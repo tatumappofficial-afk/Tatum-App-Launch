@@ -1,0 +1,8 @@
+{
+  "name": "debrief",
+  "version": "0.1.0",
+  "description": "Debrief context container. Stores transcripts, synthesis skills, and a live mirror of ~/.claude for this project.",
+  "author": {
+    "name": "Debrief"
+  }
+}
