@@ -1,0 +1,11 @@
+appId: com.skylightsocial.tatum
+---
+- launchApp
+- tapOn: "STATS"
+- assertVisible: "Your Stats"
+- tapOn: "WHISPER"
+- assertVisible: "Tatum Whisper"
+- tapOn: "PROFILE"
+- assertVisible: "Your truth, all in one place."
+- tapOn: "CALENDAR"
+- assertVisible: "April 2026"

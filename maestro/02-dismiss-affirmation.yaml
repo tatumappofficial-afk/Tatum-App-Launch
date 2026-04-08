@@ -1,0 +1,8 @@
+appId: com.skylightsocial.tatum
+---
+- launchApp
+- tapOn: "CALENDAR"
+- assertVisible: "April 2026"
+- tapOn:
+    text: "TAP TO DISMISS"
+    optional: true

@@ -8,27 +8,30 @@ The Expo Router file structure for Tatum. Route files in `app/` are thin — the
 
 ## Tab Structure
 
-Tatum uses a bottom tab navigator with 5 items. The center item is a floating action button.
+Tatum uses a custom tab bar with 4 tab destinations and a center action button (FAB). The tab bar is built with `expo-router/ui` headless primitives (`Tabs`, `TabList`, `TabTrigger`, `TabSlot`) for full control over the UI while handling routing underneath.
 
-| Position | Tab | Icon | Screen | Description |
-|----------|-----|------|--------|-------------|
-| 1 | Calendar | 📅 | Home/Calendar | Emoji calendar + emoji tray (Pillar 1) |
-| 2 | Stats | 📊 | Stats | Daily/weekly/monthly/yearly stats |
-| 3 | + (FAB) | ✦ | — | Floating action button, opens Quick Log sheet |
-| 4 | Whisper | 💬 | Whisper | Tatum Whisper composition + history (Pillar 3) |
-| 5 | Profile | 👤 | Profile | Settings, partner management, account |
+| Position | Item | Icon (Ionicons) | Screen | Description |
+|----------|------|-----------------|--------|-------------|
+| 1 | Calendar | `calendar-outline` | Home/Calendar | Emoji calendar + emoji tray (Pillar 1) |
+| 2 | Stats | `bar-chart-outline` | Stats | Daily/weekly/monthly/yearly stats |
+| 3 | + (FAB) | ✦ (text) | — | Center action button, opens Quick Log sheet |
+| 4 | Whisper | `chatbubble-outline` | Whisper | Tatum Whisper composition + history (Pillar 3) |
+| 5 | Profile | `person-outline` | Profile | Settings, partner management, account |
 
-The center FAB is not a tab destination — it triggers the Quick Log bottom sheet overlay on top of whatever tab is active.
+The center FAB is not a tab destination — it's a `TouchableOpacity` that opens the Quick Log modal via `router.push`. The 4 actual tabs use `TabTrigger` with `asChild` to render custom styled buttons. A hidden `TabList` defines the route configuration.
 
 ### Tab Bar Styling
 
-- Background: Surface
+- Background: Surface (`#FBF7F2`)
 - Border top: 1px Border
-- Active icon: Terra with glow `drop-shadow(0 0 3px rgba(192,120,88,0.5))`
+- Active icon color: Terra (`#C07858`)
 - Active label: Terra
-- Inactive icon/label: Stone
-- Labels: DM Sans 8.5px uppercase
-- FAB: 46px circle, Terra→Fig gradient, white "✦" icon, elevated shadow, positioned -8px above tab bar
+- Inactive icon/label: Stone (`#9A8878`)
+- Labels: DM Sans 500, 8.5px, uppercase, letter-spacing 1.5px
+- Icons: Ionicons from `@expo/vector-icons`, 22px
+- FAB: 56px circle, Terra background, white "✦" icon, elevated shadow, positioned center between tabs, raised -12px above tab bar line
+- Tab bar height: 60px + safe area bottom inset
+- Consistent appearance on iOS and Android
 
 ---
 
@@ -38,11 +41,11 @@ The center FAB is not a tab destination — it triggers the Quick Log bottom she
 app/
   _layout.tsx                    ← Root layout: font loading, theme provider, auth gate
   (tabs)/
-    _layout.tsx                  ← Tab navigator with 5 tabs + FAB
+    _layout.tsx                  ← Custom tab bar (expo-router/ui) with 4 tabs + center FAB
     index.tsx                    ← Calendar screen (tab 1)
     stats.tsx                    ← Stats screen (tab 2)
-    whisper.tsx                  ← Whisper screen (tab 4)
-    profile.tsx                  ← Profile screen (tab 5)
+    whisper.tsx                  ← Whisper screen (tab 3)
+    profile.tsx                  ← Profile screen (tab 4)
   (modals)/
     quick-log.tsx                ← Quick Log bottom sheet
     note-editor.tsx              ← Private note editor
@@ -133,5 +136,6 @@ The root `_layout.tsx` handles:
 - Route files must stay thin — this is non-negotiable in the regenerative architecture
 - The tab layout and route paths are stable — changing a route path is a breaking change
 - Modal routes use the `(modals)` group so they can be presented over any tab
-- The FAB's Quick Log sheet is not a route — it's a component-level overlay managed in the tab layout
+- The FAB's Quick Log sheet opens via `router.push('/(modals)/quick-log')` — the FAB is a plain `TouchableOpacity` in the custom tab bar, not a route
+- The tab bar is built with `expo-router/ui` headless primitives for cross-platform consistency — not NativeTabs (which doesn't support embedded action buttons)
 - Safe Space needs a prominent entry point that doesn't require navigating to a specific tab — consider a long-press on the FAB or a dedicated gesture

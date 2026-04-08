@@ -144,11 +144,11 @@ These patterns inform every component in `lib/`. Components should be built as p
 
 ## Iconography
 
-Tatum uses emoji as the primary icon system for activity logging. For navigation and UI chrome, use a minimal icon set — Lucide or a similar line-icon library in the warm palette.
+Tatum uses emoji as the primary icon system for activity logging. For navigation and UI chrome, use Ionicons from `@expo/vector-icons` (ships with Expo, no extra native deps) in the warm palette.
 
 ### Bottom Navigation Icons
 
-Five tabs, centered layout. Active tab uses Terra color with a subtle glow (`drop-shadow(0 0 3px rgba(192,120,88,0.5))`). Labels: DM Sans 8.5px uppercase.
+Four tabs + center FAB, custom tab bar. Icons: Ionicons outline style, 22px. Active: Terra color. Inactive: Stone color. Labels: DM Sans 500, 8.5px uppercase, letter-spacing 1.5px. Center FAB: 56px Terra circle with white "✦" text, elevated shadow.
 
 ---
 

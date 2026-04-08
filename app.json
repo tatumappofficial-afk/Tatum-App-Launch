@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "Tatum",
+    "slug": "tatum",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "tatum",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "backgroundColor": "#F5EFE8",
+      "resizeMode": "contain"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.skylightsocial.tatum"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#F5EFE8"
+      },
+      "package": "com.skylightsocial.tatum"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-secure-store",
+      "expo-sqlite"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

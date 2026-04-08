@@ -1,0 +1,12 @@
+appId: com.skylightsocial.tatum
+---
+- launchApp
+- tapOn: "CALENDAR"
+- tapOn:
+    text: "TAP TO DISMISS"
+    optional: true
+- tapOn: "✦"
+- waitForAnimationToEnd
+- tapOn: "😘"
+- assertVisible: "LOG IT"
+- tapOn: "LOG IT"

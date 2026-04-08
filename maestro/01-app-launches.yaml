@@ -1,0 +1,8 @@
+appId: com.skylightsocial.tatum
+---
+- launchApp
+- assertVisible: "CALENDAR"
+- assertVisible: "STATS"
+- assertVisible: "WHISPER"
+- assertVisible: "PROFILE"
+- assertVisible: "April 2026"

@@ -1,0 +1,7 @@
+appId: com.skylightsocial.tatum
+---
+- launchApp
+- tapOn: "WHISPER"
+- assertVisible: "Tatum Whisper"
+- tapOn: "SEND A WHISPER"
+- assertVisible: "Compose Whisper"
