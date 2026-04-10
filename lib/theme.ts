@@ -1,3 +1,6 @@
+// Design tokens extracted from design-system skill
+// Every component references tokens only — no raw hex values.
+
 export const colors = {
   warmSand: '#F5EFE8',
   surface: '#FBF7F2',
@@ -13,90 +16,103 @@ export const colors = {
   ink: '#3D2B25',
   muted: '#A08878',
   white: '#FFFFFF',
-  transparent: 'transparent',
-} as const;
+} as const
 
 export const gradients = {
-  primaryCta: [colors.terra, colors.fig] as [string, string],
-  positive: ['#8BA888', '#5A8060'] as [string, string],
-  negative: [colors.mauve, colors.fig] as [string, string],
-  today: [colors.terra, colors.fig] as [string, string],
-  highActivity: [colors.mauve, colors.fig] as [string, string],
-} as const;
-
-export const partnerGradients: [string, string][] = [
-  [colors.terra, colors.fig],
-  [colors.blush, colors.terra],
-  [colors.mauve, colors.fig],
-  ['#8BA888', '#5A8060'],
-  [colors.gold, colors.terra],
-  ['#B07080', '#C07858'],
-  ['#7C4A5A', '#3D2B25'],
-  ['#C4993A', '#7C4A5A'],
-];
+  primaryCta: ['#C07858', '#7C4A5A'] as const, // Terra → Fig, 135deg
+  positive: ['#8BA888', '#5A8060'] as const,
+  negative: ['#B07080', '#7C4A5A'] as const,
+} as const
 
 export const fonts = {
   playfair: {
     regular: 'PlayfairDisplay_400Regular',
-    medium: 'PlayfairDisplay_500Medium',
+    italic: 'PlayfairDisplay_400Regular_Italic',
     semiBold: 'PlayfairDisplay_600SemiBold',
     bold: 'PlayfairDisplay_700Bold',
-    italic: 'PlayfairDisplay_400Regular_Italic',
-    semiBoldItalic: 'PlayfairDisplay_600SemiBold_Italic',
   },
   dmSans: {
-    light: 'DMSans_400Regular',
+    light: 'DMSans_300Light',
     regular: 'DMSans_400Regular',
     medium: 'DMSans_500Medium',
   },
-} as const;
+} as const
+
+// Web font families for Storybook (CSS)
+export const webFonts = {
+  playfair: "'Playfair Display', serif",
+  dmSans: "'DM Sans', sans-serif",
+} as const
 
 export const typography = {
   screenTitle: {
-    fontFamily: fonts.playfair.bold,
+    fontFamily: webFonts.playfair,
+    fontWeight: 700,
     fontSize: 28,
     color: colors.ink,
   },
   sectionLabel: {
-    fontFamily: fonts.dmSans.medium,
+    fontFamily: webFonts.dmSans,
+    fontWeight: 500,
     fontSize: 9,
     textTransform: 'uppercase' as const,
-    letterSpacing: 3.5,
+    letterSpacing: 3,
     color: colors.stone,
   },
+  sectionLabelTerra: {
+    fontFamily: webFonts.dmSans,
+    fontWeight: 500,
+    fontSize: 9,
+    textTransform: 'uppercase' as const,
+    letterSpacing: 4,
+    color: colors.terra,
+  },
   cardTitle: {
-    fontFamily: fonts.playfair.semiBold,
+    fontFamily: webFonts.playfair,
+    fontWeight: 600,
     fontSize: 18,
     color: colors.ink,
   },
   statNumber: {
-    fontFamily: fonts.playfair.semiBold,
+    fontFamily: webFonts.playfair,
+    fontWeight: 600,
     fontSize: 36,
     color: colors.terra,
   },
   body: {
-    fontFamily: fonts.dmSans.regular,
+    fontFamily: webFonts.dmSans,
+    fontWeight: 300,
     fontSize: 12,
     color: colors.ink,
   },
-  bodyLight: {
-    fontFamily: fonts.dmSans.light,
+  bodyRegular: {
+    fontFamily: webFonts.dmSans,
+    fontWeight: 400,
     fontSize: 12,
     color: colors.ink,
   },
   hint: {
-    fontFamily: fonts.dmSans.light,
+    fontFamily: webFonts.dmSans,
+    fontWeight: 300,
     fontSize: 10,
     fontStyle: 'italic' as const,
     color: colors.muted,
   },
-  tabLabel: {
-    fontFamily: fonts.dmSans.medium,
+  tagLabel: {
+    fontFamily: webFonts.dmSans,
+    fontWeight: 500,
+    fontSize: 9,
+    textTransform: 'uppercase' as const,
+    letterSpacing: 1.5,
+  },
+  navLabel: {
+    fontFamily: webFonts.dmSans,
+    fontWeight: 500,
     fontSize: 8.5,
     textTransform: 'uppercase' as const,
     letterSpacing: 1.5,
   },
-} as const;
+} as const
 
 export const spacing = {
   xs: 4,
@@ -105,37 +121,25 @@ export const spacing = {
   lg: 24,
   xl: 28,
   xxl: 32,
-} as const;
+} as const
+
+export const layout = {
+  maxWidth: 390,
+  horizontalPadding: 28,
+  sectionSpacing: 24,
+  cardGap: 10,
+} as const
 
 export const radii = {
-  sm: 8,
-  md: 10,
-  lg: 14,
-  xl: 16,
-  pill: 20,
-  full: 50,
-} as const;
+  card: 15,
+  button: 50,
+  tag: 20,
+  emoji: 10,
+  avatar: 27, // half of 54
+} as const
 
 export const shadows = {
-  card: {
-    shadowColor: '#3D2B25',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  button: {
-    shadowColor: '#7C4A5A',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 22,
-    elevation: 6,
-  },
-  tagActive: {
-    shadowColor: '#C07858',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-} as const;
+  card: '0 2px 8px rgba(61,43,37,0.1)',
+  primaryButton: '0 8px 22px rgba(124,74,90,0.3)',
+  activeTag: '0 2px 8px rgba(192,120,88,0.3)',
+} as const

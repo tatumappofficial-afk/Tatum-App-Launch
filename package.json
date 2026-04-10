@@ -1,48 +1,35 @@
 {
   "name": "tatum",
   "version": "1.0.0",
-  "private": true,
-  "main": "expo-router/entry",
+  "main": "index.ts",
   "scripts": {
     "start": "expo start",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
-    "web": "expo start --web"
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
-    "@expo-google-fonts/dm-sans": "^0.2.3",
-    "@expo-google-fonts/playfair-display": "^0.2.3",
-    "@gorhom/bottom-sheet": "^5",
-    "@tanstack/db": "^0.6.2",
-    "@tanstack/react-db": "^0.1.80",
-    "drizzle-orm": "^0.39.0",
-    "expo": "^55.0.12",
-    "expo-clipboard": "~55.0.12",
-    "expo-constants": "~55.0.12",
-    "expo-crypto": "~55.0.13",
-    "expo-font": "~55.0.6",
-    "expo-haptics": "~55.0.13",
-    "expo-linking": "~55.0.11",
-    "expo-router": "~55.0.11",
-    "expo-secure-store": "~55.0.12",
-    "expo-sms": "~55.0.12",
-    "expo-splash-screen": "~55.0.16",
-    "expo-sqlite": "~55.0.14",
+    "expo": "^55.0.13",
     "expo-status-bar": "~55.0.5",
-    "expo-system-ui": "~55.0.14",
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
-    "react-native": "0.83.4",
-    "react-native-gesture-handler": "~2.30.0",
-    "react-native-reanimated": "^4.3.0",
-    "react-native-safe-area-context": "~5.6.2",
-    "react-native-screens": "~4.23.0",
-    "react-native-uuid": "^2.0.2",
-    "zod": "^3.24.0"
+    "react": "^19.2.5",
+    "react-native": "0.83.4"
   },
   "devDependencies": {
-    "@babel/core": "^7.29.0",
-    "@types/react": "~19.1.0",
-    "typescript": "^5.3.0"
-  }
+    "@chromatic-com/storybook": "^5.1.1",
+    "@storybook/addon-a11y": "^10.3.5",
+    "@storybook/addon-docs": "^10.3.5",
+    "@storybook/addon-onboarding": "^10.3.5",
+    "@storybook/addon-vitest": "^10.3.5",
+    "@storybook/react-vite": "^10.3.5",
+    "@types/react": "~19.2.10",
+    "@vitest/browser-playwright": "^4.1.4",
+    "@vitest/coverage-v8": "^4.1.4",
+    "playwright": "^1.59.1",
+    "storybook": "^10.3.5",
+    "typescript": "~5.9.2",
+    "vitest": "^4.1.4"
+  },
+  "private": true
 }

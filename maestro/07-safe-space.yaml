@@ -1,6 +1,0 @@
-appId: com.skylightsocial.tatum
----
-- launchApp
-- tapOn: "PROFILE"
-- tapOn: "Safe Space"
-- assertVisible: "A private place for your desire."

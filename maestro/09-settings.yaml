@@ -1,6 +1,0 @@
-appId: com.skylightsocial.tatum
----
-- launchApp
-- tapOn: "PROFILE"
-- tapOn: "Settings"
-- assertVisible: "Display Name"

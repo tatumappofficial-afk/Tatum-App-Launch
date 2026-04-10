@@ -1,5 +1,0 @@
-appId: com.skylightsocial.tatum
----
-- launchApp
-- tapOn: "STATS"
-- assertVisible: "Your Stats"
