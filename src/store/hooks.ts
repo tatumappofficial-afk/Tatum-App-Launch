@@ -17,12 +17,7 @@ export function useEncountersByMonth(year: number, month: number) {
 
   const { data } = useLiveQuery(
     (q) => q.from({ e: encountersCollection })
-      .where(({ e }) => and(gte(e.date, startDate), lt(e.date, endDate)))
-      .select(({ e }) => ({
-        id: e.id, date: e.date, activities: e.activities, partnerId: e.partnerId,
-        rating: e.rating, stars: e.stars, vibes: e.vibes, noteId: e.noteId,
-        createdAt: e.createdAt, updatedAt: e.updatedAt,
-      })),
+      .where(({ e }) => and(gte(e.date, startDate), lt(e.date, endDate))),
     [year, month]
   );
   return (data ?? []) as Encounter[];
@@ -31,13 +26,17 @@ export function useEncountersByMonth(year: number, month: number) {
 export function useEncountersByDateRange(start: string, end: string) {
   const { data } = useLiveQuery(
     (q) => q.from({ e: encountersCollection })
-      .where(({ e }) => and(gte(e.date, start), lte(e.date, end)))
-      .select(({ e }) => ({
-        id: e.id, date: e.date, activities: e.activities, partnerId: e.partnerId,
-        rating: e.rating, stars: e.stars, vibes: e.vibes, noteId: e.noteId,
-        createdAt: e.createdAt, updatedAt: e.updatedAt,
-      })),
+      .where(({ e }) => and(gte(e.date, start), lte(e.date, end))),
     [start, end]
+  );
+  return (data ?? []) as Encounter[];
+}
+
+export function useEncountersByDate(date: string) {
+  const { data } = useLiveQuery(
+    (q) => q.from({ e: encountersCollection })
+      .where(({ e }) => eq(e.date, date)),
+    [date]
   );
   return (data ?? []) as Encounter[];
 }
@@ -72,11 +71,6 @@ export function useActivePartners(): Partner[] {
   const { data } = useLiveQuery(
     (q) => q.from({ p: partnersCollection })
       .where(({ p }) => eq(p.isActive, true))
-      .select(({ p }) => ({
-        id: p.id, displayName: p.displayName, avatarType: p.avatarType,
-        avatarValue: p.avatarValue, avatarGradient: p.avatarGradient,
-        isActive: p.isActive, createdAt: p.createdAt, updatedAt: p.updatedAt,
-      }))
   );
   return (data ?? []) as Partner[];
 }

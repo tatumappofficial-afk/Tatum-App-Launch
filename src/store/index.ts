@@ -7,7 +7,7 @@ export {
 
 // Hooks
 export {
-  useEncountersByMonth, useEncountersByDateRange, useEncounterById,
+  useEncountersByMonth, useEncountersByDateRange, useEncountersByDate, useEncounterById,
   useEncountersByPartnerId, useEncountersCount,
   useActivePartners, usePartnerById, usePartnerMap,
   useRecentDesires, useWhisperHistory,

@@ -77,10 +77,12 @@ export function CalendarScreen() {
   const onDayPress = (day: number) => {
     const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     const dayEncounters = encountersByDate.get(dateStr);
-    if (dayEncounters && dayEncounters.length > 0) {
-      router.push({ pathname: '/(modals)/encounter-detail', params: { id: dayEncounters[0].id } });
-    } else {
+    if (!dayEncounters || dayEncounters.length === 0) {
       router.push({ pathname: '/(modals)/quick-log', params: { date: dateStr } });
+    } else if (dayEncounters.length === 1) {
+      router.push({ pathname: '/(modals)/quick-log', params: { id: dayEncounters[0].id, date: dateStr } });
+    } else {
+      router.push({ pathname: '/(modals)/encounter-detail', params: { date: dateStr } });
     }
   };
 

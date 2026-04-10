@@ -1,17 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { colors, fonts, spacing, radii } from '@/lib/theme';
 import { EmojiItem, AvatarBubble, SoloAvatar, Button, Tag, MilestoneCelebration, SectionDivider } from '@/lib/components';
-import { useActivePartners, useShownMilestones, insertEncounter, markMilestoneShown, encountersCollection } from '@/src/store';
+import { useActivePartners, useShownMilestones, useEncounterById, insertEncounter, updateEncounter, markMilestoneShown, encountersCollection } from '@/src/store';
 import { ACTIVITIES } from '@/src/data/activities';
 import { VIBE_TAGS } from '@/src/data/vibes';
 import { MILESTONES, getMilestoneByKey } from '@/src/data/milestones';
+import type { Encounter } from '@/client/schemas';
 
 export function QuickLogScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ emoji?: string; date?: string }>();
+  const params = useLocalSearchParams<{ emoji?: string; date?: string; id?: string }>();
   const date = params.date || new Date().toISOString().split('T')[0];
+  const isEditing = !!params.id;
+  const existingEncounter = useEncounterById(params.id);
 
   const [selectedEmojis, setSelectedEmojis] = useState<string[]>(
     params.emoji ? [params.emoji] : []
@@ -24,6 +27,21 @@ export function QuickLogScreen() {
   const [selectedVibes, setSelectedVibes] = useState<string[]>([]);
   const [milestone, setMilestone] = useState<any>(null);
   const shownMilestones = useShownMilestones();
+  const [prefilled, setPrefilled] = useState(false);
+
+  useEffect(() => {
+    if (existingEncounter && !prefilled) {
+      setSelectedEmojis(existingEncounter.activities);
+      setSelectedPartner(existingEncounter.partnerId);
+      setIsSolo(!existingEncounter.partnerId);
+      setRating(existingEncounter.rating);
+      setSelectedVibes(existingEncounter.vibes);
+      if (existingEncounter.rating || existingEncounter.vibes.length > 0) {
+        setShowRating(true);
+      }
+      setPrefilled(true);
+    }
+  }, [existingEncounter, prefilled]);
 
   const toggleEmoji = (code: string) => {
     setSelectedEmojis((prev) =>
@@ -49,6 +67,18 @@ export function QuickLogScreen() {
 
   const handleLog = async () => {
     if (selectedEmojis.length === 0) return;
+
+    if (isEditing && params.id) {
+      await updateEncounter(params.id, {
+        date,
+        activities: selectedEmojis,
+        partnerId: selectedPartner,
+        rating,
+        vibes: selectedVibes as Encounter['vibes'],
+      });
+      router.back();
+      return;
+    }
 
     await insertEncounter({
       date,
@@ -175,7 +205,7 @@ export function QuickLogScreen() {
       </TouchableOpacity>
 
       <Button
-        title="Log It"
+        title={isEditing ? "Save" : "Log It"}
         onPress={handleLog}
         disabled={selectedEmojis.length === 0}
         style={{ marginTop: 20 }}
