@@ -1,9 +1,6 @@
 import React from 'react'
 import { colors, webFonts } from '../theme'
-import { StatusBar } from './shared/StatusBar'
-import { DynamicIsland } from './shared/DynamicIsland'
 import { DecorativeGlow } from './shared/DecorativeGlow'
-import { HomeIndicator } from './shared/HomeIndicator'
 import { AvatarCircle } from '../components/AvatarCircle'
 
 /* ── Types ── */
@@ -64,8 +61,7 @@ export const PartnersScreen: React.FC<PartnersScreenProps> = ({
       color: colors.ink,
     }}>
       <DecorativeGlow position="top-right" size={240} opacity={0.09} />
-      <DynamicIsland />
-      <StatusBar />
+      <div style={{ height: 54 }} />
 
       {/* ── Screen Header ── */}
       <div style={{
@@ -293,7 +289,6 @@ export const PartnersScreen: React.FC<PartnersScreenProps> = ({
         <div style={{ height: 12, flexShrink: 0 }} />
       </div>
 
-      <HomeIndicator />
     </div>
   )
 }

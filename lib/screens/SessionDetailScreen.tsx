@@ -1,9 +1,6 @@
 import React from 'react'
 import { colors, webFonts } from '../theme'
-import { StatusBar } from './shared/StatusBar'
-import { DynamicIsland } from './shared/DynamicIsland'
 import { DecorativeGlow } from './shared/DecorativeGlow'
-import { HomeIndicator } from './shared/HomeIndicator'
 import { AvatarCircle } from '../components/AvatarCircle'
 import { StatStrip } from '../components/StatStrip'
 import { TagPill } from '../components/TagPill'
@@ -389,8 +386,7 @@ export const SessionDetailScreen: React.FC<SessionDetailScreenProps> = ({
     color: colors.ink,
   }}>
     <DecorativeGlow position="center" size={320} opacity={0.12} />
-    <DynamicIsland />
-    <StatusBar />
+    <div style={{ height: 54 }} />
     <ScreenHeader onBack={onBack} onEdit={onEdit} />
 
     <Hero partners={partners} partnerNames={partnerNames} date={date} />
@@ -427,6 +423,5 @@ export const SessionDetailScreen: React.FC<SessionDetailScreenProps> = ({
       </div>
     </div>
 
-    <HomeIndicator />
   </div>
 )

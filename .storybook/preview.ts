@@ -1,6 +1,7 @@
 import type { Preview } from '@storybook/react-vite'
-import { INITIAL_VIEWPORTS } from 'storybook/viewport'
 import React from 'react'
+import { withDeviceFrame } from './addons/device-frame/decorator'
+import { deviceList } from './addons/device-frame/devices'
 
 const preview: Preview = {
   parameters: {
@@ -14,8 +15,8 @@ const preview: Preview = {
       test: 'todo',
     },
     layout: 'fullscreen',
+    viewport: { disable: true },
     backgrounds: {
-      default: 'warm-sand',
       options: {
         'warm-sand': { name: 'Warm Sand', value: '#F5EFE8' },
         'surface': { name: 'Surface', value: '#FBF7F2' },
@@ -23,12 +24,23 @@ const preview: Preview = {
         'dark': { name: 'Dark', value: '#1C1C1E' },
       },
     },
-    viewport: {
-      options: INITIAL_VIEWPORTS,
+  },
+  globalTypes: {
+    device: {
+      description: 'Device frame surrounding the story',
+      toolbar: {
+        title: 'Device',
+        icon: 'mobile',
+        items: [
+          ...deviceList.map((d) => ({ value: d.id, title: d.name })),
+          { value: 'none', title: 'No Frame' },
+        ],
+        dynamicTitle: true,
+      },
     },
   },
   initialGlobals: {
-    viewport: { value: 'iphone14', isRotated: false },
+    device: 'iphone-17-pro',
     backgrounds: { value: 'warm-sand' },
   },
   decorators: [
@@ -47,6 +59,7 @@ const preview: Preview = {
         React.createElement(Story)
       )
     },
+    withDeviceFrame,
   ],
 }
 

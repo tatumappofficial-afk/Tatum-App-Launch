@@ -1,7 +1,5 @@
 import React from 'react'
 import { colors, webFonts } from '../theme'
-import { StatusBar } from './shared/StatusBar'
-import { DynamicIsland } from './shared/DynamicIsland'
 import { BottomNav } from './shared/BottomNav'
 import { AvatarCircle } from '../components/AvatarCircle'
 import { StarRating } from '../components/StarRating'
@@ -357,8 +355,7 @@ export const CalendarDayModal: React.FC<CalendarDayModalProps> = ({
         selectedDay={selectedDay} loggedDays={loggedDays}
       />
 
-      <DynamicIsland />
-      <StatusBar />
+      <div style={{ height: 54 }} />
 
       {/* Dim overlay */}
       <div

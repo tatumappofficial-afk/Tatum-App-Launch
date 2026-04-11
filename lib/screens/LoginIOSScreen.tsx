@@ -1,8 +1,5 @@
 import React from 'react'
 import { colors, webFonts } from '../theme'
-import { DynamicIsland } from './shared/DynamicIsland'
-import { StatusBar } from './shared/StatusBar'
-import { HomeIndicator } from './shared/HomeIndicator'
 
 const AppleLogo: React.FC = () => (
   <svg width={19} height={19} viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
@@ -52,8 +49,7 @@ export const LoginIOSScreen: React.FC = () => (
       zIndex: 0,
     }} />
 
-    <DynamicIsland />
-    <StatusBar />
+    <div style={{ height: 54 }} />
 
     {/* Main content */}
     <div style={{
@@ -206,22 +202,5 @@ export const LoginIOSScreen: React.FC = () => (
       </div>
     </div>
 
-    {/* Home indicator */}
-    <div style={{
-      height: 28,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      flexShrink: 0,
-      position: 'relative',
-      zIndex: 2,
-    }}>
-      <div style={{
-        width: 120,
-        height: 4,
-        background: 'rgba(61,43,37,0.18)',
-        borderRadius: 2,
-      }} />
-    </div>
   </div>
 )

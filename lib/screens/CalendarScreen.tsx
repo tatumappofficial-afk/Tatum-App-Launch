@@ -1,7 +1,5 @@
 import React from 'react'
 import { colors, webFonts } from '../theme'
-import { StatusBar } from './shared/StatusBar'
-import { DynamicIsland } from './shared/DynamicIsland'
 import { BottomNav } from './shared/BottomNav'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { CalendarGrid } from '../components/CalendarGrid'
@@ -219,8 +217,7 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
       color: colors.ink,
     }}>
       <DecorativeGlow position="top-right" size={220} opacity={0.09} />
-      <DynamicIsland />
-      <StatusBar />
+      <div style={{ height: 54 }} />
       <NavHeader />
 
       {/* Calendar section */}

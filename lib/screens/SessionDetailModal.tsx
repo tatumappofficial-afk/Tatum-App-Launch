@@ -1,7 +1,5 @@
 import React from 'react'
 import { colors, webFonts } from '../theme'
-import { StatusBar } from './shared/StatusBar'
-import { DynamicIsland } from './shared/DynamicIsland'
 import { SectionLabel } from './shared/SectionLabel'
 import { AvatarCircle } from '../components/AvatarCircle'
 import { StatStrip } from '../components/StatStrip'
@@ -136,8 +134,7 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
       month={month} year={year} today={today}
       selectedDay={selectedDay} loggedDays={loggedDays}
     />
-    <DynamicIsland />
-    <StatusBar />
+    <div style={{ height: 54 }} />
 
     {/* Heavier dim overlay */}
     <div style={{

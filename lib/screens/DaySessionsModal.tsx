@@ -1,7 +1,5 @@
 import React from 'react'
 import { colors, webFonts } from '../theme'
-import { StatusBar } from './shared/StatusBar'
-import { DynamicIsland } from './shared/DynamicIsland'
 import { BottomNav } from './shared/BottomNav'
 
 /* ── Types ── */
@@ -287,8 +285,7 @@ export const DaySessionsModal: React.FC<DaySessionsModalProps> = ({
     fontFamily: webFonts.dmSans, color: colors.ink,
   }}>
     <CalendarBackground month={month} year={year} today={today} selectedDay={selectedDay} loggedDays={loggedDays} />
-    <DynamicIsland />
-    <StatusBar />
+    <div style={{ height: 54 }} />
 
     {/* Dim overlay */}
     <div onClick={onDismiss} style={{

@@ -1,9 +1,6 @@
 import React from 'react'
 import { colors, webFonts } from '../theme'
-import { DynamicIsland } from './shared/DynamicIsland'
-import { StatusBar } from './shared/StatusBar'
 import { DecorativeGlow } from './shared/DecorativeGlow'
-import { HomeIndicator } from './shared/HomeIndicator'
 import { GradientButton } from '../components/GradientButton'
 
 /* ── Shared onboarding primitives ── */
@@ -63,9 +60,8 @@ export const OnboardingPrivacyScreen: React.FC = () => (
       color: colors.ink,
     }}
   >
-    <DynamicIsland />
     <DecorativeGlow position="center" size={320} opacity={0.13} />
-    <StatusBar />
+    <div style={{ height: 54 }} />
 
     {/* Content */}
     <div

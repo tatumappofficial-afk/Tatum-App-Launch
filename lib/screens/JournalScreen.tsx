@@ -1,7 +1,5 @@
 import React, { useState } from 'react'
 import { colors, webFonts } from '../theme'
-import { StatusBar } from './shared/StatusBar'
-import { DynamicIsland } from './shared/DynamicIsland'
 import { BottomNav } from './shared/BottomNav'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { AvatarCircle } from '../components/AvatarCircle'
@@ -680,8 +678,7 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({
       color: colors.ink,
     }}>
       <DecorativeGlow position="top-right" size={200} opacity={0.08} />
-      <DynamicIsland />
-      <StatusBar />
+      <div style={{ height: 54 }} />
 
       {/* Screen header */}
       <div style={{

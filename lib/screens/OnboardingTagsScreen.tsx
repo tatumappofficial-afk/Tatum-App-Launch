@@ -1,9 +1,6 @@
 import React from 'react'
 import { colors, webFonts } from '../theme'
-import { DynamicIsland } from './shared/DynamicIsland'
-import { StatusBar } from './shared/StatusBar'
 import { DecorativeGlow } from './shared/DecorativeGlow'
-import { HomeIndicator } from './shared/HomeIndicator'
 import { StepDots } from '../components/StepDots'
 
 const GradientButton: React.FC<{ label: string }> = ({ label }) => (
@@ -159,9 +156,8 @@ export const OnboardingTagsScreen: React.FC = () => (
       color: colors.ink,
     }}
   >
-    <DynamicIsland />
     <DecorativeGlow position="top-right" size={240} opacity={0.1} />
-    <StatusBar />
+    <div style={{ height: 54 }} />
 
     {/* Content */}
     <div

@@ -1,8 +1,5 @@
 import React from 'react'
 import { colors, webFonts } from '../theme'
-import { DynamicIsland } from './shared/DynamicIsland'
-import { StatusBar } from './shared/StatusBar'
-import { HomeIndicator } from './shared/HomeIndicator'
 import { GradientButton } from '../components/GradientButton'
 
 /* ── Feature icons (SVG) ── */
@@ -66,8 +63,6 @@ export const OnboardingReadyScreen: React.FC = () => (
       color: colors.ink,
     }}
   >
-    <DynamicIsland />
-
     {/* Large ambient glow — centered */}
     <div
       style={{
@@ -111,7 +106,7 @@ export const OnboardingReadyScreen: React.FC = () => (
       }}
     />
 
-    <StatusBar />
+    <div style={{ height: 54 }} />
 
     {/* Main content — centered vertically */}
     <div

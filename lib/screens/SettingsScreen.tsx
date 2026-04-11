@@ -1,9 +1,6 @@
 import React from 'react'
 import { colors, webFonts } from '../theme'
-import { StatusBar } from './shared/StatusBar'
-import { DynamicIsland } from './shared/DynamicIsland'
 import { DecorativeGlow } from './shared/DecorativeGlow'
-import { HomeIndicator } from './shared/HomeIndicator'
 import { SettingsRow } from '../components/SettingsRow'
 import { ToggleSwitch } from '../components/ToggleSwitch'
 import { BackButton } from '../components/BackButton'
@@ -109,8 +106,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       color: colors.ink,
     }}>
       <DecorativeGlow position="top-right" size={220} opacity={0.07} />
-      <DynamicIsland />
-      <StatusBar />
+      <div style={{ height: 54 }} />
 
       {/* ── Screen Header ── */}
       <div style={{
@@ -330,7 +326,6 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         </div>
       </div>
 
-      <HomeIndicator />
     </div>
   )
 }

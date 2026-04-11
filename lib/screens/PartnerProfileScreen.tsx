@@ -1,10 +1,7 @@
 import React from 'react'
 import { colors, webFonts } from '../theme'
-import { StatusBar } from './shared/StatusBar'
-import { DynamicIsland } from './shared/DynamicIsland'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { SectionLabel } from './shared/SectionLabel'
-import { HomeIndicator } from './shared/HomeIndicator'
 import { AvatarCircle } from '../components/AvatarCircle'
 import { StatStrip } from '../components/StatStrip'
 import { StarRating } from '../components/StarRating'
@@ -60,8 +57,7 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
   }}>
     {/* Glow */}
     <DecorativeGlow position="center" size={320} opacity={0.13} />
-    <DynamicIsland />
-    <StatusBar />
+    <div style={{ height: 54 }} />
 
     {/* Header: back + edit */}
     <div style={{
@@ -207,9 +203,5 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
       </div>
     </div>
 
-    {/* Home indicator at bottom */}
-    <div style={{ marginTop: 'auto' }}>
-      <HomeIndicator />
-    </div>
   </div>
 )
