@@ -22,7 +22,7 @@ Encounter {
   activities: ActivityEmoji[]    — one or more emoji codes from the activity set
   partnerId: uuid | null         — linked partner, or null for solo
   rating: 'up' | 'down' | null  — thumbs up/down, optional
-  stars: 1–5 | null              — star rating, optional (premium)
+  stars: 1–10 | null             — star rating (/10 scale), optional (premium)
   vibes: VibeTag[]               — zero or more vibe tags
   noteId: uuid | null            — linked private note, optional
   createdAt: ISO datetime
@@ -194,6 +194,39 @@ All data is **local-first**. v1 has no server — everything lives on-device.
 - **Encryption**: Private notes encrypted at rest using expo-crypto or a lightweight encryption layer. The key is derived from the device and optional biometric lock.
 
 No cloud sync in v1. Data export (premium) writes to a local file the user can save.
+
+---
+
+## Implementation Notes
+
+### TanStack DB + expo-sqlite
+
+- TanStack DB collections are backed by SQLite tables via a custom `createSqliteCollection` factory in `src/db/collections.ts`
+- Each collection has `sync` (loads from SQLite on init), `onInsert`, `onUpdate`, `onDelete` handlers that persist mutations
+- JSON columns (activities, vibes, emojiTags) are serialized/deserialized automatically
+- Boolean columns (isActive, actedOn) are converted to 0/1 for SQLite
+
+### Critical: crypto.randomUUID polyfill
+
+TanStack DB uses `crypto.randomUUID()` internally for mutation and transaction IDs. React Native's Hermes engine doesn't have this API. A global polyfill must be loaded before any TanStack DB code runs — see `src/utils/crypto-polyfill.ts`, imported at the top of `app/_layout.tsx`.
+
+### Critical: useLiveQuery reactivity
+
+For reactive updates to work, `useLiveQuery` MUST use the query function form with `.select()` destructuring:
+
+```tsx
+// CORRECT — reactive
+const { data } = useLiveQuery((q) =>
+  q.from({ partners }).select(({ partners }) => ({ ...partners }))
+)
+
+// WRONG — not reactive, stale data
+const { data } = useLiveQuery(partners)
+```
+
+### Mutations
+
+Always use collection methods (`collection.insert()`, `collection.update()`, `collection.delete()`) for mutations — never raw SQL. Raw SQL bypasses TanStack DB's reactive layer and the UI won't update.
 
 ---
 

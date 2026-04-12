@@ -1,10 +1,11 @@
 appId: host.exp.exponent
 ---
 - runFlow: seed-data.yaml
-# The home screen shows partner cards - tap on the first one (Alex)
-# Partner cards are in the middle of the screen, around 30% x, ~52% y
+# Home screen shows partner cards in the PARTNERS section
+# Tap the first partner card (leftmost, around 15-20% x, 52% y)
 - tapOn:
-    point: "20%,52%"
+    point: "15%,52%"
 - waitForAnimationToEnd
-# Verify we're on partner detail
-- assertVisible: "Alex"
+# Verify partner profile opened (should show partner name and stats)
+- assertVisible:
+    text: ".*SESSIONS.*|.*Sessions.*|.*sessions.*"

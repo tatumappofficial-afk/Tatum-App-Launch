@@ -1,17 +1,14 @@
 appId: host.exp.exponent
 ---
 - runFlow: seed-data.yaml
-# Open Log Session via FAB
+# Go to Profile tab
 - tapOn:
-    point: "50%,95%"
+    point: "90%,96%"
 - waitForAnimationToEnd
-- assertVisible: "Log a Session"
-# Tap the Add partner button (dashed circle with +)
-- tapOn: "Add"
+# Tap the ADD circle in the partners row
+- tapOn: "ADD"
 - waitForAnimationToEnd
 - assertVisible: "New Partner"
-# Type partner name
-- inputText: "Sam"
-# Tap Save
+- inputText: "Zoe"
 - tapOn: "SAVE"
 - waitForAnimationToEnd

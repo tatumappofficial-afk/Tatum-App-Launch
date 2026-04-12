@@ -74,3 +74,45 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
 }
 ```
 Add this to `metro.config.js` at scaffold time, before installing any dependencies.
+
+## Runtime Constraints (learned)
+
+### crypto.randomUUID not available
+Hermes (React Native's JS engine) does not implement `crypto.randomUUID()`. TanStack DB uses it internally. A global polyfill must be loaded at app startup — see `src/utils/crypto-polyfill.ts`.
+
+### iOS 26 beta simulator missing emoji font
+The iOS 26.3 beta simulator does not include the Apple Color Emoji font. All emoji render as boxes with question marks. This is a simulator-only issue — real devices and Android emulators render emoji correctly. **Test emoji rendering on Android emulator.**
+
+### Font loading on Android
+Use `Font.loadAsync()` explicitly instead of the `useFonts` hook. The hook approach is less reliable on Android for initial font loading.
+
+Each font weight must be a separate registered font name:
+```tsx
+await Font.loadAsync({
+  PlayfairDisplay_400Regular,
+  PlayfairDisplay_600SemiBold,
+  PlayfairDisplay_700Bold,
+  DMSans_300Light,
+  DMSans_400Regular,
+  DMSans_500Medium,
+})
+```
+
+### fontWeight conflict on Android (CRITICAL)
+On Android, setting `fontWeight: '700'` alongside `fontFamily: 'PlayfairDisplay_700Bold'` causes Android to **ignore the custom font** and fall back to the system font. The weight is already baked into the font file.
+
+Use the `font()` helper from `lib/theme.ts` which returns the correct weight-specific font name:
+```tsx
+// ✅ CORRECT
+fontFamily: font('playfair', '700')
+// No fontWeight needed — the font file IS the weight
+
+// ❌ WRONG — Android ignores the custom font
+fontFamily: font('playfair', '700'),
+fontWeight: '700',
+```
+
+### Modal presentation differences
+- iOS: `presentation: 'formSheet'` with `sheetGrabberVisible: true` and `sheetAllowedDetents`
+- Android: `presentation: 'transparentModal'` with a custom `BottomSheet` wrapper component (`lib/components/BottomSheet.tsx`)
+- Check `Platform.OS` in `app/(modals)/_layout.tsx` for the pattern

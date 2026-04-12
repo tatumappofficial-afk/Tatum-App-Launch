@@ -118,3 +118,22 @@ Phase 2: Native App
   5. Store                  → src/store/ (data layer from schemas)
   6. Wiring                 → connect screens to store
 ```
+
+## Current State (Phase 2 Complete)
+
+Phase 2 is **complete**. The app boots in Expo Go, renders correctly on Android and iOS, and has 13 passing Maestro E2E tests.
+
+### What was built
+- All 15 `lib/components/` and 21 `lib/screens/` converted from HTML to React Native
+- Same components render in both Storybook (via react-native-web) and the real Expo app
+- `app/` directory with Expo Router: 4 tab screens + 10 modal routes
+- expo-sqlite + TanStack DB for persistence with custom collection adapter
+- Dev Tools screen for data management (seed/reset/clear+reseed)
+- 13 Maestro E2E tests covering app launch, tab navigation, data creation, and detail views
+
+### Key architectural patterns established
+- **Theme helpers**: `font('playfair', '700')` resolves weight-specific font names per platform
+- **BottomSheet wrapper**: Platform-specific modal presentation (formSheet on iOS, transparentModal on Android)
+- **Route files are thin**: Query data from TanStack DB, compute props, pass to `lib/screens/` components
+- **crypto polyfill**: Global polyfill for `crypto.randomUUID` required by TanStack DB
+- **Maestro seed-data flow**: Each test starts with known DB state via Dev Tools screen

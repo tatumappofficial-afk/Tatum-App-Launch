@@ -117,3 +117,38 @@ const meta = {
   parameters: { layout: 'centered' },
 } satisfies Meta<typeof MyComponent>
 ```
+
+## React Native Web Integration
+
+All `lib/` components are written in React Native (`View`, `Text`, `Pressable`, `ScrollView`). Storybook renders them in the browser via `react-native-web`.
+
+### Vite Configuration (`.storybook/main.ts`)
+
+```typescript
+async viteFinal(config) {
+  config.resolve.alias = {
+    'react-native': 'react-native-web',
+    'react-native/Libraries/Image/AssetRegistry': 'react-native-web/dist/modules/AssetRegistry',
+  }
+  config.resolve.extensions = ['.web.tsx', '.web.ts', '.web.js', '.tsx', '.ts', '.js', '.json']
+  config.define = {
+    __DEV__: JSON.stringify(true),
+    'process.env.EXPO_OS': JSON.stringify('web'),
+  }
+  return config
+}
+```
+
+### SVG Support
+`react-native-svg` has built-in web support — auto-resolved by the `.web.js` extension priority. No additional aliases needed.
+
+### Platform-Aware Helpers in Theme
+
+The `lib/theme.ts` file provides helpers that work on both platforms:
+
+- **`gradientStyle(gradient)`** — returns `{ background: gradient }` on web, `{ experimental_backgroundImage: gradient }` on native
+- **`font(family, weight)`** — returns CSS font-family on web (e.g., `'Playfair Display', serif`), weight-specific font name on native (e.g., `PlayfairDisplay_700Bold`)
+- **`fontFamily.playfair` / `fontFamily.dmSans`** — shorthand for the regular weight
+
+### Fonts on Web
+Google Fonts are loaded via `@import url(...)` in a Storybook decorator in `.storybook/preview.ts`. The CSS font-family names match what `font()` returns on web.

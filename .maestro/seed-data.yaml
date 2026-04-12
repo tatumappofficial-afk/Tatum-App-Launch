@@ -7,7 +7,6 @@ appId: host.exp.exponent
 - tapOn:
     text: "HOME"
     optional: true
-# Reopen the app to ensure known state
 - openLink: "exp://10.0.2.2:8082"
 - extendedWaitUntil:
     visible: "TATUM"
@@ -15,7 +14,6 @@ appId: host.exp.exponent
 # Navigate to Profile → Dev Tools → Clear & Reseed
 - tapOn: "PROFILE"
 - waitForAnimationToEnd
-# Scroll down to Dev Tools
 - swipe:
     direction: UP
 - swipe:
