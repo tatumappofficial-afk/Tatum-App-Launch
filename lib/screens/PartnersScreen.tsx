@@ -1,5 +1,7 @@
 import React from 'react'
-import { colors, webFonts } from '../theme'
+import { Pressable, ScrollView, Text, View } from 'react-native'
+import Svg, { Circle, Line, Path, Polyline } from 'react-native-svg'
+import { colors, font, fontFamily } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { AvatarCircle } from '../components/AvatarCircle'
 
@@ -27,18 +29,18 @@ export interface PartnersScreenProps {
 /* ── Inline icon helpers ── */
 
 const ChevronForwardIcon: React.FC<{ color?: string; opacity?: number }> = ({ color = colors.terra, opacity = 0.35 }) => (
-  <svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity={opacity}>
-    <polyline points="9 18 15 12 9 6" />
-  </svg>
+  <Svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" opacity={opacity}>
+    <Polyline points="9 18 15 12 9 6" />
+  </Svg>
 )
 
 const PersonAddIcon: React.FC = () => (
-  <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity={0.7}>
-    <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-    <circle cx="8.5" cy="7" r="4" />
-    <line x1="20" y1="8" x2="20" y2="14" />
-    <line x1="17" y1="11" x2="23" y2="11" />
-  </svg>
+  <Svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" opacity={0.7}>
+    <Path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+    <Circle cx={8.5} cy={7} r={4} />
+    <Line x1={20} y1={8} x2={20} y2={14} />
+    <Line x1={17} y1={11} x2={23} y2={11} />
+  </Svg>
 )
 
 /* ── Main component ── */
@@ -50,88 +52,81 @@ export const PartnersScreen: React.FC<PartnersScreenProps> = ({
   onAddPartner,
 }) => {
   return (
-    <div style={{
-      width: '100%',
-      minHeight: '100vh',
+    <View style={{
+      flex: 1,
+      backgroundColor: colors.warmSand,
       position: 'relative',
       overflow: 'hidden',
-      display: 'flex',
       flexDirection: 'column',
-      fontFamily: webFonts.dmSans,
-      color: colors.ink,
     }}>
       <DecorativeGlow position="top-right" size={240} opacity={0.09} />
-      <div style={{ height: 54 }} />
+      <View style={{ height: 54 }} />
 
       {/* ── Screen Header ── */}
-      <div style={{
-        padding: '4px 20px 0',
-        display: 'flex',
+      <View style={{
+        paddingTop: 4,
+        paddingHorizontal: 20,
+        flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         flexShrink: 0,
         position: 'relative',
         zIndex: 2,
       }}>
-        <button
-          onClick={onBack}
+        <Pressable
+          onPress={onBack}
           style={{
             width: 34,
             height: 34,
-            borderRadius: '50%',
+            borderRadius: 17,
             backgroundColor: colors.surface2,
-            border: 'none',
-            display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            cursor: 'pointer',
           }}
         >
-          <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={colors.stone} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
-        <div style={{
-          fontFamily: webFonts.playfair,
+          <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={colors.stone} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+            <Polyline points="15 18 9 12 15 6" />
+          </Svg>
+        </Pressable>
+        <Text style={{
+          fontFamily: font('playfair', '700'),
           fontSize: 20,
-          fontWeight: 700,
           color: colors.ink,
           position: 'absolute',
           left: '50%',
-          transform: 'translateX(-50%)',
-        }}>Partners</div>
-        <div style={{ width: 34 }} />
-      </div>
+          transform: [{ translateX: '-50%' }],
+        }}>Partners</Text>
+        <View style={{ width: 34 }} />
+      </View>
 
       {/* ── Scrollable body ── */}
-      <div style={{
+      <ScrollView style={{
         flex: 1,
-        overflowY: 'auto',
-        overflowX: 'hidden',
-        padding: '14px 20px 0',
-        scrollbarWidth: 'none',
+        paddingTop: 14,
+        paddingHorizontal: 20,
       }}>
         {partners.map((partner, i) => (
-          <div
+          <Pressable
             key={i}
-            onClick={() => onPartnerTap?.(i)}
+            onPress={() => onPartnerTap?.(i)}
             style={{
-              background: colors.surface,
-              border: partner.isSolo
-                ? '1px solid rgba(160,100,80,0.1)'
-                : '1px solid rgba(160,100,80,0.14)',
+              backgroundColor: colors.surface,
+              borderWidth: 1,
+              borderColor: partner.isSolo
+                ? 'rgba(160,100,80,0.1)'
+                : 'rgba(160,100,80,0.14)',
               borderRadius: 20,
-              padding: '16px 18px',
+              paddingVertical: 16,
+              paddingHorizontal: 18,
               marginBottom: 10,
-              cursor: 'pointer',
               position: 'relative',
               overflow: 'hidden',
               boxShadow: '0 2px 10px rgba(61,43,37,0.06)',
             }}
           >
             {/* Card top row */}
-            <div style={{
-              display: 'flex',
+            <View style={{
+              flexDirection: 'row',
               alignItems: 'center',
               gap: 12,
             }}>
@@ -144,151 +139,151 @@ export const PartnersScreen: React.FC<PartnersScreenProps> = ({
               />
 
               {/* Name + since */}
-              <div style={{ flex: 1 }}>
-                <div style={{
-                  fontFamily: webFonts.playfair,
+              <View style={{ flex: 1 }}>
+                <Text style={{
+                  fontFamily: font('playfair', '700'),
                   fontSize: 17,
-                  fontWeight: 700,
                   color: colors.ink,
                   marginBottom: 2,
-                }}>{partner.name}</div>
-                <div style={{
+                }}>{partner.name}</Text>
+                <Text style={{
                   fontSize: 10,
-                  fontWeight: 300,
+                  fontWeight: '300',
                   color: colors.stone,
-                }}>{partner.since}</div>
-              </div>
+                }}>{partner.since}</Text>
+              </View>
 
               {/* Stats */}
-              <div style={{
-                display: 'flex',
+              <View style={{
+                flexDirection: 'row',
                 alignItems: 'center',
                 flexShrink: 0,
               }}>
-                <div style={{
-                  textAlign: 'center',
-                  padding: '0 10px',
-                  borderRight: '1px solid rgba(160,100,80,0.12)',
+                <View style={{
+                  alignItems: 'center',
+                  paddingHorizontal: 10,
+                  borderRightWidth: 1,
+                  borderRightColor: 'rgba(160,100,80,0.12)',
                 }}>
-                  <div style={{
-                    fontFamily: webFonts.playfair,
+                  <Text style={{
+                    fontFamily: font('playfair', '600'),
                     fontSize: 17,
-                    fontWeight: 600,
                     color: colors.terra,
-                    lineHeight: 1,
-                  }}>{partner.sessions}</div>
-                  <div style={{
+                    lineHeight: 17,
+                  }}>{partner.sessions}</Text>
+                  <Text style={{
                     fontSize: 7,
-                    fontWeight: 500,
+                    fontWeight: '500',
                     letterSpacing: 0.8,
                     textTransform: 'uppercase',
                     color: colors.stone,
                     marginTop: 2,
-                  }}>Sessions</div>
-                </div>
-                <div style={{
-                  textAlign: 'center',
-                  padding: '0 10px',
+                  }}>Sessions</Text>
+                </View>
+                <View style={{
+                  alignItems: 'center',
+                  paddingHorizontal: 10,
                 }}>
-                  <div style={{
-                    fontFamily: webFonts.playfair,
+                  <Text style={{
+                    fontFamily: font('playfair', '600'),
                     fontSize: 17,
-                    fontWeight: 600,
                     color: colors.terra,
-                    lineHeight: 1,
-                  }}>{partner.avgSat}</div>
-                  <div style={{
+                    lineHeight: 17,
+                  }}>{partner.avgSat}</Text>
+                  <Text style={{
                     fontSize: 7,
-                    fontWeight: 500,
+                    fontWeight: '500',
                     letterSpacing: 0.8,
                     textTransform: 'uppercase',
                     color: colors.stone,
                     marginTop: 2,
-                  }}>Avg Sat</div>
-                </div>
-              </div>
+                  }}>Avg Sat</Text>
+                </View>
+              </View>
 
               {/* Chevron */}
-              <div style={{ marginLeft: 6 }}>
+              <View style={{ marginLeft: 6 }}>
                 <ChevronForwardIcon />
-              </div>
-            </div>
+              </View>
+            </View>
 
             {/* Tags row */}
             {partner.tags.length > 0 && (
-              <div style={{
-                display: 'flex',
+              <View style={{
+                flexDirection: 'row',
                 gap: 5,
                 flexWrap: 'wrap',
                 marginTop: 10,
                 paddingTop: 10,
-                borderTop: '1px solid rgba(160,100,80,0.08)',
+                borderTopWidth: 1,
+                borderTopColor: 'rgba(160,100,80,0.08)',
                 alignItems: 'center',
               }}>
                 {partner.tags.map((tag, j) => (
-                  <span key={j} style={{
+                  <Text key={j} style={{
                     fontSize: 13,
-                    background: colors.surface2,
+                    backgroundColor: colors.surface2,
                     borderRadius: 6,
-                    padding: '2px 6px',
-                  }}>{tag}</span>
+                    paddingVertical: 2,
+                    paddingHorizontal: 6,
+                  }}>{tag}</Text>
                 ))}
-                <span style={{
+                <Text style={{
                   fontSize: 10,
-                  fontWeight: 300,
+                  fontWeight: '300',
                   color: colors.stone,
-                  padding: '2px 0',
-                }}>Most common</span>
-              </div>
+                  paddingVertical: 2,
+                }}>Most common</Text>
+              </View>
             )}
-          </div>
+          </Pressable>
         ))}
 
         {/* ── Add partner card ── */}
-        <div
-          onClick={onAddPartner}
+        <Pressable
+          onPress={onAddPartner}
           style={{
-            background: 'transparent',
-            border: '1.5px dashed rgba(192,120,88,0.3)',
+            backgroundColor: 'transparent',
+            borderWidth: 1.5,
+            borderStyle: 'dashed',
+            borderColor: 'rgba(192,120,88,0.3)',
             borderRadius: 20,
             padding: 18,
             marginBottom: 10,
-            cursor: 'pointer',
-            display: 'flex',
+            flexDirection: 'row',
             alignItems: 'center',
             gap: 14,
           }}
         >
-          <div style={{
+          <View style={{
             width: 52,
             height: 52,
-            borderRadius: '50%',
+            borderRadius: 26,
             backgroundColor: 'rgba(192,120,88,0.08)',
-            display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0,
           }}>
             <PersonAddIcon />
-          </div>
-          <div>
-            <div style={{
+          </View>
+          <View>
+            <Text style={{
               fontSize: 14,
-              fontWeight: 400,
+              fontWeight: '400',
               color: colors.terra,
-            }}>Add a partner</div>
-            <div style={{
+            }}>Add a partner</Text>
+            <Text style={{
               fontSize: 11,
-              fontWeight: 300,
+              fontWeight: '300',
               color: colors.muted,
               marginTop: 1,
-            }}>Give them a name and a color</div>
-          </div>
-        </div>
+            }}>Give them a name and a color</Text>
+          </View>
+        </Pressable>
 
-        <div style={{ height: 12, flexShrink: 0 }} />
-      </div>
+        <View style={{ height: 12, flexShrink: 0 }} />
+      </ScrollView>
 
-    </div>
+    </View>
   )
 }

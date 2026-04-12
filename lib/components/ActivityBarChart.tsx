@@ -1,5 +1,6 @@
 import React from 'react'
-import { colors, webFonts } from '../theme'
+import { Text, View } from 'react-native'
+import { colors, font, fontFamily, gradientStyle } from '../theme'
 
 export interface ActivityBarItem {
   emoji: string
@@ -13,52 +14,53 @@ export interface ActivityBarChartProps {
 }
 
 export const ActivityBarChart: React.FC<ActivityBarChartProps> = ({ activities }) => (
-  <div style={{
-    background: colors.surface,
-    border: `1px solid ${colors.border}`,
+  <View style={{
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
     borderRadius: 14,
-    padding: '12px 14px',
+    padding: 12,
+    paddingHorizontal: 14,
     flexShrink: 0,
   }}>
     {activities.map((a, i) => (
-      <div key={a.label} style={{
-        display: 'flex',
+      <View key={a.label} style={{
+        flexDirection: 'row',
         alignItems: 'center',
         gap: 7,
         marginBottom: i < activities.length - 1 ? 7 : 0,
       }}>
-        <div style={{ fontSize: 13, width: 18, textAlign: 'center', flexShrink: 0 }}>{a.emoji}</div>
-        <div style={{
+        <Text style={{ fontSize: 13, width: 18, textAlign: 'center', flexShrink: 0 }}>{a.emoji}</Text>
+        <Text style={{
           fontSize: 10,
           color: colors.stone,
           width: 62,
           flexShrink: 0,
-          fontFamily: webFonts.dmSans,
-        }}>{a.label}</div>
-        <div style={{
+          fontFamily: fontFamily.dmSans,
+        }}>{a.label}</Text>
+        <View style={{
           flex: 1,
           height: 5,
-          background: colors.surface2,
+          backgroundColor: colors.surface2,
           borderRadius: 3,
           overflow: 'hidden',
         }}>
-          <div style={{
-            height: '100%',
-            background: 'linear-gradient(to right, #C07858, #B07080)',
+          <View style={{
+            height: 5,
+            ...gradientStyle('linear-gradient(to right, #C07858, #B07080)'),
             borderRadius: 3,
-            width: `${a.percent}%`,
+            width: `${a.percent}%` as unknown as number,
           }} />
-        </div>
-        <div style={{
+        </View>
+        <Text style={{
           fontSize: 10,
-          fontWeight: 500,
           color: colors.mauve,
           width: 12,
           textAlign: 'right',
           flexShrink: 0,
-          fontFamily: webFonts.dmSans,
-        }}>{a.count}</div>
-      </div>
+          fontFamily: font('dmSans', '500'),
+        }}>{a.count}</Text>
+      </View>
     ))}
-  </div>
+  </View>
 )

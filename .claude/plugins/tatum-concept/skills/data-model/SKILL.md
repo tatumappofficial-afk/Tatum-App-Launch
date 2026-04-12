@@ -188,9 +188,10 @@ UserSettings {
 
 All data is **local-first**. v1 has no server — everything lives on-device.
 
-- **MMKV** for UserProfile, UserSettings, shown milestone keys, and small key-value state
-- **SQLite** (via expo-sqlite or drizzle) for Encounters, Partners, Notes, DesireEntries, WhisperMessages
-- **Encryption**: Private notes are encrypted at rest using expo-crypto or a lightweight encryption layer. The key is derived from the device and optional biometric lock.
+- **expo-sqlite** for ALL data: Encounters, Partners, Notes, DesireEntries, WhisperMessages, UserProfile, UserSettings, Affirmations
+- **expo-sqlite/localStorage** polyfill for simple key-value settings (replaces MMKV — MMKV does not work in Expo Go)
+- **TanStack DB** with custom expo-sqlite collection adapter for reactive queries
+- **Encryption**: Private notes encrypted at rest using expo-crypto or a lightweight encryption layer. The key is derived from the device and optional biometric lock.
 
 No cloud sync in v1. Data export (premium) writes to a local file the user can save.
 

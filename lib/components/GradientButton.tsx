@@ -1,5 +1,6 @@
 import React from 'react'
-import { colors, webFonts } from '../theme'
+import { Pressable, Text } from 'react-native'
+import { colors, font, fontFamily, gradientStyle } from '../theme'
 
 export interface GradientButtonProps {
   label: string
@@ -25,37 +26,37 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
   const isPrimary = variant === 'primary'
 
   return (
-    <button
-      onClick={onPress}
+    <Pressable
+      onPress={onPress}
       style={{
         width: fullWidth ? '100%' : undefined,
         height,
-        display: 'inline-flex',
+        flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         gap: icon ? 7 : 0,
-        background: isPrimary
-          ? 'linear-gradient(135deg, #C07858, #7C4A5A)'
-          : 'transparent',
-        border: isPrimary
-          ? 'none'
-          : `1.5px solid ${colors.terra}`,
+        ...(isPrimary
+          ? gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)')
+          : { backgroundColor: 'transparent' }),
+        borderWidth: isPrimary ? 0 : 1.5,
+        borderColor: isPrimary ? undefined : colors.terra,
         borderRadius: 9999,
-        cursor: 'pointer',
-        fontFamily: webFonts.dmSans,
-        fontSize,
-        fontWeight: 500,
-        letterSpacing,
-        textTransform: 'uppercase',
-        color: isPrimary ? colors.white : colors.terra,
         boxShadow: isPrimary
           ? '0 6px 20px rgba(124,74,90,0.32), inset 0 1px 0 rgba(255,255,255,0.15)'
-          : 'none',
-        padding: fullWidth ? undefined : `0 ${height * 0.54}px`,
+          : undefined,
+        paddingHorizontal: fullWidth ? undefined : height * 0.54,
       }}
     >
       {icon}
-      {label}
-    </button>
+      <Text style={{
+        fontFamily: font('dmSans', '500'),
+        fontSize,
+        letterSpacing,
+        textTransform: 'uppercase',
+        color: isPrimary ? colors.white : colors.terra,
+      }}>
+        {label}
+      </Text>
+    </Pressable>
   )
 }

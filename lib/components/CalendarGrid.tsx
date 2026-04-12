@@ -1,5 +1,6 @@
 import React from 'react'
-import { colors, webFonts } from '../theme'
+import { Pressable, Text, View } from 'react-native'
+import { colors, font, fontFamily, gradientStyle } from '../theme'
 
 export interface LoggedDay {
   day: number
@@ -44,58 +45,43 @@ const DayCell: React.FC<{
   const emojiFontSize = compact ? 7 : 8
   const plusFontSize = compact ? 6 : 7
 
-  let bgStyle: React.CSSProperties = {}
-  if (isToday) {
-    bgStyle = { background: 'linear-gradient(135deg, #C07858, #7C4A5A)' }
-  } else if (isSelected) {
-    bgStyle = {
-      background: 'rgba(192,120,88,0.15)',
-      border: `2px solid ${colors.terra}`,
-    }
-  }
-
   return (
-    <div
-      onClick={onPress}
+    <Pressable
+      onPress={onPress}
       style={{
-        aspectRatio: '1',
-        borderRadius: '50%',
-        display: 'flex',
-        flexDirection: 'column',
+        aspectRatio: 1,
+        borderRadius: 9999,
         alignItems: 'center',
         justifyContent: 'center',
-        cursor: 'pointer',
-        ...bgStyle,
+        ...(isToday
+          ? gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)')
+          : isSelected
+            ? { backgroundColor: 'rgba(192,120,88,0.15)', borderWidth: 2, borderColor: colors.terra }
+            : {}),
       }}
     >
-      <span style={{
-        fontFamily: webFonts.dmSans,
+      <Text style={{
+        fontFamily: font('dmSans', isToday ? '700' : isLoggedDay ? '500' : '400'),
         fontSize,
-        lineHeight: 1,
+        lineHeight: fontSize * 1.2,
         color: isToday ? colors.white : isLoggedDay ? colors.terra : colors.ink,
-        fontWeight: isToday ? 700 : isLoggedDay ? 500 : 400,
       }}>
         {day}
-      </span>
+      </Text>
       {isLoggedDay && !isToday && (
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          lineHeight: 1,
-          marginTop: 1,
-        }}>
-          <span style={{ fontSize: emojiFontSize }}>{logged!.emoji}</span>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 1 }}>
+          <Text style={{ fontSize: emojiFontSize }}>{logged!.emoji}</Text>
           {logged!.hasMultiple && (
-            <span style={{
+            <Text style={{
               fontSize: plusFontSize,
-              fontWeight: 600,
+              fontWeight: '600',
               color: colors.mauve,
               marginLeft: 1,
-            }}>+</span>
+            }}>+</Text>
           )}
-        </div>
+        </View>
       )}
-    </div>
+    </Pressable>
   )
 }
 
@@ -121,7 +107,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
   const cells: React.ReactNode[] = []
   for (let i = 0; i < firstDow; i++) {
     cells.push(
-      <div key={`empty-${i}`} style={{ aspectRatio: '1', pointerEvents: 'none' }} />
+      <View key={`empty-${i}`} style={{ aspectRatio: 1 }} />
     )
   }
   for (let d = 1; d <= daysInMonth; d++) {
@@ -139,38 +125,48 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
     )
   }
 
-  return (
-    <div>
-      {/* Day-of-week header */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(7, 1fr)',
-        marginBottom: compact ? 2 : 4,
-      }}>
-        {DAY_LABELS.map((label) => (
-          <div key={label} style={{
-            textAlign: 'center',
-            fontFamily: webFonts.dmSans,
+  // Render as rows of 7 (flex-based grid)
+  const headerRow = (
+    <View style={{ flexDirection: 'row', marginBottom: compact ? 2 : 4 }}>
+      {DAY_LABELS.map((label) => (
+        <View key={label} style={{ flex: 1, alignItems: 'center', paddingVertical: 3 }}>
+          <Text style={{
+            fontFamily: font('dmSans', '500'),
             fontSize: headerFontSize,
-            fontWeight: 500,
             letterSpacing: compact ? 0.8 : 0.5,
             color: colors.stone,
             textTransform: 'uppercase',
-            padding: '3px 0',
           }}>
             {label}
-          </div>
-        ))}
-      </div>
+          </Text>
+        </View>
+      ))}
+    </View>
+  )
 
-      {/* Day grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(7, 1fr)',
-        gap: compact ? 0 : 2,
-      }}>
-        {cells}
-      </div>
-    </div>
+  // Build rows of 7 from cells
+  const rows: React.ReactNode[] = []
+  for (let i = 0; i < cells.length; i += 7) {
+    const rowCells = cells.slice(i, i + 7)
+    // Pad last row
+    while (rowCells.length < 7) {
+      rowCells.push(<View key={`pad-${rowCells.length}`} style={{ flex: 1 }} />)
+    }
+    rows.push(
+      <View key={`row-${i}`} style={{ flexDirection: 'row', gap: compact ? 0 : 2 }}>
+        {rowCells.map((cell, j) => (
+          <View key={j} style={{ flex: 1 }}>{cell}</View>
+        ))}
+      </View>
+    )
+  }
+
+  return (
+    <View>
+      {headerRow}
+      <View style={{ gap: compact ? 0 : 2 }}>
+        {rows}
+      </View>
+    </View>
   )
 }

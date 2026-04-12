@@ -1,5 +1,6 @@
 import React from 'react'
-import { colors, webFonts } from '../theme'
+import { Pressable, Text, View } from 'react-native'
+import { colors, font, fontFamily } from '../theme'
 
 export interface SettingsRowProps {
   icon: React.ReactNode
@@ -22,46 +23,43 @@ export const SettingsRow: React.FC<SettingsRowProps> = ({
   onPress,
   showBorder = true,
 }) => (
-  <div
-    onClick={onPress}
+  <Pressable
+    onPress={onPress}
     style={{
-      display: 'flex',
+      flexDirection: 'row',
       alignItems: 'center',
-      padding: '14px 16px',
-      borderBottom: showBorder ? '1px solid rgba(160,100,80,0.1)' : 'none',
-      cursor: 'pointer',
-      position: 'relative',
+      padding: 14,
+      paddingHorizontal: 16,
+      borderBottomWidth: showBorder ? 1 : 0,
+      borderBottomColor: 'rgba(160,100,80,0.1)',
     }}
   >
-    <div style={{
+    <View style={{
       width: 32,
       height: 32,
       borderRadius: 9,
-      display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       flexShrink: 0,
       marginRight: 12,
-      background: iconBg,
+      backgroundColor: iconBg,
     }}>
       {icon}
-    </div>
-    <div style={{ flex: 1 }}>
-      <div style={{
+    </View>
+    <View style={{ flex: 1 }}>
+      <Text style={{
         fontSize: 14,
-        fontWeight: 500,
-        fontFamily: webFonts.dmSans,
+        fontFamily: font('dmSans', '500'),
         color: destructive ? colors.mauve : colors.ink,
-        lineHeight: 1.2,
-      }}>{title}</div>
-      <div style={{
+        lineHeight: 16.8,
+      }}>{title}</Text>
+      <Text style={{
         fontSize: 11,
-        fontWeight: 300,
-        fontFamily: webFonts.dmSans,
+        fontFamily: font('dmSans', '300'),
         color: colors.stone,
         marginTop: 1,
-      }}>{subtitle}</div>
-    </div>
+      }}>{subtitle}</Text>
+    </View>
     {trailing}
-  </div>
+  </Pressable>
 )

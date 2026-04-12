@@ -1,5 +1,7 @@
 import React from 'react'
-import { colors, webFonts } from '../../theme'
+import { Text, View } from 'react-native'
+import Svg, { Polyline } from 'react-native-svg'
+import { colors, font, fontFamily } from '../../theme'
 
 interface SectionLabelProps {
   label: string
@@ -7,30 +9,30 @@ interface SectionLabelProps {
 }
 
 export const SectionLabel: React.FC<SectionLabelProps> = ({ label, showChevron = false }) => (
-  <div style={{
-    display: 'flex',
+  <View style={{
+    flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    margin: '12px 24px 8px',
+    marginVertical: 12,
+    marginHorizontal: 24,
+    marginBottom: 8,
   }}>
-    <span style={{
-      fontFamily: webFonts.dmSans,
+    <Text style={{
+      fontFamily: font('dmSans', '500'),
       fontSize: 8,
-      fontWeight: 500,
       letterSpacing: 3,
       textTransform: 'uppercase',
       color: colors.terra,
-      whiteSpace: 'nowrap',
-    }}>{label}</span>
-    <div style={{
+    }}>{label}</Text>
+    <View style={{
       flex: 1,
       height: 1,
       backgroundColor: 'rgba(160,100,80,0.18)',
     }} />
     {showChevron && (
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="9 18 15 12 9 6"/>
-      </svg>
+      <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+        <Polyline points="9 18 15 12 9 6" />
+      </Svg>
     )}
-  </div>
+  </View>
 )

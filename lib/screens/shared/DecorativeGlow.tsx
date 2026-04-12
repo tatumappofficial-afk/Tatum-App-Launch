@@ -1,4 +1,6 @@
 import React from 'react'
+import { View } from 'react-native'
+import { gradientStyle } from '../../theme'
 
 interface DecorativeGlowProps {
   position?: 'top-right' | 'center'
@@ -13,18 +15,20 @@ export const DecorativeGlow: React.FC<DecorativeGlowProps> = ({
 }) => {
   const posStyle = position === 'top-right'
     ? { top: -40, right: -60 }
-    : { top: -20, left: '50%', transform: 'translateX(-50%)' }
+    : { top: -20, left: '50%' as unknown as number, transform: [{ translateX: '-50%' as unknown as number }] }
 
   return (
-    <div style={{
-      position: 'absolute',
-      width: size,
-      height: size,
-      borderRadius: '50%',
-      background: `radial-gradient(circle, rgba(192,120,88,${opacity}) 0%, transparent 70%)`,
-      pointerEvents: 'none',
-      zIndex: 0,
-      ...posStyle,
-    }} />
+    <View
+      pointerEvents="none"
+      style={{
+        position: 'absolute',
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        ...gradientStyle(`radial-gradient(circle, rgba(192,120,88,${opacity}) 0%, transparent 70%)`),
+        zIndex: 0,
+        ...posStyle,
+      }}
+    />
   )
 }

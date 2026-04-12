@@ -16,28 +16,28 @@ type Story = StoryObj<typeof StarRating>
 
 export const Full: Story = {
   args: {
-    percent: 100,
+    rating: 100,
     size: 11,
   },
 }
 
 export const Partial: Story = {
   args: {
-    percent: 70,
+    rating: 70,
     size: 11,
   },
 }
 
 export const Low: Story = {
   args: {
-    percent: 30,
+    rating: 30,
     size: 11,
   },
 }
 
 export const Empty: Story = {
   args: {
-    percent: 0,
+    rating: 0,
     size: 11,
   },
 }

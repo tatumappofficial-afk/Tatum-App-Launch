@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
-import { colors, webFonts } from '../theme'
-import { BottomNav } from './shared/BottomNav'
+import { Pressable, ScrollView, Text, View } from 'react-native'
+import Svg, { Line, Polyline } from 'react-native-svg'
+import { colors, font, fontFamily, gradientStyle } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { AvatarCircle } from '../components/AvatarCircle'
 import { GradientButton } from '../components/GradientButton'
@@ -39,298 +40,303 @@ export interface JournalScreenProps {
   entryCount?: number
   calendarDays?: CalendarDay[]
   showCalendar?: boolean
+  onEntryPress?: (id: string) => void
 }
 
 /* ── Sub-components ── */
 
 const ChevronDown: React.FC<{ color?: string; size?: number }> = ({ color = 'rgba(255,255,255,0.75)', size = 14 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="6 9 12 15 18 9" />
-  </svg>
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+    <Polyline points="6 9 12 15 18 9" />
+  </Svg>
 )
 
 const ChevronUp: React.FC<{ color?: string; size?: number }> = ({ color = 'rgba(255,255,255,0.75)', size = 14 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="6 15 12 9 18 15" />
-  </svg>
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+    <Polyline points="6 15 12 9 18 15" />
+  </Svg>
 )
 
 const ChevronBack: React.FC<{ color?: string; size?: number }> = ({ color = colors.stone, size = 16 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="15 18 9 12 15 6" />
-  </svg>
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+    <Polyline points="15 18 9 12 15 6" />
+  </Svg>
 )
 
 const ChevronForward: React.FC<{ color?: string; size?: number }> = ({ color = colors.stone, size = 16 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="9 6 15 12 9 18" />
-  </svg>
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+    <Polyline points="9 6 15 12 9 18" />
+  </Svg>
 )
 
 const ArrowUpRight: React.FC<{ color?: string; size?: number }> = ({ color = colors.terra, size = 18 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="7" y1="17" x2="17" y2="7" />
-    <polyline points="7 7 17 7 17 17" />
-  </svg>
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Line x1={7} y1={17} x2={17} y2={7} />
+    <Polyline points="7 7 17 7 17 17" />
+  </Svg>
 )
 
 const PlusIcon: React.FC<{ color?: string; size?: number }> = ({ color = 'white', size = 16 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round">
-    <line x1="12" y1="5" x2="12" y2="19" />
-    <line x1="5" y1="12" x2="19" y2="12" />
-  </svg>
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.5} strokeLinecap="round">
+    <Line x1={12} y1={5} x2={12} y2={19} />
+    <Line x1={5} y1={12} x2={19} y2={12} />
+  </Svg>
 )
 
 /* ── Month Separator ── */
 
 const MonthSeparator: React.FC<{ label: string }> = ({ label }) => (
-  <div style={{
-    fontSize: 8,
-    fontFamily: webFonts.dmSans,
-    fontWeight: 500,
-    letterSpacing: 3.5,
-    textTransform: 'uppercase',
-    color: colors.terra,
-    display: 'flex',
+  <View style={{
+    flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    margin: '4px 0 10px',
+    marginTop: 4,
+    marginBottom: 10,
   }}>
-    {label}
-    <div style={{ flex: 1, height: 1, background: 'rgba(160,100,80,0.18)' }} />
-  </div>
+    <Text style={{
+      fontSize: 8,
+      fontFamily: font('dmSans', '500'),
+      letterSpacing: 3.5,
+      textTransform: 'uppercase',
+      color: colors.terra,
+    }}>
+      {label}
+    </Text>
+    <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(160,100,80,0.18)' }} />
+  </View>
 )
 
 /* ── Entry Card ── */
 
-const EntryCard: React.FC<{ entry: JournalEntry }> = ({ entry }) => {
+const EntryCard: React.FC<{ entry: JournalEntry; onPress?: () => void }> = ({ entry, onPress }) => {
   const isCompact = !entry.note
   const hasMultiplePartners = entry.partners.length > 1
 
   return (
-    <div style={{
+    <View style={{
       position: 'relative',
       marginBottom: 14,
     }}>
       {/* Shadow stack behind (depth) */}
-      <div style={{
+      <View style={{
         position: 'absolute',
         bottom: -4,
         left: 6,
         right: -6,
         top: 4,
-        background: colors.surface2,
+        backgroundColor: colors.surface2,
         borderRadius: 16,
         zIndex: 0,
       }} />
 
       {/* Main paper */}
-      <div style={{
+      <View style={{
         position: 'relative',
         zIndex: 1,
-        background: colors.surface,
+        backgroundColor: colors.surface,
         borderRadius: 16,
-        border: `1px solid rgba(160,100,80,0.14)`,
+        borderWidth: 1,
+        borderColor: 'rgba(160,100,80,0.14)',
         overflow: 'hidden',
         boxShadow: '0 2px 12px rgba(61,43,37,0.07)',
       }}>
-        {/* Ruled lines */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundImage: `repeating-linear-gradient(
-            to bottom,
-            transparent, transparent 27px,
-            rgba(160,100,80,0.08) 27px, rgba(160,100,80,0.08) 28px
-          )`,
-          backgroundPosition: '0 54px',
-          pointerEvents: 'none',
-          zIndex: 0,
-        }} />
-
         {/* Margin line */}
-        <div style={{
+        <View style={{
           position: 'absolute',
           top: 0,
           bottom: 0,
           left: 50,
           width: 1,
-          background: 'rgba(192,120,88,0.12)',
+          backgroundColor: 'rgba(192,120,88,0.12)',
           zIndex: 0,
         }} />
 
         {/* Header band */}
-        <div style={{
+        <View style={{
           position: 'relative',
           zIndex: 2,
-          display: 'flex',
+          flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '11px 12px 10px 14px',
-          borderBottom: '1px solid rgba(160,100,80,0.1)',
-          background: 'rgba(245,239,232,0.6)',
+          paddingTop: 11,
+          paddingBottom: 10,
+          paddingLeft: 14,
+          paddingRight: 12,
+          borderBottomWidth: 1,
+          borderBottomColor: 'rgba(160,100,80,0.1)',
+          backgroundColor: 'rgba(245,239,232,0.6)',
         }}>
           {/* Left side */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {hasMultiplePartners ? (
-              <div style={{ position: 'relative', width: 46, height: 32, flexShrink: 0 }}>
-                <div style={{ position: 'absolute', left: 0, zIndex: 2 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            {hasMultiplePartners && entry.partners[0] && entry.partners[1] ? (
+              <View style={{ position: 'relative', width: 46, height: 32, flexShrink: 0 }}>
+                <View style={{ position: 'absolute', left: 0, zIndex: 2 }}>
                   <AvatarCircle
                     initials={entry.partners[0].initials}
                     gradient={entry.partners[0].gradient}
                     size={32}
                     borderWidth={2}
                   />
-                </div>
-                <div style={{ position: 'absolute', left: 14, zIndex: 1 }}>
+                </View>
+                <View style={{ position: 'absolute', left: 14, zIndex: 1 }}>
                   <AvatarCircle
                     initials={entry.partners[1].initials}
                     gradient={entry.partners[1].gradient}
                     size={32}
                     borderWidth={2}
                   />
-                </div>
-              </div>
-            ) : (
+                </View>
+              </View>
+            ) : entry.partners[0] ? (
               <AvatarCircle
                 initials={entry.partners[0].initials}
                 gradient={entry.partners[0].gradient}
                 size={32}
                 borderWidth={2}
               />
+            ) : (
+              <AvatarCircle
+                initials="✨"
+                gradient="linear-gradient(135deg, #8BA888, #5A8060)"
+                size={32}
+                borderWidth={2}
+              />
             )}
-            <div style={hasMultiplePartners ? { marginLeft: 8 } : undefined}>
-              <div style={{
-                fontFamily: webFonts.playfair,
+            <View style={hasMultiplePartners ? { marginLeft: 8 } : undefined}>
+              <Text style={{
+                fontFamily: font('playfair', '600'),
                 fontSize: 13,
-                fontWeight: 600,
                 color: colors.ink,
-                lineHeight: 1.1,
+                lineHeight: 14,
               }}>
                 {entry.partnerName}
-              </div>
-              <div style={{
+              </Text>
+              <Text style={{
                 fontSize: 8.5,
-                fontWeight: 300,
+                fontWeight: '300',
                 color: colors.stone,
                 marginTop: 1,
               }}>
                 {entry.date}
-              </div>
-            </div>
-          </div>
+              </Text>
+            </View>
+          </View>
 
           {/* Right side -- score + arrow */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 2 }}>
-              <span style={{
-                fontFamily: webFonts.playfair,
+          <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 10 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 2 }}>
+              <Text style={{
+                fontFamily: font('playfair', '700'),
                 fontSize: 22,
-                fontWeight: 700,
                 color: colors.terra,
-                lineHeight: 1,
+                lineHeight: 22,
               }}>
                 {entry.score}
-              </span>
-              <span style={{
+              </Text>
+              <Text style={{
                 fontSize: 13,
-                fontWeight: 300,
+                fontWeight: '300',
                 color: '#C4B0A0',
-                margin: '0 1px',
-              }}>/</span>
-              <span style={{
+                marginHorizontal: 1,
+              }}>/</Text>
+              <Text style={{
                 fontSize: 12,
-                fontWeight: 300,
+                fontWeight: '300',
                 color: '#C4B0A0',
               }}>
                 {entry.maxScore ?? 10}
-              </span>
-            </div>
-            <button style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
+              </Text>
+            </View>
+            <Pressable
+              onPress={onPress}
+              style={{
               alignItems: 'center',
               padding: 2,
               opacity: 0.5,
             }}>
               <ArrowUpRight />
-            </button>
-          </div>
-        </div>
+            </Pressable>
+          </View>
+        </View>
 
         {/* Tags row */}
-        <div style={{
+        <View style={{
           position: 'relative',
           zIndex: 2,
-          display: 'flex',
+          flexDirection: 'row',
           alignItems: 'center',
           gap: 5,
           flexWrap: 'wrap',
-          padding: '7px 14px 5px',
-          borderBottom: '1px solid rgba(160,100,80,0.07)',
+          paddingTop: 7,
+          paddingHorizontal: 14,
+          paddingBottom: 5,
+          borderBottomWidth: 1,
+          borderBottomColor: 'rgba(160,100,80,0.07)',
         }}>
           {entry.tags.map((tag, i) => (
-            <span key={i} style={{
+            <Text key={i} style={{
               fontSize: 14,
-              background: 'rgba(237,227,216,0.85)',
+              backgroundColor: 'rgba(237,227,216,0.85)',
               borderRadius: 7,
-              padding: '2px 6px',
+              paddingVertical: 2,
+              paddingHorizontal: 6,
             }}>
               {tag}
-            </span>
+            </Text>
           ))}
           {entry.mood && (
-            <span style={{
+            <Text style={{
               fontSize: 10,
-              background: 'rgba(192,120,88,0.1)',
-              border: '1px solid rgba(192,120,88,0.2)',
+              backgroundColor: 'rgba(192,120,88,0.1)',
+              borderWidth: 1,
+              borderColor: 'rgba(192,120,88,0.2)',
               borderRadius: 9999,
-              padding: '2px 8px',
+              paddingVertical: 2,
+              paddingHorizontal: 8,
               color: colors.terra,
             }}>
               {entry.mood.emoji} {entry.mood.label}
-            </span>
+            </Text>
           )}
-        </div>
+        </View>
 
         {/* Note body */}
         {!isCompact && (
-          <div style={{
+          <View style={{
             position: 'relative',
             zIndex: 2,
-            padding: '10px 16px 14px',
+            paddingTop: 10,
+            paddingHorizontal: 16,
+            paddingBottom: 14,
             minHeight: 56,
           }}>
-            <div style={{
-              fontFamily: webFonts.playfair,
+            <Text style={{
+              fontFamily: fontFamily.playfair,
               fontSize: 13,
-              fontWeight: 400,
+              fontWeight: '400',
               fontStyle: 'italic',
               color: '#5A3E36',
-              lineHeight: '27px',
+              lineHeight: 27,
               letterSpacing: 0.1,
             }}>
               {entry.note}
-            </div>
-          </div>
+            </Text>
+          </View>
         )}
 
         {/* Compact cards: smaller bottom padding area */}
         {isCompact && (
-          <div style={{
+          <View style={{
             position: 'relative',
             zIndex: 2,
             minHeight: 0,
-            padding: '7px 16px 10px',
+            paddingTop: 7,
+            paddingHorizontal: 16,
+            paddingBottom: 10,
           }} />
         )}
-      </div>
-    </div>
+      </View>
+    </View>
   )
 }
 
@@ -342,308 +348,284 @@ const CalendarDropdown: React.FC<{
   monthLabel: string
   days: CalendarDay[]
 }> = ({ monthLabel, days }) => (
-  <div style={{
+  <View style={{
     position: 'absolute',
-    top: 'calc(100% + 8px)',
+    top: 48,
     left: 24,
     width: 318,
-    background: colors.surface,
-    border: '1px solid rgba(160,100,80,0.18)',
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: 'rgba(160,100,80,0.18)',
     borderRadius: 22,
     boxShadow: '0 16px 48px rgba(61,43,37,0.18), 0 2px 8px rgba(61,43,37,0.08)',
     zIndex: 200,
     overflow: 'hidden',
   }}>
     {/* Nav */}
-    <div style={{
-      display: 'flex',
+    <View style={{
+      flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      padding: '14px 16px 10px',
-      borderBottom: '1px solid rgba(160,100,80,0.1)',
+      paddingTop: 14,
+      paddingHorizontal: 16,
+      paddingBottom: 10,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(160,100,80,0.1)',
     }}>
-      <button style={{
+      <Pressable style={{
         width: 30,
         height: 30,
-        borderRadius: '50%',
-        background: colors.surface2,
-        border: 'none',
-        display: 'flex',
+        borderRadius: 15,
+        backgroundColor: colors.surface2,
         alignItems: 'center',
         justifyContent: 'center',
-        cursor: 'pointer',
       }}>
         <ChevronBack />
-      </button>
-      <div style={{
-        fontFamily: webFonts.playfair,
+      </Pressable>
+      <Text style={{
+        fontFamily: font('playfair', '600'),
         fontSize: 16,
-        fontWeight: 600,
         color: colors.ink,
       }}>
         {monthLabel}
-      </div>
-      <button style={{
+      </Text>
+      <Pressable style={{
         width: 30,
         height: 30,
-        borderRadius: '50%',
-        background: colors.surface2,
-        border: 'none',
-        display: 'flex',
+        borderRadius: 15,
+        backgroundColor: colors.surface2,
         alignItems: 'center',
         justifyContent: 'center',
-        cursor: 'pointer',
       }}>
         <ChevronForward />
-      </button>
-    </div>
+      </Pressable>
+    </View>
 
     {/* Day-of-week header */}
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(7, 1fr)',
-      padding: '8px 10px 3px',
+    <View style={{
+      flexDirection: 'row',
+      paddingTop: 8,
+      paddingHorizontal: 10,
+      paddingBottom: 3,
     }}>
       {DOW_LABELS.map((d) => (
-        <div key={d} style={{
-          textAlign: 'center',
-          fontSize: 8,
-          fontWeight: 500,
-          letterSpacing: 0.8,
-          textTransform: 'uppercase',
-          color: colors.stone,
-          padding: '3px 0',
-        }}>
-          {d}
-        </div>
+        <View key={d} style={{ flex: 1, alignItems: 'center' }}>
+          <Text style={{
+            fontSize: 8,
+            fontWeight: '500',
+            letterSpacing: 0.8,
+            textTransform: 'uppercase',
+            color: colors.stone,
+            paddingVertical: 3,
+          }}>
+            {d}
+          </Text>
+        </View>
       ))}
-    </div>
+    </View>
 
     {/* Day grid */}
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(7, 1fr)',
-      gap: 0,
-      padding: '2px 10px 14px',
+    <View style={{
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      paddingTop: 2,
+      paddingHorizontal: 10,
+      paddingBottom: 14,
     }}>
       {days.map((d, i) => {
         const isEmpty = d.day === null
         const isToday = d.isToday
+        const cellSize = (318 - 20) / 7 // account for horizontal padding
         return (
-          <div key={i} style={{
-            aspectRatio: '1',
-            borderRadius: '50%',
-            display: 'flex',
+          <View key={i} style={{
+            width: cellSize,
+            aspectRatio: 1,
+            borderRadius: cellSize / 2,
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            cursor: isEmpty ? 'default' : 'pointer',
-            pointerEvents: isEmpty ? 'none' : 'auto',
-            background: isToday ? 'linear-gradient(135deg, #C07858, #7C4A5A)' : 'transparent',
+            ...(isToday ? gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)') : {}),
           }}>
-            <span style={{
+            <Text style={{
               fontSize: 11,
-              fontWeight: isToday ? 700 : d.logged ? 500 : 400,
+              fontWeight: isToday ? '700' : d.logged ? '500' : '400',
               color: isToday ? 'white' : d.logged ? colors.terra : colors.ink,
-              lineHeight: 1,
+              lineHeight: 11,
               opacity: isEmpty ? 0 : 1,
             }}>
               {d.day ?? ''}
-            </span>
+            </Text>
             {d.logged && !isToday && (
-              <div style={{ display: 'flex', alignItems: 'center', lineHeight: 1, marginTop: 1 }}>
-                <span style={{ fontSize: 7 }}>{d.emoji}</span>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 1 }}>
+                <Text style={{ fontSize: 7 }}>{d.emoji}</Text>
                 {d.hasPlus && (
-                  <span style={{ fontSize: 6, fontWeight: 600, color: colors.mauve, marginLeft: 1 }}>+</span>
+                  <Text style={{ fontSize: 6, fontWeight: '600', color: colors.mauve, marginLeft: 1 }}>+</Text>
                 )}
-              </div>
+              </View>
             )}
-          </div>
+          </View>
         )
       })}
-    </div>
+    </View>
 
     {/* Legend */}
-    <div style={{
-      display: 'flex',
+    <View style={{
+      flexDirection: 'row',
       alignItems: 'center',
       gap: 14,
-      padding: '8px 16px 12px',
-      borderTop: '1px solid rgba(160,100,80,0.1)',
+      paddingTop: 8,
+      paddingHorizontal: 16,
+      paddingBottom: 12,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(160,100,80,0.1)',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 9, color: colors.stone }}>
-        <span style={{ fontSize: 10 }}>&#x1F346;</span>
-        <span>Logged</span>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 9, color: colors.stone }}>
-        <span style={{ fontSize: 10, color: colors.terra, fontWeight: 600 }}>&#x1F346;+</span>
-        <span>Multiple</span>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 9, color: colors.stone }}>
-        <span style={{
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+        <Text style={{ fontSize: 10 }}>&#x1F346;</Text>
+        <Text style={{ fontSize: 9, color: colors.stone }}>Logged</Text>
+      </View>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+        <Text style={{ fontSize: 10, color: colors.terra, fontWeight: '600' }}>&#x1F346;+</Text>
+        <Text style={{ fontSize: 9, color: colors.stone }}>Multiple</Text>
+      </View>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+        <View style={{
           width: 10,
           height: 10,
-          borderRadius: '50%',
-          background: 'linear-gradient(135deg, #C07858, #7C4A5A)',
-          display: 'inline-block',
+          borderRadius: 5,
+          ...gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)'),
         }} />
-        <span>Today</span>
-      </div>
-    </div>
+        <Text style={{ fontSize: 9, color: colors.stone }}>Today</Text>
+      </View>
+    </View>
 
     {/* Hint */}
-    <div style={{
-      textAlign: 'center',
-      fontSize: 9,
-      fontWeight: 300,
-      color: colors.muted,
-      fontStyle: 'italic',
-      padding: '0 16px 12px',
+    <View style={{
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingBottom: 12,
     }}>
-      Tap a date to jump to that entry
-    </div>
-  </div>
+      <Text style={{
+        fontSize: 9,
+        fontWeight: '300',
+        color: colors.muted,
+        fontStyle: 'italic',
+      }}>
+        Tap a date to jump to that entry
+      </Text>
+    </View>
+  </View>
 )
 
 /* ── Empty State ── */
 
 const EmptyState: React.FC = () => (
-  <div style={{
+  <View style={{
     flex: 1,
-    display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '0 36px',
-    textAlign: 'center',
+    paddingHorizontal: 36,
   }}>
     {/* Stacked blank journal cards */}
-    <div style={{ position: 'relative', width: 240, height: 130, marginBottom: 28 }}>
+    <View style={{ position: 'relative', width: 240, height: 130, marginBottom: 28 }}>
       {/* Card 3 - furthest back */}
-      <div style={{
+      <View style={{
         position: 'absolute',
         width: 200,
         height: 110,
         top: 20,
-        left: '50%',
-        transform: 'translateX(-50%) rotate(4deg)',
+        left: 20,
         opacity: 0.4,
         borderRadius: 16,
         overflow: 'hidden',
-        background: colors.surface,
-        border: '1px solid rgba(160,100,80,0.12)',
-      }}>
-        <div style={{
-          width: '100%',
-          height: '100%',
-          backgroundImage: `repeating-linear-gradient(
-            to bottom, transparent, transparent 27px,
-            rgba(160,100,80,0.08) 27px, rgba(160,100,80,0.08) 28px
-          )`,
-          backgroundPosition: '0 20px',
-        }} />
-      </div>
+        backgroundColor: colors.surface,
+        borderWidth: 1,
+        borderColor: 'rgba(160,100,80,0.12)',
+      }} />
       {/* Card 2 */}
-      <div style={{
+      <View style={{
         position: 'absolute',
         width: 220,
         height: 118,
         top: 10,
-        left: '50%',
-        transform: 'translateX(-50%) rotate(-2deg)',
+        left: 10,
         opacity: 0.65,
         borderRadius: 16,
         overflow: 'hidden',
-        background: colors.surface,
-        border: '1px solid rgba(160,100,80,0.12)',
-      }}>
-        <div style={{
-          width: '100%',
-          height: '100%',
-          backgroundImage: `repeating-linear-gradient(
-            to bottom, transparent, transparent 27px,
-            rgba(160,100,80,0.08) 27px, rgba(160,100,80,0.08) 28px
-          )`,
-          backgroundPosition: '0 20px',
-        }} />
-      </div>
+        backgroundColor: colors.surface,
+        borderWidth: 1,
+        borderColor: 'rgba(160,100,80,0.12)',
+      }} />
       {/* Card 1 - front */}
-      <div style={{
+      <View style={{
         position: 'absolute',
         width: 240,
         height: 130,
         top: 0,
-        left: '50%',
-        transform: 'translateX(-50%)',
+        left: 0,
         borderRadius: 16,
         overflow: 'hidden',
-        background: colors.surface,
-        border: '1px solid rgba(160,100,80,0.12)',
-        backgroundImage: `repeating-linear-gradient(
-          to bottom, transparent, transparent 27px,
-          rgba(160,100,80,0.08) 27px, rgba(160,100,80,0.08) 28px
-        )`,
-        backgroundPosition: '0 20px',
+        backgroundColor: colors.surface,
+        borderWidth: 1,
+        borderColor: 'rgba(160,100,80,0.12)',
       }}>
         {/* Margin line */}
-        <div style={{
+        <View style={{
           position: 'absolute',
           top: 0,
           bottom: 0,
           left: 40,
           width: 1,
-          background: 'rgba(192,120,88,0.12)',
+          backgroundColor: 'rgba(192,120,88,0.12)',
         }} />
         {/* Center icon */}
-        <div style={{
+        <View style={{
           position: 'absolute',
           top: 0,
           left: 0,
           right: 0,
           bottom: 0,
-          display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: 36,
-          opacity: 0.3,
         }}>
-          &#x1F319;
-        </div>
-      </div>
-    </div>
+          <Text style={{ fontSize: 36, opacity: 0.3 }}>&#x1F319;</Text>
+        </View>
+      </View>
+    </View>
 
-    <div style={{
-      fontFamily: webFonts.playfair,
+    <Text style={{
+      fontFamily: font('playfair', '700'),
       fontSize: 22,
-      fontWeight: 700,
       color: colors.ink,
       marginBottom: 10,
-      lineHeight: 1.3,
+      lineHeight: 29,
+      textAlign: 'center',
     }}>
       Your story starts here.
-    </div>
+    </Text>
 
-    <div style={{
-      fontFamily: webFonts.dmSans,
+    <Text style={{
+      fontFamily: font('dmSans', '300'),
       fontSize: 13,
-      fontWeight: 300,
       color: colors.stone,
-      lineHeight: 1.7,
+      lineHeight: 22,
       marginBottom: 26,
+      textAlign: 'center',
     }}>
       As you log sessions, they'll appear here as private journal entries — yours to read, remember, and return to.
-    </div>
+    </Text>
 
-    <div style={{
-      fontFamily: webFonts.playfair,
+    <Text style={{
+      fontFamily: fontFamily.playfair,
       fontSize: 14,
       fontStyle: 'italic',
       color: colors.mauve,
       marginBottom: 28,
-      lineHeight: 1.6,
+      lineHeight: 22,
+      textAlign: 'center',
     }}>
       "Feel seen, validated, and completely empowered."
-    </div>
+    </Text>
 
     <GradientButton
       label="Log your first session"
@@ -651,7 +633,7 @@ const EmptyState: React.FC = () => (
       letterSpacing={1.5}
       icon={<PlusIcon />}
     />
-  </div>
+  </View>
 )
 
 /* ── Main Screen ── */
@@ -662,128 +644,133 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({
   entryCount = 8,
   calendarDays = [],
   showCalendar: showCalendarProp,
+  onEntryPress,
 }) => {
   const [calendarOpen, setCalendarOpen] = useState(showCalendarProp ?? false)
   const isEmpty = entries.length === 0
 
   return (
-    <div style={{
+    <View style={{
       width: '100%',
-      minHeight: '100vh',
+      flex: 1,
       position: 'relative',
       overflow: 'hidden',
-      display: 'flex',
       flexDirection: 'column',
-      fontFamily: webFonts.dmSans,
+      fontFamily: fontFamily.dmSans,
       color: colors.ink,
-    }}>
+    } as any}>
       <DecorativeGlow position="top-right" size={200} opacity={0.08} />
-      <div style={{ height: 54 }} />
+      <View style={{ height: 54 }} />
 
       {/* Screen header */}
-      <div style={{
-        padding: '4px 24px 0',
-        display: 'flex',
+      <View style={{
+        paddingTop: 4,
+        paddingHorizontal: 24,
+        flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         flexShrink: 0,
         position: 'relative',
         zIndex: 2,
       }}>
-        <div style={{
-          fontFamily: webFonts.playfair,
+        <Text style={{
+          fontFamily: font('playfair', '700'),
           fontSize: 28,
-          fontWeight: 700,
           color: colors.ink,
         }}>
           Sessions Journal
-        </div>
-      </div>
+        </Text>
+      </View>
 
       {/* Sticky month bar */}
-      <div style={{
+      <View style={{
         flexShrink: 0,
-        padding: '10px 24px 0',
+        paddingTop: 10,
+        paddingHorizontal: 24,
         position: 'relative',
         zIndex: 50,
       }}>
         {isEmpty ? (
           /* Ghost pill for empty state */
-          <div style={{
-            display: 'inline-flex',
+          <View style={{
+            flexDirection: 'row',
+            alignSelf: 'flex-start',
             alignItems: 'center',
             gap: 7,
-            background: colors.surface2,
+            backgroundColor: colors.surface2,
             borderRadius: 9999,
-            padding: '7px 12px 7px 16px',
+            paddingVertical: 7,
+            paddingLeft: 16,
+            paddingRight: 12,
           }}>
-            <span style={{
-              fontFamily: webFonts.playfair,
+            <Text style={{
+              fontFamily: font('playfair', '600'),
               fontSize: 14,
-              fontWeight: 600,
               color: '#C4B0A0',
               letterSpacing: 0.3,
             }}>
               No entries yet
-            </span>
+            </Text>
             <ChevronDown color="#C4B0A0" size={13} />
-          </div>
+          </View>
         ) : (
-          <button
-            onClick={() => setCalendarOpen(!calendarOpen)}
+          <Pressable
+            onPress={() => setCalendarOpen(!calendarOpen)}
             style={{
-              display: 'inline-flex',
+              flexDirection: 'row',
+              alignSelf: 'flex-start',
               alignItems: 'center',
               gap: 7,
-              background: 'linear-gradient(135deg, #C07858, #7C4A5A)',
-              border: 'none',
+              ...gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)'),
               borderRadius: 9999,
-              padding: '7px 12px 7px 16px',
-              cursor: 'pointer',
+              paddingVertical: 7,
+              paddingLeft: 16,
+              paddingRight: 12,
               boxShadow: '0 3px 12px rgba(124,74,90,0.3)',
-            }}
+            } as any}
           >
-            <span style={{
-              fontFamily: webFonts.playfair,
+            <Text style={{
+              fontFamily: font('playfair', '600'),
               fontSize: 15,
-              fontWeight: 600,
               color: 'white',
               letterSpacing: 0.3,
             }}>
               {currentMonth}
-            </span>
-            <span style={{
-              background: 'rgba(255,255,255,0.2)',
+            </Text>
+            <Text style={{
+              backgroundColor: 'rgba(255,255,255,0.2)',
               borderRadius: 9999,
-              padding: '1px 7px',
+              paddingVertical: 1,
+              paddingHorizontal: 7,
               fontSize: 9,
-              fontWeight: 500,
+              fontWeight: '500',
               color: 'rgba(255,255,255,0.85)',
               letterSpacing: 0.5,
+              overflow: 'hidden',
             }}>
               {entryCount}
-            </span>
+            </Text>
             {calendarOpen ? <ChevronUp /> : <ChevronDown />}
-          </button>
+          </Pressable>
         )}
 
         {/* Calendar dropdown */}
         {calendarOpen && calendarDays.length > 0 && (
           <CalendarDropdown monthLabel={currentMonth} days={calendarDays} />
         )}
-      </div>
+      </View>
 
       {/* Dim overlay */}
       {calendarOpen && (
-        <div
-          onClick={() => setCalendarOpen(false)}
+        <Pressable
+          onPress={() => setCalendarOpen(false)}
           style={{
             position: 'absolute',
             top: 0,
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'rgba(30,18,12,0.22)',
+            backgroundColor: 'rgba(30,18,12,0.22)',
             zIndex: 40,
           }}
         />
@@ -793,25 +780,19 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({
       {isEmpty ? (
         <EmptyState />
       ) : (
-        <div style={{
+        <ScrollView style={{
           flex: 1,
-          overflowY: 'auto',
-          overflowX: 'hidden',
-          padding: '12px 20px 0',
-          scrollbarWidth: 'none',
+          paddingTop: 12,
+          paddingHorizontal: 20,
         }}>
           {entries.map((entry, idx) => (
             <React.Fragment key={entry.id}>
               {entry.monthSeparator && <MonthSeparator label={entry.monthSeparator} />}
-              <EntryCard entry={entry} />
+              <EntryCard entry={entry} onPress={() => onEntryPress?.(entry.id)} />
             </React.Fragment>
           ))}
-          {/* Nav spacer */}
-          <div style={{ height: 72 }} />
-        </div>
+        </ScrollView>
       )}
-
-      <BottomNav activeTab="journal" />
-    </div>
+    </View>
   )
 }

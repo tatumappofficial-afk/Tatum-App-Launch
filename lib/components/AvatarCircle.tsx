@@ -1,5 +1,6 @@
 import React from 'react'
-import { colors, webFonts } from '../theme'
+import { Text, View } from 'react-native'
+import { colors, font, fontFamily, gradientStyle } from '../theme'
 
 export interface AvatarCircleProps {
   initials: string
@@ -19,23 +20,25 @@ export const AvatarCircle: React.FC<AvatarCircleProps> = ({
   const fontSize = Math.round(size * 0.35)
 
   return (
-    <div style={{
+    <View style={{
       width: size,
       height: size,
-      borderRadius: '50%',
-      background: gradient,
-      display: 'flex',
+      borderRadius: size / 2,
+      ...gradientStyle(gradient),
       alignItems: 'center',
       justifyContent: 'center',
-      fontFamily: webFonts.playfair,
-      fontSize,
-      fontWeight: 700,
-      color: colors.white,
-      border: `${borderWidth}px solid ${colors.white}`,
-      boxShadow: showShadow ? '0 3px 12px rgba(61,43,37,0.15)' : 'none',
+      borderWidth,
+      borderColor: colors.white,
+      boxShadow: showShadow ? '0 3px 12px rgba(61,43,37,0.15)' : undefined,
       flexShrink: 0,
     }}>
-      {initials}
-    </div>
+      <Text style={{
+        fontFamily: font('playfair', '700'),
+        fontSize,
+        color: colors.white,
+      }}>
+        {initials}
+      </Text>
+    </View>
   )
 }

@@ -1,5 +1,6 @@
 // Design tokens extracted from design-system skill
 // Every component references tokens only — no raw hex values.
+import { Platform, type TextStyle, type ViewStyle } from 'react-native'
 
 export const colors = {
   warmSand: '#F5EFE8',
@@ -24,94 +25,142 @@ export const gradients = {
   negative: ['#B07080', '#7C4A5A'] as const,
 } as const
 
+// ── Font helpers ──
+// On web (Storybook), CSS font-family names work via Google Fonts @import.
+// On native, each weight is a separate registered font name.
+
+const isWeb = Platform.OS === 'web'
+
+// Individual font names — use these when you need a specific weight on native.
+// On web, fontFamily + fontWeight CSS works naturally.
 export const fonts = {
   playfair: {
-    regular: 'PlayfairDisplay_400Regular',
-    italic: 'PlayfairDisplay_400Regular_Italic',
-    semiBold: 'PlayfairDisplay_600SemiBold',
-    bold: 'PlayfairDisplay_700Bold',
+    regular: isWeb ? "'Playfair Display', serif" : 'PlayfairDisplay_400Regular',
+    italic: isWeb ? "'Playfair Display', serif" : 'PlayfairDisplay_400Regular_Italic',
+    semiBold: isWeb ? "'Playfair Display', serif" : 'PlayfairDisplay_600SemiBold',
+    bold: isWeb ? "'Playfair Display', serif" : 'PlayfairDisplay_700Bold',
   },
   dmSans: {
-    light: 'DMSans_300Light',
-    regular: 'DMSans_400Regular',
-    medium: 'DMSans_500Medium',
+    light: isWeb ? "'DM Sans', sans-serif" : 'DMSans_300Light',
+    regular: isWeb ? "'DM Sans', sans-serif" : 'DMSans_400Regular',
+    medium: isWeb ? "'DM Sans', sans-serif" : 'DMSans_500Medium',
   },
 } as const
 
-// Web font families for Storybook (CSS)
-export const webFonts = {
-  playfair: "'Playfair Display', serif",
-  dmSans: "'DM Sans', sans-serif",
+// Shorthand — maps to the regular weight for backward compat.
+// Components that use fontFamily.xxx + fontWeight should call font() instead.
+export const fontFamily = {
+  playfair: fonts.playfair.regular,
+  dmSans: fonts.dmSans.regular,
 } as const
 
+// Kept for backward compat — same as fontFamily
+export const webFonts = fontFamily
+
+// ── Font resolver ──
+// Returns the correct fontFamily string for a given family + weight.
+// On web, fontWeight CSS handles this. On native, each weight is a different font.
+type PlayfairWeight = '400' | '600' | '700'
+type DmSansWeight = '300' | '400' | '500'
+
+const playfairMap: Record<string, string> = {
+  '400': fonts.playfair.regular,
+  '600': fonts.playfair.semiBold,
+  '700': fonts.playfair.bold,
+}
+const dmSansMap: Record<string, string> = {
+  '300': fonts.dmSans.light,
+  '400': fonts.dmSans.regular,
+  '500': fonts.dmSans.medium,
+}
+
+export function font(family: 'playfair' | 'dmSans', weight: string = '400'): string {
+  if (isWeb) {
+    return family === 'playfair' ? "'Playfair Display', serif" : "'DM Sans', sans-serif"
+  }
+  const map = family === 'playfair' ? playfairMap : dmSansMap
+  return map[weight] || (family === 'playfair' ? fonts.playfair.regular : fonts.dmSans.regular)
+}
+
+// ── Gradient helper ──
+// On native (New Arch): uses experimental_backgroundImage
+// On web: uses CSS background property
+export function gradientStyle(gradient: string): ViewStyle {
+  if (isWeb) {
+    return { background: gradient } as unknown as ViewStyle
+  }
+  return { experimental_backgroundImage: gradient } as ViewStyle
+}
+
+// ── Typography presets ──
 export const typography = {
   screenTitle: {
-    fontFamily: webFonts.playfair,
-    fontWeight: 700,
+    fontFamily: fonts.playfair.bold,
+    fontWeight: '700' as const,
     fontSize: 28,
     color: colors.ink,
-  },
+  } satisfies TextStyle,
   sectionLabel: {
-    fontFamily: webFonts.dmSans,
-    fontWeight: 500,
+    fontFamily: fonts.dmSans.medium,
+    fontWeight: '500' as const,
     fontSize: 9,
     textTransform: 'uppercase' as const,
     letterSpacing: 3,
     color: colors.stone,
-  },
+  } satisfies TextStyle,
   sectionLabelTerra: {
-    fontFamily: webFonts.dmSans,
-    fontWeight: 500,
+    fontFamily: fonts.dmSans.medium,
+    fontWeight: '500' as const,
     fontSize: 9,
     textTransform: 'uppercase' as const,
     letterSpacing: 4,
     color: colors.terra,
-  },
+  } satisfies TextStyle,
   cardTitle: {
-    fontFamily: webFonts.playfair,
-    fontWeight: 600,
+    fontFamily: fonts.playfair.semiBold,
+    fontWeight: '600' as const,
     fontSize: 18,
     color: colors.ink,
-  },
+  } satisfies TextStyle,
   statNumber: {
-    fontFamily: webFonts.playfair,
-    fontWeight: 600,
+    fontFamily: fonts.playfair.semiBold,
+    fontWeight: '600' as const,
     fontSize: 36,
     color: colors.terra,
-  },
+  } satisfies TextStyle,
   body: {
-    fontFamily: webFonts.dmSans,
-    fontWeight: 300,
+    fontFamily: fonts.dmSans.light,
+    fontWeight: '300' as const,
     fontSize: 12,
     color: colors.ink,
-  },
+  } satisfies TextStyle,
   bodyRegular: {
-    fontFamily: webFonts.dmSans,
-    fontWeight: 400,
+    fontFamily: fonts.dmSans.regular,
+    fontWeight: '400' as const,
     fontSize: 12,
     color: colors.ink,
-  },
+  } satisfies TextStyle,
   hint: {
-    fontFamily: webFonts.dmSans,
-    fontWeight: 300,
+    fontFamily: fonts.dmSans.light,
+    fontWeight: '300' as const,
     fontSize: 10,
     fontStyle: 'italic' as const,
     color: colors.muted,
-  },
+  } satisfies TextStyle,
   tagLabel: {
-    fontFamily: webFonts.dmSans,
-    fontWeight: 500,
+    fontFamily: fonts.dmSans.medium,
+    fontWeight: '500' as const,
     fontSize: 9,
     textTransform: 'uppercase' as const,
     letterSpacing: 1.5,
-  },
+  } satisfies TextStyle,
   navLabel: {
-    fontFamily: webFonts.dmSans,
-    fontWeight: 500,
+    fontFamily: fonts.dmSans.medium,
+    fontWeight: '500' as const,
     fontSize: 8.5,
     textTransform: 'uppercase' as const,
     letterSpacing: 1.5,
-  },
+  } satisfies TextStyle,
 } as const
 
 export const spacing = {

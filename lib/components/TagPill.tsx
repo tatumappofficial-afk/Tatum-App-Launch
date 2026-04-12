@@ -1,5 +1,6 @@
 import React from 'react'
-import { colors, webFonts } from '../theme'
+import { Pressable, Text, View } from 'react-native'
+import { colors, font, fontFamily } from '../theme'
 
 export interface TagPillProps {
   emoji: string
@@ -20,28 +21,28 @@ export const TagPill: React.FC<TagPillProps> = ({
   const isActive = isSelectable && selected
 
   return (
-    <div
-      onClick={onPress}
+    <Pressable
+      onPress={onPress}
+      disabled={!isSelectable}
       style={{
-        display: 'flex',
+        flexDirection: 'row',
         alignItems: 'center',
         gap: 5,
-        background: isActive ? 'rgba(192,120,88,0.12)' : colors.surface,
-        border: isActive
-          ? `1.5px solid ${colors.terra}`
-          : '1px solid rgba(160,100,80,0.18)',
+        backgroundColor: isActive ? 'rgba(192,120,88,0.12)' : colors.surface,
+        borderWidth: isActive ? 1.5 : 1,
+        borderColor: isActive ? colors.terra : 'rgba(160,100,80,0.18)',
         borderRadius: 9999,
-        padding: '6px 12px 6px 9px',
-        cursor: isSelectable ? 'pointer' : 'default',
+        paddingVertical: 6,
+        paddingLeft: 9,
+        paddingRight: 12,
       }}
     >
-      <span style={{ fontSize: 16, lineHeight: 1 }}>{emoji}</span>
-      <span style={{
-        fontFamily: webFonts.dmSans,
+      <Text style={{ fontSize: 16, lineHeight: 18 }}>{emoji}</Text>
+      <Text style={{
+        fontFamily: font('dmSans', isActive ? '500' : '400'),
         fontSize: 12,
-        fontWeight: isActive ? 500 : 400,
         color: isActive ? colors.terra : '#6A4A40',
-      }}>{label}</span>
-    </div>
+      }}>{label}</Text>
+    </Pressable>
   )
 }

@@ -1,0 +1,13 @@
+appId: host.exp.exponent
+---
+- runFlow: seed-data.yaml
+- tapOn: "PROFILE"
+- waitForAnimationToEnd
+# Tap Partners section
+- tapOn:
+    label: "View Partners"
+- waitForAnimationToEnd
+# Tap on Alex partner
+- tapOn: "Alex"
+- waitForAnimationToEnd
+- assertVisible: "Alex"

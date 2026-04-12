@@ -1,5 +1,7 @@
 import React from 'react'
-import { colors, webFonts } from '../theme'
+import { View, Text, Pressable, ScrollView } from 'react-native'
+import Svg, { Path, Polyline } from 'react-native-svg'
+import { colors, font, fontFamily } from '../theme'
 import { SectionLabel } from './shared/SectionLabel'
 import { AvatarCircle } from '../components/AvatarCircle'
 import { StatStrip } from '../components/StatStrip'
@@ -39,265 +41,146 @@ export interface SessionDetailModalProps {
   onDelete?: () => void
 }
 
-/* ── Helpers ── */
-
-const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
-]
-const DAY_LABELS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
-
-function getDaysInMonth(month: number, year: number): number {
-  return new Date(year, month, 0).getDate()
-}
-function getFirstDayOfWeek(month: number, year: number): number {
-  return new Date(year, month - 1, 1).getDay()
-}
-
-/* ── Blurred Calendar Background ── */
-
-const BlurredCalendarBackground: React.FC<{
-  month: number; year: number; today?: number; selectedDay: number; loggedDays: LoggedDay[]
-}> = ({ month, year, today, selectedDay, loggedDays }) => {
-  const daysInMonth = getDaysInMonth(month, year)
-  const firstDow = getFirstDayOfWeek(month, year)
-  const logMap = new Map<number, LoggedDay>()
-  loggedDays.forEach((ld) => logMap.set(ld.day, ld))
-
-  const cells: React.ReactNode[] = []
-  for (let i = 0; i < firstDow; i++) {
-    cells.push(<div key={`e-${i}`} style={{ aspectRatio: '1' }} />)
-  }
-  for (let d = 1; d <= daysInMonth; d++) {
-    const logged = logMap.get(d)
-    const isToday = d === today
-    const isSelected = d === selectedDay
-    let bgStyle: React.CSSProperties = {}
-    if (isToday) bgStyle = { background: 'linear-gradient(135deg, #C07858, #7C4A5A)' }
-    else if (isSelected) bgStyle = { background: 'rgba(192,120,88,0.12)', outline: `2px solid ${colors.terra}`, outlineOffset: -1 }
-
-    cells.push(
-      <div key={d} style={{
-        aspectRatio: '1', borderRadius: '50%', display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center', ...bgStyle,
-      }}>
-        <span style={{
-          fontFamily: webFonts.dmSans, fontSize: 11, lineHeight: 1,
-          color: isToday ? colors.white : (isSelected || !!logged) ? colors.terra : colors.ink,
-          fontWeight: isToday ? 700 : isSelected ? 600 : logged ? 500 : 400,
-        }}>{d}</span>
-        {logged && !isToday && (
-          <div style={{ display: 'flex', alignItems: 'center', marginTop: 1 }}>
-            <span style={{ fontSize: 7 }}>{logged.emoji}</span>
-            {logged.hasMultiple && <span style={{ fontSize: 6, fontWeight: 600, color: '#B07080', marginLeft: 1 }}>+</span>}
-          </div>
-        )}
-      </div>
-    )
-  }
-
-  return (
-    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: colors.warmSand, zIndex: 0 }}>
-      <div style={{ padding: '50px 20px 0', filter: 'blur(1.5px)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 4px 10px' }}>
-          <div style={{ fontFamily: webFonts.playfair, fontSize: 20, fontWeight: 700, color: colors.ink }}>
-            {MONTH_NAMES[month - 1]} {year}
-          </div>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', marginBottom: 2 }}>
-          {DAY_LABELS.map((lbl) => (
-            <div key={lbl} style={{
-              textAlign: 'center', fontFamily: webFonts.dmSans, fontSize: 8, fontWeight: 500,
-              textTransform: 'uppercase', color: colors.stone, padding: '3px 0',
-            }}>{lbl}</div>
-          ))}
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1 }}>{cells}</div>
-      </div>
-    </div>
-  )
-}
-
 /* ── Main Component ── */
 
 export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
-  month, year, today, loggedDays = [], selectedDay,
   backLabel, partnerName, partnerInitials, partnerGradient,
   dateLabel, rating, dayOfWeek, tags, noteText,
   onBack, onEdit, onEditNote, onDelete,
 }) => (
-  <div style={{
-    width: '100%', height: '100vh', position: 'relative', overflow: 'hidden',
-    fontFamily: webFonts.dmSans, color: colors.ink,
-  }}>
-    <BlurredCalendarBackground
-      month={month} year={year} today={today}
-      selectedDay={selectedDay} loggedDays={loggedDays}
-    />
-    <div style={{ height: 54 }} />
-
-    {/* Heavier dim overlay */}
-    <div style={{
-      position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-      background: 'rgba(30,18,12,0.5)', zIndex: 10,
-    }} />
-
-    {/* Bottom sheet */}
-    <div style={{
-      position: 'absolute', bottom: 0, left: 0, right: 0, height: 440,
-      background: colors.warmSand, borderRadius: '28px 28px 0 0',
-      zIndex: 20, display: 'flex', flexDirection: 'column',
-      boxShadow: '0 -8px 40px rgba(61,43,37,0.22)',
+  <View style={{ flex: 1, backgroundColor: colors.warmSand }}>
+    {/* Header: back pill + edit */}
+    <View style={{
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+      paddingTop: 10, paddingHorizontal: 20, flexShrink: 0,
     }}>
-      {/* Handle */}
-      <div style={{
-        width: 36, height: 4, background: 'rgba(160,100,80,0.25)',
-        borderRadius: 2, margin: '12px auto 0', flexShrink: 0,
-      }} />
+      <Pressable
+        onPress={onBack}
+        style={{
+          flexDirection: 'row', alignItems: 'center', gap: 5,
+          backgroundColor: colors.surface2, borderRadius: 9999,
+          paddingVertical: 6, paddingLeft: 8, paddingRight: 12,
+        }}
+      >
+        <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.stone} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+          <Polyline points="15 18 9 12 15 6" />
+        </Svg>
+        <Text style={{
+          fontFamily: fontFamily.dmSans, fontSize: 12, fontWeight: '400', color: colors.stone,
+        }}>{backLabel}</Text>
+      </Pressable>
+      <Pressable
+        onPress={onEdit}
+        style={{
+          backgroundColor: 'transparent', borderWidth: 1, borderColor: 'rgba(160,100,80,0.3)',
+          borderRadius: 9999, paddingVertical: 5, paddingHorizontal: 14,
+        }}
+      >
+        <Text style={{
+          fontFamily: font('dmSans', '500'), fontSize: 11, color: colors.terra,
+          letterSpacing: 0.5,
+        }}>Edit</Text>
+      </Pressable>
+    </View>
 
-      {/* Header: back pill + edit */}
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '10px 20px 0', flexShrink: 0,
+    {/* Scrollable content */}
+    <ScrollView style={{ flex: 1 }}>
+      {/* Hero */}
+      <View style={{
+        flexDirection: 'column', alignItems: 'center',
+        paddingTop: 16, paddingHorizontal: 24,
       }}>
-        <button
-          onClick={onBack}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 5,
-            background: colors.surface2, border: 'none', borderRadius: 9999,
-            padding: '6px 12px 6px 8px', cursor: 'pointer',
-            fontFamily: webFonts.dmSans, fontSize: 12, fontWeight: 400, color: colors.stone,
-          }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={colors.stone} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-          {backLabel}
-        </button>
-        <button
-          onClick={onEdit}
-          style={{
-            background: 'none', border: '1px solid rgba(160,100,80,0.3)',
-            borderRadius: 9999, padding: '5px 14px',
-            fontFamily: webFonts.dmSans, fontSize: 11, fontWeight: 500, color: colors.terra,
-            letterSpacing: 0.5, cursor: 'pointer',
-          }}
-        >Edit</button>
-      </div>
+        <View style={{ marginBottom: 10 }}>
+          <AvatarCircle
+            initials={partnerInitials}
+            gradient={partnerGradient}
+            size={68}
+            borderWidth={3}
+          />
+        </View>
+        <Text style={{
+          fontFamily: font('playfair', '700'), fontSize: 22,
+          color: colors.ink, marginBottom: 3,
+        }}>{partnerName}</Text>
+        <Text style={{
+          fontFamily: font('dmSans', '300'), fontSize: 11, color: colors.stone,
+        }}>{dateLabel}</Text>
+      </View>
 
-      {/* Scrollable content */}
-      <div style={{
-        flex: 1, overflowY: 'auto', scrollbarWidth: 'none',
+      {/* Stat strip */}
+      <View style={{ marginTop: 14, marginHorizontal: 20 }}>
+        <StatStrip stats={[
+          { value: rating, unit: ' /10', label: 'Rating' },
+          { value: dayOfWeek, label: 'Day' },
+        ]} />
+      </View>
+
+      {/* What Happened */}
+      <SectionLabel label="What Happened" />
+      <View style={{
+        flexDirection: 'row', gap: 7, flexWrap: 'wrap', marginHorizontal: 20,
       }}>
-        {/* Hero */}
-        <div style={{
-          display: 'flex', flexDirection: 'column', alignItems: 'center',
-          padding: '16px 24px 0',
-        }}>
-          <div style={{ marginBottom: 10 }}>
-            <AvatarCircle
-              initials={partnerInitials}
-              gradient={partnerGradient}
-              size={68}
-              borderWidth={3}
-            />
-          </div>
-          <div style={{
-            fontFamily: webFonts.playfair, fontSize: 22, fontWeight: 700,
-            color: colors.ink, marginBottom: 3,
-          }}>{partnerName}</div>
-          <div style={{
-            fontFamily: webFonts.dmSans, fontSize: 11, fontWeight: 300, color: colors.stone,
-          }}>{dateLabel}</div>
-        </div>
+        {tags.map((tag, i) => (
+          <TagPill key={i} emoji={tag.emoji} label={tag.label} variant="display" />
+        ))}
+      </View>
 
-        {/* Stat strip */}
-        <div style={{ margin: '14px 20px 0' }}>
-          <StatStrip stats={[
-            { value: rating, unit: ' /10', label: 'Rating' },
-            { value: dayOfWeek, label: 'Day' },
-          ]} />
-        </div>
-
-        {/* What Happened */}
-        <SectionLabel label="What Happened" />
-        <div style={{
-          display: 'flex', gap: 7, flexWrap: 'wrap', margin: '0 20px',
-        }}>
-          {tags.map((tag, i) => (
-            <TagPill key={i} emoji={tag.emoji} label={tag.label} variant="display" />
-          ))}
-        </div>
-
-        {/* Notes */}
-        {noteText && (
-          <>
-            <SectionLabel label="Notes" />
-            <div style={{
-              margin: '0 20px 14px', borderRadius: 16, overflow: 'hidden',
-              border: '1px solid rgba(160,100,80,0.14)', position: 'relative',
-              boxShadow: '3px 4px 0 0 #EDE3D8',
+      {/* Notes */}
+      {noteText && (
+        <>
+          <SectionLabel label="Notes" />
+          <View style={{
+            marginHorizontal: 20, marginBottom: 14, borderRadius: 16, overflow: 'hidden',
+            borderWidth: 1, borderColor: 'rgba(160,100,80,0.14)', position: 'relative',
+            boxShadow: '3px 4px 0 0 #EDE3D8',
+          }}>
+            <View style={{
+              position: 'relative', backgroundColor: colors.surface,
+              borderRadius: 16, overflow: 'hidden',
             }}>
-              <div style={{
-                position: 'relative', background: colors.surface,
-                borderRadius: 16, overflow: 'hidden',
+              {/* Note text */}
+              <Text style={{
+                position: 'relative', zIndex: 1,
+                fontFamily: fontFamily.playfair, fontSize: 13, fontWeight: '400',
+                fontStyle: 'italic', color: '#5A3E36',
+                lineHeight: 27, paddingVertical: 12, paddingHorizontal: 16,
+              }}>{noteText}</Text>
+              {/* Edit note row */}
+              <View style={{
+                position: 'relative', zIndex: 1,
+                flexDirection: 'row', alignItems: 'center', gap: 6,
+                paddingTop: 6, paddingHorizontal: 14, paddingBottom: 10,
+                borderTopWidth: 1, borderTopColor: 'rgba(160,100,80,0.1)',
               }}>
-                {/* Ruled lines */}
-                <div style={{
-                  position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                  backgroundImage: 'repeating-linear-gradient(to bottom, transparent, transparent 27px, rgba(160,100,80,0.08) 27px, rgba(160,100,80,0.08) 28px)',
-                  backgroundPosition: '0 14px', pointerEvents: 'none',
-                }} />
-                {/* Margin line */}
-                <div style={{
-                  position: 'absolute', top: 0, bottom: 0, left: 46,
-                  width: 1, background: 'rgba(192,120,88,0.12)',
-                }} />
-                {/* Note text */}
-                <div style={{
-                  position: 'relative', zIndex: 1,
-                  fontFamily: webFonts.playfair, fontSize: 13, fontWeight: 400,
-                  fontStyle: 'italic', color: '#5A3E36',
-                  lineHeight: '27px', padding: '12px 16px',
-                }}>{noteText}</div>
-                {/* Edit note row */}
-                <div style={{
-                  position: 'relative', zIndex: 1,
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  padding: '6px 14px 10px',
-                  borderTop: '1px solid rgba(160,100,80,0.1)',
-                }}>
-                  <button
-                    onClick={onEditNote}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 5,
-                      background: 'none', border: 'none', cursor: 'pointer',
-                      fontFamily: webFonts.dmSans, fontSize: 11, color: colors.terra, padding: 0,
-                    }}
-                  >
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
-                    </svg>
-                    Edit note
-                  </button>
-                </div>
-              </div>
-            </div>
-          </>
-        )}
+                <Pressable
+                  onPress={onEditNote}
+                  style={{
+                    flexDirection: 'row', alignItems: 'center', gap: 5,
+                    padding: 0,
+                  }}
+                >
+                  <Svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                    <Path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+                  </Svg>
+                  <Text style={{
+                    fontFamily: fontFamily.dmSans, fontSize: 11, color: colors.terra,
+                  }}>Edit note</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        </>
+      )}
 
-        {/* Delete */}
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '4px 0 24px' }}>
-          <button
-            onClick={onDelete}
-            style={{
-              background: 'none', border: 'none', cursor: 'pointer',
-              fontFamily: webFonts.dmSans, fontSize: 11, fontWeight: 300,
-              color: '#C4B0A0', letterSpacing: 0.5,
-            }}
-          >Delete this session</button>
-        </div>
-      </div>
-    </div>
-  </div>
+      {/* Delete */}
+      <View style={{ alignItems: 'center', paddingTop: 4, paddingBottom: 24 }}>
+        <Pressable onPress={onDelete}>
+          <Text style={{
+            fontFamily: font('dmSans', '300'), fontSize: 11,
+            color: '#C4B0A0', letterSpacing: 0.5,
+          }}>Delete this session</Text>
+        </Pressable>
+      </View>
+    </ScrollView>
+  </View>
 )

@@ -1,38 +1,29 @@
 import React from 'react'
-import { colors, webFonts } from '../theme'
-import { BottomNav } from './shared/BottomNav'
+import { Pressable, ScrollView, Text, View } from 'react-native'
+import Svg, { Circle, Line, Path, Polyline, Rect } from 'react-native-svg'
+import { colors, font, fontFamily, gradientStyle } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { AvatarCircle } from '../components/AvatarCircle'
 import { StarRating } from '../components/StarRating'
+
 // ── Inline section label (no horizontal margin — parent provides padding) ──
 
 const InlineSectionLabel: React.FC<{ label: string; showChevron?: boolean }> = ({ label, showChevron = false }) => (
-  <div style={{
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-    flexShrink: 0,
-  }}>
-    <span style={{
-      fontFamily: webFonts.dmSans,
+  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+    <Text style={{
+      fontFamily: font('dmSans', '500'),
       fontSize: 8.5,
-      fontWeight: 500,
       letterSpacing: 3.5,
       textTransform: 'uppercase',
       color: colors.terra,
-      whiteSpace: 'nowrap',
-    }}>{label}</span>
-    <div style={{
-      flex: 1,
-      height: 1,
-      backgroundColor: 'rgba(160,100,80,0.18)',
-    }} />
+    }}>{label}</Text>
+    <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(160,100,80,0.18)' }} />
     {showChevron && (
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="9 18 15 12 9 6" />
-      </svg>
+      <Svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+        <Polyline points="9 18 15 12 9 6" />
+      </Svg>
     )}
-  </div>
+  </View>
 )
 
 // ── Types ──
@@ -41,7 +32,6 @@ export interface Activity {
   emoji: string
   label: string
   count: number
-  /** 0–100 bar fill percentage */
   percent: number
 }
 
@@ -57,8 +47,7 @@ export interface Session {
   partnerInitials: string
   partnerGradient: string
   date: string
-  /** 0–100 star fill percentage */
-  ratingPercent: number
+  rating: number
   activityEmojis: string[]
   note: string
 }
@@ -70,9 +59,7 @@ export interface EmptyPartner {
 }
 
 export interface HomeScreenProps {
-  /** Active period tab index (0=Week, 1=Month, 2=Year, 3=All Time) */
   activePeriod?: number
-  /** Date range label shown on the active tab, e.g. "Mar 12-18" */
   periodDateLabel?: string
   sessionsCount?: number
   avgSatisfaction?: number
@@ -80,32 +67,34 @@ export interface HomeScreenProps {
   topActivities?: Activity[]
   partners?: Partner[]
   recentSessions?: Session[]
-  /** Empty state fields */
   isEmpty?: boolean
   userName?: string
   emptyPartners?: EmptyPartner[]
+  onPartnerPress?: (index: number) => void
+  onSessionPress?: (index: number) => void
+  onLogFirstSession?: () => void
 }
 
 // ── Sub-components ──
 
 const Wordmark: React.FC = () => (
-  <div style={{
-    padding: '8px 24px 0',
-    display: 'flex',
+  <View style={{
+    paddingHorizontal: 24,
+    paddingTop: 8,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     flexShrink: 0,
     position: 'relative',
     zIndex: 2,
   }}>
-    <div style={{
-      fontFamily: webFonts.playfair,
+    <Text style={{
+      fontFamily: 'PlayfairDisplay_700Bold',
       fontSize: 22,
-      fontWeight: 700,
       letterSpacing: 6,
       color: colors.terra,
-    }}>TATUM</div>
-  </div>
+    }}>TATUM</Text>
+  </View>
 )
 
 interface PeriodTabsProps {
@@ -117,9 +106,10 @@ interface PeriodTabsProps {
 const periodNames = ['Week', 'Month', 'Year', 'All Time']
 
 const PeriodTabs: React.FC<PeriodTabsProps> = ({ activeIndex, dateLabel, isEmpty }) => (
-  <div style={{
-    padding: '10px 24px 0',
-    display: 'flex',
+  <View style={{
+    paddingHorizontal: 24,
+    paddingTop: 10,
+    flexDirection: 'row',
     gap: 6,
     flexShrink: 0,
     position: 'relative',
@@ -128,41 +118,37 @@ const PeriodTabs: React.FC<PeriodTabsProps> = ({ activeIndex, dateLabel, isEmpty
     {periodNames.map((name, i) => {
       const isActive = !isEmpty && activeIndex === i
       return (
-        <button key={name} style={{
+        <Pressable key={name} style={{
           flex: 1,
           borderRadius: 9999,
-          display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          background: isActive
-            ? 'linear-gradient(135deg, #C07858, #7C4A5A)'
-            : colors.surface2,
-          color: isActive ? colors.white : colors.stone,
-          border: 'none',
-          cursor: 'pointer',
-          padding: '5px 0',
-          boxShadow: isActive ? '0 3px 10px rgba(124,74,90,0.25)' : 'none',
-          fontFamily: webFonts.dmSans,
+          ...(isActive
+            ? gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)')
+            : { backgroundColor: colors.surface2 }),
+          paddingVertical: 5,
+          boxShadow: isActive ? '0 3px 10px rgba(124,74,90,0.25)' : undefined,
         }}>
-          <span style={{
+          <Text style={{
+            fontFamily: font('dmSans', '500'),
             fontSize: 11,
-            fontWeight: 500,
             letterSpacing: 0.5,
-            lineHeight: 1.2,
-          }}>{name}</span>
+            lineHeight: 13.2,
+            color: isActive ? colors.white : colors.stone,
+          }}>{name}</Text>
           {isActive && dateLabel && (
-            <span style={{
+            <Text style={{
+              fontFamily: font('dmSans', '300'),
               fontSize: 8,
-              fontWeight: 300,
               opacity: 0.8,
-              lineHeight: 1.2,
-            }}>{dateLabel}</span>
+              lineHeight: 9.6,
+              color: colors.white,
+            }}>{dateLabel}</Text>
           )}
-        </button>
+        </Pressable>
       )
     })}
-  </div>
+  </View>
 )
 
 const OverviewCard: React.FC<{
@@ -176,110 +162,109 @@ const OverviewCard: React.FC<{
     { label: 'Avg Rating', value: avgRating.toFixed(1) },
   ]
   return (
-    <div style={{
-      background: colors.surface,
-      border: `1px solid ${colors.border}`,
+    <View style={{
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
       borderRadius: 16,
-      padding: '14px 16px',
-      display: 'grid',
-      gridTemplateColumns: 'repeat(3, 1fr)',
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      flexDirection: 'row',
       flexShrink: 0,
     }}>
       {stats.map((s, i) => (
-        <div key={s.label} style={{
-          display: 'flex',
-          flexDirection: 'column',
-          padding: '0 10px',
-          borderRight: i < 2 ? '1px solid rgba(160,100,80,0.12)' : 'none',
+        <View key={s.label} style={{
+          flex: 1,
+          paddingHorizontal: 10,
+          borderRightWidth: i < 2 ? 1 : 0,
+          borderRightColor: 'rgba(160,100,80,0.12)',
           ...(i === 0 ? { paddingLeft: 0 } : {}),
         }}>
-          <div style={{
+          <Text style={{
             fontSize: 7.5,
-            fontWeight: 500,
             letterSpacing: 1.5,
             textTransform: 'uppercase',
             color: colors.stone,
             marginBottom: 3,
-            fontFamily: webFonts.dmSans,
-          }}>{s.label}</div>
-          <div style={{
-            fontFamily: webFonts.playfair,
+            fontFamily: font('dmSans', '500'),
+          }}>{s.label}</Text>
+          <Text style={{
+            fontFamily: font('playfair', '600'),
             fontSize: 28,
-            fontWeight: 600,
             color: colors.terra,
-            lineHeight: 1,
+            lineHeight: 28,
             marginBottom: 2,
-          }}>{s.value}</div>
-        </div>
+          }}>{s.value}</Text>
+        </View>
       ))}
-    </div>
+    </View>
   )
 }
 
 const ActivityBar: React.FC<{ activities: Activity[] }> = ({ activities }) => (
-  <div style={{
-    background: colors.surface,
-    border: `1px solid ${colors.border}`,
+  <View style={{
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
     borderRadius: 14,
-    padding: '12px 14px',
+    paddingVertical: 12,
+    paddingHorizontal: 14,
     flexShrink: 0,
   }}>
     {activities.map((a, i) => (
-      <div key={a.label} style={{
-        display: 'flex',
+      <View key={a.label} style={{
+        flexDirection: 'row',
         alignItems: 'center',
         gap: 7,
         marginBottom: i < activities.length - 1 ? 7 : 0,
       }}>
-        <div style={{ fontSize: 13, width: 18, textAlign: 'center', flexShrink: 0 }}>{a.emoji}</div>
-        <div style={{
+        <Text style={{ fontSize: 16, width: 24, textAlign: 'center', flexShrink: 0 }}>{a.emoji}</Text>
+        <Text style={{
           fontSize: 10,
           color: colors.stone,
           width: 62,
           flexShrink: 0,
-          fontFamily: webFonts.dmSans,
-        }}>{a.label}</div>
-        <div style={{
+          fontFamily: fontFamily.dmSans,
+        }}>{a.label}</Text>
+        <View style={{
           flex: 1,
           height: 5,
-          background: colors.surface2,
+          backgroundColor: colors.surface2,
           borderRadius: 3,
           overflow: 'hidden',
         }}>
-          <div style={{
-            height: '100%',
-            background: 'linear-gradient(to right, #C07858, #B07080)',
+          <View style={{
+            height: 5,
+            ...gradientStyle('linear-gradient(to right, #C07858, #B07080)'),
             borderRadius: 3,
-            width: `${a.percent}%`,
+            width: `${a.percent}%` as unknown as number,
           }} />
-        </div>
-        <div style={{
+        </View>
+        <Text style={{
           fontSize: 10,
-          fontWeight: 500,
           color: colors.mauve,
           width: 12,
           textAlign: 'right',
           flexShrink: 0,
-          fontFamily: webFonts.dmSans,
-        }}>{a.count}</div>
-      </div>
+          fontFamily: font('dmSans', '500'),
+        }}>{a.count}</Text>
+      </View>
     ))}
-  </div>
+  </View>
 )
 
-const PartnerCard: React.FC<{ partner: Partner }> = ({ partner }) => (
-  <div style={{
+const HomePartnerCard: React.FC<{ partner: Partner; onPress?: () => void }> = ({ partner, onPress }) => (
+  <Pressable onPress={onPress} style={{
     flexShrink: 0,
     width: 126,
-    background: colors.surface,
-    border: `1px solid ${colors.border}`,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
     borderRadius: 16,
-    padding: '16px 12px',
-    display: 'flex',
-    flexDirection: 'column',
+    paddingVertical: 16,
+    paddingHorizontal: 12,
     alignItems: 'center',
     gap: 8,
-    position: 'relative',
     overflow: 'hidden',
   }}>
     <AvatarCircle
@@ -288,247 +273,238 @@ const PartnerCard: React.FC<{ partner: Partner }> = ({ partner }) => (
       size={52}
       borderWidth={2.5}
     />
-    <div style={{ display: 'flex', gap: 8, width: '100%' }}>
-      <div style={{ flex: 1, textAlign: 'center' }}>
-        <div style={{
-          fontFamily: webFonts.playfair,
+    <View style={{ flexDirection: 'row', gap: 8, width: '100%' }}>
+      <View style={{ flex: 1, alignItems: 'center' }}>
+        <Text style={{
+          fontFamily: font('playfair', '600'),
           fontSize: 17,
-          fontWeight: 600,
           color: colors.terra,
-          lineHeight: 1,
-        }}>{partner.sessions}</div>
-        <div style={{
+          lineHeight: 17,
+        }}>{partner.sessions}</Text>
+        <Text style={{
           fontSize: 7,
           letterSpacing: 0.5,
           textTransform: 'uppercase',
           color: colors.stone,
           marginTop: 2,
-          fontFamily: webFonts.dmSans,
-        }}>Sessions</div>
-      </div>
-      <div style={{ flex: 1, textAlign: 'center' }}>
-        <div style={{
-          fontFamily: webFonts.playfair,
+          fontFamily: fontFamily.dmSans,
+        }}>Sessions</Text>
+      </View>
+      <View style={{ flex: 1, alignItems: 'center' }}>
+        <Text style={{
+          fontFamily: font('playfair', '600'),
           fontSize: 17,
-          fontWeight: 600,
           color: colors.terra,
-          lineHeight: 1,
-        }}>{partner.avgSatisfaction.toFixed(1)}</div>
-        <div style={{
+          lineHeight: 17,
+        }}>{partner.avgSatisfaction.toFixed(1)}</Text>
+        <Text style={{
           fontSize: 7,
           letterSpacing: 0.5,
           textTransform: 'uppercase',
           color: colors.stone,
           marginTop: 2,
-          fontFamily: webFonts.dmSans,
-        }}>Avg Sat.</div>
-      </div>
-    </div>
-    <div style={{
+          fontFamily: fontFamily.dmSans,
+        }}>Avg Sat.</Text>
+      </View>
+    </View>
+    <Text style={{
       fontSize: 10,
       color: colors.muted,
-      fontWeight: 300,
-      fontFamily: webFonts.dmSans,
-    }}>{partner.topActivityEmoji} Most common</div>
-  </div>
+      fontFamily: font('dmSans', '300'),
+    }}>{partner.topActivityEmoji} Most common</Text>
+  </Pressable>
 )
 
-const SessionCard: React.FC<{ session: Session }> = ({ session }) => (
-  <div style={{
+const HomeSessionCard: React.FC<{ session: Session; onPress?: () => void }> = ({ session, onPress }) => (
+  <Pressable onPress={onPress} style={{
     flexShrink: 0,
     width: 158,
-    background: colors.surface,
-    border: `1px solid ${colors.border}`,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
     borderRadius: 16,
-    padding: '16px 14px',
-    display: 'flex',
-    flexDirection: 'column',
+    padding: 16,
+    paddingHorizontal: 14,
     gap: 10,
-    cursor: 'pointer',
-    height: '100%',
   }}>
-    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
       <AvatarCircle
         initials={session.partnerInitials}
         gradient={session.partnerGradient}
         size={36}
         borderWidth={2}
       />
-      <div style={{
+      <Text style={{
         fontSize: 9,
         color: colors.stone,
-        fontWeight: 300,
-        fontFamily: webFonts.dmSans,
-      }}>{session.date}</div>
-    </div>
-    <StarRating percent={session.ratingPercent} size={13} />
-    <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+        fontFamily: font('dmSans', '300'),
+      }}>{session.date}</Text>
+    </View>
+    <StarRating rating={session.rating} size={13} />
+    <View style={{ flexDirection: 'row', gap: 5, flexWrap: 'wrap' }}>
       {session.activityEmojis.map((e, i) => (
-        <span key={i} style={{
-          fontSize: 13,
-          background: colors.surface2,
+        <View key={i} style={{
+          backgroundColor: colors.surface2,
           borderRadius: 6,
-          padding: '3px 6px',
-        }}>{e}</span>
+          paddingVertical: 3,
+          paddingHorizontal: 6,
+        }}>
+          <Text style={{ fontSize: 14 }}>{e}</Text>
+        </View>
       ))}
-    </div>
-    <div style={{
+    </View>
+    <Text numberOfLines={2} style={{
       fontSize: 10,
-      fontWeight: 300,
       color: colors.stone,
       fontStyle: 'italic',
-      lineHeight: 1.45,
-      display: '-webkit-box',
-      WebkitLineClamp: 2,
-      WebkitBoxOrient: 'vertical',
-      overflow: 'hidden',
-      borderTop: '1px solid rgba(160,100,80,0.1)',
+      lineHeight: 14.5,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(160,100,80,0.1)',
       paddingTop: 6,
       marginTop: 2,
-      fontFamily: webFonts.dmSans,
-    }}>{session.note}</div>
-  </div>
+      fontFamily: font('dmSans', '300'),
+    }}>{session.note}</Text>
+  </Pressable>
 )
 
 const ViewAllCard: React.FC = () => (
-  <div style={{
+  <Pressable style={{
     flexShrink: 0,
     width: 72,
-    background: 'transparent',
-    border: '1.5px dashed rgba(160,100,80,0.28)',
+    backgroundColor: 'transparent',
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: 'rgba(160,100,80,0.28)',
     borderRadius: 16,
-    display: 'flex',
-    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 5,
-    cursor: 'pointer',
     marginRight: 24,
-    height: '100%',
   }}>
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="7" height="7" />
-      <rect x="14" y="3" width="7" height="7" />
-      <rect x="3" y="14" width="7" height="7" />
-      <rect x="14" y="14" width="7" height="7" />
-    </svg>
-    <div style={{
+    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      <Rect x={3} y={3} width={7} height={7} />
+      <Rect x={14} y={3} width={7} height={7} />
+      <Rect x={3} y={14} width={7} height={7} />
+      <Rect x={14} y={14} width={7} height={7} />
+    </Svg>
+    <Text style={{
       fontSize: 8,
-      fontWeight: 500,
       letterSpacing: 1,
       textTransform: 'uppercase',
       color: colors.terra,
       textAlign: 'center',
-      lineHeight: 1.3,
-      fontFamily: webFonts.dmSans,
-    }}>View All</div>
-  </div>
+      lineHeight: 10.4,
+      fontFamily: font('dmSans', '500'),
+    }}>View All</Text>
+  </Pressable>
 )
 
 // ── Empty State Sub-components ──
 
 const HeroEmpty: React.FC<{ userName: string }> = ({ userName }) => (
-  <div style={{
+  <View style={{
     marginTop: 10,
-    background: colors.surface,
-    border: '1px solid rgba(160,100,80,0.13)',
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: 'rgba(160,100,80,0.13)',
     borderRadius: 20,
-    padding: '28px 24px',
-    textAlign: 'center',
+    paddingVertical: 28,
+    paddingHorizontal: 24,
+    alignItems: 'center',
   }}>
-    <span style={{ fontSize: 44, marginBottom: 14, display: 'block' }}>{'🌙'}</span>
-    <div style={{
-      fontFamily: webFonts.playfair,
+    <Text style={{ fontSize: 44, marginBottom: 14 }}>{'\uD83C\uDF19'}</Text>
+    <Text style={{
+      fontFamily: font('playfair', '700'),
       fontSize: 22,
-      fontWeight: 700,
       color: colors.ink,
       marginBottom: 8,
-      lineHeight: 1.3,
-    }}>Welcome to Tatum, {userName}.</div>
-    <div style={{
+      lineHeight: 28.6,
+      textAlign: 'center',
+    }}>Welcome to Tatum, {userName}.</Text>
+    <Text style={{
       fontSize: 13,
-      fontWeight: 300,
       color: colors.stone,
-      lineHeight: 1.7,
+      lineHeight: 22.1,
       marginBottom: 20,
-      fontFamily: webFonts.dmSans,
+      fontFamily: font('dmSans', '300'),
+      textAlign: 'center',
     }}>
       This is your private space. As you start logging, your stats, patterns, and sessions will show up here — all yours, all on your device.
-    </div>
-    <button style={{
-      display: 'inline-flex',
+    </Text>
+    <Pressable style={{
+      flexDirection: 'row',
       alignItems: 'center',
       gap: 7,
-      background: 'linear-gradient(135deg, #C07858, #7C4A5A)',
-      border: 'none',
+      ...gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)'),
       borderRadius: 9999,
-      padding: '13px 28px',
-      fontFamily: webFonts.dmSans,
-      fontSize: 13,
-      fontWeight: 500,
-      letterSpacing: 1.5,
-      textTransform: 'uppercase',
-      color: colors.white,
-      cursor: 'pointer',
+      paddingVertical: 13,
+      paddingHorizontal: 28,
       boxShadow: '0 6px 20px rgba(124,74,90,0.3), inset 0 1px 0 rgba(255,255,255,0.15)',
     }}>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-        <line x1="12" y1="5" x2="12" y2="19" />
-        <line x1="5" y1="12" x2="19" y2="12" />
-      </svg>
-      Log your first session
-    </button>
-  </div>
+      <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round">
+        <Line x1={12} y1={5} x2={12} y2={19} />
+        <Line x1={5} y1={12} x2={19} y2={12} />
+      </Svg>
+      <Text style={{
+        fontFamily: font('dmSans', '500'),
+        fontSize: 13,
+        letterSpacing: 1.5,
+        textTransform: 'uppercase',
+        color: colors.white,
+      }}>Log your first session</Text>
+    </Pressable>
+  </View>
 )
 
 const EmptyStatsStrip: React.FC = () => {
   const labels = ['Sessions', 'Avg Sat.', 'Avg Rating']
   return (
-    <div style={{
-      background: colors.surface,
-      border: '1px solid rgba(160,100,80,0.13)',
+    <View style={{
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: 'rgba(160,100,80,0.13)',
       borderRadius: 16,
-      padding: '14px 0',
-      display: 'grid',
-      gridTemplateColumns: 'repeat(3, 1fr)',
+      paddingVertical: 14,
+      flexDirection: 'row',
     }}>
       {labels.map((label, i) => (
-        <div key={label} style={{
-          textAlign: 'center',
-          borderRight: i < 2 ? '1px solid rgba(160,100,80,0.1)' : 'none',
-          padding: '0 4px',
+        <View key={label} style={{
+          flex: 1,
+          alignItems: 'center',
+          borderRightWidth: i < 2 ? 1 : 0,
+          borderRightColor: 'rgba(160,100,80,0.1)',
+          paddingHorizontal: 4,
         }}>
-          <div style={{
+          <View style={{
             width: 36,
             height: 20,
-            background: colors.surface2,
+            backgroundColor: colors.surface2,
             borderRadius: 6,
-            margin: '0 auto 5px',
+            marginBottom: 5,
           }} />
-          <div style={{
+          <Text style={{
             fontSize: 7.5,
-            fontWeight: 500,
             letterSpacing: 1,
             textTransform: 'uppercase',
             color: '#C4B0A0',
-            fontFamily: webFonts.dmSans,
-          }}>{label}</div>
-        </div>
+            fontFamily: font('dmSans', '500'),
+          }}>{label}</Text>
+        </View>
       ))}
-    </div>
+    </View>
   )
 }
 
 const EmptyPartnerCard: React.FC<{ partner: EmptyPartner }> = ({ partner }) => (
-  <div style={{
+  <View style={{
     flexShrink: 0,
     width: 110,
-    background: colors.surface,
-    border: '1px solid rgba(160,100,80,0.13)',
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: 'rgba(160,100,80,0.13)',
     borderRadius: 16,
-    padding: '14px 10px',
-    display: 'flex',
-    flexDirection: 'column',
+    paddingVertical: 14,
+    paddingHorizontal: 10,
     alignItems: 'center',
     gap: 6,
   }}>
@@ -538,80 +514,79 @@ const EmptyPartnerCard: React.FC<{ partner: EmptyPartner }> = ({ partner }) => (
       size={44}
       borderWidth={2}
     />
-    <div style={{
+    <Text style={{
       fontSize: 12,
-      fontWeight: 500,
       color: colors.ink,
-      fontFamily: webFonts.dmSans,
-    }}>{partner.name}</div>
-    <div style={{
+      fontFamily: font('dmSans', '500'),
+    }}>{partner.name}</Text>
+    <Text style={{
       fontSize: 10,
-      fontWeight: 300,
       color: '#C4B0A0',
       fontStyle: 'italic',
-      fontFamily: webFonts.dmSans,
-    }}>No sessions yet</div>
-  </div>
+      fontFamily: font('dmSans', '300'),
+    }}>No sessions yet</Text>
+  </View>
 )
 
 const AddPartnerChip: React.FC = () => (
-  <div style={{
+  <Pressable style={{
     flexShrink: 0,
     width: 110,
-    background: 'transparent',
-    border: '1.5px dashed rgba(192,120,88,0.3)',
+    backgroundColor: 'transparent',
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: 'rgba(192,120,88,0.3)',
     borderRadius: 16,
-    padding: '14px 10px',
-    display: 'flex',
-    flexDirection: 'column',
+    paddingVertical: 14,
+    paddingHorizontal: 10,
     alignItems: 'center',
     gap: 6,
-    cursor: 'pointer',
   }}>
-    <div style={{
+    <View style={{
       width: 44,
       height: 44,
-      borderRadius: '50%',
-      background: 'rgba(192,120,88,0.08)',
-      display: 'flex',
+      borderRadius: 22,
+      backgroundColor: 'rgba(192,120,88,0.08)',
       alignItems: 'center',
       justifyContent: 'center',
     }}>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" opacity={0.7}>
-        <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-        <circle cx="8.5" cy="7" r="4" />
-        <line x1="20" y1="8" x2="20" y2="14" />
-        <line x1="23" y1="11" x2="17" y2="11" />
-      </svg>
-    </div>
-    <div style={{
+      <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" opacity={0.7}>
+        <Path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+        <Circle cx={8.5} cy={7} r={4} />
+        <Line x1={20} y1={8} x2={20} y2={14} />
+        <Line x1={23} y1={11} x2={17} y2={11} />
+      </Svg>
+    </View>
+    <Text style={{
       fontSize: 11,
-      fontWeight: 400,
+      fontWeight: '400',
       color: colors.terra,
-      fontFamily: webFonts.dmSans,
-    }}>Add partner</div>
-  </div>
+      fontFamily: fontFamily.dmSans,
+    }}>Add partner</Text>
+  </Pressable>
 )
 
 const EmptySessionsPlaceholder: React.FC = () => (
-  <div style={{
-    background: colors.surface,
-    border: '1px solid rgba(160,100,80,0.13)',
+  <View style={{
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: 'rgba(160,100,80,0.13)',
     borderRadius: 16,
-    padding: '22px 20px',
-    textAlign: 'center',
+    paddingVertical: 22,
+    paddingHorizontal: 20,
+    alignItems: 'center',
   }}>
-    <div style={{ fontSize: 28, marginBottom: 8, opacity: 0.5 }}>{'📖'}</div>
-    <div style={{
+    <Text style={{ fontSize: 28, marginBottom: 8, opacity: 0.5 }}>{'\uD83D\uDCD6'}</Text>
+    <Text style={{
       fontSize: 12,
-      fontWeight: 300,
       color: colors.stone,
-      lineHeight: 1.65,
-      fontFamily: webFonts.dmSans,
+      lineHeight: 19.8,
+      fontFamily: font('dmSans', '300'),
+      textAlign: 'center',
     }}>
       Once you start logging, your sessions will show up here. Every entry is a part of your story.
-    </div>
-  </div>
+    </Text>
+  </View>
 )
 
 // ── Main Component ──
@@ -628,136 +603,108 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   isEmpty = false,
   userName = 'Alanna',
   emptyPartners = [],
+  onPartnerPress,
+  onSessionPress,
+  onLogFirstSession,
 }) => {
   if (isEmpty) {
     return (
-      <div style={{
+      <View style={{
         width: '100%',
-        minHeight: '100vh',
+        flex: 1,
         position: 'relative',
         overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column',
-        fontFamily: webFonts.dmSans,
-        color: colors.ink,
+        backgroundColor: colors.warmSand,
       }}>
         <DecorativeGlow position="center" size={320} />
-        <div style={{ height: 54 }} />
+        <View style={{ height: 54 }} />
         <Wordmark />
         <PeriodTabs isEmpty />
 
-        <div style={{
-          flex: 1,
-          overflowY: 'auto',
-          overflowX: 'hidden',
-          padding: '0 24px',
-          position: 'relative',
-          zIndex: 1,
-        }}>
+        <ScrollView style={{ flex: 1, paddingHorizontal: 24, position: 'relative', zIndex: 1 }}>
           <HeroEmpty userName={userName} />
 
-          <div style={{ marginTop: 16, marginBottom: 10 }}>
+          <View style={{ marginTop: 16, marginBottom: 10 }}>
             <InlineSectionLabel label="Overview" />
-          </div>
+          </View>
           <EmptyStatsStrip />
 
-          <div style={{ marginTop: 16, marginBottom: 10 }}>
+          <View style={{ marginTop: 16, marginBottom: 10 }}>
             <InlineSectionLabel label="Partners" />
-          </div>
-          <div style={{ overflow: 'hidden', marginRight: -24 }}>
-            <div style={{ display: 'flex', gap: 8, overflow: 'hidden', paddingRight: 40 }}>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ overflow: 'visible' }}>
+            <View style={{ flexDirection: 'row', gap: 8, paddingRight: 40 }}>
               {emptyPartners.map((p, i) => (
                 <EmptyPartnerCard key={i} partner={p} />
               ))}
               <AddPartnerChip />
-            </div>
-          </div>
+            </View>
+          </ScrollView>
 
-          <div style={{ marginTop: 16, marginBottom: 10 }}>
+          <View style={{ marginTop: 16, marginBottom: 10 }}>
             <InlineSectionLabel label="Recent Sessions" />
-          </div>
+          </View>
           <EmptySessionsPlaceholder />
 
-          <div style={{ height: 72, flexShrink: 0 }} />
-        </div>
-
-        <BottomNav activeTab="home" />
-      </div>
+        </ScrollView>
+      </View>
     )
   }
 
   return (
-    <div style={{
+    <View style={{
       width: '100%',
-      minHeight: '100vh',
+      flex: 1,
       position: 'relative',
       overflow: 'hidden',
-      display: 'flex',
-      flexDirection: 'column',
-      fontFamily: webFonts.dmSans,
-      color: colors.ink,
+      backgroundColor: colors.warmSand,
     }}>
       <DecorativeGlow position="top-right" size={240} />
-      <div style={{ height: 54 }} />
+      <View style={{ height: 54 }} />
       <Wordmark />
       <PeriodTabs activeIndex={activePeriod} dateLabel={periodDateLabel} />
 
       {/* Main content */}
-      <div style={{
+      <ScrollView style={{
         flex: 1,
-        overflow: 'hidden',
-        padding: '10px 24px 0',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 9,
+        paddingHorizontal: 24,
+        paddingTop: 10,
         position: 'relative',
         zIndex: 1,
       }}>
-        <OverviewCard
-          sessionsCount={sessionsCount}
-          avgSatisfaction={avgSatisfaction}
-          avgRating={avgRating}
-        />
+        <View style={{ gap: 9 }}>
+          <OverviewCard
+            sessionsCount={sessionsCount}
+            avgSatisfaction={avgSatisfaction}
+            avgRating={avgRating}
+          />
 
-        <InlineSectionLabel label="Top Activities" />
-        <ActivityBar activities={topActivities} />
+          <InlineSectionLabel label="Top Activities" />
+          <ActivityBar activities={topActivities} />
 
-        {/* Partners - clickable section label with chevron */}
-        <InlineSectionLabel label="Partners" showChevron />
+          <InlineSectionLabel label="Partners" showChevron />
 
-        <div style={{ flexShrink: 0, marginRight: -24 }}>
-          <div style={{
-            display: 'flex',
-            gap: 8,
-            overflow: 'hidden',
-            paddingRight: 40,
-          }}>
-            {partners.map((p, i) => (
-              <PartnerCard key={i} partner={p} />
-            ))}
-          </div>
-        </div>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginRight: -24, overflow: 'visible' }}>
+            <View style={{ flexDirection: 'row', gap: 8, paddingRight: 40 }}>
+              {partners.map((p, i) => (
+                <HomePartnerCard key={i} partner={p} onPress={() => onPartnerPress?.(i)} />
+              ))}
+            </View>
+          </ScrollView>
 
-        <InlineSectionLabel label="Sessions" />
+          <InlineSectionLabel label="Sessions" />
 
-        <div style={{ flex: 1, marginRight: -24, minHeight: 0 }}>
-          <div style={{
-            display: 'flex',
-            gap: 8,
-            overflow: 'hidden',
-            paddingRight: 40,
-            height: '100%',
-          }}>
-            {recentSessions.map((s, i) => (
-              <SessionCard key={i} session={s} />
-            ))}
-            <ViewAllCard />
-          </div>
-        </div>
-      </div>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginRight: -24, overflow: 'visible' }}>
+            <View style={{ flexDirection: 'row', gap: 8, paddingRight: 40 }}>
+              {recentSessions.map((s, i) => (
+                <HomeSessionCard key={i} session={s} onPress={() => onSessionPress?.(i)} />
+              ))}
+              <ViewAllCard />
+            </View>
+          </ScrollView>
+        </View>
 
-      <div style={{ height: 72, flexShrink: 0 }} />
-      <BottomNav activeTab="home" />
-    </div>
+      </ScrollView>
+    </View>
   )
 }

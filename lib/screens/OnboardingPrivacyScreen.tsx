@@ -1,23 +1,24 @@
 import React from 'react'
-import { colors, webFonts } from '../theme'
+import { View, Text } from 'react-native'
+import { colors, font, fontFamily, gradientStyle } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { GradientButton } from '../components/GradientButton'
 
-/* ── Shared onboarding primitives ── */
+/* -- Shared onboarding primitives -- */
 
 const StepDots: React.FC<{ active: number; total?: number }> = ({ active, total = 4 }) => (
-  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6 }}>
+  <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 6 }}>
     {Array.from({ length: total }, (_, i) => {
       const isDone = i < active
       const isActive = i === active
       return (
-        <div
+        <View
           key={i}
           style={{
             width: isActive ? 20 : 7,
             height: 7,
-            borderRadius: isActive ? 4 : '50%',
-            background: isActive
+            borderRadius: isActive ? 4 : 3.5,
+            backgroundColor: isActive
               ? colors.terra
               : isDone
                 ? 'rgba(192,120,88,0.4)'
@@ -26,81 +27,75 @@ const StepDots: React.FC<{ active: number; total?: number }> = ({ active, total 
         />
       )
     })}
-  </div>
+  </View>
 )
 
-/* ── Promise item ── */
+/* -- Promise item -- */
 
 const PromiseItem: React.FC<{ emoji: string; title: string; desc: string }> = ({ emoji, title, desc }) => (
-  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-    <span style={{ fontSize: 20, flexShrink: 0, marginTop: 1 }}>{emoji}</span>
-    <div>
-      <div style={{ fontFamily: webFonts.dmSans, fontSize: 13, fontWeight: 500, color: colors.ink, marginBottom: 2 }}>
+  <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 12 }}>
+    <Text style={{ fontSize: 20, flexShrink: 0, marginTop: 1 }}>{emoji}</Text>
+    <View>
+      <Text style={{ fontFamily: font('dmSans', '500'), fontSize: 13, color: colors.ink, marginBottom: 2 }}>
         {title}
-      </div>
-      <div style={{ fontFamily: webFonts.dmSans, fontSize: 12, fontWeight: 300, color: colors.stone, lineHeight: '1.55' }}>
+      </Text>
+      <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 12, color: colors.stone, lineHeight: 18.6 }}>
         {desc}
-      </div>
-    </div>
-  </div>
+      </Text>
+    </View>
+  </View>
 )
 
-/* ── Screen ── */
+/* -- Screen -- */
 
 export const OnboardingPrivacyScreen: React.FC = () => (
-  <div
+  <View
     style={{
-      width: '100%',
-      minHeight: '100vh',
+      flex: 1,
       position: 'relative',
       overflow: 'hidden',
-      display: 'flex',
       flexDirection: 'column',
-      fontFamily: webFonts.dmSans,
-      color: colors.ink,
+      backgroundColor: colors.warmSand,
     }}
   >
     <DecorativeGlow position="center" size={320} opacity={0.13} />
-    <div style={{ height: 54 }} />
+    <View style={{ height: 54 }} />
 
     {/* Content */}
-    <div
+    <View
       style={{
         flex: 1,
         overflow: 'hidden',
-        display: 'flex',
         flexDirection: 'column',
-        padding: '0 28px',
+        paddingHorizontal: 28,
         position: 'relative',
         zIndex: 1,
       }}
     >
       {/* App icon */}
-      <div style={{ marginTop: 18, marginBottom: 16, display: 'flex', justifyContent: 'center' }}>
-        <div
+      <View style={{ marginTop: 18, marginBottom: 16, flexDirection: 'row', justifyContent: 'center' }}>
+        <View
           style={{
             width: 64,
             height: 64,
             borderRadius: 18,
-            background: 'linear-gradient(135deg, #C07858, #7C4A5A)',
-            display: 'flex',
+            ...gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)'),
             alignItems: 'center',
             justifyContent: 'center',
             boxShadow: '0 8px 24px rgba(124,74,90,0.3)',
-            fontSize: 32,
           }}
         >
-          <span style={{ fontSize: 16, color: colors.white, lineHeight: 1 }}>&#10022;</span>
-        </div>
-      </div>
+          <Text style={{ fontSize: 16, color: colors.white, lineHeight: 16 }}>&#10022;</Text>
+        </View>
+      </View>
 
       {/* Letter-style headline */}
-      <div style={{ textAlign: 'center', marginBottom: 18 }}>
-        <div
+      <View style={{ alignItems: 'center', marginBottom: 18 }}>
+        <Text
           style={{
-            fontFamily: webFonts.playfair,
+            fontFamily: fontFamily.playfair,
             fontSize: 13,
-            fontWeight: 400,
+            fontWeight: '400',
             fontStyle: 'italic',
             color: colors.stone,
             marginBottom: 6,
@@ -108,39 +103,37 @@ export const OnboardingPrivacyScreen: React.FC = () => (
           }}
         >
           before we begin —
-        </div>
-        <div
+        </Text>
+        <Text
           style={{
-            fontFamily: webFonts.playfair,
+            fontFamily: font('playfair', '700'),
             fontSize: 26,
-            fontWeight: 700,
             color: colors.ink,
-            lineHeight: 1.25,
+            lineHeight: 32.5,
             marginBottom: 10,
+            textAlign: 'center',
           }}
         >
-          This is yours.
-          <br />
-          Only yours.
-        </div>
-        <div
+          This is yours.{'\n'}Only yours.
+        </Text>
+        <Text
           style={{
+            fontFamily: font('dmSans', '300'),
             fontSize: 13,
-            fontWeight: 300,
             color: '#7A5A50',
-            lineHeight: 1.7,
+            lineHeight: 22.1,
             textAlign: 'center',
           }}
         >
           Everything you log in Tatum lives on your device and nowhere else. That way your data stays yours.
-        </div>
-      </div>
+        </Text>
+      </View>
 
       {/* Divider */}
-      <div style={{ width: 40, height: 1, background: 'rgba(192,120,88,0.3)', margin: '16px auto' }} />
+      <View style={{ width: 40, height: 1, backgroundColor: 'rgba(192,120,88,0.3)', alignSelf: 'center', marginVertical: 16 }} />
 
       {/* Promise list */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 16 }}>
+      <View style={{ flexDirection: 'column', gap: 14, marginBottom: 16 }}>
         <PromiseItem
           emoji="🔒"
           title="Stored only on your phone"
@@ -156,31 +149,30 @@ export const OnboardingPrivacyScreen: React.FC = () => (
           title="Switch phones safely"
           desc="If you choose to turn it on, your data can move with you via iCloud or Google backup when you get a new device."
         />
-      </div>
+      </View>
 
       {/* Signature */}
-      <div style={{ textAlign: 'center', marginBottom: 14 }}>
-        <div style={{ fontSize: 11, fontWeight: 300, color: colors.stone, marginBottom: 3 }}>with love,</div>
-        <div
+      <View style={{ alignItems: 'center', marginBottom: 14 }}>
+        <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 11, color: colors.stone, marginBottom: 3 }}>with love,</Text>
+        <Text
           style={{
-            fontFamily: webFonts.playfair,
+            fontFamily: font('playfair', '600'),
             fontSize: 18,
             fontStyle: 'italic',
-            fontWeight: 600,
             color: colors.terra,
           }}
         >
           Tatum
-        </div>
-      </div>
-    </div>
+        </Text>
+      </View>
+    </View>
 
     {/* Bottom area */}
-    <div style={{ flexShrink: 0, padding: '0 28px 32px' }}>
-      <div style={{ marginBottom: 14 }}>
+    <View style={{ flexShrink: 0, paddingHorizontal: 28, paddingBottom: 32 }}>
+      <View style={{ marginBottom: 14 }}>
         <GradientButton label="I Understand, Let's Begin" />
-      </div>
+      </View>
       <StepDots active={0} />
-    </div>
-  </div>
+    </View>
+  </View>
 )

@@ -1,32 +1,39 @@
 import React from 'react'
-import { colors, webFonts } from '../theme'
+import { View, Text, Pressable, TextInput, ScrollView } from 'react-native'
+import Svg, { Polyline } from 'react-native-svg'
+import { colors, font, fontFamily, gradientStyle } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { StepDots } from '../components/StepDots'
 
-const GradientButton: React.FC<{ label: string }> = ({ label }) => (
-  <button
+const GradientButton: React.FC<{ label: string; onPress?: () => void }> = ({ label, onPress }) => (
+  <Pressable
+    onPress={onPress}
     style={{
       width: '100%',
       height: 52,
-      background: 'linear-gradient(135deg, #C07858, #7C4A5A)',
-      border: 'none',
+      ...gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)'),
       borderRadius: 9999,
-      cursor: 'pointer',
-      fontFamily: webFonts.dmSans,
-      fontSize: 13,
-      fontWeight: 500,
-      letterSpacing: 1.5,
-      textTransform: 'uppercase',
-      color: 'white',
+      alignItems: 'center',
+      justifyContent: 'center',
       boxShadow: '0 6px 20px rgba(124,74,90,0.32), inset 0 1px 0 rgba(255,255,255,0.15)',
       marginBottom: 10,
     }}
   >
-    {label}
-  </button>
+    <Text
+      style={{
+        fontFamily: font('dmSans', '500'),
+        fontSize: 13,
+        letterSpacing: 1.5,
+        textTransform: 'uppercase',
+        color: 'white',
+      }}
+    >
+      {label}
+    </Text>
+  </Pressable>
 )
 
-/* ── Color swatches data ── */
+/* -- Color swatches data -- */
 
 const SWATCH_GRADIENTS = [
   'linear-gradient(135deg, #C07858, #7C4A5A)',
@@ -37,50 +44,44 @@ const SWATCH_GRADIENTS = [
   'linear-gradient(135deg, #7C6090, #4A3060)',
 ] as const
 
-/* ── Chevron icon ── */
+/* -- Chevron icon -- */
 
 const ChevronRight: React.FC = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C4B0A0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="9 18 15 12 9 6" />
-  </svg>
+  <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#C4B0A0" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Polyline points="9 18 15 12 9 6" />
+  </Svg>
 )
 
-/* ── Screen ── */
+/* -- Screen -- */
 
 export const OnboardingPartnerScreen: React.FC = () => (
-  <div
+  <View
     style={{
-      width: '100%',
-      minHeight: '100vh',
+      flex: 1,
       position: 'relative',
       overflow: 'hidden',
-      display: 'flex',
       flexDirection: 'column',
-      fontFamily: webFonts.dmSans,
-      color: colors.ink,
+      backgroundColor: colors.warmSand,
     }}
   >
     <DecorativeGlow position="top-right" size={240} opacity={0.1} />
-    <div style={{ height: 54 }} />
+    <View style={{ height: 54 }} />
 
     {/* Content */}
-    <div
+    <ScrollView
       style={{
         flex: 1,
-        overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column',
-        padding: '0 28px',
+        paddingHorizontal: 28,
         zIndex: 1,
       }}
+      contentContainerStyle={{ flexDirection: 'column' }}
     >
       {/* Title area */}
-      <div style={{ marginTop: 24, marginBottom: 24 }}>
-        <div
+      <View style={{ marginTop: 24, marginBottom: 24 }}>
+        <Text
           style={{
-            fontFamily: webFonts.dmSans,
+            fontFamily: font('dmSans', '500'),
             fontSize: 9,
-            fontWeight: 500,
             letterSpacing: 3.5,
             textTransform: 'uppercase',
             color: colors.terra,
@@ -88,89 +89,88 @@ export const OnboardingPartnerScreen: React.FC = () => (
           }}
         >
           Step 3 of 4
-        </div>
-        <div
+        </Text>
+        <Text
           style={{
-            fontFamily: webFonts.playfair,
+            fontFamily: font('playfair', '700'),
             fontSize: 30,
-            fontWeight: 700,
             color: colors.ink,
-            lineHeight: 1.2,
+            lineHeight: 36,
             marginBottom: 8,
           }}
         >
-          Add a
-          <br />
-          partner
-        </div>
-        <div style={{ fontSize: 13, fontWeight: 300, color: colors.stone, lineHeight: 1.6 }}>
+          Add a{'\n'}partner
+        </Text>
+        <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 13, color: colors.stone, lineHeight: 20.8 }}>
           Give them a name and a color. You can always add more from your profile later.
-        </div>
-      </div>
+        </Text>
+      </View>
 
       {/* Partner preview */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 24 }}>
-        <div
+      <View style={{ flexDirection: 'column', alignItems: 'center', marginBottom: 24 }}>
+        <View
           style={{
             width: 80,
             height: 80,
-            borderRadius: '50%',
-            background: SWATCH_GRADIENTS[0],
-            display: 'flex',
+            borderRadius: 40,
+            ...gradientStyle(SWATCH_GRADIENTS[0]),
             alignItems: 'center',
             justifyContent: 'center',
-            fontFamily: webFonts.playfair,
-            fontSize: 28,
-            fontWeight: 700,
-            color: 'white',
-            border: '3px solid white',
+            borderWidth: 3,
+            borderColor: 'white',
             boxShadow: '0 6px 20px rgba(61,43,37,0.15)',
             marginBottom: 10,
           }}
         >
-          AL
-        </div>
-        <div
+          <Text
+            style={{
+              fontFamily: font('playfair', '700'),
+              fontSize: 28,
+              color: 'white',
+            }}
+          >
+            AL
+          </Text>
+        </View>
+        <Text
           style={{
-            fontFamily: webFonts.playfair,
+            fontFamily: font('playfair', '600'),
             fontSize: 18,
             fontStyle: 'italic',
-            fontWeight: 600,
             color: colors.ink,
             minHeight: 26,
           }}
         >
           Alex
-        </div>
-      </div>
+        </Text>
+      </View>
 
       {/* Name input */}
-      <div style={{ marginBottom: 20 }}>
-        <input
-          type="text"
+      <View style={{ marginBottom: 20 }}>
+        <TextInput
           defaultValue="Alex"
           placeholder="Their name or nickname"
           maxLength={30}
           style={{
             width: '100%',
-            background: colors.surface,
-            border: '1.5px solid rgba(160,100,80,0.2)',
+            backgroundColor: colors.surface,
+            borderWidth: 1.5,
+            borderColor: 'rgba(160,100,80,0.2)',
             borderRadius: 12,
-            padding: '13px 16px',
-            fontFamily: webFonts.dmSans,
+            paddingVertical: 13,
+            paddingHorizontal: 16,
+            fontFamily: fontFamily.dmSans,
             fontSize: 14,
             color: colors.ink,
-            outline: 'none',
-            boxSizing: 'border-box',
           }}
         />
-      </div>
+      </View>
 
       {/* Color picker */}
-      <div
+      <Text
         style={{
+          fontFamily: font('dmSans', '500'),
           fontSize: 9,
-          fontWeight: 500,
           letterSpacing: 2,
           textTransform: 'uppercase',
           color: colors.stone,
@@ -178,96 +178,95 @@ export const OnboardingPartnerScreen: React.FC = () => (
         }}
       >
         Choose a color
-      </div>
-      <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+      </Text>
+      <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
         {SWATCH_GRADIENTS.map((grad, i) => (
-          <div
+          <Pressable
             key={i}
             style={{
               width: 32,
               height: 32,
-              borderRadius: '50%',
-              background: grad,
-              cursor: 'pointer',
-              border: i === 0 ? '2.5px solid white' : '2.5px solid transparent',
+              borderRadius: 16,
+              ...gradientStyle(grad),
+              borderWidth: 2.5,
+              borderColor: i === 0 ? 'white' : 'transparent',
               boxShadow: i === 0 ? '0 0 0 2.5px #C07858' : 'none',
             }}
           />
         ))}
-      </div>
+      </View>
 
       {/* Or divider */}
-      <div
+      <Text
         style={{
+          fontFamily: fontFamily.dmSans,
           fontSize: 10,
           color: '#C4B0A0',
           textAlign: 'center',
-          margin: '12px 0',
+          marginVertical: 12,
           letterSpacing: 2,
           textTransform: 'uppercase',
         }}
       >
         or
-      </div>
+      </Text>
 
       {/* Solo row */}
-      <div
+      <Pressable
         style={{
-          display: 'flex',
+          flexDirection: 'row',
           alignItems: 'center',
           gap: 14,
-          background: colors.surface,
-          border: '1.5px solid rgba(160,100,80,0.15)',
+          backgroundColor: colors.surface,
+          borderWidth: 1.5,
+          borderColor: 'rgba(160,100,80,0.15)',
           borderRadius: 14,
-          padding: '12px 16px',
+          paddingVertical: 12,
+          paddingHorizontal: 16,
           marginBottom: 20,
-          cursor: 'pointer',
         }}
       >
-        <div
+        <View
           style={{
             width: 44,
             height: 44,
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, #9A8878, #6A5848)',
-            display: 'flex',
+            borderRadius: 22,
+            ...gradientStyle('linear-gradient(135deg, #9A8878, #6A5848)'),
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: 22,
-            border: '2px solid white',
+            borderWidth: 2,
+            borderColor: 'white',
             boxShadow: '0 2px 8px rgba(61,43,37,0.12)',
             flexShrink: 0,
           }}
         >
-          ✨
-        </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 14, fontWeight: 500, color: colors.ink }}>Solo ✨</div>
-          <div style={{ fontSize: 11, fontWeight: 300, color: colors.stone }}>
+          <Text style={{ fontSize: 22 }}>✨</Text>
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontFamily: font('dmSans', '500'), fontSize: 14, color: colors.ink }}>Solo ✨</Text>
+          <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 11, color: colors.stone }}>
             Track your own experiences without adding a partner
-          </div>
-        </div>
+          </Text>
+        </View>
         <ChevronRight />
-      </div>
-    </div>
+      </Pressable>
+    </ScrollView>
 
     {/* Bottom area */}
-    <div style={{ flexShrink: 0, padding: '0 28px 32px' }}>
+    <View style={{ flexShrink: 0, paddingHorizontal: 28, paddingBottom: 32 }}>
       <GradientButton label="Add Alex" />
-      <div
-        style={{
-          textAlign: 'center',
-          fontSize: 12,
-          fontWeight: 300,
-          color: colors.muted,
-          cursor: 'pointer',
-          padding: '4px 0',
-          marginBottom: 12,
-        }}
-      >
-        Skip for now
-      </div>
+      <Pressable style={{ alignItems: 'center', paddingVertical: 4, marginBottom: 12 }}>
+        <Text
+          style={{
+            fontFamily: font('dmSans', '300'),
+            fontSize: 12,
+            color: colors.muted,
+          }}
+        >
+          Skip for now
+        </Text>
+      </Pressable>
       <StepDots current={2} />
-    </div>
-  </div>
+    </View>
+  </View>
 )

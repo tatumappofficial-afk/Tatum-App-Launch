@@ -1,4 +1,5 @@
 import React from 'react'
+import { View } from 'react-native'
 import { colors } from '../theme'
 
 export interface StepDotsProps {
@@ -7,18 +8,18 @@ export interface StepDotsProps {
 }
 
 export const StepDots: React.FC<StepDotsProps> = ({ current, total = 4 }) => (
-  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6 }}>
+  <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 6 }}>
     {Array.from({ length: total }, (_, i) => {
       const isDone = i < current
       const isActive = i === current
       return (
-        <div
+        <View
           key={i}
           style={{
             width: isActive ? 20 : 7,
             height: 7,
-            borderRadius: isActive ? 4 : '50%',
-            background: isActive
+            borderRadius: isActive ? 4 : 3.5,
+            backgroundColor: isActive
               ? colors.terra
               : isDone
                 ? 'rgba(192,120,88,0.4)'
@@ -27,5 +28,5 @@ export const StepDots: React.FC<StepDotsProps> = ({ current, total = 4 }) => (
         />
       )
     })}
-  </div>
+  </View>
 )

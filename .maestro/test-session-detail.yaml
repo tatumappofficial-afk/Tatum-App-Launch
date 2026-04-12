@@ -1,0 +1,10 @@
+appId: host.exp.exponent
+---
+- runFlow: seed-data.yaml
+- tapOn: "SESSIONS"
+- waitForAnimationToEnd
+- assertVisible: "Sessions Journal"
+# Tap first entry's arrow icon area
+- tapOn:
+    point: "92%,28%"
+- waitForAnimationToEnd

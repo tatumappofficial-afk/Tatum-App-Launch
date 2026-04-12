@@ -1,11 +1,11 @@
 import React from 'react'
+import { View } from 'react-native'
 
 export const DynamicIsland: React.FC = () => (
-  <div style={{
+  <View style={{
     position: 'absolute',
     top: 10,
-    left: '50%',
-    transform: 'translateX(-50%)',
+    alignSelf: 'center',
     width: 120,
     height: 34,
     backgroundColor: '#1C1C1E',

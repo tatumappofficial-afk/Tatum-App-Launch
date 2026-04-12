@@ -1,5 +1,7 @@
 import React from 'react'
-import { colors, webFonts } from '../theme'
+import { View, Text, Pressable, ScrollView } from 'react-native'
+import Svg, { Path, Polyline } from 'react-native-svg'
+import { colors, font, fontFamily } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { AvatarCircle } from '../components/AvatarCircle'
 import { StatStrip } from '../components/StatStrip'
@@ -38,83 +40,82 @@ export interface SessionDetailScreenProps {
 /* ── Sub-components ── */
 
 const PencilIcon: React.FC = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
-  </svg>
+  <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+  </Svg>
 )
 
 const ChevronForwardIcon: React.FC = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
-    <polyline points="9 6 15 12 9 18" />
-  </svg>
+  <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
+    <Polyline points="9 6 15 12 9 18" />
+  </Svg>
 )
 
 const ScreenHeader: React.FC<{
   onBack?: () => void
   onEdit?: () => void
 }> = ({ onBack, onEdit }) => (
-  <div style={{
-    padding: '6px 24px 0',
-    display: 'flex',
+  <View style={{
+    paddingTop: 6,
+    paddingHorizontal: 24,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     flexShrink: 0,
     position: 'relative',
     zIndex: 2,
   }}>
-    <button
-      onClick={onBack}
-      aria-label="Go back"
+    <Pressable
+      onPress={onBack}
+      accessibilityLabel="Go back"
       style={{
         width: 34,
         height: 34,
-        borderRadius: '50%',
-        background: colors.surface2,
-        border: 'none',
-        display: 'flex',
+        borderRadius: 17,
+        backgroundColor: colors.surface2,
         alignItems: 'center',
         justifyContent: 'center',
-        cursor: 'pointer',
         padding: 0,
       }}
     >
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={colors.stone} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="15 18 9 12 15 6" />
-      </svg>
-    </button>
-    <button
-      onClick={onEdit}
+      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={colors.stone} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+        <Polyline points="15 18 9 12 15 6" />
+      </Svg>
+    </Pressable>
+    <Pressable
+      onPress={onEdit}
       style={{
-        background: 'none',
-        border: '1px solid rgba(160,100,80,0.3)',
+        backgroundColor: 'transparent',
+        borderWidth: 1,
+        borderColor: 'rgba(160,100,80,0.3)',
         borderRadius: 9999,
-        padding: '5px 14px',
-        fontSize: 11,
-        fontWeight: 500,
-        fontFamily: webFonts.dmSans,
-        color: colors.terra,
-        letterSpacing: 0.5,
-        cursor: 'pointer',
+        paddingVertical: 5,
+        paddingHorizontal: 14,
       }}
     >
-      Edit
-    </button>
-  </div>
+      <Text style={{
+        fontSize: 11,
+        fontFamily: font('dmSans', '500'),
+        color: colors.terra,
+        letterSpacing: 0.5,
+      }}>Edit</Text>
+    </Pressable>
+  </View>
 )
 
 const HeroAvatars: React.FC<{ partners: SessionPartner[] }> = ({ partners }) => (
-  <div style={{ display: 'flex', alignItems: 'center', marginBottom: 10 }}>
+  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
     {partners.map((p, i) => (
-      <div key={p.initials} style={{ marginLeft: i > 0 ? -16 : 0 }}>
+      <View key={p.initials} style={{ marginLeft: i > 0 ? -16 : 0 }}>
         <AvatarCircle
           initials={p.initials}
           gradient={p.gradient}
           size={68}
           borderWidth={3}
         />
-      </div>
+      </View>
     ))}
-  </div>
+  </View>
 )
 
 const Hero: React.FC<{
@@ -122,35 +123,33 @@ const Hero: React.FC<{
   partnerNames: string
   date: string
 }> = ({ partners, partnerNames, date }) => (
-  <div style={{
+  <View style={{
     flexShrink: 0,
-    display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    padding: '14px 24px 0',
+    paddingTop: 14,
+    paddingHorizontal: 24,
     position: 'relative',
     zIndex: 1,
   }}>
     <HeroAvatars partners={partners} />
-    <div style={{
-      fontFamily: webFonts.playfair,
+    <Text style={{
+      fontFamily: font('playfair', '700'),
       fontSize: 22,
-      fontWeight: 700,
       color: colors.ink,
       marginBottom: 3,
     }}>
       {partnerNames}
-    </div>
-    <div style={{
+    </Text>
+    <Text style={{
       fontSize: 11,
-      fontWeight: 300,
-      fontFamily: webFonts.dmSans,
+      fontFamily: font('dmSans', '300'),
       color: colors.stone,
       letterSpacing: 0.3,
     }}>
       {date}
-    </div>
-  </div>
+    </Text>
+  </View>
 )
 
 const SessionStatStrip: React.FC<{
@@ -158,153 +157,145 @@ const SessionStatStrip: React.FC<{
   ratingMax: number
   dayOfWeek: string
 }> = ({ rating, ratingMax, dayOfWeek }) => (
-  <div style={{ margin: '14px 24px 0', flexShrink: 0 }}>
+  <View style={{ marginTop: 14, marginHorizontal: 24, flexShrink: 0 }}>
     <StatStrip stats={[
       { value: rating, unit: ` /${ratingMax}`, label: 'Rating' },
       { value: dayOfWeek, label: 'Day' },
     ]} />
-  </div>
+  </View>
 )
 
 const SectionLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div style={{
-    fontSize: 8,
-    fontWeight: 500,
-    letterSpacing: 3,
-    textTransform: 'uppercase',
-    color: colors.terra,
-    fontFamily: webFonts.dmSans,
-    display: 'flex',
+  <View style={{
+    flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    margin: '12px 24px 8px',
+    marginTop: 12,
+    marginHorizontal: 24,
+    marginBottom: 8,
     flexShrink: 0,
   }}>
-    {children}
-    <div style={{ flex: 1, height: 1, background: 'rgba(160,100,80,0.15)' }} />
-  </div>
+    <Text style={{
+      fontSize: 8,
+      letterSpacing: 3,
+      textTransform: 'uppercase',
+      color: colors.terra,
+      fontFamily: font('dmSans', '500'),
+    }}>
+      {children}
+    </Text>
+    <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(160,100,80,0.15)' }} />
+  </View>
 )
 
 const ActivityTags: React.FC<{ activities: ActivityTag[] }> = ({ activities }) => (
-  <div style={{
-    margin: '0 24px',
+  <View style={{
+    marginHorizontal: 24,
     flexShrink: 0,
-    display: 'flex',
+    flexDirection: 'row',
     gap: 7,
     flexWrap: 'wrap',
   }}>
     {activities.map((a) => (
       <TagPill key={a.label} emoji={a.emoji} label={a.label} variant="display" />
     ))}
-  </div>
+  </View>
 )
 
 const NotesCard: React.FC<{
   note?: string
   onEditNote?: () => void
 }> = ({ note, onEditNote }) => (
-  <div style={{
-    margin: '0 24px 14px',
+  <View style={{
+    marginHorizontal: 24,
+    marginBottom: 14,
     flexShrink: 0,
     position: 'relative',
   }}>
     {/* Stacked paper shadow */}
-    <div style={{
+    <View style={{
       position: 'absolute',
       bottom: -4,
       left: 6,
       right: -6,
       top: 4,
-      background: colors.surface2,
+      backgroundColor: colors.surface2,
       borderRadius: 16,
       zIndex: 0,
     }} />
     {/* Main card */}
-    <div style={{
+    <View style={{
       position: 'relative',
       zIndex: 1,
-      background: colors.surface,
-      border: '1px solid rgba(160,100,80,0.14)',
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: 'rgba(160,100,80,0.14)',
       borderRadius: 16,
       overflow: 'hidden',
       boxShadow: '0 2px 10px rgba(61,43,37,0.06)',
     }}>
-      {/* Ruled lines */}
-      <div style={{
-        position: 'absolute',
-        top: 0, left: 0, right: 0, bottom: 0,
-        backgroundImage: 'repeating-linear-gradient(to bottom, transparent, transparent 27px, rgba(160,100,80,0.08) 27px, rgba(160,100,80,0.08) 28px)',
-        backgroundPosition: '0 14px',
-        pointerEvents: 'none',
-        zIndex: 0,
-      }} />
-      {/* Margin line */}
-      <div style={{
-        position: 'absolute',
-        top: 0, bottom: 0, left: 46,
-        width: 1,
-        background: 'rgba(192,120,88,0.12)',
-        zIndex: 0,
-      }} />
-      {/* Text content */}
+      {/* Note text */}
       {note ? (
-        <div style={{
+        <Text style={{
           position: 'relative', zIndex: 1,
-          fontFamily: webFonts.playfair,
-          fontSize: 13, fontWeight: 400, fontStyle: 'italic',
-          color: '#5A3E36', lineHeight: '27px',
-          padding: '12px 16px 16px',
-        }}>{note}</div>
+          fontFamily: fontFamily.playfair,
+          fontSize: 13, fontWeight: '400', fontStyle: 'italic',
+          color: '#5A3E36', lineHeight: 27,
+          paddingVertical: 12, paddingHorizontal: 16,
+        }}>{note}</Text>
       ) : (
-        <div style={{
+        <Text style={{
           position: 'relative', zIndex: 1,
-          padding: '14px 16px',
-          fontSize: 12, fontWeight: 300,
-          fontFamily: webFonts.dmSans,
+          paddingVertical: 14, paddingHorizontal: 16,
+          fontSize: 12, fontFamily: font('dmSans', '300'),
           color: '#C4B0A0', fontStyle: 'italic',
-          lineHeight: '27px',
-        }}>No notes yet...</div>
+          lineHeight: 27,
+        }}>No notes yet...</Text>
       )}
       {/* Edit note row */}
-      <div style={{
+      <View style={{
         position: 'relative', zIndex: 1,
-        display: 'flex', alignItems: 'center', gap: 6,
-        padding: '8px 14px 12px',
-        borderTop: '1px solid rgba(160,100,80,0.1)',
+        flexDirection: 'row', alignItems: 'center', gap: 6,
+        paddingTop: 8, paddingHorizontal: 14, paddingBottom: 12,
+        borderTopWidth: 1, borderTopColor: 'rgba(160,100,80,0.1)',
       }}>
-        <button
-          onClick={onEditNote}
+        <Pressable
+          onPress={onEditNote}
           style={{
-            display: 'flex', alignItems: 'center', gap: 5,
-            background: 'none', border: 'none', cursor: 'pointer',
-            fontSize: 11, fontWeight: 400,
-            fontFamily: webFonts.dmSans,
-            color: colors.terra, padding: 0,
+            flexDirection: 'row', alignItems: 'center', gap: 5,
+            padding: 0,
           }}
         >
           <PencilIcon />
-          {note ? 'Edit note' : 'Add note'}
-        </button>
-      </div>
-    </div>
-  </div>
+          <Text style={{
+            fontSize: 11, fontWeight: '400',
+            fontFamily: fontFamily.dmSans,
+            color: colors.terra,
+          }}>
+            {note ? 'Edit note' : 'Add note'}
+          </Text>
+        </Pressable>
+      </View>
+    </View>
+  </View>
 )
 
 const PartnerRow: React.FC<{
   partner: SessionPartner
   onPress?: () => void
 }> = ({ partner, onPress }) => (
-  <div
-    onClick={onPress}
+  <Pressable
+    onPress={onPress}
     style={{
-      background: colors.surface,
-      border: '1px solid rgba(160,100,80,0.15)',
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: 'rgba(160,100,80,0.15)',
       borderRadius: 14,
-      padding: '12px 14px',
-      display: 'flex',
+      paddingVertical: 12,
+      paddingHorizontal: 14,
+      flexDirection: 'row',
       alignItems: 'center',
       gap: 12,
-      cursor: 'pointer',
     }}
   >
     {/* Avatar */}
@@ -315,48 +306,45 @@ const PartnerRow: React.FC<{
       borderWidth={2}
     />
     {/* Name + subtitle */}
-    <div style={{ flex: 1 }}>
-      <div style={{
-        fontFamily: webFonts.playfair,
+    <View style={{ flex: 1 }}>
+      <Text style={{
+        fontFamily: font('playfair', '600'),
         fontSize: 14,
-        fontWeight: 600,
         color: colors.ink,
       }}>
         {partner.name}
-      </div>
-      <div style={{
+      </Text>
+      <Text style={{
         fontSize: 10,
-        fontWeight: 300,
-        fontFamily: webFonts.dmSans,
+        fontFamily: font('dmSans', '300'),
         color: colors.stone,
         marginTop: 1,
       }}>
-        {partner.sessionCount} sessions together &middot; {partner.avgSatisfaction} avg
-      </div>
-    </div>
+        {partner.sessionCount} sessions together {'\u00B7'} {partner.avgSatisfaction} avg
+      </Text>
+    </View>
     {/* Avg stat */}
-    <div style={{ textAlign: 'center' }}>
-      <div style={{
-        fontFamily: webFonts.playfair,
+    <View style={{ alignItems: 'center' }}>
+      <Text style={{
+        fontFamily: font('playfair', '600'),
         fontSize: 16,
-        fontWeight: 600,
         color: colors.terra,
       }}>
         {partner.avgSatisfaction}
-      </div>
-      <div style={{
+      </Text>
+      <Text style={{
         fontSize: 7,
         letterSpacing: 1,
         textTransform: 'uppercase',
-        fontFamily: webFonts.dmSans,
+        fontFamily: fontFamily.dmSans,
         color: colors.stone,
       }}>
         Avg Sat
-      </div>
-    </div>
+      </Text>
+    </View>
     {/* Chevron */}
     <ChevronForwardIcon />
-  </div>
+  </Pressable>
 )
 
 /* ── Main Screen ── */
@@ -375,30 +363,26 @@ export const SessionDetailScreen: React.FC<SessionDetailScreenProps> = ({
   onEditNote,
   onPartnerPress,
 }) => (
-  <div style={{
+  <View style={{
     width: '100%',
-    minHeight: '100vh',
+    flex: 1,
     position: 'relative',
     overflow: 'hidden',
-    display: 'flex',
     flexDirection: 'column',
-    fontFamily: webFonts.dmSans,
-    color: colors.ink,
+    backgroundColor: colors.warmSand,
   }}>
     <DecorativeGlow position="center" size={320} opacity={0.12} />
-    <div style={{ height: 54 }} />
+    <View style={{ height: 54 }} />
     <ScreenHeader onBack={onBack} onEdit={onEdit} />
 
     <Hero partners={partners} partnerNames={partnerNames} date={date} />
     <SessionStatStrip rating={rating} ratingMax={ratingMax} dayOfWeek={dayOfWeek} />
 
     {/* Scrollable body */}
-    <div style={{
+    <ScrollView style={{
       flex: 1,
-      overflowY: 'auto',
-      overflowX: 'hidden',
+    }} contentContainerStyle={{
       paddingBottom: 16,
-      scrollbarWidth: 'none',
     }}>
       <SectionLabel>What Happened</SectionLabel>
       <ActivityTags activities={activities} />
@@ -407,11 +391,11 @@ export const SessionDetailScreen: React.FC<SessionDetailScreenProps> = ({
       <NotesCard note={note} onEditNote={onEditNote} />
 
       <SectionLabel>With</SectionLabel>
-      <div style={{
-        display: 'flex',
+      <View style={{
         flexDirection: 'column',
         gap: 8,
-        margin: '0 24px 14px',
+        marginHorizontal: 24,
+        marginBottom: 14,
       }}>
         {partners.map((p) => (
           <PartnerRow
@@ -420,8 +404,8 @@ export const SessionDetailScreen: React.FC<SessionDetailScreenProps> = ({
             onPress={() => onPartnerPress?.(p)}
           />
         ))}
-      </div>
-    </div>
+      </View>
+    </ScrollView>
 
-  </div>
+  </View>
 )

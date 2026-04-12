@@ -1,0 +1,11 @@
+appId: host.exp.exponent
+---
+- runFlow: seed-data.yaml
+- tapOn: "CALENDAR"
+- assertVisible: "Quick Log"
+- tapOn:
+    label: "Previous month"
+- waitForAnimationToEnd
+- tapOn:
+    label: "Next month"
+- waitForAnimationToEnd

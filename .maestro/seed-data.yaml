@@ -1,0 +1,29 @@
+appId: host.exp.exponent
+---
+# Ensure we're in the app
+- pressKey: back
+- pressKey: back
+- pressKey: back
+- tapOn:
+    text: "HOME"
+    optional: true
+# Reopen the app to ensure known state
+- openLink: "exp://10.0.2.2:8082"
+- extendedWaitUntil:
+    visible: "TATUM"
+    timeout: 30000
+# Navigate to Profile → Dev Tools → Clear & Reseed
+- tapOn: "PROFILE"
+- waitForAnimationToEnd
+# Scroll down to Dev Tools
+- swipe:
+    direction: UP
+- swipe:
+    direction: UP
+- tapOn: "🔧 Dev Tools"
+- waitForAnimationToEnd
+- tapOn: "Clear & Reseed"
+- waitForAnimationToEnd
+- pressKey: back
+- tapOn: "HOME"
+- waitForAnimationToEnd

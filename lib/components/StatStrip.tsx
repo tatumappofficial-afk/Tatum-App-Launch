@@ -1,5 +1,6 @@
 import React from 'react'
-import { colors, webFonts } from '../theme'
+import { Text, View } from 'react-native'
+import { colors, font, fontFamily } from '../theme'
 
 export interface StatItem {
   value: string | number
@@ -12,42 +13,42 @@ export interface StatStripProps {
 }
 
 export const StatStrip: React.FC<StatStripProps> = ({ stats }) => (
-  <div style={{
+  <View style={{
     backgroundColor: colors.surface,
-    border: '1px solid rgba(160,100,80,0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(160,100,80,0.15)',
     borderRadius: 16,
-    padding: '12px 0',
-    display: 'grid',
-    gridTemplateColumns: `repeat(${stats.length}, 1fr)`,
+    paddingVertical: 12,
+    flexDirection: 'row',
   }}>
     {stats.map((stat, i) => (
-      <div key={stat.label} style={{
-        textAlign: 'center',
-        borderRight: i < stats.length - 1 ? '1px solid rgba(160,100,80,0.12)' : 'none',
-        padding: '0 4px',
+      <View key={stat.label} style={{
+        flex: 1,
+        alignItems: 'center',
+        borderRightWidth: i < stats.length - 1 ? 1 : 0,
+        borderRightColor: 'rgba(160,100,80,0.12)',
+        paddingHorizontal: 4,
       }}>
-        <div style={{
-          fontFamily: webFonts.playfair,
+        <Text style={{
+          fontFamily: font('playfair', '600'),
           fontSize: 22,
-          fontWeight: 600,
           color: colors.terra,
-          lineHeight: 1,
+          lineHeight: 22,
         }}>
           {stat.value}
           {stat.unit && (
-            <span style={{ fontSize: 12, fontWeight: 300, color: '#C4B0A0' }}>{stat.unit}</span>
+            <Text style={{ fontSize: 12, fontWeight: '300', color: '#C4B0A0' }}>{stat.unit}</Text>
           )}
-        </div>
-        <div style={{
-          fontFamily: webFonts.dmSans,
+        </Text>
+        <Text style={{
+          fontFamily: font('dmSans', '500'),
           fontSize: 7.5,
-          fontWeight: 500,
           letterSpacing: 1.5,
           textTransform: 'uppercase',
           color: colors.stone,
           marginTop: 3,
-        }}>{stat.label}</div>
-      </div>
+        }}>{stat.label}</Text>
+      </View>
     ))}
-  </div>
+  </View>
 )

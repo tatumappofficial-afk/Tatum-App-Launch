@@ -1,0 +1,15 @@
+appId: host.exp.exponent
+---
+- runFlow: seed-data.yaml
+- tapOn: "HOME"
+- assertVisible: "TATUM"
+# Tap FAB
+- tapOn:
+    point: "50%,95%"
+- waitForAnimationToEnd
+- assertVisible: "Log a Session"
+# Tap rating "9"
+- tapOn: "9"
+# Tap Save Session
+- tapOn: "SAVE SESSION"
+- waitForAnimationToEnd

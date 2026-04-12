@@ -1,5 +1,7 @@
-import React from 'react'
-import { colors, webFonts, gradients } from '../theme'
+import React, { useRef } from 'react'
+import { View, Text, Pressable, ScrollView, TextInput, type GestureResponderEvent, type LayoutChangeEvent } from 'react-native'
+import Svg, { Polyline } from 'react-native-svg'
+import { colors, font, fontFamily, gradients, gradientStyle } from '../theme'
 import { GradientButton } from '../components/GradientButton'
 import { TagPill } from '../components/TagPill'
 
@@ -31,6 +33,7 @@ export interface LogSessionScreenProps {
   onActivityToggle?: (id: string) => void
   onRatingChange?: (value: number) => void
   onNotesChange?: (value: string) => void
+  onAddPartner?: () => void
   onSave?: () => void
 }
 
@@ -67,237 +70,151 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
   onActivityToggle,
   onRatingChange,
   onNotesChange,
+  onAddPartner,
   onSave,
 }) => {
   const ratingPct = (rating / 10) * 100
+  const trackWidthRef = useRef(0)
+
+  function handleTrackLayout(e: LayoutChangeEvent) {
+    trackWidthRef.current = e.nativeEvent.layout.width
+  }
+
+  function handleTrackPress(e: GestureResponderEvent) {
+    if (trackWidthRef.current <= 0) return
+    const x = e.nativeEvent.locationX
+    const value = Math.round((x / trackWidthRef.current) * 10)
+    onRatingChange?.(Math.max(0, Math.min(10, value)))
+  }
 
   return (
-    <div style={{
-      width: '100%',
-      height: '100vh',
-      position: 'relative',
-      overflow: 'hidden',
-      fontFamily: webFonts.dmSans,
-      color: colors.ink,
+    <View style={{
+      flex: 1,
+      backgroundColor: colors.warmSand,
     }}>
-      {/* ── Blurred home background ── */}
-      <div style={{
-        position: 'absolute',
-        inset: 0,
-        background: colors.warmSand,
-        zIndex: 0,
-      }}>
-        <div style={{ padding: '52px 24px 0', filter: 'blur(1px)' }}>
-          <div style={{
-            fontFamily: webFonts.playfair,
-            fontSize: 18,
-            fontWeight: 700,
-            letterSpacing: 6,
-            color: colors.terra,
-            marginBottom: 16,
-          }}>TATUM</div>
-          {/* Stat cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 12 }}>
-            {[
-              { label: 'Sessions', value: '12', sub: '\u2191 3 more' },
-              { label: 'Avg Sat', value: '8.2', sub: '\u2191 best yet' },
-              { label: 'Avg Rating', value: '8.2', sub: 'same' },
-            ].map((s) => (
-              <div key={s.label} style={{
-                background: colors.surface,
-                borderRadius: 12,
-                padding: 12,
-                border: `1px solid rgba(160,100,80,0.13)`,
-              }}>
-                <div style={{ fontSize: 7, letterSpacing: 1.5, textTransform: 'uppercase', color: colors.stone, marginBottom: 4 }}>{s.label}</div>
-                <div style={{ fontFamily: webFonts.playfair, fontSize: 22, fontWeight: 700, color: colors.terra }}>{s.value}</div>
-                <div style={{ fontSize: 8, color: colors.sage, marginTop: 2 }}>{s.sub}</div>
-              </div>
-            ))}
-          </div>
-          <div style={{ fontSize: 8, letterSpacing: 3, textTransform: 'uppercase', color: colors.stone, margin: '12px 0 8px' }}>Partners</div>
-          <div style={{ display: 'flex', gap: 10 }}>
-            {[
-              { initials: 'AL', name: 'Alex', stat: '8 \u00B7 8.4', grad: `linear-gradient(135deg,${colors.terra},${colors.fig})` },
-              { initials: 'JO', name: 'Jordan', stat: '4 \u00B7 7.8', grad: `linear-gradient(135deg,${colors.mauve},${colors.fig})` },
-              { initials: 'SO', name: 'Solo', stat: '2 \u00B7 9.0', grad: `linear-gradient(135deg,${colors.stone},#6A5848)` },
-            ].map((p) => (
-              <div key={p.name} style={{
-                flex: 1,
-                background: colors.surface,
-                borderRadius: 14,
-                padding: '12px 10px',
-                border: `1px solid rgba(160,100,80,0.13)`,
-                textAlign: 'center',
-              }}>
-                <div style={{
-                  width: 40, height: 40, borderRadius: '50%', margin: '0 auto 6px',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontFamily: webFonts.playfair, fontSize: 14, fontWeight: 700, color: colors.white,
-                  background: p.grad, border: `2px solid ${colors.white}`,
-                  boxShadow: '0 2px 8px rgba(61,43,37,0.12)',
-                }}>{p.initials}</div>
-                <div style={{ fontSize: 10, fontWeight: 500, color: colors.ink }}>{p.name}</div>
-                <div style={{ fontSize: 8, color: colors.stone, marginTop: 1 }}>{p.stat}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ── Dim overlay ── */}
-      <div style={{
-        position: 'absolute',
-        inset: 0,
-        background: 'rgba(30,18,12,0.45)',
-        zIndex: 10,
-      }} />
-
-      {/* ── Bottom sheet ── */}
-      <div style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: 574,
-        background: colors.warmSand,
-        borderRadius: '28px 28px 0 0',
-        zIndex: 20,
-        display: 'flex',
-        flexDirection: 'column',
-        boxShadow: '0 -8px 40px rgba(61,43,37,0.2)',
-      }}>
-        {/* Handle */}
-        <div style={{
-          width: 36,
-          height: 4,
-          background: 'rgba(160,100,80,0.25)',
-          borderRadius: 2,
-          margin: '12px auto 0',
-          flexShrink: 0,
-        }} />
-
         {/* Header */}
-        <div style={{
-          display: 'flex',
+        <View style={{
+          flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '12px 20px 0',
+          paddingTop: 12,
+          paddingHorizontal: 20,
           flexShrink: 0,
         }}>
-          <div style={{
-            fontFamily: webFonts.playfair,
+          <Text style={{
+            fontFamily: font('playfair', '700'),
             fontSize: 20,
-            fontWeight: 700,
             color: colors.ink,
-          }}>Log a Session</div>
-          <button style={{
-            display: 'inline-flex',
+          }}>Log a Session</Text>
+          <Pressable style={{
+            flexDirection: 'row',
             alignItems: 'center',
             gap: 5,
-            background: `linear-gradient(135deg, ${gradients.primaryCta[0]}, ${gradients.primaryCta[1]})`,
-            border: 'none',
+            ...gradientStyle(`linear-gradient(135deg, ${gradients.primaryCta[0]}, ${gradients.primaryCta[1]})`),
             borderRadius: 9999,
-            padding: '6px 10px 6px 12px',
-            cursor: 'pointer',
+            paddingVertical: 6,
+            paddingLeft: 12,
+            paddingRight: 10,
             boxShadow: '0 2px 10px rgba(124,74,90,0.28)',
           }}>
-            <span style={{ fontSize: 12, fontWeight: 500, color: colors.white }}>{date}</span>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.75)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
-          </button>
-        </div>
+            <Text style={{ fontSize: 12, fontWeight: '500', color: colors.white }}>{date}</Text>
+            <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
+              <Polyline points="6 9 12 15 18 9" stroke="rgba(255,255,255,0.75)" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+            </Svg>
+          </Pressable>
+        </View>
 
         {/* Scrollable form body */}
-        <div style={{
+        <ScrollView style={{
           flex: 1,
-          overflowY: 'auto',
-          overflowX: 'hidden',
-          padding: '14px 20px 0',
+          paddingTop: 14,
+          paddingHorizontal: 20,
         }}>
           {/* ── WITH (partners) ── */}
           <FormLabel>With</FormLabel>
-          <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+          <View style={{ flexDirection: 'row', gap: 12, marginBottom: 16 }}>
             {partners.map((p) => {
               const selected = selectedPartnerIds.includes(p.id)
               return (
-                <div
+                <Pressable
                   key={p.id}
-                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, cursor: 'pointer' }}
-                  onClick={() => onPartnerToggle?.(p.id)}
+                  style={{ flexDirection: 'column', alignItems: 'center', gap: 4 }}
+                  onPress={() => onPartnerToggle?.(p.id)}
                 >
-                  <div style={{ position: 'relative' }}>
-                    <div style={{
+                  <View style={{ position: 'relative' }}>
+                    <View style={{
                       width: 46,
                       height: 46,
-                      borderRadius: '50%',
-                      display: 'flex',
+                      borderRadius: 23,
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontFamily: webFonts.playfair,
-                      fontSize: p.isSolo ? 20 : 15,
-                      fontWeight: 700,
-                      color: colors.white,
-                      background: p.gradient,
-                      border: selected ? `2.5px solid ${colors.terra}` : '2.5px solid transparent',
+                      ...gradientStyle(p.gradient),
+                      borderWidth: 2.5,
+                      borderColor: selected ? colors.terra : 'transparent',
                       boxShadow: selected
-                        ? `0 0 0 3px rgba(192,120,88,0.18), 0 2px 8px rgba(61,43,37,0.12)`
+                        ? '0 0 0 3px rgba(192,120,88,0.18), 0 2px 8px rgba(61,43,37,0.12)'
                         : '0 2px 8px rgba(61,43,37,0.12)',
                     }}>
-                      {p.isSolo ? '\u2728' : p.initials}
-                    </div>
+                      <Text style={{
+                        fontFamily: font('playfair', '700'),
+                        fontSize: p.isSolo ? 20 : 15,
+                        color: colors.white,
+                      }}>{p.isSolo ? '\u2728' : p.initials}</Text>
+                    </View>
                     {selected && (
-                      <div style={{
+                      <View style={{
                         position: 'absolute',
                         bottom: -1,
                         right: -1,
                         width: 16,
                         height: 16,
-                        borderRadius: '50%',
-                        background: colors.terra,
-                        border: `2px solid ${colors.warmSand}`,
-                        display: 'flex',
+                        borderRadius: 8,
+                        backgroundColor: colors.terra,
+                        borderWidth: 2,
+                        borderColor: colors.warmSand,
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: 8,
-                        color: colors.white,
-                        fontWeight: 700,
-                      }}>{'\u2713'}</div>
+                      }}>
+                        <Text style={{ fontSize: 8, color: colors.white, fontWeight: '700' }}>{'\u2713'}</Text>
+                      </View>
                     )}
-                  </div>
-                  <div style={{
+                  </View>
+                  <Text style={{
                     fontSize: 9,
-                    fontWeight: selected ? 500 : 400,
+                    fontWeight: selected ? '500' : '400',
                     color: selected ? colors.terra : colors.stone,
-                  }}>{p.name}</div>
-                </div>
+                  }}>{p.name}</Text>
+                </Pressable>
               )
             })}
             {/* Add button */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
-              <div style={{ position: 'relative' }}>
-                <div style={{
+            <Pressable onPress={() => onAddPartner?.()} style={{ flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+              <View style={{ position: 'relative' }}>
+                <View style={{
                   width: 46,
                   height: 46,
-                  borderRadius: '50%',
-                  display: 'flex',
+                  borderRadius: 23,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  background: 'transparent',
-                  border: `1.5px dashed rgba(192,120,88,0.35)`,
-                  color: colors.terra,
-                  fontFamily: webFonts.dmSans,
-                  fontSize: 20,
-                }}>{'\uFF0B'}</div>
-              </div>
-              <div style={{ fontSize: 9, fontWeight: 400, color: colors.terra }}>Add</div>
-            </div>
-          </div>
+                  backgroundColor: 'transparent',
+                  borderWidth: 1.5,
+                  borderStyle: 'dashed',
+                  borderColor: 'rgba(192,120,88,0.35)',
+                }}>
+                  <Text style={{
+                    color: colors.terra,
+                    fontFamily: fontFamily.dmSans,
+                    fontSize: 20,
+                  }}>{'\uFF0B'}</Text>
+                </View>
+              </View>
+              <Text style={{ fontSize: 9, fontWeight: '400', color: colors.terra }}>Add</Text>
+            </Pressable>
+          </View>
 
           {/* ── WHAT HAPPENED (activity tags) ── */}
           <FormLabel>What happened</FormLabel>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 16 }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 16 }}>
             {activities.map((tag) => (
               <TagPill
                 key={tag.id}
@@ -308,116 +225,123 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
                 onPress={() => onActivityToggle?.(tag.id)}
               />
             ))}
-          </div>
+          </View>
 
           {/* ── RATING ── */}
           <FormLabel>Rating</FormLabel>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 8 }}>
-            <span style={{
-              fontFamily: webFonts.playfair,
+          <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4, marginBottom: 8 }}>
+            <Text style={{
+              fontFamily: font('playfair', '700'),
               fontSize: 22,
-              fontWeight: 700,
               color: colors.terra,
-            }}>{rating}</span>
-            <span style={{ fontSize: 11, fontWeight: 300, color: colors.stone }}> / 10</span>
-          </div>
-          <div style={{
-            position: 'relative',
-            height: 4,
-            background: colors.surface2,
-            borderRadius: 2,
-            marginBottom: 4,
-          }}>
-            <div style={{
-              position: 'absolute',
-              left: 0,
-              top: 0,
-              bottom: 0,
-              width: `${ratingPct}%`,
-              background: `linear-gradient(to right, ${colors.terra}, ${colors.mauve})`,
+            }}>{rating}</Text>
+            <Text style={{ fontSize: 11, fontWeight: '300', color: colors.stone }}> / 10</Text>
+          </View>
+          <Pressable
+            onLayout={handleTrackLayout}
+            onPress={handleTrackPress}
+            style={{
+              position: 'relative',
+              height: 20,
+              justifyContent: 'center',
+              marginBottom: 4,
+            }}
+          >
+            <View style={{
+              height: 4,
+              backgroundColor: colors.surface2,
               borderRadius: 2,
-            }} />
-            <div style={{
+            }}>
+              <View style={{
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                bottom: 0,
+                width: `${ratingPct}%`,
+                ...gradientStyle(`linear-gradient(to right, ${colors.terra}, ${colors.mauve})`),
+                borderRadius: 2,
+              }} />
+            </View>
+            <View style={{
               position: 'absolute',
-              top: '50%',
+              top: 0,
               left: `${ratingPct}%`,
-              transform: 'translate(-50%, -50%)',
+              marginLeft: -10,
               width: 20,
               height: 20,
-              borderRadius: '50%',
-              background: colors.white,
-              border: `2.5px solid ${colors.terra}`,
+              borderRadius: 10,
+              backgroundColor: colors.white,
+              borderWidth: 2.5,
+              borderColor: colors.terra,
               boxShadow: '0 2px 8px rgba(124,74,90,0.3)',
             }} />
-          </div>
-          <div style={{
-            display: 'flex',
+          </Pressable>
+          <View style={{
+            flexDirection: 'row',
             justifyContent: 'space-between',
-            fontSize: 8.5,
-            fontWeight: 300,
-            color: '#C4B0A0',
             marginBottom: 16,
           }}>
-            {['None', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'].map((l) => (
-              <span key={l}>{l}</span>
+            {['None', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'].map((l, i) => (
+              <Pressable key={l} onPress={() => onRatingChange?.(i)} hitSlop={4}>
+                <Text style={{ fontSize: 8.5, fontWeight: rating === i ? '600' : '300', color: rating === i ? colors.terra : '#C4B0A0' }}>{l}</Text>
+              </Pressable>
             ))}
-          </div>
+          </View>
 
           {/* ── NOTES ── */}
           <FormLabel>Notes</FormLabel>
-          <textarea
+          <TextInput
             value={notes}
-            onChange={(e) => onNotesChange?.(e.target.value)}
+            onChangeText={(text) => onNotesChange?.(text)}
             placeholder="How did it feel? What made tonight special\u2026"
-            rows={3}
+            placeholderTextColor={colors.muted}
+            multiline
+            numberOfLines={3}
             style={{
               width: '100%',
-              background: colors.surface,
-              border: `1.5px solid ${colors.border}`,
+              backgroundColor: colors.surface,
+              borderWidth: 1.5,
+              borderColor: colors.border,
               borderRadius: 14,
-              padding: '12px 14px',
-              fontFamily: webFonts.playfair,
+              paddingVertical: 12,
+              paddingHorizontal: 14,
+              fontFamily: fontFamily.playfair,
               fontSize: 13,
               fontStyle: 'italic',
               color: '#5A3E36',
-              resize: 'none',
-              outline: 'none',
-              lineHeight: 1.65,
+              lineHeight: 21,
               marginBottom: 4,
               minHeight: 70,
-              boxSizing: 'border-box',
-              backgroundImage: `repeating-linear-gradient(
-                to bottom, transparent, transparent 27px,
-                rgba(160,100,80,0.07) 27px, rgba(160,100,80,0.07) 28px
-              )`,
-              backgroundPosition: '0 14px',
+              textAlignVertical: 'top',
             }}
           />
-        </div>
+        </ScrollView>
 
         {/* ── Footer ── */}
-        <div style={{
+        <View style={{
           flexShrink: 0,
-          padding: '10px 20px 24px',
-          borderTop: '1px solid rgba(160,100,80,0.1)',
-          background: colors.warmSand,
+          paddingVertical: 10,
+          paddingHorizontal: 20,
+          paddingBottom: 24,
+          borderTopWidth: 1,
+          borderTopColor: 'rgba(160,100,80,0.1)',
+          backgroundColor: colors.warmSand,
         }}>
           <GradientButton label="Save Session" onPress={onSave} height={50} />
-        </div>
-      </div>
-    </div>
+        </View>
+    </View>
   )
 }
 
 /* ── Helpers ── */
 
 const FormLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div style={{
+  <Text style={{
     fontSize: 8,
-    fontWeight: 500,
+    fontWeight: '500',
     letterSpacing: 3,
     textTransform: 'uppercase',
     color: colors.stone,
     marginBottom: 8,
-  }}>{children}</div>
+  }}>{children}</Text>
 )
