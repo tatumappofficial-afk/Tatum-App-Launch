@@ -18,7 +18,6 @@ export const Default: Story = {
     activePeriod: 0,
     periodDateLabel: 'Mar 12\u201318',
     sessionsCount: 12,
-    avgSatisfaction: 8.2,
     avgRating: 8.2,
     topActivities: [
       { emoji: '\uD83C\uDF46', label: 'Penetration', count: 5, percent: 85 },

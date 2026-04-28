@@ -1,12 +1,7 @@
 import { useLiveQuery } from '@tanstack/react-db'
 import { useRouter } from 'expo-router'
 import { ProfileScreen } from '@/lib/screens/ProfileScreen'
-import { encounters, partners } from '@/src/db'
-import { ACTIVITY_EMOJIS } from '@/src/db/schema'
-
-function getInitials(name: string): string {
-  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
-}
+import { activityTags, encounters, partners } from '@/src/db'
 
 export default function ProfileRoute() {
   const router = useRouter()
@@ -17,23 +12,19 @@ export default function ProfileRoute() {
     q.from({ partners }).select(({ partners }) => ({ ...partners }))
   )
 
-  // Activity tags
-  const activityCounts = new Map<string, number>()
-  for (const enc of allEncounters) {
-    for (const a of enc.activities) {
-      activityCounts.set(a, (activityCounts.get(a) || 0) + 1)
-    }
-  }
-  const activityTags = [...activityCounts.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .map(([emoji]) => {
-      const known = ACTIVITY_EMOJIS.find(a => a.code === emoji)
-      return { emoji, label: known?.label || emoji }
-    })
+  const { data: allTags = [] } = useLiveQuery((q) =>
+    q.from({ activityTags }).select(({ activityTags }) => ({ ...activityTags }))
+  )
+
+  // All active activity tags from the DB, sorted by sortOrder
+  const activityTagList = allTags
+    .filter(t => t.isActive)
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .map(t => ({ emoji: t.emoji, label: t.label }))
 
   // Partners (matches ProfileScreen Partner interface: initials, gradient, since)
   const partnerList = allPartners.filter(p => p.isActive).map(p => ({
-    initials: getInitials(p.displayName),
+    initials: p.avatarValue,
     gradient: p.avatarGradient,
     since: new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
   }))
@@ -45,17 +36,18 @@ export default function ProfileRoute() {
     .map(enc => {
       const partner = allPartners.find(p => p.id === enc.partnerId)
       return {
-        partnerInitials: partner ? getInitials(partner.displayName) : '✨',
+        partnerInitials: partner ? partner.avatarValue : '✨',
         partnerGradient: partner?.avatarGradient || 'linear-gradient(135deg, #8BA888, #5A8060)',
-        date: new Date(enc.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        date: new Date(enc.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         rating: enc.stars || 0,
         tags: enc.activities,
-        note: 'A beautiful moment worth remembering.',
+        note: enc.notes ?? undefined,
       }
     })
 
-  const avgSat = allEncounters.length > 0
-    ? allEncounters.reduce((s, e) => s + (e.stars || 0), 0) / allEncounters.length
+  const ratedEncounters = allEncounters.filter(e => e.stars && e.stars > 0)
+  const avgSat = ratedEncounters.length > 0
+    ? ratedEncounters.reduce((s, e) => s + (e.stars || 0), 0) / ratedEncounters.length
     : 0
 
   return (
@@ -69,14 +61,13 @@ export default function ProfileRoute() {
         partners: allPartners.filter(p => p.isActive).length,
       }}
       partners={partnerList}
-      activityTags={activityTags}
+      activityTags={activityTagList}
       recentSessions={recentSessions}
-      onEdit={() => router.push('/(modals)/edit-profile')}
-      onSettings={() => router.push('/(modals)/settings')}
-      onPartnersSection={() => router.push('/(modals)/partners')}
-      onAddTag={() => router.push('/(modals)/add-tag')}
-      onAddPartner={() => router.push('/(modals)/partners')}
-      onDevTools={() => router.push('/(modals)/dev-tools')}
+      onEdit={() => router.push('/(pages)/edit-profile')}
+      onSettings={() => router.push('/(pages)/settings')}
+      onPartnersSection={() => router.push('/(pages)/partners')}
+      onAddTag={() => router.push('/(sheets)/add-tag')}
+      onAddPartner={() => router.push('/(sheets)/edit-partner')}
     />
   )
 }

@@ -1,9 +1,11 @@
 import React from 'react'
-import { Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import Svg, { Line } from 'react-native-svg'
-import { colors, font, fontFamily, gradientStyle } from '../theme'
+import { colors, fontFamily, gradientStyle, typography } from '../theme'
 import { TagPill } from '../components/TagPill'
+import { EmojiChip } from '../components/EmojiChip'
 import { GradientButton } from '../components/GradientButton'
+import { TAG_EMOJIS } from '../data/tagEmojis'
 
 /* ── Types ── */
 
@@ -27,20 +29,8 @@ export interface AddTagModalProps {
   onTagNameChange?: (name: string) => void
 }
 
-/* ── Emoji grid data ── */
-
-const emojiRows = [
-  // Row 1 - intimacy / activity
-  ['\u{1F346}', '\u{1F48B}', '\u{270B}', '\u{1F449}', '\u{1F32C}\u{FE0F}', '\u{1F351}', '\u{1FA84}'],
-  // Row 2 - mood / feeling
-  ['\u{1F525}', '\u{1F4AB}', '\u{1F970}', '\u{1F60F}', '\u{1F319}', '\u{2728}', '\u{1F4A6}'],
-  // Row 3 - emotional / milestone
-  ['\u{1FA77}', '\u{2764}\u{FE0F}', '\u{1FAF6}', '\u{1F618}', '\u{1F942}', '\u{1F389}', '\u{1FA78}'],
-  // Row 4 - body / health / other
-  ['\u{1F48A}', '\u{1F33F}', '\u{1F6C1}', '\u{1F9D8}', '\u{1F4A4}', '\u{26A1}', '\u{1F3B5}'],
-]
-
-const EMOJI_CELL_BASIS = `${100 / 7}%` as unknown as number
+const EMOJI_CELL_BASIS = `${100 / 7}%`
+const EMOJI_GRID_MAX_HEIGHT = 280
 
 /* ── Inline icon helpers ── */
 
@@ -64,11 +54,16 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
   onEmojiSelect,
   onTagNameChange,
 }) => {
+  const trimmedName = tagName.trim()
+  const isDuplicate = trimmedName.length > 0
+    && existingTags.some(t => t.name.toLowerCase() === trimmedName.toLowerCase())
+  const addTagDisabled = trimmedName.length === 0 || isDuplicate
+
   return (
-    <View style={{
-      flex: 1,
-      backgroundColor: colors.surface,
-    }}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={{ flex: 1, backgroundColor: colors.surface }}
+    >
         {/* Header */}
         <View style={{
           paddingTop: 20,
@@ -77,11 +72,7 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
           alignItems: 'center',
           justifyContent: 'space-between',
         }}>
-          <Text style={{
-            fontFamily: font('playfair', '700'),
-            fontSize: 20,
-            color: colors.ink,
-          }}>Add a tag</Text>
+          <Text style={typography.screenTitle}>Add a tag</Text>
           <Pressable
             onPress={onClose}
             style={{
@@ -98,106 +89,64 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
         </View>
 
         {/* ── Existing tags strip ── */}
-        <View style={{ paddingTop: 12, paddingHorizontal: 20 }}>
-          <Text style={{
-            fontSize: 8,
-            fontWeight: '500',
-            letterSpacing: 3,
-            textTransform: 'uppercase',
-            color: colors.stone,
-            marginBottom: 8,
-          }}>Your current tags</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={{ paddingBottom: 2 }}
-            contentContainerStyle={{ gap: 6 }}
-          >
-            {existingTags.map((tag, i) => (
-              <View key={i} style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 4,
-                flexShrink: 0,
-                backgroundColor: colors.surface2,
-                borderRadius: 9999,
-                paddingVertical: 5,
-                paddingRight: 10,
-                paddingLeft: 7,
-                borderWidth: 1,
-                borderColor: 'rgba(160,100,80,0.18)',
-              }}>
-                <Text style={{ fontSize: 14, lineHeight: 14 }}>{tag.emoji}</Text>
-                <Text style={{ fontSize: 11, fontWeight: '400', color: '#6A4A40' }}>{tag.name}</Text>
-              </View>
-            ))}
-          </ScrollView>
-        </View>
+        {existingTags.length > 0 && (
+          <View style={{ paddingTop: 12, paddingHorizontal: 20 }}>
+            <Text style={[typography.sectionLabel, { marginBottom: 8 }]}>Your current tags</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={{ paddingBottom: 2 }}
+              contentContainerStyle={{ gap: 6 }}
+            >
+              {existingTags.map((tag, i) => (
+                <TagPill key={i} emoji={tag.emoji} label={tag.name} variant="display" />
+              ))}
+            </ScrollView>
+          </View>
+        )}
 
         {/* Divider */}
         <View style={{
           height: 1,
-          backgroundColor: 'rgba(160,100,80,0.1)',
+          backgroundColor: colors.border,
           marginTop: 12,
         }} />
 
         {/* ── Emoji picker ── */}
         <View style={{ paddingTop: 12, paddingHorizontal: 20 }}>
-          <Text style={{
-            fontSize: 8,
-            fontWeight: '500',
-            letterSpacing: 3,
-            textTransform: 'uppercase',
-            color: colors.stone,
-            marginBottom: 8,
-          }}>Choose an emoji</Text>
+          <Text style={[typography.sectionLabel, { marginBottom: 8 }]}>Choose an emoji</Text>
 
-          <View style={{
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            gap: 4,
-            marginBottom: 8,
-          }}>
-            {emojiRows.flat().map((emoji, i) => {
+          <ScrollView
+            style={{ maxHeight: EMOJI_GRID_MAX_HEIGHT, marginBottom: 8 }}
+            showsVerticalScrollIndicator={true}
+            contentContainerStyle={{
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              gap: 4,
+              paddingBottom: 4,
+            }}
+          >
+            {TAG_EMOJIS.map((emoji, i) => {
               const isUsed = usedEmojis.includes(emoji)
               const isSelected = emoji === selectedEmoji && !isUsed
               return (
-                <Pressable
+                <EmojiChip
                   key={i}
-                  onPress={() => !isUsed && onEmojiSelect?.(emoji)}
+                  emoji={emoji}
+                  flexBasis={EMOJI_CELL_BASIS}
+                  borderRadius={10}
+                  selected={isSelected}
                   disabled={isUsed}
-                  style={{
-                    flexBasis: EMOJI_CELL_BASIS,
-                    aspectRatio: 1,
-                    borderRadius: 10,
-                    ...(isSelected
-                      ? gradientStyle('linear-gradient(135deg, rgba(192,120,88,0.18), rgba(124,74,90,0.12))')
-                      : { backgroundColor: colors.surface2 }),
-                    borderWidth: 1.5,
-                    borderColor: isSelected ? colors.terra : 'transparent',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    opacity: isUsed ? 0.22 : 1,
-                    boxShadow: isSelected ? '0 2px 8px rgba(124,74,90,0.2)' : 'none',
-                  }}
-                >
-                  <Text style={{ fontSize: 20 }}>{emoji}</Text>
-                </Pressable>
+                  onPress={() => onEmojiSelect?.(emoji)}
+                />
               )
             })}
-          </View>
+          </ScrollView>
         </View>
 
         {/* ── Tag name input ── */}
         <View style={{ paddingTop: 10, paddingHorizontal: 20 }}>
-          <Text style={{
-            fontSize: 8,
-            fontWeight: '500',
-            letterSpacing: 3,
-            textTransform: 'uppercase',
-            color: colors.stone,
-            marginBottom: 8,
-          }}>Tag name</Text>
+          <Text style={[typography.sectionLabel, { marginBottom: 8 }]}>Tag name</Text>
           <View style={{
             flexDirection: 'row',
             alignItems: 'center',
@@ -228,7 +177,7 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
                 flex: 1,
                 backgroundColor: colors.surface2,
                 borderWidth: 1.5,
-                borderColor: 'rgba(160,100,80,0.2)',
+                borderColor: colors.border,
                 borderRadius: 12,
                 paddingVertical: 12,
                 paddingHorizontal: 14,
@@ -240,6 +189,16 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
               }}
             />
           </View>
+          {isDuplicate && (
+            <Text style={{
+              ...typography.hint,
+              color: colors.fig,
+              marginTop: 6,
+              fontStyle: 'normal',
+            }}>
+              A tag with this name already exists.
+            </Text>
+          )}
         </View>
 
         {/* ── Footer ── */}
@@ -256,17 +215,16 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
               flex: 1,
               height: 46,
               borderWidth: 1.5,
-              borderColor: 'rgba(160,100,80,0.25)',
+              borderColor: colors.border,
               borderRadius: 9999,
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
             <Text style={{
-              fontFamily: font('dmSans', '500'),
+              ...typography.tagLabel,
               fontSize: 12,
               letterSpacing: 1,
-              textTransform: 'uppercase',
               color: colors.stone,
             }}>Cancel</Text>
           </Pressable>
@@ -277,9 +235,10 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
               fontSize={12}
               letterSpacing={1.5}
               onPress={onAddTag}
+              disabled={addTagDisabled}
             />
           </View>
         </View>
-    </View>
+    </KeyboardAvoidingView>
   )
 }

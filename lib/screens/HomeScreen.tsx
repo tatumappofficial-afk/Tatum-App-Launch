@@ -1,30 +1,14 @@
 import React from 'react'
-import { Pressable, ScrollView, Text, View } from 'react-native'
+import { Image, Pressable, ScrollView, Text, View } from 'react-native'
 import Svg, { Circle, Line, Path, Polyline, Rect } from 'react-native-svg'
 import { colors, font, fontFamily, gradientStyle } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
+import { SectionLabel } from './shared/SectionLabel'
 import { AvatarCircle } from '../components/AvatarCircle'
 import { StarRating } from '../components/StarRating'
 
-// ── Inline section label (no horizontal margin — parent provides padding) ──
-
-const InlineSectionLabel: React.FC<{ label: string; showChevron?: boolean }> = ({ label, showChevron = false }) => (
-  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-    <Text style={{
-      fontFamily: font('dmSans', '500'),
-      fontSize: 8.5,
-      letterSpacing: 3.5,
-      textTransform: 'uppercase',
-      color: colors.terra,
-    }}>{label}</Text>
-    <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(160,100,80,0.18)' }} />
-    {showChevron && (
-      <Svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-        <Polyline points="9 18 15 12 9 6" />
-      </Svg>
-    )}
-  </View>
-)
+// Parent views provide spacing around these, so strip the shared defaults.
+const INLINE_LABEL_STYLE = { marginVertical: 0, marginHorizontal: 0, marginBottom: 0, flexShrink: 0 } as const
 
 // ── Types ──
 
@@ -49,7 +33,7 @@ export interface Session {
   date: string
   rating: number
   activityEmojis: string[]
-  note: string
+  note?: string
 }
 
 export interface EmptyPartner {
@@ -62,7 +46,6 @@ export interface HomeScreenProps {
   activePeriod?: number
   periodDateLabel?: string
   sessionsCount?: number
-  avgSatisfaction?: number
   avgRating?: number
   topActivities?: Activity[]
   partners?: Partner[]
@@ -73,6 +56,7 @@ export interface HomeScreenProps {
   onPartnerPress?: (index: number) => void
   onSessionPress?: (index: number) => void
   onLogFirstSession?: () => void
+  onAddPartner?: () => void
 }
 
 // ── Sub-components ──
@@ -109,6 +93,7 @@ const PeriodTabs: React.FC<PeriodTabsProps> = ({ activeIndex, dateLabel, isEmpty
   <View style={{
     paddingHorizontal: 24,
     paddingTop: 10,
+    paddingBottom: 14,
     flexDirection: 'row',
     gap: 6,
     flexShrink: 0,
@@ -126,8 +111,10 @@ const PeriodTabs: React.FC<PeriodTabsProps> = ({ activeIndex, dateLabel, isEmpty
           ...(isActive
             ? gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)')
             : { backgroundColor: colors.surface2 }),
-          paddingVertical: 5,
-          boxShadow: isActive ? '0 3px 10px rgba(124,74,90,0.25)' : undefined,
+          height: 32,
+          boxShadow: isActive
+            ? '0 3px 10px rgba(124,74,90,0.25)'
+            : '0 2px 6px rgba(61,43,37,0.08)',
         }}>
           <Text style={{
             fontFamily: font('dmSans', '500'),
@@ -153,12 +140,10 @@ const PeriodTabs: React.FC<PeriodTabsProps> = ({ activeIndex, dateLabel, isEmpty
 
 const OverviewCard: React.FC<{
   sessionsCount: number
-  avgSatisfaction: number
   avgRating: number
-}> = ({ sessionsCount, avgSatisfaction, avgRating }) => {
+}> = ({ sessionsCount, avgRating }) => {
   const stats = [
     { label: 'Sessions', value: String(sessionsCount) },
-    { label: 'Avg Sat.', value: avgSatisfaction.toFixed(1) },
     { label: 'Avg Rating', value: avgRating.toFixed(1) },
   ]
   return (
@@ -176,9 +161,9 @@ const OverviewCard: React.FC<{
         <View key={s.label} style={{
           flex: 1,
           paddingHorizontal: 10,
-          borderRightWidth: i < 2 ? 1 : 0,
+          borderRightWidth: i < stats.length - 1 ? 1 : 0,
           borderRightColor: 'rgba(160,100,80,0.12)',
-          ...(i === 0 ? { paddingLeft: 0 } : {}),
+          alignItems: 'center',
         }}>
           <Text style={{
             fontSize: 7.5,
@@ -307,11 +292,13 @@ const HomePartnerCard: React.FC<{ partner: Partner; onPress?: () => void }> = ({
         }}>Avg Sat.</Text>
       </View>
     </View>
-    <Text style={{
-      fontSize: 10,
-      color: colors.muted,
-      fontFamily: font('dmSans', '300'),
-    }}>{partner.topActivityEmoji} Most common</Text>
+    {partner.sessions > 0 && (
+      <Text style={{
+        fontSize: 10,
+        color: colors.muted,
+        fontFamily: font('dmSans', '300'),
+      }}>{partner.topActivityEmoji} Most common</Text>
+    )}
   </Pressable>
 )
 
@@ -401,7 +388,7 @@ const ViewAllCard: React.FC = () => (
 
 // ── Empty State Sub-components ──
 
-const HeroEmpty: React.FC<{ userName: string }> = ({ userName }) => (
+const HeroEmpty: React.FC<{ userName: string; onLogSession?: () => void }> = ({ userName, onLogSession }) => (
   <View style={{
     marginTop: 10,
     backgroundColor: colors.surface,
@@ -412,7 +399,7 @@ const HeroEmpty: React.FC<{ userName: string }> = ({ userName }) => (
     paddingHorizontal: 24,
     alignItems: 'center',
   }}>
-    <Text style={{ fontSize: 44, marginBottom: 14 }}>{'\uD83C\uDF19'}</Text>
+    <Image source={require('@/assets/tatum-logo.png')} style={{ width: 64, height: 64, marginBottom: 14 }} />
     <Text style={{
       fontFamily: font('playfair', '700'),
       fontSize: 22,
@@ -431,16 +418,19 @@ const HeroEmpty: React.FC<{ userName: string }> = ({ userName }) => (
     }}>
       This is your private space. As you start logging, your stats, patterns, and sessions will show up here — all yours, all on your device.
     </Text>
-    <Pressable style={{
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 7,
-      ...gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)'),
-      borderRadius: 9999,
-      paddingVertical: 13,
-      paddingHorizontal: 28,
-      boxShadow: '0 6px 20px rgba(124,74,90,0.3), inset 0 1px 0 rgba(255,255,255,0.15)',
-    }}>
+    <Pressable
+      onPress={onLogSession}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 7,
+        ...gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)'),
+        borderRadius: 9999,
+        paddingVertical: 13,
+        paddingHorizontal: 28,
+        boxShadow: '0 6px 20px rgba(124,74,90,0.3), inset 0 1px 0 rgba(255,255,255,0.15)',
+      }}
+    >
       <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round">
         <Line x1={12} y1={5} x2={12} y2={19} />
         <Line x1={5} y1={12} x2={19} y2={12} />
@@ -528,20 +518,23 @@ const EmptyPartnerCard: React.FC<{ partner: EmptyPartner }> = ({ partner }) => (
   </View>
 )
 
-const AddPartnerChip: React.FC = () => (
-  <Pressable style={{
-    flexShrink: 0,
-    width: 110,
-    backgroundColor: 'transparent',
-    borderWidth: 1.5,
-    borderStyle: 'dashed',
-    borderColor: 'rgba(192,120,88,0.3)',
-    borderRadius: 16,
-    paddingVertical: 14,
-    paddingHorizontal: 10,
-    alignItems: 'center',
-    gap: 6,
-  }}>
+const AddPartnerChip: React.FC<{ onPress?: () => void }> = ({ onPress }) => (
+  <Pressable
+    onPress={onPress}
+    style={{
+      flexShrink: 0,
+      width: 110,
+      backgroundColor: 'transparent',
+      borderWidth: 1.5,
+      borderStyle: 'dashed',
+      borderColor: 'rgba(192,120,88,0.3)',
+      borderRadius: 16,
+      paddingVertical: 14,
+      paddingHorizontal: 10,
+      alignItems: 'center',
+      gap: 6,
+    }}
+  >
     <View style={{
       width: 44,
       height: 44,
@@ -595,7 +588,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   activePeriod = 0,
   periodDateLabel,
   sessionsCount = 0,
-  avgSatisfaction = 0,
   avgRating = 0,
   topActivities = [],
   partners = [],
@@ -606,6 +598,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onPartnerPress,
   onSessionPress,
   onLogFirstSession,
+  onAddPartner,
 }) => {
   if (isEmpty) {
     return (
@@ -621,28 +614,31 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         <Wordmark />
         <PeriodTabs isEmpty />
 
-        <ScrollView style={{ flex: 1, paddingHorizontal: 24, position: 'relative', zIndex: 1 }}>
-          <HeroEmpty userName={userName} />
+        <ScrollView
+          style={{ flex: 1, paddingHorizontal: 24, position: 'relative', zIndex: 1 }}
+          contentContainerStyle={{ paddingBottom: 100 }}
+        >
+          <HeroEmpty userName={userName} onLogSession={onLogFirstSession} />
 
           <View style={{ marginTop: 16, marginBottom: 10 }}>
-            <InlineSectionLabel label="Overview" />
+            <SectionLabel label="Overview" style={INLINE_LABEL_STYLE} />
           </View>
           <EmptyStatsStrip />
 
           <View style={{ marginTop: 16, marginBottom: 10 }}>
-            <InlineSectionLabel label="Partners" />
+            <SectionLabel label="Partners" style={INLINE_LABEL_STYLE} />
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ overflow: 'visible' }}>
             <View style={{ flexDirection: 'row', gap: 8, paddingRight: 40 }}>
               {emptyPartners.map((p, i) => (
                 <EmptyPartnerCard key={i} partner={p} />
               ))}
-              <AddPartnerChip />
+              <AddPartnerChip onPress={onAddPartner} />
             </View>
           </ScrollView>
 
           <View style={{ marginTop: 16, marginBottom: 10 }}>
-            <InlineSectionLabel label="Recent Sessions" />
+            <SectionLabel label="Recent Sessions" style={INLINE_LABEL_STYLE} />
           </View>
           <EmptySessionsPlaceholder />
 
@@ -665,24 +661,26 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       <PeriodTabs activeIndex={activePeriod} dateLabel={periodDateLabel} />
 
       {/* Main content */}
-      <ScrollView style={{
-        flex: 1,
-        paddingHorizontal: 24,
-        paddingTop: 10,
-        position: 'relative',
-        zIndex: 1,
-      }}>
+      <ScrollView
+        style={{
+          flex: 1,
+          paddingHorizontal: 24,
+          paddingTop: 10,
+          position: 'relative',
+          zIndex: 1,
+        }}
+        contentContainerStyle={{ paddingBottom: 100 }}
+      >
         <View style={{ gap: 9 }}>
           <OverviewCard
             sessionsCount={sessionsCount}
-            avgSatisfaction={avgSatisfaction}
             avgRating={avgRating}
           />
 
-          <InlineSectionLabel label="Top Activities" />
+          <SectionLabel label="Top Activities" style={INLINE_LABEL_STYLE} />
           <ActivityBar activities={topActivities} />
 
-          <InlineSectionLabel label="Partners" showChevron />
+          <SectionLabel label="Partners" showChevron style={INLINE_LABEL_STYLE} />
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginRight: -24, overflow: 'visible' }}>
             <View style={{ flexDirection: 'row', gap: 8, paddingRight: 40 }}>
@@ -692,7 +690,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             </View>
           </ScrollView>
 
-          <InlineSectionLabel label="Sessions" />
+          <SectionLabel label="Sessions" style={INLINE_LABEL_STYLE} />
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginRight: -24, overflow: 'visible' }}>
             <View style={{ flexDirection: 'row', gap: 8, paddingRight: 40 }}>

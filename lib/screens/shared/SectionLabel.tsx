@@ -1,29 +1,24 @@
 import React from 'react'
-import { Text, View } from 'react-native'
+import { Text, View, type ViewStyle } from 'react-native'
 import Svg, { Polyline } from 'react-native-svg'
-import { colors, font, fontFamily } from '../../theme'
+import { colors, typography } from '../../theme'
 
 interface SectionLabelProps {
   label: string
   showChevron?: boolean
+  style?: ViewStyle
 }
 
-export const SectionLabel: React.FC<SectionLabelProps> = ({ label, showChevron = false }) => (
-  <View style={{
+export const SectionLabel: React.FC<SectionLabelProps> = ({ label, showChevron = false, style }) => (
+  <View style={[{
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
     marginVertical: 12,
     marginHorizontal: 24,
     marginBottom: 8,
-  }}>
-    <Text style={{
-      fontFamily: font('dmSans', '500'),
-      fontSize: 8,
-      letterSpacing: 3,
-      textTransform: 'uppercase',
-      color: colors.terra,
-    }}>{label}</Text>
+  }, style]}>
+    <Text style={typography.sectionLabelTerra}>{label}</Text>
     <View style={{
       flex: 1,
       height: 1,

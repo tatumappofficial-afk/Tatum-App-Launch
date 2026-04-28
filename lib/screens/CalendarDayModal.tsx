@@ -35,6 +35,7 @@ export interface CalendarDayModalProps {
   onLogSession?: () => void
   onSessionPress?: (id: string) => void
   onDismiss?: () => void
+  onClose?: () => void
 }
 
 /* ── Empty State ── */
@@ -174,6 +175,7 @@ export const CalendarDayModal: React.FC<CalendarDayModalProps> = ({
   sessions = [],
   onLogSession,
   onSessionPress,
+  onClose,
 }) => {
   const hasSessions = sessions.length > 0
   const subtitle = hasSessions ? `${sessions.length} session${sessions.length > 1 ? 's' : ''}` : 'No sessions logged'
@@ -185,7 +187,7 @@ export const CalendarDayModal: React.FC<CalendarDayModalProps> = ({
         flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
         paddingHorizontal: 20, paddingTop: 12, flexShrink: 0,
       }}>
-        <View>
+        <View style={{ flex: 1 }}>
           <Text style={{
             fontFamily: font('playfair', '700'), fontSize: 22, color: colors.ink,
           }}>{dayLabel}</Text>
@@ -194,6 +196,19 @@ export const CalendarDayModal: React.FC<CalendarDayModalProps> = ({
             color: colors.stone, marginTop: 1,
           }}>{subtitle}</Text>
         </View>
+        <Pressable
+          onPress={onClose}
+          style={{
+            width: 30, height: 30, borderRadius: 15,
+            backgroundColor: colors.surface2,
+            alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.stone} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+            <Line x1={18} y1={6} x2={6} y2={18} />
+            <Line x1={6} y1={6} x2={18} y2={18} />
+          </Svg>
+        </Pressable>
       </View>
 
       {/* Content */}

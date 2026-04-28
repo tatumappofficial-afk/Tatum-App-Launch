@@ -68,14 +68,14 @@ const DayCell: React.FC<{
       }}>
         {day}
       </Text>
-      {isLoggedDay && !isToday && (
+      {isLoggedDay && (
         <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 1 }}>
           <Text style={{ fontSize: emojiFontSize }}>{logged!.emoji}</Text>
           {logged!.hasMultiple && (
             <Text style={{
               fontSize: plusFontSize,
               fontWeight: '600',
-              color: colors.mauve,
+              color: isToday ? 'rgba(255,255,255,0.8)' : colors.mauve,
               marginLeft: 1,
             }}>+</Text>
           )}

@@ -1,7 +1,7 @@
 import React from 'react'
 import { View, Text, Pressable, ScrollView } from 'react-native'
 import Svg, { Circle, Path, Polyline, Line } from 'react-native-svg'
-import { colors, font, fontFamily } from '../theme'
+import { colors, font, fontFamily, typography } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { SectionLabel } from './shared/SectionLabel'
 import { AvatarCircle } from '../components/AvatarCircle'
@@ -29,7 +29,7 @@ export interface RecentSession {
   /** 0-100 percentage for the star fill width */
   rating: number
   tags: string[]
-  note: string
+  note?: string
 }
 
 export interface ProfileScreenProps {
@@ -50,7 +50,6 @@ export interface ProfileScreenProps {
   onAddPartner?: () => void
   onAddTag?: () => void
   onPartnersSection?: () => void
-  onDevTools?: () => void
 }
 
 /* ── Inline icon helpers ── */
@@ -99,7 +98,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   onAddPartner,
   onAddTag,
   onPartnersSection,
-  onDevTools,
 }) => {
   return (
     <View style={{
@@ -112,6 +110,8 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
       <DecorativeGlow position="top-right" size={220} opacity={0.09} />
       <View style={{ height: 54 }} />
 
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 24 }}>
+
       {/* ── Screen Header ── */}
       <View style={{
         paddingTop: 6,
@@ -123,11 +123,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         position: 'relative',
         zIndex: 2,
       }}>
-        <Text style={{
-          fontFamily: font('playfair', '700'),
-          fontSize: 20,
-          color: colors.ink,
-        }}>Profile</Text>
+        <Text style={typography.screenTitle}>Profile</Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <Pressable
             onPress={onEdit}
@@ -370,7 +366,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 }}>{session.date}</Text>
               </View>
               <StarRating rating={session.rating} size={12} />
-              <View style={{ flexDirection: 'row', gap: 4 }}>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4, overflow: 'hidden', maxHeight: 52 }}>
                 {session.tags.map((tag, j) => (
                   <Text key={j} style={{
                     fontSize: 13,
@@ -400,15 +396,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         </ScrollView>
       </View>
 
-      {onDevTools && (
-        <Pressable
-          onPress={onDevTools}
-          accessibilityLabel="Open Dev Tools Page"
-          style={{ paddingVertical: 12, alignItems: 'center' }}
-        >
-          <Text style={{ fontSize: 11, color: colors.muted }}>🔧 Dev Tools</Text>
-        </Pressable>
-      )}
+      </ScrollView>
 
     </View>
   )

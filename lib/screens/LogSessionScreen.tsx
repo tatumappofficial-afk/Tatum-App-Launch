@@ -1,9 +1,11 @@
-import React, { useRef } from 'react'
-import { View, Text, Pressable, ScrollView, TextInput, type GestureResponderEvent, type LayoutChangeEvent } from 'react-native'
-import Svg, { Polyline } from 'react-native-svg'
+import React from 'react'
+import { View, Text, Pressable, ScrollView, TextInput } from 'react-native'
+import Svg, { Line, Polyline } from 'react-native-svg'
 import { colors, font, fontFamily, gradients, gradientStyle } from '../theme'
 import { GradientButton } from '../components/GradientButton'
 import { TagPill } from '../components/TagPill'
+import { RatingSlider } from '../components/RatingSlider'
+import { SuccessOverlay } from '../components/SuccessOverlay'
 
 /* ── Types ── */
 
@@ -22,6 +24,8 @@ export interface ActivityTag {
 }
 
 export interface LogSessionScreenProps {
+  title?: string
+  saveLabel?: string
   date?: string
   partners?: Partner[]
   selectedPartnerIds?: string[]
@@ -35,6 +39,13 @@ export interface LogSessionScreenProps {
   onNotesChange?: (value: string) => void
   onAddPartner?: () => void
   onSave?: () => void
+  onDelete?: () => void
+  onClose?: () => void
+  onDatePress?: () => void
+  calendarOpen?: boolean
+  calendarContent?: React.ReactNode
+  showSuccess?: boolean
+  successLabel?: string
 }
 
 /* ── Default data ── */
@@ -59,6 +70,8 @@ const defaultActivities: ActivityTag[] = [
 /* ── Component ── */
 
 export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
+  title = 'Log a Session',
+  saveLabel = 'Save Session',
   date = 'Tue, Mar 25',
   partners = defaultPartners,
   selectedPartnerIds = ['alex'],
@@ -72,64 +85,87 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
   onNotesChange,
   onAddPartner,
   onSave,
+  onDelete,
+  onClose,
+  onDatePress,
+  calendarOpen = false,
+  calendarContent,
+  showSuccess = false,
+  successLabel = 'Session added',
 }) => {
-  const ratingPct = (rating / 10) * 100
-  const trackWidthRef = useRef(0)
-
-  function handleTrackLayout(e: LayoutChangeEvent) {
-    trackWidthRef.current = e.nativeEvent.layout.width
-  }
-
-  function handleTrackPress(e: GestureResponderEvent) {
-    if (trackWidthRef.current <= 0) return
-    const x = e.nativeEvent.locationX
-    const value = Math.round((x / trackWidthRef.current) * 10)
-    onRatingChange?.(Math.max(0, Math.min(10, value)))
-  }
 
   return (
     <View style={{
       flex: 1,
       backgroundColor: colors.warmSand,
     }}>
-        {/* Header */}
-        <View style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          paddingTop: 12,
-          paddingHorizontal: 20,
-          flexShrink: 0,
-        }}>
-          <Text style={{
-            fontFamily: font('playfair', '700'),
-            fontSize: 20,
-            color: colors.ink,
-          }}>Log a Session</Text>
-          <Pressable style={{
+        {/* Scrollable form body — header scrolls with content */}
+        <ScrollView
+          style={{
+            flex: 1,
+          }}
+          contentContainerStyle={{
+            paddingTop: 8,
+            paddingHorizontal: 20,
+            paddingBottom: 16,
+          }}
+        >
+          {/* Header */}
+          <View style={{
             flexDirection: 'row',
             alignItems: 'center',
-            gap: 5,
-            ...gradientStyle(`linear-gradient(135deg, ${gradients.primaryCta[0]}, ${gradients.primaryCta[1]})`),
-            borderRadius: 9999,
-            paddingVertical: 6,
-            paddingLeft: 12,
-            paddingRight: 10,
-            boxShadow: '0 2px 10px rgba(124,74,90,0.28)',
+            justifyContent: 'space-between',
+            paddingTop: 12,
+            marginBottom: 14,
           }}>
-            <Text style={{ fontSize: 12, fontWeight: '500', color: colors.white }}>{date}</Text>
-            <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
-              <Polyline points="6 9 12 15 18 9" stroke="rgba(255,255,255,0.75)" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
-            </Svg>
-          </Pressable>
-        </View>
+            <Text style={{
+              fontFamily: font('playfair', '700'),
+              fontSize: 20,
+              color: colors.ink,
+            }}>{title}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Pressable
+                onPress={onDatePress}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 5,
+                  ...gradientStyle(`linear-gradient(135deg, ${gradients.primaryCta[0]}, ${gradients.primaryCta[1]})`),
+                  borderRadius: 9999,
+                  paddingVertical: 6,
+                  paddingLeft: 12,
+                  paddingRight: 10,
+                  boxShadow: '0 2px 10px rgba(124,74,90,0.28)',
+                }}
+              >
+                <Text style={{ fontSize: 12, fontWeight: '500', color: colors.white }}>{date}</Text>
+                <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
+                  <Polyline points={calendarOpen ? "6 15 12 9 18 15" : "6 9 12 15 18 9"} stroke="rgba(255,255,255,0.75)" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+              </Pressable>
+              <Pressable
+                onPress={onClose}
+                style={{
+                  width: 30, height: 30, borderRadius: 15,
+                  backgroundColor: colors.surface2,
+                  alignItems: 'center', justifyContent: 'center',
+                }}
+              >
+                <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.stone} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                  <Line x1={18} y1={6} x2={6} y2={18} />
+                  <Line x1={6} y1={6} x2={18} y2={18} />
+                </Svg>
+              </Pressable>
+            </View>
+          </View>
 
-        {/* Scrollable form body */}
-        <ScrollView style={{
-          flex: 1,
-          paddingTop: 14,
-          paddingHorizontal: 20,
-        }}>
+          {/* ── Date picker dropdown ── */}
+          {calendarOpen && calendarContent && (
+            <View style={{ zIndex: 100, marginBottom: 8 }}>
+              {calendarContent}
+            </View>
+          )}
+
           {/* ── WITH (partners) ── */}
           <FormLabel>With</FormLabel>
           <View style={{ flexDirection: 'row', gap: 12, marginBottom: 16 }}>
@@ -229,63 +265,8 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
 
           {/* ── RATING ── */}
           <FormLabel>Rating</FormLabel>
-          <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4, marginBottom: 8 }}>
-            <Text style={{
-              fontFamily: font('playfair', '700'),
-              fontSize: 22,
-              color: colors.terra,
-            }}>{rating}</Text>
-            <Text style={{ fontSize: 11, fontWeight: '300', color: colors.stone }}> / 10</Text>
-          </View>
-          <Pressable
-            onLayout={handleTrackLayout}
-            onPress={handleTrackPress}
-            style={{
-              position: 'relative',
-              height: 20,
-              justifyContent: 'center',
-              marginBottom: 4,
-            }}
-          >
-            <View style={{
-              height: 4,
-              backgroundColor: colors.surface2,
-              borderRadius: 2,
-            }}>
-              <View style={{
-                position: 'absolute',
-                left: 0,
-                top: 0,
-                bottom: 0,
-                width: `${ratingPct}%`,
-                ...gradientStyle(`linear-gradient(to right, ${colors.terra}, ${colors.mauve})`),
-                borderRadius: 2,
-              }} />
-            </View>
-            <View style={{
-              position: 'absolute',
-              top: 0,
-              left: `${ratingPct}%`,
-              marginLeft: -10,
-              width: 20,
-              height: 20,
-              borderRadius: 10,
-              backgroundColor: colors.white,
-              borderWidth: 2.5,
-              borderColor: colors.terra,
-              boxShadow: '0 2px 8px rgba(124,74,90,0.3)',
-            }} />
-          </Pressable>
-          <View style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            marginBottom: 16,
-          }}>
-            {['None', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'].map((l, i) => (
-              <Pressable key={l} onPress={() => onRatingChange?.(i)} hitSlop={4}>
-                <Text style={{ fontSize: 8.5, fontWeight: rating === i ? '600' : '300', color: rating === i ? colors.terra : '#C4B0A0' }}>{l}</Text>
-              </Pressable>
-            ))}
+          <View style={{ marginBottom: 16 }}>
+            <RatingSlider value={rating} onChange={onRatingChange} />
           </View>
 
           {/* ── NOTES ── */}
@@ -293,10 +274,11 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
           <TextInput
             value={notes}
             onChangeText={(text) => onNotesChange?.(text)}
-            placeholder="How did it feel? What made tonight special\u2026"
+            placeholder={"How did it feel? What made this moment special\u2026"}
             placeholderTextColor={colors.muted}
             multiline
             numberOfLines={3}
+            maxLength={3000}
             style={{
               width: '100%',
               backgroundColor: colors.surface,
@@ -315,6 +297,13 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
               textAlignVertical: 'top',
             }}
           />
+          <Text style={{
+            fontSize: 10,
+            color: (notes?.length || 0) > 2800 ? colors.terra : colors.muted,
+            textAlign: 'right',
+            fontFamily: fontFamily.dmSans,
+            marginBottom: 4,
+          }}>{notes?.length || 0} / 3,000</Text>
         </ScrollView>
 
         {/* ── Footer ── */}
@@ -322,13 +311,31 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
           flexShrink: 0,
           paddingVertical: 10,
           paddingHorizontal: 20,
-          paddingBottom: 24,
+          paddingBottom: 34,
           borderTopWidth: 1,
           borderTopColor: 'rgba(160,100,80,0.1)',
           backgroundColor: colors.warmSand,
         }}>
-          <GradientButton label="Save Session" onPress={onSave} height={50} />
+          <GradientButton label={saveLabel} onPress={onSave} height={50} />
+          {onDelete && (
+            <Pressable
+              onPress={onDelete}
+              style={{
+                alignItems: 'center',
+                paddingTop: 14,
+              }}
+            >
+              <Text style={{
+                fontSize: 13,
+                fontFamily: font('dmSans', '500'),
+                color: '#B04040',
+                letterSpacing: 0.3,
+              }}>Delete Session</Text>
+            </Pressable>
+          )}
         </View>
+
+        <SuccessOverlay visible={showSuccess} label={successLabel} />
     </View>
   )
 }

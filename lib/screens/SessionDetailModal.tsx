@@ -1,6 +1,6 @@
 import React from 'react'
 import { View, Text, Pressable, ScrollView } from 'react-native'
-import Svg, { Path, Polyline } from 'react-native-svg'
+import Svg, { Line, Path, Polyline } from 'react-native-svg'
 import { colors, font, fontFamily } from '../theme'
 import { SectionLabel } from './shared/SectionLabel'
 import { AvatarCircle } from '../components/AvatarCircle'
@@ -39,6 +39,7 @@ export interface SessionDetailModalProps {
   onEdit?: () => void
   onEditNote?: () => void
   onDelete?: () => void
+  onClose?: () => void
 }
 
 /* ── Main Component ── */
@@ -46,7 +47,7 @@ export interface SessionDetailModalProps {
 export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
   backLabel, partnerName, partnerInitials, partnerGradient,
   dateLabel, rating, dayOfWeek, tags, noteText,
-  onBack, onEdit, onEditNote, onDelete,
+  onBack, onEdit, onEditNote, onDelete, onClose,
 }) => (
   <View style={{ flex: 1, backgroundColor: colors.warmSand }}>
     {/* Header: back pill + edit */}
@@ -69,18 +70,33 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
           fontFamily: fontFamily.dmSans, fontSize: 12, fontWeight: '400', color: colors.stone,
         }}>{backLabel}</Text>
       </Pressable>
-      <Pressable
-        onPress={onEdit}
-        style={{
-          backgroundColor: 'transparent', borderWidth: 1, borderColor: 'rgba(160,100,80,0.3)',
-          borderRadius: 9999, paddingVertical: 5, paddingHorizontal: 14,
-        }}
-      >
-        <Text style={{
-          fontFamily: font('dmSans', '500'), fontSize: 11, color: colors.terra,
-          letterSpacing: 0.5,
-        }}>Edit</Text>
-      </Pressable>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <Pressable
+          onPress={onEdit}
+          style={{
+            backgroundColor: 'transparent', borderWidth: 1, borderColor: 'rgba(160,100,80,0.3)',
+            borderRadius: 9999, paddingVertical: 5, paddingHorizontal: 14,
+          }}
+        >
+          <Text style={{
+            fontFamily: font('dmSans', '500'), fontSize: 11, color: colors.terra,
+            letterSpacing: 0.5,
+          }}>Edit</Text>
+        </Pressable>
+        <Pressable
+          onPress={onClose}
+          style={{
+            width: 30, height: 30, borderRadius: 15,
+            backgroundColor: colors.surface2,
+            alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.stone} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+            <Line x1={18} y1={6} x2={6} y2={18} />
+            <Line x1={6} y1={6} x2={18} y2={18} />
+          </Svg>
+        </Pressable>
+      </View>
     </View>
 
     {/* Scrollable content */}

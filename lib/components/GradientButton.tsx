@@ -11,6 +11,7 @@ export interface GradientButtonProps {
   fullWidth?: boolean
   icon?: React.ReactNode
   variant?: 'primary' | 'outline'
+  disabled?: boolean
 }
 
 export const GradientButton: React.FC<GradientButtonProps> = ({
@@ -22,12 +23,14 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
   fullWidth = true,
   icon,
   variant = 'primary',
+  disabled = false,
 }) => {
   const isPrimary = variant === 'primary'
 
   return (
     <Pressable
       onPress={onPress}
+      disabled={disabled}
       style={{
         width: fullWidth ? '100%' : undefined,
         height,
@@ -41,10 +44,11 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
         borderWidth: isPrimary ? 0 : 1.5,
         borderColor: isPrimary ? undefined : colors.terra,
         borderRadius: 9999,
-        boxShadow: isPrimary
+        boxShadow: isPrimary && !disabled
           ? '0 6px 20px rgba(124,74,90,0.32), inset 0 1px 0 rgba(255,255,255,0.15)'
           : undefined,
         paddingHorizontal: fullWidth ? undefined : height * 0.54,
+        opacity: disabled ? 0.4 : 1,
       }}
     >
       {icon}

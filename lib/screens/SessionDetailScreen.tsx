@@ -3,6 +3,7 @@ import { View, Text, Pressable, ScrollView } from 'react-native'
 import Svg, { Path, Polyline } from 'react-native-svg'
 import { colors, font, fontFamily } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
+import { SectionLabel } from './shared/SectionLabel'
 import { AvatarCircle } from '../components/AvatarCircle'
 import { StatStrip } from '../components/StatStrip'
 import { TagPill } from '../components/TagPill'
@@ -68,15 +69,16 @@ const ScreenHeader: React.FC<{
     <Pressable
       onPress={onBack}
       accessibilityLabel="Go back"
-      style={{
+      style={({ pressed }) => ({
         width: 34,
         height: 34,
         borderRadius: 17,
-        backgroundColor: colors.surface2,
+        backgroundColor: pressed ? 'rgba(160,100,80,0.18)' : colors.surface2,
         alignItems: 'center',
         justifyContent: 'center',
         padding: 0,
-      }}
+        transform: [{ scale: pressed ? 0.94 : 1 }],
+      })}
     >
       <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={colors.stone} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
         <Polyline points="15 18 9 12 15 6" />
@@ -84,14 +86,15 @@ const ScreenHeader: React.FC<{
     </Pressable>
     <Pressable
       onPress={onEdit}
-      style={{
-        backgroundColor: 'transparent',
+      style={({ pressed }) => ({
+        backgroundColor: pressed ? 'rgba(192,120,88,0.12)' : 'transparent',
         borderWidth: 1,
-        borderColor: 'rgba(160,100,80,0.3)',
+        borderColor: pressed ? colors.terra : 'rgba(160,100,80,0.3)',
         borderRadius: 9999,
         paddingVertical: 5,
         paddingHorizontal: 14,
-      }}
+        opacity: pressed ? 0.85 : 1,
+      })}
     >
       <Text style={{
         fontSize: 11,
@@ -162,29 +165,6 @@ const SessionStatStrip: React.FC<{
       { value: rating, unit: ` /${ratingMax}`, label: 'Rating' },
       { value: dayOfWeek, label: 'Day' },
     ]} />
-  </View>
-)
-
-const SectionLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <View style={{
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginTop: 12,
-    marginHorizontal: 24,
-    marginBottom: 8,
-    flexShrink: 0,
-  }}>
-    <Text style={{
-      fontSize: 8,
-      letterSpacing: 3,
-      textTransform: 'uppercase',
-      color: colors.terra,
-      fontFamily: font('dmSans', '500'),
-    }}>
-      {children}
-    </Text>
-    <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(160,100,80,0.15)' }} />
   </View>
 )
 
@@ -261,10 +241,14 @@ const NotesCard: React.FC<{
       }}>
         <Pressable
           onPress={onEditNote}
-          style={{
+          style={({ pressed }) => ({
             flexDirection: 'row', alignItems: 'center', gap: 5,
-            padding: 0,
-          }}
+            paddingVertical: 4, paddingHorizontal: 8,
+            marginVertical: -4, marginHorizontal: -8,
+            borderRadius: 8,
+            backgroundColor: pressed ? 'rgba(192,120,88,0.12)' : 'transparent',
+            opacity: pressed ? 0.8 : 1,
+          })}
         >
           <PencilIcon />
           <Text style={{
@@ -286,17 +270,18 @@ const PartnerRow: React.FC<{
 }> = ({ partner, onPress }) => (
   <Pressable
     onPress={onPress}
-    style={{
-      backgroundColor: colors.surface,
+    style={({ pressed }) => ({
+      backgroundColor: pressed ? 'rgba(192,120,88,0.08)' : colors.surface,
       borderWidth: 1,
-      borderColor: 'rgba(160,100,80,0.15)',
+      borderColor: pressed ? 'rgba(160,100,80,0.3)' : 'rgba(160,100,80,0.15)',
       borderRadius: 14,
       paddingVertical: 12,
       paddingHorizontal: 14,
       flexDirection: 'row',
       alignItems: 'center',
       gap: 12,
-    }}
+      transform: [{ scale: pressed ? 0.98 : 1 }],
+    })}
   >
     {/* Avatar */}
     <AvatarCircle
@@ -384,13 +369,13 @@ export const SessionDetailScreen: React.FC<SessionDetailScreenProps> = ({
     }} contentContainerStyle={{
       paddingBottom: 16,
     }}>
-      <SectionLabel>What Happened</SectionLabel>
+      <SectionLabel label="What Happened" />
       <ActivityTags activities={activities} />
 
-      <SectionLabel>Notes</SectionLabel>
+      <SectionLabel label="Notes" />
       <NotesCard note={note} onEditNote={onEditNote} />
 
-      <SectionLabel>With</SectionLabel>
+      <SectionLabel label="With" />
       <View style={{
         flexDirection: 'column',
         gap: 8,

@@ -19,7 +19,6 @@ export interface SettingsScreenProps {
   onSubmitFeedback?: () => void
   onPrivacyInfo?: () => void
   onEraseEverything?: () => void
-  onDevTools?: () => void
 }
 
 /* ── Inline icon helpers ── */
@@ -76,7 +75,6 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   onSubmitFeedback,
   onPrivacyInfo,
   onEraseEverything,
-  onDevTools,
 }) => {
   return (
     <View style={{
@@ -291,29 +289,6 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         </View>
       </View>
 
-      {/* ── Dev Tools Section ── */}
-      {onDevTools && (
-        <View style={{ marginTop: 8 }}>
-          <View style={{
-            backgroundColor: colors.surface,
-            borderWidth: 1,
-            borderColor: 'rgba(160,100,80,0.15)',
-            borderRadius: 16,
-            marginHorizontal: 20,
-            overflow: 'hidden',
-          }}>
-            <SettingsRow
-              icon={<Text style={{ fontSize: 15 }}>{'\uD83D\uDD27'}</Text>}
-              iconBg="rgba(160,100,80,0.08)"
-              title="Dev Tools"
-              subtitle="Seed data, reset database, debug"
-              trailing={<ChevronForwardIcon />}
-              onPress={onDevTools}
-              showBorder={false}
-            />
-          </View>
-        </View>
-      )}
 
       {/* ── Footer ── */}
       <View style={{

@@ -3,17 +3,38 @@ import { useLiveQuery } from '@tanstack/react-db'
 import { useRouter } from 'expo-router'
 import { generateId as uuid } from '@/src/utils/uuid'
 import { CalendarScreen } from '@/lib/screens/CalendarScreen'
-import { encounters } from '@/src/db'
+import { activityTags, encounters, partners } from '@/src/db'
+import { useActivityTagMap } from '@/src/hooks/useActivityTagMap'
+
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+]
 
 export default function CalendarRoute() {
   const router = useRouter()
   const now = new Date()
   const [month, setMonth] = useState(now.getMonth() + 1)
   const [year, setYear] = useState(now.getFullYear())
+  const [selectedDay, setSelectedDay] = useState<number>(now.getDate())
 
   const { data: allEncounters = [] } = useLiveQuery((q) =>
     q.from({ encounters }).select(({ encounters }) => ({ ...encounters }))
   )
+  const { data: allPartners = [] } = useLiveQuery((q) =>
+    q.from({ partners }).select(({ partners }) => ({ ...partners }))
+  )
+  const { data: allTags = [] } = useLiveQuery((q) =>
+    q.from({ activityTags }).select(({ activityTags }) => ({ ...activityTags }))
+  )
+
+  const tagMap = useActivityTagMap()
+
+  const quickLogEmojis = allTags
+    .filter(t => t.isActive)
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .map(t => t.emoji)
 
   // Compute logged days for current month
   const monthStr = `${year}-${String(month).padStart(2, '0')}`
@@ -33,20 +54,45 @@ export default function CalendarRoute() {
 
   const loggedDays = [...loggedDaysMap.entries()].map(([day, data]) => ({
     day,
-    emoji: data.emojis[0] || '✨',
+    emoji: data.emojis[0] || '\u2728',
     hasMultiple: data.count > 1 || data.emojis.length > 1,
   }))
 
   const isCurrentMonth = month === now.getMonth() + 1 && year === now.getFullYear()
 
+  // Build sessions for selected day
+  const selectedDateStr = `${year}-${String(month).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`
+  const selectedDateObj = new Date(selectedDateStr + 'T00:00:00')
+  const dayOfWeek = DAY_NAMES[selectedDateObj.getDay()]
+  const selectedDayLabel = `${dayOfWeek}, ${MONTH_NAMES[month - 1]} ${selectedDay}`
+
+  const dayEncounters = allEncounters.filter(e => e.date === selectedDateStr)
+  const daySessions = dayEncounters.map(enc => {
+    const partner = allPartners.find(p => p.id === enc.partnerId)
+    return {
+      id: enc.id,
+      partnerName: partner?.displayName || 'Solo',
+      partnerInitials: partner ? partner.avatarValue : "\u2728",
+      partnerGradient: partner?.avatarGradient || 'linear-gradient(135deg, #8BA888, #5A8060)',
+      rating: enc.stars || 0,
+      tags: enc.activities.map(emoji => ({
+        emoji,
+        label: tagMap.get(emoji) || emoji,
+      })),
+      noteSnippet: enc.notes?.slice(0, 80),
+    }
+  })
+
   function handlePrevMonth() {
     if (month === 1) { setMonth(12); setYear(y => y - 1) }
     else setMonth(m => m - 1)
+    setSelectedDay(1)
   }
 
   function handleNextMonth() {
     if (month === 12) { setMonth(1); setYear(y => y + 1) }
     else setMonth(m => m + 1)
+    setSelectedDay(1)
   }
 
   function handleQuickLog(emoji: string) {
@@ -57,10 +103,8 @@ export default function CalendarRoute() {
       date: dateStr,
       activities: [emoji],
       partnerId: null,
-      rating: null,
       stars: null,
-      vibes: [],
-      noteId: null,
+      notes: null,
       createdAt: nowStr,
       updatedAt: nowStr,
     })
@@ -72,10 +116,15 @@ export default function CalendarRoute() {
       year={year}
       today={isCurrentMonth ? now.getDate() : undefined}
       loggedDays={loggedDays}
+      selectedDay={selectedDay}
+      selectedDayLabel={selectedDayLabel}
+      daySessions={daySessions}
       onPrevMonth={handlePrevMonth}
       onNextMonth={handleNextMonth}
-      onDayPress={(day) => router.push(`/(modals)/calendar-day?month=${month}&year=${year}&day=${day}`)}
+      onDayPress={setSelectedDay}
       onQuickLog={handleQuickLog}
+      onSessionPress={(id) => router.push(`/(pages)/session-detail?id=${id}`)}
+      quickLogEmojis={quickLogEmojis}
     />
   )
 }

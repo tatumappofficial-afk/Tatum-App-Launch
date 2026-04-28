@@ -1,10 +1,14 @@
 import React from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 import Svg, { Polyline } from 'react-native-svg'
-import { colors, font, fontFamily, gradientStyle } from '../theme'
+import { colors, font, fontFamily, gradientStyle, typography } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
+import { SectionLabel } from './shared/SectionLabel'
 import { CalendarGrid } from '../components/CalendarGrid'
 import { EmojiChip } from '../components/EmojiChip'
+import { AvatarCircle } from '../components/AvatarCircle'
+import { StarRating } from '../components/StarRating'
+import { TagPill } from '../components/TagPill'
 
 /* ── Types ── */
 
@@ -14,16 +18,30 @@ export interface LoggedDay {
   hasMultiple?: boolean
 }
 
+export interface DaySession {
+  id: string
+  partnerName: string
+  partnerInitials: string
+  partnerGradient: string
+  rating: number
+  tags: { emoji: string; label: string }[]
+  noteSnippet?: string
+}
+
 export interface CalendarScreenProps {
   month: number       // 1-12
   year: number
   today?: number
   loggedDays?: LoggedDay[]
   selectedDay?: number | null
+  selectedDayLabel?: string
+  daySessions?: DaySession[]
   onPrevMonth?: () => void
   onNextMonth?: () => void
   onDayPress?: (day: number) => void
   onQuickLog?: (emoji: string) => void
+  onSessionPress?: (id: string) => void
+  quickLogEmojis?: string[]
 }
 
 /* ── Helpers ── */
@@ -33,7 +51,6 @@ const MONTH_NAMES = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ]
 
-const QUICK_LOG_EMOJIS = ['🍆', '✋', '👉', '💋', '🌬️', '😘', '🍑', '✨', '🌙', '🩷', '🩸']
 
 /* ── Sub-components ── */
 
@@ -48,12 +65,7 @@ const NavHeader: React.FC = () => (
     position: 'relative',
     zIndex: 2,
   }}>
-    <Text style={{
-      fontFamily: font('playfair', '700'),
-      fontSize: 20,
-      letterSpacing: 5,
-      color: colors.terra,
-    }}>TATUM</Text>
+    <Text style={typography.screenTitle}>Calendar</Text>
   </View>
 )
 
@@ -136,19 +148,18 @@ const Legend: React.FC = () => (
       <Text style={{ fontFamily: fontFamily.dmSans, fontSize: 8.5, color: colors.stone }}>Today</Text>
     </View>
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-      <Text style={{ fontSize: 10 }}>🍆</Text>
+      <Text style={{ fontSize: 10 }}>{'\uD83C\uDF46'}</Text>
       <Text style={{ fontFamily: fontFamily.dmSans, fontSize: 8.5, color: colors.stone }}>Logged</Text>
     </View>
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-      <Text style={{ fontSize: 10, color: colors.terra, fontWeight: '600' }}>🍆+</Text>
+      <Text style={{ fontSize: 10, color: colors.terra, fontWeight: '600' }}>{'\uD83C\uDF46'}+</Text>
       <Text style={{ fontFamily: fontFamily.dmSans, fontSize: 8.5, color: colors.stone }}>Multiple</Text>
     </View>
   </View>
 )
 
-const QuickLogWidget: React.FC<{ onQuickLog?: (emoji: string) => void }> = ({ onQuickLog }) => (
+const QuickLogWidget: React.FC<{ onQuickLog?: (emoji: string) => void; emojis?: string[] }> = ({ onQuickLog, emojis = [] }) => (
   <View style={{
-    flexShrink: 0,
     backgroundColor: colors.surface,
     borderRadius: 18,
     borderWidth: 1,
@@ -176,13 +187,61 @@ const QuickLogWidget: React.FC<{ onQuickLog?: (emoji: string) => void }> = ({ on
       }}>Drag to a date · Tap to log today</Text>
     </View>
     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-      <View style={{ flexDirection: 'row', gap: 7, paddingBottom: 2 }}>
-        {QUICK_LOG_EMOJIS.map((emoji, i) => (
+      <View style={{ flexDirection: 'row', gap: 7 }}>
+        {emojis.map((emoji, i) => (
           <EmojiChip key={i} emoji={emoji} size={46} borderRadius={12} onPress={() => onQuickLog?.(emoji)} />
         ))}
       </View>
     </ScrollView>
   </View>
+)
+
+
+const SessionRow: React.FC<{ session: DaySession; onPress?: () => void }> = ({ session, onPress }) => (
+  <Pressable
+    onPress={onPress}
+    style={{
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: 'rgba(160,100,80,0.15)',
+      borderRadius: 14,
+      paddingVertical: 12,
+      paddingHorizontal: 14,
+      marginHorizontal: 16,
+      marginBottom: 8,
+      gap: 10,
+    }}
+  >
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+      <AvatarCircle
+        initials={session.partnerInitials}
+        gradient={session.partnerGradient}
+        size={36}
+        borderWidth={2}
+      />
+      <View style={{ flex: 1 }}>
+        <Text style={{
+          fontFamily: font('playfair', '600'),
+          fontSize: 14,
+          color: colors.ink,
+        }}>{session.partnerName}</Text>
+      </View>
+      <StarRating rating={session.rating} size={12} />
+    </View>
+    <View style={{ flexDirection: 'row', gap: 5, flexWrap: 'wrap' }}>
+      {session.tags.map((t) => (
+        <TagPill key={t.emoji} emoji={t.emoji} label={t.label} variant="display" />
+      ))}
+    </View>
+    {session.noteSnippet && (
+      <Text numberOfLines={1} style={{
+        fontSize: 11,
+        color: colors.stone,
+        fontStyle: 'italic',
+        fontFamily: font('dmSans', '300'),
+      }}>{session.noteSnippet}</Text>
+    )}
+  </Pressable>
 )
 
 /* ── Main Screen ── */
@@ -193,10 +252,14 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
   today,
   loggedDays = [],
   selectedDay,
+  selectedDayLabel,
+  daySessions = [],
   onPrevMonth,
   onNextMonth,
   onDayPress,
   onQuickLog,
+  onSessionPress,
+  quickLogEmojis = [],
 }) => (
   <View style={{
     width: '100%',
@@ -226,7 +289,28 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
 
     <View style={{ height: 1, backgroundColor: 'rgba(160,100,80,0.12)', marginHorizontal: 22, marginTop: 10, flexShrink: 0 }} />
 
-    <QuickLogWidget onQuickLog={onQuickLog} />
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 16 }}>
+      <QuickLogWidget onQuickLog={onQuickLog} emojis={quickLogEmojis} />
+
+      {selectedDay != null && (
+        <>
+          <SectionLabel label={selectedDayLabel || `Day ${selectedDay}`} style={{ marginHorizontal: 16, marginTop: 14 }} />
+          {daySessions.length > 0 ? (
+            daySessions.map((s) => (
+              <SessionRow key={s.id} session={s} onPress={() => onSessionPress?.(s.id)} />
+            ))
+          ) : (
+            <Text style={{
+              marginHorizontal: 16,
+              fontSize: 12,
+              color: colors.muted,
+              fontStyle: 'italic',
+              fontFamily: font('dmSans', '300'),
+            }}>No sessions logged</Text>
+          )}
+        </>
+      )}
+    </ScrollView>
 
   </View>
 )

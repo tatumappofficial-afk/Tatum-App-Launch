@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-import { Pressable, ScrollView, Text, View } from 'react-native'
+import { Image, Pressable, ScrollView, Text, View } from 'react-native'
 import Svg, { Line, Polyline } from 'react-native-svg'
-import { colors, font, fontFamily, gradientStyle } from '../theme'
+import { colors, font, fontFamily, gradientStyle, typography } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { AvatarCircle } from '../components/AvatarCircle'
 import { GradientButton } from '../components/GradientButton'
@@ -41,6 +41,7 @@ export interface JournalScreenProps {
   calendarDays?: CalendarDay[]
   showCalendar?: boolean
   onEntryPress?: (id: string) => void
+  onLogFirstSession?: () => void
 }
 
 /* ── Sub-components ── */
@@ -518,7 +519,7 @@ const CalendarDropdown: React.FC<{
 
 /* ── Empty State ── */
 
-const EmptyState: React.FC = () => (
+const EmptyState: React.FC<{ onLogSession?: () => void }> = ({ onLogSession }) => (
   <View style={{
     flex: 1,
     flexDirection: 'column',
@@ -588,7 +589,7 @@ const EmptyState: React.FC = () => (
           alignItems: 'center',
           justifyContent: 'center',
         }}>
-          <Text style={{ fontSize: 36, opacity: 0.3 }}>&#x1F319;</Text>
+          <Image source={require('@/assets/tatum-logo.png')} style={{ width: 80, height: 80, opacity: 0.3 }} />
         </View>
       </View>
     </View>
@@ -632,6 +633,7 @@ const EmptyState: React.FC = () => (
       fullWidth={false}
       letterSpacing={1.5}
       icon={<PlusIcon />}
+      onPress={onLogSession}
     />
   </View>
 )
@@ -645,6 +647,7 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({
   calendarDays = [],
   showCalendar: showCalendarProp,
   onEntryPress,
+  onLogFirstSession,
 }) => {
   const [calendarOpen, setCalendarOpen] = useState(showCalendarProp ?? false)
   const isEmpty = entries.length === 0
@@ -673,13 +676,7 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({
         position: 'relative',
         zIndex: 2,
       }}>
-        <Text style={{
-          fontFamily: font('playfair', '700'),
-          fontSize: 28,
-          color: colors.ink,
-        }}>
-          Sessions Journal
-        </Text>
+        <Text style={typography.screenTitle}>Sessions Journal</Text>
       </View>
 
       {/* Sticky month bar */}
@@ -778,7 +775,7 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({
 
       {/* Content */}
       {isEmpty ? (
-        <EmptyState />
+        <EmptyState onLogSession={onLogFirstSession} />
       ) : (
         <ScrollView style={{
           flex: 1,
