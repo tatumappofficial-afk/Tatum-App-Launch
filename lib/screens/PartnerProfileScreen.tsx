@@ -1,7 +1,8 @@
 import React from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Polyline } from 'react-native-svg'
-import { colors, font, fontFamily, gradientStyle } from '../theme'
+import { colors, font, gradientPoints } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { SectionLabel } from './shared/SectionLabel'
 import { AvatarCircle } from '../components/AvatarCircle'
@@ -158,11 +159,12 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
             flex: 1, height: 5, backgroundColor: colors.surface2,
             borderRadius: 3, overflow: 'hidden',
           }}>
-            <View style={{
-              height: 5, width: `${a.percent}%`,
-              ...gradientStyle(`linear-gradient(to right, ${colors.terra}, ${colors.mauve})`),
-              borderRadius: 3,
-            }} />
+            <LinearGradient
+              colors={[colors.terra, colors.mauve]}
+              start={gradientPoints.horizontal.start}
+              end={gradientPoints.horizontal.end}
+              style={{ height: 5, width: `${a.percent}%`, borderRadius: 3 }}
+            />
           </View>
           <Text style={{
             fontSize: 10, fontWeight: '500', color: colors.mauve,

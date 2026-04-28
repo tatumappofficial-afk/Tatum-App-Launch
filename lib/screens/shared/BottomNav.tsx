@@ -1,7 +1,8 @@
 import React from 'react'
-import { Pressable, Text, View } from 'react-native'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Circle, Line, Path, Rect } from 'react-native-svg'
-import { colors, font, fontFamily } from '../../theme'
+import { colors, font, gradientPoints, gradients } from '../../theme'
 
 type Tab = 'home' | 'calendar' | 'log' | 'journal' | 'profile'
 
@@ -77,17 +78,29 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab = 'home', onTabP
           <Pressable
             key="log"
             onPress={() => onTabPress?.('log')}
+            accessibilityRole="button"
+            accessibilityLabel="Log a session"
             style={{
               width: 52,
               height: 52,
               borderRadius: 26,
-              ...({ background: 'linear-gradient(135deg, #C07858, #7C4A5A)' } as any),
               alignItems: 'center',
               justifyContent: 'center',
               marginTop: -14,
-              boxShadow: '0 4px 16px rgba(124,74,90,0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
+              overflow: 'hidden',
+              shadowColor: '#7C4A5A',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.4,
+              shadowRadius: 16,
+              elevation: 8,
             }}
           >
+            <LinearGradient
+              colors={gradients.primaryCta}
+              start={gradientPoints.diagonal.start}
+              end={gradientPoints.diagonal.end}
+              style={StyleSheet.absoluteFill}
+            />
             <Svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round">
               <Line x1={12} y1={5} x2={12} y2={19} />
               <Line x1={5} y1={12} x2={19} y2={12} />

@@ -1,7 +1,8 @@
 import React from 'react'
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import Svg, { Line } from 'react-native-svg'
-import { colors, fontFamily, gradientStyle, typography } from '../theme'
+import { LinearGradient } from 'expo-linear-gradient'
+import { colors, fontFamily, gradientPoints, typography } from '../theme'
 import { TagPill } from '../components/TagPill'
 import { EmojiChip } from '../components/EmojiChip'
 import { GradientButton } from '../components/GradientButton'
@@ -157,13 +158,18 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
               width: 52,
               height: 52,
               borderRadius: 14,
-              flexShrink: 0,
-              ...gradientStyle('linear-gradient(135deg, rgba(192,120,88,0.15), rgba(124,74,90,0.1))'),
               borderWidth: 1.5,
               borderColor: 'rgba(192,120,88,0.3)',
               alignItems: 'center',
               justifyContent: 'center',
+              overflow: 'hidden',
             }}>
+              <LinearGradient
+                colors={['rgba(192,120,88,0.15)', 'rgba(124,74,90,0.1)']}
+                start={gradientPoints.diagonal.start}
+                end={gradientPoints.diagonal.end}
+                style={StyleSheet.absoluteFill}
+              />
               <Text style={{ fontSize: 26 }}>{selectedEmoji}</Text>
             </View>
             {/* Text input */}

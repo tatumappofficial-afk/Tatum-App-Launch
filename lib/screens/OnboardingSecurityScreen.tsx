@@ -1,24 +1,33 @@
 import React from 'react'
-import { View, Text, Pressable } from 'react-native'
+import { StyleSheet, View, Text, Pressable } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Path, Circle, Polyline } from 'react-native-svg'
-import { colors, font, fontFamily, gradientStyle } from '../theme'
+import { colors, font, gradientPoints, gradients, shadows } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { StepDots } from '../components/StepDots'
 
 const GradientButton: React.FC<{ label: string; onPress?: () => void }> = ({ label, onPress }) => (
   <Pressable
     onPress={onPress}
+    accessibilityRole="button"
+    accessibilityLabel={label}
     style={{
       width: '100%',
       height: 52,
-      ...gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)'),
       borderRadius: 9999,
+      overflow: 'hidden',
       alignItems: 'center',
       justifyContent: 'center',
-      boxShadow: '0 6px 20px rgba(124,74,90,0.32), inset 0 1px 0 rgba(255,255,255,0.15)',
       marginBottom: 10,
+      ...shadows.primaryButtonStrong,
     }}
   >
+    <LinearGradient
+      colors={gradients.primaryCta}
+      start={gradientPoints.diagonal.start}
+      end={gradientPoints.diagonal.end}
+      style={StyleSheet.absoluteFill}
+    />
     <Text
       style={{
         fontFamily: font('dmSans', '500'),
@@ -79,6 +88,10 @@ interface SecurityCardProps {
 
 const SecurityCard: React.FC<SecurityCardProps> = ({ icon, title, desc, selected }) => (
   <Pressable
+    accessibilityRole="radio"
+    accessibilityLabel={title}
+    accessibilityHint={desc}
+    accessibilityState={{ selected }}
     style={{
       backgroundColor: colors.surface,
       borderWidth: 2,
@@ -89,9 +102,14 @@ const SecurityCard: React.FC<SecurityCardProps> = ({ icon, title, desc, selected
       flexDirection: 'row',
       alignItems: 'center',
       gap: 14,
-      position: 'relative',
       overflow: 'hidden',
-      boxShadow: selected ? '0 0 0 3px rgba(192,120,88,0.15)' : 'none',
+      ...(selected ? {
+        shadowColor: '#C07858',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.15,
+        shadowRadius: 6,
+        elevation: 2,
+      } : null),
     }}
   >
     <View
@@ -102,7 +120,6 @@ const SecurityCard: React.FC<SecurityCardProps> = ({ icon, title, desc, selected
         backgroundColor: 'rgba(192,120,88,0.1)',
         alignItems: 'center',
         justifyContent: 'center',
-        flexShrink: 0,
       }}
     >
       {icon}
@@ -121,12 +138,17 @@ const SecurityCard: React.FC<SecurityCardProps> = ({ icon, title, desc, selected
           width: 22,
           height: 22,
           borderRadius: 11,
-          ...gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)'),
           alignItems: 'center',
           justifyContent: 'center',
-          flexShrink: 0,
+          overflow: 'hidden',
         }}
       >
+        <LinearGradient
+          colors={gradients.primaryCta}
+          start={gradientPoints.diagonal.start}
+          end={gradientPoints.diagonal.end}
+          style={StyleSheet.absoluteFill}
+        />
         <CheckIcon />
       </View>
     ) : (
@@ -137,7 +159,6 @@ const SecurityCard: React.FC<SecurityCardProps> = ({ icon, title, desc, selected
           borderRadius: 11,
           borderWidth: 2,
           borderColor: 'rgba(160,100,80,0.25)',
-          flexShrink: 0,
         }}
       />
     )}

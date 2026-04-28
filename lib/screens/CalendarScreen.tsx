@@ -1,7 +1,8 @@
 import React from 'react'
-import { Pressable, ScrollView, Text, View } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Polyline } from 'react-native-svg'
-import { colors, font, fontFamily, gradientStyle, typography } from '../theme'
+import { colors, font, fontFamily, gradientPoints, gradients, typography } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { SectionLabel } from './shared/SectionLabel'
 import { CalendarGrid } from '../components/CalendarGrid'
@@ -139,12 +140,14 @@ const CalendarHeader: React.FC<{
 const Legend: React.FC = () => (
   <View style={{ flexDirection: 'row', gap: 14, paddingHorizontal: 22, paddingTop: 7 }}>
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-      <View style={{
-        width: 10,
-        height: 10,
-        borderRadius: 5,
-        ...gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)'),
-      }} />
+      <View style={{ width: 10, height: 10, borderRadius: 5, overflow: 'hidden' }}>
+        <LinearGradient
+          colors={gradients.primaryCta}
+          start={gradientPoints.diagonal.start}
+          end={gradientPoints.diagonal.end}
+          style={StyleSheet.absoluteFill}
+        />
+      </View>
       <Text style={{ fontFamily: fontFamily.dmSans, fontSize: 8.5, color: colors.stone }}>Today</Text>
     </View>
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>

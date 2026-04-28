@@ -1,7 +1,9 @@
 import React from 'react'
-import { View, Text, Pressable } from 'react-native'
+import { StyleSheet, View, Text, Pressable } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Path, Rect } from 'react-native-svg'
-import { colors, font, fontFamily, gradientStyle } from '../theme'
+import { colors, font, gradientPoints } from '../theme'
+import { RadialGlow } from './shared/DecorativeGlow'
 
 const GoogleLogo: React.FC = () => (
   <Svg width={20} height={20} viewBox="0 0 24 24">
@@ -14,33 +16,17 @@ const GoogleLogo: React.FC = () => (
 
 export const LoginAndroidScreen: React.FC = () => (
   <View style={{
-    width: '100%',
     flex: 1,
-    flexDirection: 'column',
-    position: 'relative',
     overflow: 'hidden',
     backgroundColor: colors.warmSand,
   }}>
     {/* Ambient glows */}
-    <View style={{
-      position: 'absolute',
-      top: -60,
-      left: '50%',
-      transform: [{ translateX: '-50%' }],
-      width: 320,
-      height: 320,
-      ...gradientStyle('radial-gradient(circle, rgba(192,120,88,0.13) 0%, transparent 65%)'),
-      zIndex: 0,
-    }} />
-    <View style={{
-      position: 'absolute',
-      bottom: -40,
-      right: -40,
-      width: 200,
-      height: 200,
-      ...gradientStyle('radial-gradient(circle, rgba(124,74,90,0.09) 0%, transparent 70%)'),
-      zIndex: 0,
-    }} />
+    <View pointerEvents="none" style={{ position: 'absolute', top: -60, left: '50%', marginLeft: -160, width: 320, height: 320 }}>
+      <RadialGlow size={320} color="rgb(192,120,88)" opacity={0.13} falloff={65} />
+    </View>
+    <View pointerEvents="none" style={{ position: 'absolute', bottom: -40, right: -40, width: 200, height: 200 }}>
+      <RadialGlow size={200} color="rgb(124,74,90)" opacity={0.09} falloff={70} />
+    </View>
 
     {/* Android punch-hole camera */}
     <View style={{
@@ -51,8 +37,7 @@ export const LoginAndroidScreen: React.FC = () => (
       position: 'absolute',
       top: 14,
       left: '50%',
-      transform: [{ translateX: -6 }],
-      zIndex: 10,
+      marginLeft: -6,
     }} />
 
     {/* Android status bar */}
@@ -63,9 +48,6 @@ export const LoginAndroidScreen: React.FC = () => (
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      flexShrink: 0,
-      position: 'relative',
-      zIndex: 2,
     }}>
       <Text style={{
         fontFamily: font('dmSans', '500'),
@@ -73,13 +55,11 @@ export const LoginAndroidScreen: React.FC = () => (
         color: colors.stone,
       }}>9:41</Text>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-        {/* WiFi */}
         <Svg width={16} height={12} viewBox="0 0 16 12" fill="none">
           <Path d="M8 9.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" fill={colors.stone} />
           <Path d="M4.5 7.5C5.6 6.4 6.7 5.8 8 5.8s2.4.6 3.5 1.7" stroke={colors.stone} strokeWidth={1.4} strokeLinecap="round" fill="none" />
           <Path d="M2 5C3.8 3.2 5.8 2.2 8 2.2s4.2 1 6 2.8" stroke={colors.stone} strokeWidth={1.4} strokeLinecap="round" fill="none" />
         </Svg>
-        {/* Signal bars */}
         <Svg width={16} height={12} viewBox="0 0 16 12" fill={colors.stone}>
           <Rect x={0} y={8} width={3} height={4} rx={0.5} fill={colors.stone} />
           <Rect x={4.5} y={5} width={3} height={7} rx={0.5} fill={colors.stone} />
@@ -92,39 +72,34 @@ export const LoginAndroidScreen: React.FC = () => (
     {/* Main content */}
     <View style={{
       flex: 1,
-      flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'space-between',
       paddingHorizontal: 36,
-      position: 'relative',
-      zIndex: 1,
     }}>
       {/* Logo group */}
-      <View style={{
-        flexDirection: 'column',
-        alignItems: 'center',
-        marginTop: 48,
-      }}>
+      <View style={{ alignItems: 'center', marginTop: 48 }}>
         {/* App icon */}
         <View style={{
           width: 80,
           height: 80,
-          ...gradientStyle('linear-gradient(145deg, #C98060, #7C4A5A)'),
           borderRadius: 22,
           alignItems: 'center',
           justifyContent: 'center',
           marginBottom: 20,
-          boxShadow: '0 16px 40px rgba(124,74,90,0.3), 0 4px 12px rgba(124,74,90,0.16), inset 0 1px 0 rgba(255,255,255,0.18)',
-          position: 'relative',
-          overflow: 'visible',
+          overflow: 'hidden',
+          shadowColor: '#7C4A5A',
+          shadowOffset: { width: 0, height: 16 },
+          shadowOpacity: 0.3,
+          shadowRadius: 40,
+          elevation: 12,
         }}>
-          <Text style={{
-            fontSize: 36,
-            color: colors.white,
-            lineHeight: 36,
-            position: 'relative',
-            zIndex: 1,
-          }}>&#10022;</Text>
+          <LinearGradient
+            colors={['#C98060', '#7C4A5A']}
+            start={gradientPoints.steepDiagonal.start}
+            end={gradientPoints.steepDiagonal.end}
+            style={StyleSheet.absoluteFill}
+          />
+          <Text style={{ fontSize: 36, color: colors.white, lineHeight: 36 }}>&#10022;</Text>
         </View>
 
         {/* Wordmark */}
@@ -154,24 +129,28 @@ export const LoginAndroidScreen: React.FC = () => (
       </View>
 
       {/* Buttons group — Google only */}
-      <View style={{
-        width: '100%',
-        flexDirection: 'column',
-        gap: 12,
-      }}>
-        <Pressable style={{
-          width: '100%',
-          height: 58,
-          backgroundColor: colors.surface,
-          borderWidth: 1.5,
-          borderColor: 'rgba(160,100,80,0.2)',
-          borderRadius: 9999,
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 10,
-          boxShadow: '0 2px 8px rgba(61,43,37,0.06)',
-        }}>
+      <View style={{ width: '100%', gap: 12 }}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Continue with Google"
+          style={{
+            width: '100%',
+            height: 58,
+            backgroundColor: colors.surface,
+            borderWidth: 1.5,
+            borderColor: 'rgba(160,100,80,0.2)',
+            borderRadius: 9999,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 10,
+            shadowColor: '#3D2B25',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.06,
+            shadowRadius: 8,
+            elevation: 1,
+          }}
+        >
           <GoogleLogo />
           <Text style={{
             fontFamily: font('dmSans', '500'),
@@ -183,17 +162,8 @@ export const LoginAndroidScreen: React.FC = () => (
       </View>
 
       {/* Privacy footer */}
-      <View style={{
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 8,
-        paddingBottom: 8,
-      }}>
-        <View style={{
-          width: 28,
-          height: 1,
-          backgroundColor: 'rgba(160,100,80,0.2)',
-        }} />
+      <View style={{ alignItems: 'center', gap: 8, paddingBottom: 8 }}>
+        <View style={{ width: 28, height: 1, backgroundColor: 'rgba(160,100,80,0.2)' }} />
         <Text style={{
           fontSize: 11,
           fontWeight: '300',
@@ -211,9 +181,6 @@ export const LoginAndroidScreen: React.FC = () => (
       height: 28,
       alignItems: 'center',
       justifyContent: 'center',
-      flexShrink: 0,
-      position: 'relative',
-      zIndex: 2,
     }}>
       <View style={{
         width: 120,

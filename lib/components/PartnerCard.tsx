@@ -1,6 +1,6 @@
 import React from 'react'
 import { Pressable, Text, View } from 'react-native'
-import { colors, font, fontFamily, gradientStyle } from '../theme'
+import { colors, font, fontFamily } from '../theme'
 import { AvatarCircle } from './AvatarCircle'
 
 export interface PartnerCardProps {

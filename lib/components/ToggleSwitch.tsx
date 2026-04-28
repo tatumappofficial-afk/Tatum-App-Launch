@@ -1,6 +1,7 @@
 import React from 'react'
-import { Pressable, View } from 'react-native'
-import { colors, gradientStyle } from '../theme'
+import { Pressable, StyleSheet, View } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
+import { colors, gradientPoints, gradients } from '../theme'
 
 export interface ToggleSwitchProps {
   enabled: boolean
@@ -10,17 +11,29 @@ export interface ToggleSwitchProps {
 export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ enabled, onToggle }) => (
   <Pressable
     onPress={onToggle}
+    accessibilityRole="switch"
+    accessibilityState={{ checked: enabled }}
     style={{
       width: 44,
       height: 26,
       borderRadius: 13,
-      ...(enabled
-        ? gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)')
-        : { backgroundColor: colors.surface2 }),
-      flexShrink: 0,
-      boxShadow: enabled ? '0 1px 4px rgba(124,74,90,0.3)' : undefined,
+      overflow: 'hidden',
+      backgroundColor: enabled ? undefined : colors.surface2,
+      shadowColor: '#7C4A5A',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: enabled ? 0.3 : 0,
+      shadowRadius: 4,
+      elevation: enabled ? 2 : 0,
     }}
   >
+    {enabled && (
+      <LinearGradient
+        colors={gradients.primaryCta}
+        start={gradientPoints.diagonal.start}
+        end={gradientPoints.diagonal.end}
+        style={StyleSheet.absoluteFill}
+      />
+    )}
     <View style={{
       width: 20,
       height: 20,
@@ -29,7 +42,11 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ enabled, onToggle })
       position: 'absolute',
       top: 3,
       ...(enabled ? { right: 3 } : { left: 3 }),
-      boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.15,
+      shadowRadius: 4,
+      elevation: 2,
     }} />
   </Pressable>
 )

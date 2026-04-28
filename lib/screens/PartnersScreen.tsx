@@ -119,9 +119,12 @@ export const PartnersScreen: React.FC<PartnersScreenProps> = ({
               paddingVertical: 16,
               paddingHorizontal: 18,
               marginBottom: 10,
-              position: 'relative',
               overflow: 'hidden',
-              boxShadow: '0 2px 10px rgba(61,43,37,0.06)',
+              shadowColor: '#3D2B25',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.06,
+              shadowRadius: 10,
+              elevation: 1,
             }}
           >
             {/* Card top row */}

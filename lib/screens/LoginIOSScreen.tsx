@@ -1,7 +1,9 @@
 import React from 'react'
-import { View, Text, Pressable } from 'react-native'
+import { StyleSheet, View, Text, Pressable } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Path } from 'react-native-svg'
-import { colors, font, fontFamily, gradientStyle } from '../theme'
+import { colors, font, gradientPoints } from '../theme'
+import { RadialGlow } from './shared/DecorativeGlow'
 
 const AppleLogo: React.FC = () => (
   <Svg width={19} height={19} viewBox="0 0 24 24" fill="white">
@@ -20,72 +22,51 @@ const GoogleLogo: React.FC = () => (
 
 export const LoginIOSScreen: React.FC = () => (
   <View style={{
-    width: '100%',
     flex: 1,
-    flexDirection: 'column',
-    position: 'relative',
     overflow: 'hidden',
     backgroundColor: colors.warmSand,
   }}>
     {/* Ambient glows */}
-    <View style={{
-      position: 'absolute',
-      top: -60,
-      left: '50%',
-      transform: [{ translateX: '-50%' }],
-      width: 320,
-      height: 320,
-      ...gradientStyle('radial-gradient(circle, rgba(192,120,88,0.13) 0%, transparent 65%)'),
-      zIndex: 0,
-    }} />
-    <View style={{
-      position: 'absolute',
-      bottom: -40,
-      right: -40,
-      width: 200,
-      height: 200,
-      ...gradientStyle('radial-gradient(circle, rgba(124,74,90,0.09) 0%, transparent 70%)'),
-      zIndex: 0,
-    }} />
+    <View pointerEvents="none" style={{ position: 'absolute', top: -60, left: '50%', marginLeft: -160, width: 320, height: 320 }}>
+      <RadialGlow size={320} color="rgb(192,120,88)" opacity={0.13} falloff={65} />
+    </View>
+    <View pointerEvents="none" style={{ position: 'absolute', bottom: -40, right: -40, width: 200, height: 200 }}>
+      <RadialGlow size={200} color="rgb(124,74,90)" opacity={0.09} falloff={70} />
+    </View>
 
     <View style={{ height: 54 }} />
 
     {/* Main content */}
     <View style={{
       flex: 1,
-      flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'space-between',
       paddingHorizontal: 36,
-      position: 'relative',
-      zIndex: 1,
     }}>
       {/* Logo group */}
-      <View style={{
-        flexDirection: 'column',
-        alignItems: 'center',
-        marginTop: 48,
-      }}>
+      <View style={{ alignItems: 'center', marginTop: 48 }}>
         {/* App icon */}
         <View style={{
           width: 80,
           height: 80,
-          ...gradientStyle('linear-gradient(145deg, #C98060, #7C4A5A)'),
           borderRadius: 22,
           alignItems: 'center',
           justifyContent: 'center',
           marginBottom: 20,
-          boxShadow: '0 16px 40px rgba(124,74,90,0.3), 0 4px 12px rgba(124,74,90,0.16), inset 0 1px 0 rgba(255,255,255,0.18)',
-          position: 'relative',
-          overflow: 'visible',
+          overflow: 'hidden',
+          shadowColor: '#7C4A5A',
+          shadowOffset: { width: 0, height: 16 },
+          shadowOpacity: 0.3,
+          shadowRadius: 40,
+          elevation: 12,
         }}>
-          <Text style={{
-            fontSize: 36,
-            color: colors.white,
-            lineHeight: 36,
-            position: 'relative',
-            zIndex: 1,
-          }}>&#10022;</Text>
+          <LinearGradient
+            colors={['#C98060', '#7C4A5A']}
+            start={gradientPoints.steepDiagonal.start}
+            end={gradientPoints.steepDiagonal.end}
+            style={StyleSheet.absoluteFill}
+          />
+          <Text style={{ fontSize: 36, color: colors.white, lineHeight: 36 }}>&#10022;</Text>
         </View>
 
         {/* Wordmark */}
@@ -115,25 +96,26 @@ export const LoginIOSScreen: React.FC = () => (
       </View>
 
       {/* Buttons group */}
-      <View style={{
-        width: '100%',
-        flexDirection: 'column',
-        gap: 12,
-      }}>
-        {/* Apple button */}
-        <Pressable style={{
-          width: '100%',
-          height: 56,
-          backgroundColor: '#1C1C1E',
-          borderRadius: 9999,
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 10,
-          position: 'relative',
-          overflow: 'hidden',
-          boxShadow: '0 4px 18px rgba(28,28,30,0.28), 0 1px 4px rgba(28,28,30,0.14)',
-        }}>
+      <View style={{ width: '100%', gap: 12 }}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Continue with Apple"
+          style={{
+            width: '100%',
+            height: 56,
+            backgroundColor: '#1C1C1E',
+            borderRadius: 9999,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 10,
+            shadowColor: '#1C1C1E',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.28,
+            shadowRadius: 18,
+            elevation: 4,
+          }}
+        >
           <AppleLogo />
           <Text style={{
             fontFamily: font('dmSans', '500'),
@@ -143,20 +125,27 @@ export const LoginIOSScreen: React.FC = () => (
           }}>Continue with Apple</Text>
         </Pressable>
 
-        {/* Google button */}
-        <Pressable style={{
-          width: '100%',
-          height: 56,
-          backgroundColor: colors.surface,
-          borderWidth: 1.5,
-          borderColor: 'rgba(160,100,80,0.2)',
-          borderRadius: 9999,
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 10,
-          boxShadow: '0 2px 8px rgba(61,43,37,0.06)',
-        }}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Continue with Google"
+          style={{
+            width: '100%',
+            height: 56,
+            backgroundColor: colors.surface,
+            borderWidth: 1.5,
+            borderColor: 'rgba(160,100,80,0.2)',
+            borderRadius: 9999,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 10,
+            shadowColor: '#3D2B25',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.06,
+            shadowRadius: 8,
+            elevation: 1,
+          }}
+        >
           <GoogleLogo />
           <Text style={{
             fontFamily: font('dmSans', '500'),
@@ -168,17 +157,8 @@ export const LoginIOSScreen: React.FC = () => (
       </View>
 
       {/* Privacy footer */}
-      <View style={{
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 8,
-        paddingBottom: 8,
-      }}>
-        <View style={{
-          width: 28,
-          height: 1,
-          backgroundColor: 'rgba(160,100,80,0.2)',
-        }} />
+      <View style={{ alignItems: 'center', gap: 8, paddingBottom: 8 }}>
+        <View style={{ width: 28, height: 1, backgroundColor: 'rgba(160,100,80,0.2)' }} />
         <Text style={{
           fontSize: 11,
           fontWeight: '300',
@@ -190,6 +170,5 @@ export const LoginIOSScreen: React.FC = () => (
         </Text>
       </View>
     </View>
-
   </View>
 )

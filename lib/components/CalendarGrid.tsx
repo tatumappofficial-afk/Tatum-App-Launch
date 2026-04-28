@@ -1,6 +1,7 @@
 import React from 'react'
-import { Pressable, Text, View } from 'react-native'
-import { colors, font, fontFamily, gradientStyle } from '../theme'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
+import { colors, font, gradientPoints, gradients } from '../theme'
 
 export interface LoggedDay {
   day: number
@@ -48,18 +49,28 @@ const DayCell: React.FC<{
   return (
     <Pressable
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`Day ${day}${isToday ? ', today' : ''}${isSelected ? ', selected' : ''}`}
+      accessibilityState={{ selected: isSelected }}
       style={{
         aspectRatio: 1,
         borderRadius: 9999,
         alignItems: 'center',
         justifyContent: 'center',
-        ...(isToday
-          ? gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)')
-          : isSelected
-            ? { backgroundColor: 'rgba(192,120,88,0.15)', borderWidth: 2, borderColor: colors.terra }
-            : {}),
+        overflow: 'hidden',
+        ...(isSelected && !isToday
+          ? { backgroundColor: 'rgba(192,120,88,0.15)', borderWidth: 2, borderColor: colors.terra }
+          : null),
       }}
     >
+      {isToday && (
+        <LinearGradient
+          colors={gradients.primaryCta}
+          start={gradientPoints.diagonal.start}
+          end={gradientPoints.diagonal.end}
+          style={StyleSheet.absoluteFill}
+        />
+      )}
       <Text style={{
         fontFamily: font('dmSans', isToday ? '700' : isLoggedDay ? '500' : '400'),
         fontSize,

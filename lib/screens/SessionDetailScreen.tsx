@@ -212,7 +212,11 @@ const NotesCard: React.FC<{
       borderColor: 'rgba(160,100,80,0.14)',
       borderRadius: 16,
       overflow: 'hidden',
-      boxShadow: '0 2px 10px rgba(61,43,37,0.06)',
+      shadowColor: '#3D2B25',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.06,
+      shadowRadius: 10,
+      elevation: 1,
     }}>
       {/* Note text */}
       {note ? (

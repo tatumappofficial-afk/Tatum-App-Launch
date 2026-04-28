@@ -1,7 +1,8 @@
 import React from 'react'
-import { Pressable, ScrollView, Text, View } from 'react-native'
-import Svg, { Circle, Line, Path, Polyline } from 'react-native-svg'
-import { colors, font, fontFamily, gradientStyle } from '../theme'
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
+import Svg, { Circle, Line, Polyline } from 'react-native-svg'
+import { colors, font, fontFamily, gradientPoints, parseGradientColors } from '../theme'
 
 /* ── Types ── */
 
@@ -51,13 +52,17 @@ const SessionCard: React.FC<{
   return (
     <Pressable
       onPress={onPress}
+      accessibilityRole="button"
       style={{
         backgroundColor: colors.surface,
         borderWidth: 1, borderColor: 'rgba(160,100,80,0.14)',
         borderRadius: 18, paddingVertical: 14, paddingHorizontal: 16, marginBottom: 10,
-        position: 'relative',
-        boxShadow: '3px 4px 0 0 #EDE3D8',
         overflow: 'hidden',
+        shadowColor: '#EDE3D8',
+        shadowOffset: { width: 3, height: 4 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+        elevation: 2,
       }}
     >
       {/* Card top row */}
@@ -68,14 +73,21 @@ const SessionCard: React.FC<{
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
           {/* Avatar(s) */}
           {isMultiPartner ? (
-            <View style={{ flexDirection: 'row', position: 'relative', width: 54, height: 38, flexShrink: 0 }}>
+            <View style={{ flexDirection: 'row', position: 'relative', width: 54, height: 38 }}>
               <View style={{
                 position: 'absolute', left: 0, zIndex: 2,
                 width: 38, height: 38, borderRadius: 19,
                 alignItems: 'center', justifyContent: 'center',
-                ...gradientStyle(session.partners[0].gradient),
-                borderWidth: 2, borderColor: colors.warmSand, boxShadow: '0 2px 8px rgba(61,43,37,0.12)',
+                overflow: 'hidden',
+                borderWidth: 2, borderColor: colors.warmSand,
+                shadowColor: '#3D2B25', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 2,
               }}>
+                <LinearGradient
+                  colors={parseGradientColors(session.partners[0].gradient)}
+                  start={gradientPoints.diagonal.start}
+                  end={gradientPoints.diagonal.end}
+                  style={StyleSheet.absoluteFill}
+                />
                 <Text style={{ fontFamily: font('playfair', '700'), fontSize: 13, color: 'white' }}>
                   {session.partners[0].initials}
                 </Text>
@@ -84,9 +96,16 @@ const SessionCard: React.FC<{
                 position: 'absolute', left: 18, zIndex: 1,
                 width: 38, height: 38, borderRadius: 19,
                 alignItems: 'center', justifyContent: 'center',
-                ...gradientStyle(session.partners[1].gradient),
-                borderWidth: 2, borderColor: colors.warmSand, boxShadow: '0 2px 8px rgba(61,43,37,0.12)',
+                overflow: 'hidden',
+                borderWidth: 2, borderColor: colors.warmSand,
+                shadowColor: '#3D2B25', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 2,
               }}>
+                <LinearGradient
+                  colors={parseGradientColors(session.partners[1].gradient)}
+                  start={gradientPoints.diagonal.start}
+                  end={gradientPoints.diagonal.end}
+                  style={StyleSheet.absoluteFill}
+                />
                 <Text style={{ fontFamily: font('playfair', '700'), fontSize: 13, color: 'white' }}>
                   {session.partners[1].initials}
                 </Text>
@@ -94,11 +113,18 @@ const SessionCard: React.FC<{
             </View>
           ) : (
             <View style={{
-              width: 38, height: 38, borderRadius: 19, flexShrink: 0,
+              width: 38, height: 38, borderRadius: 19,
               alignItems: 'center', justifyContent: 'center',
-              ...gradientStyle(session.partners[0].gradient),
-              borderWidth: 2, borderColor: colors.warmSand, boxShadow: '0 2px 8px rgba(61,43,37,0.12)',
+              overflow: 'hidden',
+              borderWidth: 2, borderColor: colors.warmSand,
+              shadowColor: '#3D2B25', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 2,
             }}>
+              <LinearGradient
+                colors={parseGradientColors(session.partners[0].gradient)}
+                start={gradientPoints.diagonal.start}
+                end={gradientPoints.diagonal.end}
+                style={StyleSheet.absoluteFill}
+              />
               <Text style={{ fontFamily: font('playfair', '700'), fontSize: 13, color: 'white' }}>
                 {session.partners[0].initials}
               </Text>

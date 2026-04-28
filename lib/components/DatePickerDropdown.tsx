@@ -1,7 +1,7 @@
 import React from 'react'
 import { Pressable, Text, View } from 'react-native'
 import Svg, { Polyline } from 'react-native-svg'
-import { colors, font, gradientStyle } from '../theme'
+import { colors, font } from '../theme'
 import { CalendarGrid, type LoggedDay } from './CalendarGrid'
 
 const MONTH_NAMES = [
@@ -33,8 +33,12 @@ export const DatePickerDropdown: React.FC<DatePickerDropdownProps> = ({
     borderWidth: 1,
     borderColor: 'rgba(160,100,80,0.18)',
     borderRadius: 22,
-    boxShadow: '0 16px 48px rgba(61,43,37,0.18), 0 2px 8px rgba(61,43,37,0.08)',
     overflow: 'hidden',
+    shadowColor: '#3D2B25',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.18,
+    shadowRadius: 48,
+    elevation: 14,
   }}>
     {/* Month/year nav */}
     <View style={{

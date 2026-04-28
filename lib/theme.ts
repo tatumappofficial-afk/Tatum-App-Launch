@@ -1,6 +1,4 @@
-// Design tokens extracted from design-system skill
-// Every component references tokens only — no raw hex values.
-import { Platform, type TextStyle, type ViewStyle } from 'react-native'
+import type { TextStyle, ViewStyle } from 'react-native'
 
 export const colors = {
   warmSand: '#F5EFE8',
@@ -19,66 +17,73 @@ export const colors = {
   white: '#FFFFFF',
 } as const
 
+// Gradient color tuples — pass directly to <LinearGradient colors={...}>.
 export const gradients = {
-  primaryCta: ['#C07858', '#7C4A5A'] as const, // Terra → Fig, 135deg
+  primaryCta: ['#C07858', '#7C4A5A'] as const, // Terra → Fig
   positive: ['#8BA888', '#5A8060'] as const,
   negative: ['#B07080', '#7C4A5A'] as const,
+  activityBar: ['#C07858', '#B07080'] as const,
 } as const
 
 // Partner avatar gradients — single source of truth for the swatch palette.
-// The chosen string is persisted on partner.avatarGradient.
+// `gradient` (CSS string) is the value persisted on partner.avatarGradient — keep stable.
+// `colors` is the LinearGradient-ready tuple; consumers should prefer this.
 export const partnerGradients = [
-  { key: 'terra', gradient: 'linear-gradient(135deg, #C07858, #7C4A5A)' },
-  { key: 'mauve', gradient: 'linear-gradient(135deg, #B07080, #7C4A5A)' },
-  { key: 'sage', gradient: 'linear-gradient(135deg, #8BA888, #5A8060)' },
-  { key: 'gold', gradient: 'linear-gradient(135deg, #C4993A, #8A6A20)' },
-  { key: 'fig', gradient: 'linear-gradient(135deg, #7C4A5A, #3D2B25)' },
-  { key: 'blush', gradient: 'linear-gradient(135deg, #E8C4B0, #C07858)' },
-  { key: 'stone', gradient: 'linear-gradient(135deg, #9A8878, #6A5A4A)' },
-  { key: 'rust', gradient: 'linear-gradient(135deg, #A85230, #6E2E18)' },
-  { key: 'blue', gradient: 'linear-gradient(135deg, #5A7A98, #3D5470)' },
-  { key: 'ink', gradient: 'linear-gradient(135deg, #3D2B25, #6A4A40)' },
+  { key: 'terra',  gradient: 'linear-gradient(135deg, #C07858, #7C4A5A)', colors: ['#C07858', '#7C4A5A'] as const },
+  { key: 'mauve',  gradient: 'linear-gradient(135deg, #B07080, #7C4A5A)', colors: ['#B07080', '#7C4A5A'] as const },
+  { key: 'sage',   gradient: 'linear-gradient(135deg, #8BA888, #5A8060)', colors: ['#8BA888', '#5A8060'] as const },
+  { key: 'gold',   gradient: 'linear-gradient(135deg, #C4993A, #8A6A20)', colors: ['#C4993A', '#8A6A20'] as const },
+  { key: 'fig',    gradient: 'linear-gradient(135deg, #7C4A5A, #3D2B25)', colors: ['#7C4A5A', '#3D2B25'] as const },
+  { key: 'blush',  gradient: 'linear-gradient(135deg, #E8C4B0, #C07858)', colors: ['#E8C4B0', '#C07858'] as const },
+  { key: 'stone',  gradient: 'linear-gradient(135deg, #9A8878, #6A5A4A)', colors: ['#9A8878', '#6A5A4A'] as const },
+  { key: 'rust',   gradient: 'linear-gradient(135deg, #A85230, #6E2E18)', colors: ['#A85230', '#6E2E18'] as const },
+  { key: 'blue',   gradient: 'linear-gradient(135deg, #5A7A98, #3D5470)', colors: ['#5A7A98', '#3D5470'] as const },
+  { key: 'ink',    gradient: 'linear-gradient(135deg, #3D2B25, #6A4A40)', colors: ['#3D2B25', '#6A4A40'] as const },
 ] as const
 
 export type PartnerGradientKey = typeof partnerGradients[number]['key']
 
-// ── Font helpers ──
-// On web (Storybook), CSS font-family names work via Google Fonts @import.
-// On native, each weight is a separate registered font name.
+// Parse a persisted CSS gradient string back into a LinearGradient-ready colors tuple.
+// Used at render boundaries (mostly when `partner.avatarGradient` came from the DB).
+export function parseGradientColors(g: string): readonly [string, string, ...string[]] {
+  const inner = g.match(/\(([^)]+)\)/)?.[1] ?? ''
+  const parts = inner.split(',').map((s) => s.trim())
+  // Drop leading direction token like "135deg" or "to right"
+  const stops = parts[0].includes('deg') || parts[0].startsWith('to ') ? parts.slice(1) : parts
+  const cols = stops.map((s) => s.split(/\s+/)[0])
+  return (cols.length >= 2 ? cols : [cols[0] ?? '#000', cols[0] ?? '#000']) as unknown as readonly [string, string, ...string[]]
+}
 
-const isWeb = Platform.OS === 'web'
+// Start/end point presets for <LinearGradient>. Numbers are CSS-angle equivalents.
+export const gradientPoints = {
+  diagonal:      { start: { x: 0, y: 0 },    end: { x: 1, y: 1 } },         // ~135deg
+  steepDiagonal: { start: { x: 0.18, y: 0 }, end: { x: 0.82, y: 1 } },     // ~145deg
+  vertical:      { start: { x: 0, y: 0 },    end: { x: 0, y: 1 } },         // 180deg
+  almostVertical:{ start: { x: 0.13, y: 0 }, end: { x: 0.87, y: 1 } },     // ~165deg
+  horizontal:    { start: { x: 0, y: 0.5 },  end: { x: 1, y: 0.5 } },       // 90deg / "to right"
+} as const
 
-// Individual font names — use these when you need a specific weight on native.
-// On web, fontFamily + fontWeight CSS works naturally.
+// ── Fonts ──
+// Each weight is a separately registered font name (no CSS fontWeight on native).
+
 export const fonts = {
   playfair: {
-    regular: isWeb ? "'Playfair Display', serif" : 'PlayfairDisplay_400Regular',
-    italic: isWeb ? "'Playfair Display', serif" : 'PlayfairDisplay_400Regular_Italic',
-    semiBold: isWeb ? "'Playfair Display', serif" : 'PlayfairDisplay_600SemiBold',
-    bold: isWeb ? "'Playfair Display', serif" : 'PlayfairDisplay_700Bold',
+    regular: 'PlayfairDisplay_400Regular',
+    italic: 'PlayfairDisplay_400Regular_Italic',
+    semiBold: 'PlayfairDisplay_600SemiBold',
+    bold: 'PlayfairDisplay_700Bold',
   },
   dmSans: {
-    light: isWeb ? "'DM Sans', sans-serif" : 'DMSans_300Light',
-    regular: isWeb ? "'DM Sans', sans-serif" : 'DMSans_400Regular',
-    medium: isWeb ? "'DM Sans', sans-serif" : 'DMSans_500Medium',
+    light: 'DMSans_300Light',
+    regular: 'DMSans_400Regular',
+    medium: 'DMSans_500Medium',
   },
 } as const
 
-// Shorthand — maps to the regular weight for backward compat.
-// Components that use fontFamily.xxx + fontWeight should call font() instead.
 export const fontFamily = {
   playfair: fonts.playfair.regular,
   dmSans: fonts.dmSans.regular,
 } as const
-
-// Kept for backward compat — same as fontFamily
-export const webFonts = fontFamily
-
-// ── Font resolver ──
-// Returns the correct fontFamily string for a given family + weight.
-// On web, fontWeight CSS handles this. On native, each weight is a different font.
-type PlayfairWeight = '400' | '600' | '700'
-type DmSansWeight = '300' | '400' | '500'
 
 const playfairMap: Record<string, string> = {
   '400': fonts.playfair.regular,
@@ -92,21 +97,8 @@ const dmSansMap: Record<string, string> = {
 }
 
 export function font(family: 'playfair' | 'dmSans', weight: string = '400'): string {
-  if (isWeb) {
-    return family === 'playfair' ? "'Playfair Display', serif" : "'DM Sans', sans-serif"
-  }
   const map = family === 'playfair' ? playfairMap : dmSansMap
-  return map[weight] || (family === 'playfair' ? fonts.playfair.regular : fonts.dmSans.regular)
-}
-
-// ── Gradient helper ──
-// On native (New Arch): uses experimental_backgroundImage
-// On web: uses CSS background property
-export function gradientStyle(gradient: string): ViewStyle {
-  if (isWeb) {
-    return { background: gradient } as unknown as ViewStyle
-  }
-  return { experimental_backgroundImage: gradient } as ViewStyle
+  return map[weight] ?? (family === 'playfair' ? fonts.playfair.regular : fonts.dmSans.regular)
 }
 
 // ── Typography presets ──
@@ -200,11 +192,66 @@ export const radii = {
   button: 50,
   tag: 20,
   emoji: 10,
-  avatar: 27, // half of 54
+  avatar: 27,
 } as const
 
+// ── Shadow tokens ──
+// Native shadow props (iOS) + elevation (Android). Spread into a style object.
 export const shadows = {
-  card: '0 2px 8px rgba(61,43,37,0.1)',
-  primaryButton: '0 8px 22px rgba(124,74,90,0.3)',
-  activeTag: '0 2px 8px rgba(192,120,88,0.3)',
+  card: {
+    shadowColor: '#3D2B25',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 2,
+  } satisfies ViewStyle,
+  cardSubtle: {
+    shadowColor: '#3D2B25',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 1,
+  } satisfies ViewStyle,
+  primaryButton: {
+    shadowColor: '#7C4A5A',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 6,
+  } satisfies ViewStyle,
+  primaryButtonStrong: {
+    shadowColor: '#7C4A5A',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.32,
+    shadowRadius: 20,
+    elevation: 7,
+  } satisfies ViewStyle,
+  activeTag: {
+    shadowColor: '#C07858',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 3,
+  } satisfies ViewStyle,
+  fab: {
+    shadowColor: '#7C4A5A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 8,
+  } satisfies ViewStyle,
+  pillSoft: {
+    shadowColor: '#7C4A5A',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 3,
+  } satisfies ViewStyle,
+  pillFlat: {
+    shadowColor: '#3D2B25',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 1,
+  } satisfies ViewStyle,
 } as const

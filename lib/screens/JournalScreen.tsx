@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
-import { Image, Pressable, ScrollView, Text, View } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Image } from 'expo-image'
 import Svg, { Line, Polyline } from 'react-native-svg'
-import { colors, font, fontFamily, gradientStyle, typography } from '../theme'
+import { LinearGradient } from 'expo-linear-gradient'
+import { colors, font, fontFamily, gradientPoints, gradients, shadows, typography } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { AvatarCircle } from '../components/AvatarCircle'
 import { GradientButton } from '../components/GradientButton'
@@ -139,7 +141,7 @@ const EntryCard: React.FC<{ entry: JournalEntry; onPress?: () => void }> = ({ en
         borderWidth: 1,
         borderColor: 'rgba(160,100,80,0.14)',
         overflow: 'hidden',
-        boxShadow: '0 2px 12px rgba(61,43,37,0.07)',
+        ...shadows.cardSubtle,
       }}>
         {/* Margin line */}
         <View style={{
@@ -358,7 +360,11 @@ const CalendarDropdown: React.FC<{
     borderWidth: 1,
     borderColor: 'rgba(160,100,80,0.18)',
     borderRadius: 22,
-    boxShadow: '0 16px 48px rgba(61,43,37,0.18), 0 2px 8px rgba(61,43,37,0.08)',
+    shadowColor: '#3D2B25',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.18,
+    shadowRadius: 48,
+    elevation: 14,
     zIndex: 200,
     overflow: 'hidden',
   }}>
@@ -442,11 +448,18 @@ const CalendarDropdown: React.FC<{
             width: cellSize,
             aspectRatio: 1,
             borderRadius: cellSize / 2,
-            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            ...(isToday ? gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)') : {}),
+            overflow: 'hidden',
           }}>
+            {isToday && (
+              <LinearGradient
+                colors={gradients.primaryCta}
+                start={gradientPoints.diagonal.start}
+                end={gradientPoints.diagonal.end}
+                style={StyleSheet.absoluteFill}
+              />
+            )}
             <Text style={{
               fontSize: 11,
               fontWeight: isToday ? '700' : d.logged ? '500' : '400',
@@ -489,12 +502,14 @@ const CalendarDropdown: React.FC<{
         <Text style={{ fontSize: 9, color: colors.stone }}>Multiple</Text>
       </View>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-        <View style={{
-          width: 10,
-          height: 10,
-          borderRadius: 5,
-          ...gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)'),
-        }} />
+        <View style={{ width: 10, height: 10, borderRadius: 5, overflow: 'hidden' }}>
+          <LinearGradient
+            colors={gradients.primaryCta}
+            start={gradientPoints.diagonal.start}
+            end={gradientPoints.diagonal.end}
+            style={StyleSheet.absoluteFill}
+          />
+        </View>
         <Text style={{ fontSize: 9, color: colors.stone }}>Today</Text>
       </View>
     </View>
@@ -656,12 +671,8 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({
     <View style={{
       width: '100%',
       flex: 1,
-      position: 'relative',
       overflow: 'hidden',
-      flexDirection: 'column',
-      fontFamily: fontFamily.dmSans,
-      color: colors.ink,
-    } as any}>
+    }}>
       <DecorativeGlow position="top-right" size={200} opacity={0.08} />
       <View style={{ height: 54 }} />
 
@@ -713,19 +724,28 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({
         ) : (
           <Pressable
             onPress={() => setCalendarOpen(!calendarOpen)}
+            accessibilityRole="button"
+            accessibilityLabel={`Toggle calendar, ${currentMonth}`}
+            accessibilityState={{ expanded: calendarOpen }}
             style={{
               flexDirection: 'row',
               alignSelf: 'flex-start',
               alignItems: 'center',
               gap: 7,
-              ...gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)'),
               borderRadius: 9999,
               paddingVertical: 7,
               paddingLeft: 16,
               paddingRight: 12,
-              boxShadow: '0 3px 12px rgba(124,74,90,0.3)',
-            } as any}
+              overflow: 'hidden',
+              ...shadows.pillSoft,
+            }}
           >
+            <LinearGradient
+              colors={gradients.primaryCta}
+              start={gradientPoints.diagonal.start}
+              end={gradientPoints.diagonal.end}
+              style={StyleSheet.absoluteFill}
+            />
             <Text style={{
               fontFamily: font('playfair', '600'),
               fontSize: 15,

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Pressable, Text, View } from 'react-native'
 import Svg, { Path } from 'react-native-svg'
-import { colors, font, fontFamily, gradientStyle } from '../theme'
+import { colors, font, fontFamily, shadows } from '../theme'
 
 export interface NotesCardProps {
   note?: string
@@ -15,8 +15,32 @@ const PencilIcon: React.FC = () => (
   </Svg>
 )
 
+// Notebook ruled lines: render fixed number of horizontal hairlines spaced 28px apart.
+const RULED_LINE_COUNT = 14
+const RULED_LINE_SPACING = 28
+const RuledLines: React.FC = () => (
+  <View
+    pointerEvents="none"
+    style={{ position: 'absolute', top: 14, left: 0, right: 0, bottom: 0, overflow: 'hidden' }}
+  >
+    {Array.from({ length: RULED_LINE_COUNT }).map((_, i) => (
+      <View
+        key={i}
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          top: i * RULED_LINE_SPACING + 27,
+          height: 1,
+          backgroundColor: 'rgba(160,100,80,0.08)',
+        }}
+      />
+    ))}
+  </View>
+)
+
 export const NotesCard: React.FC<NotesCardProps> = ({ note, onEditNote, showStackedShadow = false }) => (
-  <View style={{ position: 'relative', flexShrink: 0 }}>
+  <View style={{ position: 'relative' }}>
     {/* Stacked paper shadow */}
     {showStackedShadow && (
       <View style={{
@@ -27,45 +51,33 @@ export const NotesCard: React.FC<NotesCardProps> = ({ note, onEditNote, showStac
         top: 4,
         backgroundColor: colors.surface2,
         borderRadius: 16,
-        zIndex: 0,
       }} />
     )}
     {/* Main card */}
     <View style={{
-      position: 'relative',
-      zIndex: 1,
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: 'rgba(160,100,80,0.14)',
       borderRadius: 16,
       overflow: 'hidden',
-      boxShadow: '0 2px 10px rgba(61,43,37,0.06)',
+      ...shadows.cardSubtle,
     }}>
-      {/* Ruled lines background */}
-      <View style={{
-        position: 'absolute',
-        top: 14,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        ...gradientStyle('repeating-linear-gradient(to bottom, transparent, transparent 27px, rgba(160,100,80,0.08) 27px, rgba(160,100,80,0.08) 28px)'),
-        zIndex: 0,
-      }} />
+      <RuledLines />
       {/* Margin line */}
-      <View style={{
-        position: 'absolute',
-        top: 0,
-        bottom: 0,
-        left: 46,
-        width: 1,
-        backgroundColor: 'rgba(192,120,88,0.12)',
-        zIndex: 0,
-      }} />
+      <View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          top: 0,
+          bottom: 0,
+          left: 46,
+          width: 1,
+          backgroundColor: 'rgba(192,120,88,0.12)',
+        }}
+      />
       {/* Text content */}
       {note ? (
         <Text style={{
-          position: 'relative',
-          zIndex: 1,
           fontFamily: fontFamily.playfair,
           fontSize: 13,
           fontWeight: '400',
@@ -80,8 +92,6 @@ export const NotesCard: React.FC<NotesCardProps> = ({ note, onEditNote, showStac
         </Text>
       ) : (
         <Text style={{
-          position: 'relative',
-          zIndex: 1,
           padding: 14,
           paddingHorizontal: 16,
           fontSize: 12,
@@ -95,8 +105,6 @@ export const NotesCard: React.FC<NotesCardProps> = ({ note, onEditNote, showStac
       )}
       {/* Edit note row */}
       <View style={{
-        position: 'relative',
-        zIndex: 1,
         flexDirection: 'row',
         alignItems: 'center',
         gap: 6,
@@ -108,6 +116,8 @@ export const NotesCard: React.FC<NotesCardProps> = ({ note, onEditNote, showStac
       }}>
         <Pressable
           onPress={onEditNote}
+          accessibilityRole="button"
+          accessibilityLabel={note ? 'Edit note' : 'Add note'}
           style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
         >
           <PencilIcon />

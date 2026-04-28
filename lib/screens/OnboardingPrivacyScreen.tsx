@@ -1,6 +1,7 @@
 import React from 'react'
-import { View, Text } from 'react-native'
-import { colors, font, fontFamily, gradientStyle } from '../theme'
+import { StyleSheet, View, Text } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
+import { colors, font, fontFamily, gradientPoints, gradients } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { GradientButton } from '../components/GradientButton'
 
@@ -79,12 +80,22 @@ export const OnboardingPrivacyScreen: React.FC = () => (
             width: 64,
             height: 64,
             borderRadius: 18,
-            ...gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)'),
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 8px 24px rgba(124,74,90,0.3)',
+            overflow: 'hidden',
+            shadowColor: '#7C4A5A',
+            shadowOffset: { width: 0, height: 8 },
+            shadowOpacity: 0.3,
+            shadowRadius: 24,
+            elevation: 8,
           }}
         >
+          <LinearGradient
+            colors={gradients.primaryCta}
+            start={gradientPoints.diagonal.start}
+            end={gradientPoints.diagonal.end}
+            style={StyleSheet.absoluteFill}
+          />
           <Text style={{ fontSize: 16, color: colors.white, lineHeight: 16 }}>&#10022;</Text>
         </View>
       </View>

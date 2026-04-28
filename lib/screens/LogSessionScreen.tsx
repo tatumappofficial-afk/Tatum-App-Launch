@@ -1,7 +1,8 @@
 import React from 'react'
-import { View, Text, Pressable, ScrollView, TextInput } from 'react-native'
+import { StyleSheet, View, Text, Pressable, ScrollView, TextInput, KeyboardAvoidingView, Platform } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Line, Polyline } from 'react-native-svg'
-import { colors, font, fontFamily, gradients, gradientStyle } from '../theme'
+import { colors, font, fontFamily, gradientPoints, gradients, parseGradientColors } from '../theme'
 import { GradientButton } from '../components/GradientButton'
 import { TagPill } from '../components/TagPill'
 import { RatingSlider } from '../components/RatingSlider'
@@ -126,18 +127,30 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <Pressable
                 onPress={onDatePress}
+                accessibilityRole="button"
+                accessibilityLabel={`Date: ${date}`}
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
                   gap: 5,
-                  ...gradientStyle(`linear-gradient(135deg, ${gradients.primaryCta[0]}, ${gradients.primaryCta[1]})`),
                   borderRadius: 9999,
                   paddingVertical: 6,
                   paddingLeft: 12,
                   paddingRight: 10,
-                  boxShadow: '0 2px 10px rgba(124,74,90,0.28)',
+                  overflow: 'hidden',
+                  shadowColor: '#7C4A5A',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.28,
+                  shadowRadius: 10,
+                  elevation: 3,
                 }}
               >
+                <LinearGradient
+                  colors={gradients.primaryCta}
+                  start={gradientPoints.diagonal.start}
+                  end={gradientPoints.diagonal.end}
+                  style={StyleSheet.absoluteFill}
+                />
                 <Text style={{ fontSize: 12, fontWeight: '500', color: colors.white }}>{date}</Text>
                 <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
                   <Polyline points={calendarOpen ? "6 15 12 9 18 15" : "6 9 12 15 18 9"} stroke="rgba(255,255,255,0.75)" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
@@ -184,13 +197,21 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
                       borderRadius: 23,
                       alignItems: 'center',
                       justifyContent: 'center',
-                      ...gradientStyle(p.gradient),
                       borderWidth: 2.5,
                       borderColor: selected ? colors.terra : 'transparent',
-                      boxShadow: selected
-                        ? '0 0 0 3px rgba(192,120,88,0.18), 0 2px 8px rgba(61,43,37,0.12)'
-                        : '0 2px 8px rgba(61,43,37,0.12)',
+                      overflow: 'hidden',
+                      shadowColor: '#3D2B25',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.12,
+                      shadowRadius: 8,
+                      elevation: 2,
                     }}>
+                      <LinearGradient
+                        colors={parseGradientColors(p.gradient)}
+                        start={gradientPoints.diagonal.start}
+                        end={gradientPoints.diagonal.end}
+                        style={StyleSheet.absoluteFill}
+                      />
                       <Text style={{
                         fontFamily: font('playfair', '700'),
                         fontSize: p.isSolo ? 20 : 15,

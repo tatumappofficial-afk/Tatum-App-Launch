@@ -1,7 +1,9 @@
 import React from 'react'
-import { Image, Pressable, ScrollView, Text, View } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Image } from 'expo-image'
+import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Circle, Line, Path, Polyline, Rect } from 'react-native-svg'
-import { colors, font, fontFamily, gradientStyle } from '../theme'
+import { colors, font, fontFamily, gradientPoints, gradients, shadows } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { SectionLabel } from './shared/SectionLabel'
 import { AvatarCircle } from '../components/AvatarCircle'
@@ -103,19 +105,30 @@ const PeriodTabs: React.FC<PeriodTabsProps> = ({ activeIndex, dateLabel, isEmpty
     {periodNames.map((name, i) => {
       const isActive = !isEmpty && activeIndex === i
       return (
-        <Pressable key={name} style={{
-          flex: 1,
-          borderRadius: 9999,
-          alignItems: 'center',
-          justifyContent: 'center',
-          ...(isActive
-            ? gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)')
-            : { backgroundColor: colors.surface2 }),
-          height: 32,
-          boxShadow: isActive
-            ? '0 3px 10px rgba(124,74,90,0.25)'
-            : '0 2px 6px rgba(61,43,37,0.08)',
-        }}>
+        <Pressable
+          key={name}
+          accessibilityRole="tab"
+          accessibilityState={{ selected: isActive }}
+          accessibilityLabel={name}
+          style={{
+            flex: 1,
+            borderRadius: 9999,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: isActive ? undefined : colors.surface2,
+            height: 32,
+            overflow: 'hidden',
+            ...(isActive ? shadows.pillSoft : shadows.pillFlat),
+          }}
+        >
+          {isActive && (
+            <LinearGradient
+              colors={gradients.primaryCta}
+              start={gradientPoints.diagonal.start}
+              end={gradientPoints.diagonal.end}
+              style={StyleSheet.absoluteFill}
+            />
+          )}
           <Text style={{
             fontFamily: font('dmSans', '500'),
             fontSize: 11,
@@ -218,12 +231,12 @@ const ActivityBar: React.FC<{ activities: Activity[] }> = ({ activities }) => (
           borderRadius: 3,
           overflow: 'hidden',
         }}>
-          <View style={{
-            height: 5,
-            ...gradientStyle('linear-gradient(to right, #C07858, #B07080)'),
-            borderRadius: 3,
-            width: `${a.percent}%` as unknown as number,
-          }} />
+          <LinearGradient
+            colors={gradients.activityBar}
+            start={gradientPoints.horizontal.start}
+            end={gradientPoints.horizontal.end}
+            style={{ height: 5, borderRadius: 3, width: `${a.percent}%` }}
+          />
         </View>
         <Text style={{
           fontSize: 10,
@@ -420,17 +433,25 @@ const HeroEmpty: React.FC<{ userName: string; onLogSession?: () => void }> = ({ 
     </Text>
     <Pressable
       onPress={onLogSession}
+      accessibilityRole="button"
+      accessibilityLabel="Log your first session"
       style={{
         flexDirection: 'row',
         alignItems: 'center',
         gap: 7,
-        ...gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)'),
         borderRadius: 9999,
         paddingVertical: 13,
         paddingHorizontal: 28,
-        boxShadow: '0 6px 20px rgba(124,74,90,0.3), inset 0 1px 0 rgba(255,255,255,0.15)',
+        overflow: 'hidden',
+        ...shadows.primaryButton,
       }}
     >
+      <LinearGradient
+        colors={gradients.primaryCta}
+        start={gradientPoints.diagonal.start}
+        end={gradientPoints.diagonal.end}
+        style={StyleSheet.absoluteFill}
+      />
       <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round">
         <Line x1={12} y1={5} x2={12} y2={19} />
         <Line x1={5} y1={12} x2={19} y2={12} />

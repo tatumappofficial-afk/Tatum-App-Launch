@@ -1,6 +1,7 @@
 import React from 'react'
 import { Text, View } from 'react-native'
-import { colors, font, fontFamily, gradientStyle } from '../theme'
+import { LinearGradient } from 'expo-linear-gradient'
+import { colors, font, gradientPoints, parseGradientColors, shadows } from '../theme'
 
 export interface AvatarCircleProps {
   initials: string
@@ -20,18 +21,21 @@ export const AvatarCircle: React.FC<AvatarCircleProps> = ({
   const fontSize = Math.round(size * 0.35)
 
   return (
-    <View style={{
-      width: size,
-      height: size,
-      borderRadius: size / 2,
-      ...gradientStyle(gradient),
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth,
-      borderColor: colors.white,
-      boxShadow: showShadow ? '0 3px 12px rgba(61,43,37,0.15)' : undefined,
-      flexShrink: 0,
-    }}>
+    <LinearGradient
+      colors={parseGradientColors(gradient)}
+      start={gradientPoints.diagonal.start}
+      end={gradientPoints.diagonal.end}
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth,
+        borderColor: colors.white,
+        ...(showShadow ? shadows.cardSubtle : null),
+      }}
+    >
       <Text style={{
         fontFamily: font('playfair', '700'),
         fontSize,
@@ -39,6 +43,6 @@ export const AvatarCircle: React.FC<AvatarCircleProps> = ({
       }}>
         {initials}
       </Text>
-    </View>
+    </LinearGradient>
   )
 }

@@ -1,10 +1,10 @@
 import React from 'react'
-import { View, Text } from 'react-native'
+import { StyleSheet, View, Text } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Rect, Line, Path, Polyline } from 'react-native-svg'
-import { colors, font, fontFamily, gradientStyle } from '../theme'
+import { colors, font, gradientPoints, gradients } from '../theme'
 import { GradientButton } from '../components/GradientButton'
-
-/* -- Feature icons (SVG) -- */
+import { RadialGlow } from './shared/DecorativeGlow'
 
 const CalendarIcon: React.FC = () => (
   <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
@@ -29,8 +29,6 @@ const BookIcon: React.FC = () => (
   </Svg>
 )
 
-/* -- Feature pill -- */
-
 const FeaturePill: React.FC<{ icon: React.ReactNode; text: React.ReactNode }> = ({ icon, text }) => (
   <View
     style={{
@@ -45,36 +43,26 @@ const FeaturePill: React.FC<{ icon: React.ReactNode; text: React.ReactNode }> = 
       gap: 10,
     }}
   >
-    <View style={{ alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{icon}</View>
+    <View style={{ alignItems: 'center', justifyContent: 'center' }}>{icon}</View>
     <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 12.5, color: '#6A4A40', lineHeight: 17.5, flex: 1 }}>{text}</Text>
   </View>
 )
 
-/* -- Screen -- */
-
 export const OnboardingReadyScreen: React.FC = () => (
-  <View
-    style={{
-      flex: 1,
-      position: 'relative',
-      overflow: 'hidden',
-      flexDirection: 'column',
-      ...gradientStyle('linear-gradient(165deg, #F5EFE8 0%, #EDE3D8 60%, #E0D0C0 100%)'),
-    }}
-  >
-    {/* Large ambient glow -- centered */}
-    <View
-      pointerEvents="none"
-      style={{
-        position: 'absolute',
-        top: '42%',
-        alignSelf: 'center',
-        width: 400,
-        height: 400,
-        ...gradientStyle('radial-gradient(circle, rgba(192,120,88,0.18) 0%, transparent 65%)'),
-        zIndex: 0,
-      }}
+  <View style={{ flex: 1, overflow: 'hidden' }}>
+    {/* Background gradient (was 165deg) */}
+    <LinearGradient
+      colors={['#F5EFE8', '#EDE3D8', '#E0D0C0']}
+      locations={[0, 0.6, 1]}
+      start={gradientPoints.almostVertical.start}
+      end={gradientPoints.almostVertical.end}
+      style={StyleSheet.absoluteFill}
     />
+
+    {/* Large ambient glow */}
+    <View pointerEvents="none" style={{ position: 'absolute', top: '42%', alignSelf: 'center', width: 400, height: 400 }}>
+      <RadialGlow size={400} color="rgb(192,120,88)" opacity={0.18} falloff={65} />
+    </View>
 
     {/* Decorative rings */}
     <View
@@ -110,11 +98,9 @@ export const OnboardingReadyScreen: React.FC = () => (
     <View
       style={{
         flex: 1,
-        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         paddingHorizontal: 36,
-        zIndex: 1,
       }}
     >
       {/* App icon -- large */}
@@ -123,17 +109,26 @@ export const OnboardingReadyScreen: React.FC = () => (
           width: 90,
           height: 90,
           borderRadius: 24,
-          ...gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)'),
           alignItems: 'center',
           justifyContent: 'center',
-          boxShadow: '0 16px 40px rgba(124,74,90,0.35)',
           marginBottom: 28,
+          overflow: 'hidden',
+          shadowColor: '#7C4A5A',
+          shadowOffset: { width: 0, height: 16 },
+          shadowOpacity: 0.35,
+          shadowRadius: 40,
+          elevation: 12,
         }}
       >
+        <LinearGradient
+          colors={gradients.primaryCta}
+          start={gradientPoints.diagonal.start}
+          end={gradientPoints.diagonal.end}
+          style={StyleSheet.absoluteFill}
+        />
         <Text style={{ fontSize: 22, color: colors.white, lineHeight: 22 }}>&#10022;</Text>
       </View>
 
-      {/* Headline */}
       <Text
         style={{
           fontFamily: font('playfair', '700'),
@@ -147,7 +142,6 @@ export const OnboardingReadyScreen: React.FC = () => (
         You're all set,{'\n'}Alanna.
       </Text>
 
-      {/* Subtitle */}
       <Text
         style={{
           fontFamily: font('dmSans', '300'),
@@ -161,8 +155,7 @@ export const OnboardingReadyScreen: React.FC = () => (
         Here's what's waiting for you.
       </Text>
 
-      {/* Feature pills */}
-      <View style={{ flexDirection: 'column', gap: 8, width: '100%', marginBottom: 32 }}>
+      <View style={{ gap: 8, width: '100%', marginBottom: 32 }}>
         <FeaturePill
           icon={<CalendarIcon />}
           text={
@@ -194,7 +187,7 @@ export const OnboardingReadyScreen: React.FC = () => (
     </View>
 
     {/* Bottom area */}
-    <View style={{ flexShrink: 0, paddingHorizontal: 28, paddingBottom: 40, zIndex: 2 }}>
+    <View style={{ paddingHorizontal: 28, paddingBottom: 40 }}>
       <View style={{ marginBottom: 12 }}>
         <GradientButton label="Start Logging" height={56} fontSize={14} />
       </View>

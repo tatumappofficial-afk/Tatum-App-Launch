@@ -1,7 +1,8 @@
 import React from 'react'
-import { View, Text, Pressable, ScrollView } from 'react-native'
+import { StyleSheet, View, Text, Pressable } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Path, Polyline, Rect } from 'react-native-svg'
-import { colors, font, fontFamily, gradientStyle } from '../theme'
+import { colors, font, gradientPoints, gradients } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { SectionLabel } from './shared/SectionLabel'
 import { SettingsRow } from '../components/SettingsRow'
@@ -110,6 +111,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       <View style={{ marginTop: 14, flexShrink: 0 }}>
         <Pressable
           onPress={onProTap}
+          accessibilityRole="button"
+          accessibilityLabel="Tatum Premium"
           style={{
             marginHorizontal: 20,
             borderRadius: 16,
@@ -118,12 +121,15 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             flexDirection: 'row',
             alignItems: 'center',
             gap: 12,
-            flexShrink: 0,
-            position: 'relative',
             overflow: 'hidden',
-            ...gradientStyle('linear-gradient(135deg, #C07858 0%, #7C4A5A 100%)'),
           }}
         >
+          <LinearGradient
+            colors={gradients.primaryCta}
+            start={gradientPoints.diagonal.start}
+            end={gradientPoints.diagonal.end}
+            style={StyleSheet.absoluteFill}
+          />
           {/* Decorative circle */}
           <View style={{
             position: 'absolute',

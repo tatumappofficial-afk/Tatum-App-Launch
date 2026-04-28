@@ -1,7 +1,8 @@
 import React from 'react'
-import { View, Text } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Polyline } from 'react-native-svg'
-import { colors, font, gradients, gradientStyle } from '../theme'
+import { colors, font, gradientPoints, gradients } from '../theme'
 
 export interface SuccessOverlayProps {
   visible: boolean
@@ -32,7 +33,11 @@ export const SuccessOverlay: React.FC<SuccessOverlayProps> = ({ visible, label }
         backgroundColor: colors.surface,
         alignItems: 'center',
         gap: 12,
-        boxShadow: '0 12px 32px rgba(61,43,37,0.25)',
+        shadowColor: '#3D2B25',
+        shadowOffset: { width: 0, height: 12 },
+        shadowOpacity: 0.25,
+        shadowRadius: 32,
+        elevation: 12,
       }}>
         <View style={{
           width: 48,
@@ -40,9 +45,19 @@ export const SuccessOverlay: React.FC<SuccessOverlayProps> = ({ visible, label }
           borderRadius: 24,
           alignItems: 'center',
           justifyContent: 'center',
-          ...gradientStyle(`linear-gradient(135deg, ${gradients.positive[0]}, ${gradients.positive[1]})`),
-          boxShadow: '0 4px 12px rgba(90,128,96,0.35)',
+          overflow: 'hidden',
+          shadowColor: '#5A8060',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.35,
+          shadowRadius: 12,
+          elevation: 4,
         }}>
+          <LinearGradient
+            colors={gradients.positive}
+            start={gradientPoints.diagonal.start}
+            end={gradientPoints.diagonal.end}
+            style={StyleSheet.absoluteFill}
+          />
           <Svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke={colors.white} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
             <Polyline points="5 12 10 17 19 8" />
           </Svg>

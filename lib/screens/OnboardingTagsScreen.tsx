@@ -1,24 +1,33 @@
 import React from 'react'
-import { View, Text, Pressable, ScrollView } from 'react-native'
+import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Path } from 'react-native-svg'
-import { colors, font, fontFamily, gradientStyle } from '../theme'
+import { colors, font, fontFamily, gradientPoints, gradients, shadows } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { StepDots } from '../components/StepDots'
 
 const GradientButton: React.FC<{ label: string; onPress?: () => void }> = ({ label, onPress }) => (
   <Pressable
     onPress={onPress}
+    accessibilityRole="button"
+    accessibilityLabel={label}
     style={{
       width: '100%',
       height: 52,
-      ...gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)'),
       borderRadius: 9999,
+      overflow: 'hidden',
       alignItems: 'center',
       justifyContent: 'center',
-      boxShadow: '0 6px 20px rgba(124,74,90,0.32), inset 0 1px 0 rgba(255,255,255,0.15)',
       marginBottom: 12,
+      ...shadows.primaryButtonStrong,
     }}
   >
+    <LinearGradient
+      colors={gradients.primaryCta}
+      start={gradientPoints.diagonal.start}
+      end={gradientPoints.diagonal.end}
+      style={StyleSheet.absoluteFill}
+    />
     <Text
       style={{
         fontFamily: font('dmSans', '500'),
@@ -62,7 +71,12 @@ const TAGS = [
 /* -- Tag chip -- */
 
 const TagChip: React.FC<{ emoji: string; label: string; active?: boolean }> = ({ emoji, label, active = true }) => (
-  <Pressable style={{ flexDirection: 'column', alignItems: 'center', gap: 5, width: 72 }}>
+  <Pressable
+    accessibilityRole="button"
+    accessibilityLabel={label}
+    accessibilityState={{ selected: active }}
+    style={{ flexDirection: 'column', alignItems: 'center', gap: 5, width: 72 }}
+  >
     <View
       style={{
         width: 64,
@@ -70,10 +84,14 @@ const TagChip: React.FC<{ emoji: string; label: string; active?: boolean }> = ({
         borderRadius: 32,
         alignItems: 'center',
         justifyContent: 'center',
+        overflow: 'hidden',
         ...(active
           ? {
-              ...gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)'),
-              boxShadow: '0 4px 14px rgba(124,74,90,0.32)',
+              shadowColor: '#7C4A5A',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.32,
+              shadowRadius: 14,
+              elevation: 5,
             }
           : {
               backgroundColor: colors.surface2,
@@ -82,6 +100,14 @@ const TagChip: React.FC<{ emoji: string; label: string; active?: boolean }> = ({
             }),
       }}
     >
+      {active && (
+        <LinearGradient
+          colors={gradients.primaryCta}
+          start={gradientPoints.diagonal.start}
+          end={gradientPoints.diagonal.end}
+          style={StyleSheet.absoluteFill}
+        />
+      )}
       <Text style={{ fontSize: 26 }}>{emoji}</Text>
     </View>
     <Text

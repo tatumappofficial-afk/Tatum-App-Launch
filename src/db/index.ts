@@ -2,6 +2,7 @@ import { getDatabase } from './sqlite'
 import { initCollections, activityTags, encounters, partners, desireEntries, whisperMessages, affirmations, userProfiles } from './collections'
 import { DEFAULT_ACTIVITY_TAGS, DEFAULT_SETTINGS, type UserSettings } from './schema'
 import { generateId as uuid } from '@/src/utils/uuid'
+import { deriveInitials } from '@/src/utils/initials'
 
 export { activityTags, encounters, partners, desireEntries, whisperMessages, affirmations, userProfiles } from './collections'
 export * from './schema'
@@ -42,6 +43,22 @@ export async function initDatabase() {
       await db.runAsync(
         'INSERT OR IGNORE INTO user_settings (key, value) VALUES (?, ?)',
         [key, JSON.stringify(value)],
+      )
+    }
+  }
+
+  // Backfill 1-character partner initials written by the legacy
+  // first-letter-of-each-word derivation. Skip rows where re-deriving
+  // can't produce 2+ chars (e.g. a 1-letter displayName).
+  const stalePartners = await db.getAllAsync<{ id: string; displayName: string; avatarValue: string }>(
+    'SELECT id, displayName, avatarValue FROM partners WHERE LENGTH(avatarValue) < 2',
+  )
+  for (const row of stalePartners) {
+    const fresh = deriveInitials(row.displayName)
+    if (fresh.length >= 2) {
+      await db.runAsync(
+        'UPDATE partners SET avatarValue = ?, updatedAt = ? WHERE id = ?',
+        [fresh, new Date().toISOString(), row.id],
       )
     }
   }

@@ -1,19 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import { useLiveQuery } from '@tanstack/react-db'
-import { Alert, View, Text, TextInput, Pressable, ScrollView } from 'react-native'
+import { Alert, StyleSheet, View, Text, TextInput, Pressable, ScrollView } from 'react-native'
 import Svg, { Line } from 'react-native-svg'
 import { generateId } from '@/src/utils/uuid'
-import { colors, font, fontFamily, gradientStyle, partnerGradients } from '@/lib/theme'
+import { deriveInitials } from '@/src/utils/initials'
+import { LinearGradient } from 'expo-linear-gradient'
+import { colors, font, fontFamily, gradientPoints, partnerGradients } from '@/lib/theme'
 import { GradientButton } from '@/lib/components/GradientButton'
 import { SuccessOverlay } from '@/lib/components/SuccessOverlay'
 import { AvatarCircle } from '@/lib/components/AvatarCircle'
 import { encounters, partners } from '@/src/db'
-
-function deriveInitials(name: string): string {
-  const firstWord = name.trim().split(/\s+/)[0] ?? ''
-  return firstWord.slice(0, 2).toUpperCase()
-}
 
 export default function EditPartnerSheet() {
   const router = useRouter()
@@ -304,17 +301,26 @@ export default function EditPartnerSheet() {
               <Pressable
                 key={opt.key}
                 onPress={() => setSelectedGradient(opt.gradient)}
+                accessibilityRole="button"
+                accessibilityLabel={`Color ${opt.key}`}
+                accessibilityState={{ selected: isSelected }}
                 style={{
                   width: 52,
                   height: 52,
                   borderRadius: 26,
-                  ...gradientStyle(opt.gradient),
+                  overflow: 'hidden',
                   borderWidth: isSelected ? 3 : 0,
                   borderColor: isSelected ? colors.ink : 'transparent',
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
               >
+                <LinearGradient
+                  colors={opt.colors}
+                  start={gradientPoints.diagonal.start}
+                  end={gradientPoints.diagonal.end}
+                  style={StyleSheet.absoluteFill}
+                />
                 {isSelected && (
                   <Text style={{ color: colors.white, fontSize: 18 }}>{'✓'}</Text>
                 )}

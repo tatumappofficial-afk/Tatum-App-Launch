@@ -1,7 +1,8 @@
 import React from 'react'
-import { Pressable, ScrollView, Text, View } from 'react-native'
-import Svg, { Circle, Line, Path, Polyline } from 'react-native-svg'
-import { colors, font, fontFamily, gradientStyle } from '../theme'
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
+import Svg, { Line, Polyline } from 'react-native-svg'
+import { colors, font, gradientPoints, gradients, shadows } from '../theme'
 import { AvatarCircle } from '../components/AvatarCircle'
 import { StarRating } from '../components/StarRating'
 import { GradientButton } from '../components/GradientButton'
@@ -50,9 +51,15 @@ const EmptyState: React.FC<{ onLogSession?: () => void }> = ({ onLogSession }) =
     <View style={{
       width: 96, height: 96, marginBottom: 16, opacity: 0.5,
       borderRadius: 16,
-      ...gradientStyle('linear-gradient(135deg, rgba(192,120,88,0.3), rgba(124,74,90,0.2))'),
+      overflow: 'hidden',
       alignItems: 'center', justifyContent: 'center',
     }}>
+      <LinearGradient
+        colors={['rgba(192,120,88,0.3)', 'rgba(124,74,90,0.2)']}
+        start={gradientPoints.diagonal.start}
+        end={gradientPoints.diagonal.end}
+        style={StyleSheet.absoluteFill}
+      />
       <Text style={{
         fontFamily: font('playfair', '700'), fontSize: 28,
         color: colors.terra, opacity: 0.6,
@@ -68,13 +75,21 @@ const EmptyState: React.FC<{ onLogSession?: () => void }> = ({ onLogSession }) =
     }}>You haven't logged anything for this day. Want to capture a moment?</Text>
     <Pressable
       onPress={onLogSession}
+      accessibilityRole="button"
+      accessibilityLabel="Log a Session"
       style={{
         flexDirection: 'row', alignItems: 'center', gap: 7,
-        ...gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)'),
         borderRadius: 9999, paddingVertical: 12, paddingHorizontal: 28,
-        boxShadow: '0 6px 20px rgba(124,74,90,0.32), inset 0 1px 0 rgba(255,255,255,0.15)',
+        overflow: 'hidden',
+        ...shadows.primaryButtonStrong,
       }}
     >
+      <LinearGradient
+        colors={gradients.primaryCta}
+        start={gradientPoints.diagonal.start}
+        end={gradientPoints.diagonal.end}
+        style={StyleSheet.absoluteFill}
+      />
       <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round">
         <Line x1={12} y1={5} x2={12} y2={19} /><Line x1={5} y1={12} x2={19} y2={12} />
       </Svg>

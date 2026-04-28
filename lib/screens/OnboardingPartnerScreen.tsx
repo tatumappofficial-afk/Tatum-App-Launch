@@ -1,24 +1,33 @@
 import React from 'react'
-import { View, Text, Pressable, TextInput, ScrollView } from 'react-native'
+import { StyleSheet, View, Text, Pressable, TextInput, ScrollView } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Polyline } from 'react-native-svg'
-import { colors, font, fontFamily, gradientStyle } from '../theme'
+import { colors, font, fontFamily, gradientPoints, gradients, shadows } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { StepDots } from '../components/StepDots'
 
 const GradientButton: React.FC<{ label: string; onPress?: () => void }> = ({ label, onPress }) => (
   <Pressable
     onPress={onPress}
+    accessibilityRole="button"
+    accessibilityLabel={label}
     style={{
       width: '100%',
       height: 52,
-      ...gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)'),
       borderRadius: 9999,
+      overflow: 'hidden',
       alignItems: 'center',
       justifyContent: 'center',
-      boxShadow: '0 6px 20px rgba(124,74,90,0.32), inset 0 1px 0 rgba(255,255,255,0.15)',
       marginBottom: 10,
+      ...shadows.primaryButtonStrong,
     }}
   >
+    <LinearGradient
+      colors={gradients.primaryCta}
+      start={gradientPoints.diagonal.start}
+      end={gradientPoints.diagonal.end}
+      style={StyleSheet.absoluteFill}
+    />
     <Text
       style={{
         fontFamily: font('dmSans', '500'),
@@ -35,16 +44,14 @@ const GradientButton: React.FC<{ label: string; onPress?: () => void }> = ({ lab
 
 /* -- Color swatches data -- */
 
-const SWATCH_GRADIENTS = [
-  'linear-gradient(135deg, #C07858, #7C4A5A)',
-  'linear-gradient(135deg, #B07080, #7C4A5A)',
-  'linear-gradient(135deg, #8BA888, #5A8060)',
-  'linear-gradient(135deg, #C4993A, #8A6A20)',
-  'linear-gradient(135deg, #9A8878, #6A5848)',
-  'linear-gradient(135deg, #7C6090, #4A3060)',
+const SWATCH_GRADIENTS: ReadonlyArray<readonly [string, string]> = [
+  ['#C07858', '#7C4A5A'],
+  ['#B07080', '#7C4A5A'],
+  ['#8BA888', '#5A8060'],
+  ['#C4993A', '#8A6A20'],
+  ['#9A8878', '#6A5848'],
+  ['#7C6090', '#4A3060'],
 ] as const
-
-/* -- Chevron icon -- */
 
 const ChevronRight: React.FC = () => (
   <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#C4B0A0" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -52,29 +59,20 @@ const ChevronRight: React.FC = () => (
   </Svg>
 )
 
-/* -- Screen -- */
-
 export const OnboardingPartnerScreen: React.FC = () => (
   <View
     style={{
       flex: 1,
-      position: 'relative',
       overflow: 'hidden',
-      flexDirection: 'column',
       backgroundColor: colors.warmSand,
     }}
   >
     <DecorativeGlow position="top-right" size={240} opacity={0.1} />
     <View style={{ height: 54 }} />
 
-    {/* Content */}
     <ScrollView
-      style={{
-        flex: 1,
-        paddingHorizontal: 28,
-        zIndex: 1,
-      }}
-      contentContainerStyle={{ flexDirection: 'column' }}
+      style={{ flex: 1, paddingHorizontal: 28 }}
+      keyboardShouldPersistTaps="handled"
     >
       {/* Title area */}
       <View style={{ marginTop: 24, marginBottom: 24 }}>
@@ -107,21 +105,31 @@ export const OnboardingPartnerScreen: React.FC = () => (
       </View>
 
       {/* Partner preview */}
-      <View style={{ flexDirection: 'column', alignItems: 'center', marginBottom: 24 }}>
+      <View style={{ alignItems: 'center', marginBottom: 24 }}>
         <View
           style={{
             width: 80,
             height: 80,
             borderRadius: 40,
-            ...gradientStyle(SWATCH_GRADIENTS[0]),
             alignItems: 'center',
             justifyContent: 'center',
             borderWidth: 3,
             borderColor: 'white',
-            boxShadow: '0 6px 20px rgba(61,43,37,0.15)',
             marginBottom: 10,
+            overflow: 'hidden',
+            shadowColor: '#3D2B25',
+            shadowOffset: { width: 0, height: 6 },
+            shadowOpacity: 0.15,
+            shadowRadius: 20,
+            elevation: 6,
           }}
         >
+          <LinearGradient
+            colors={SWATCH_GRADIENTS[0]}
+            start={gradientPoints.diagonal.start}
+            end={gradientPoints.diagonal.end}
+            style={StyleSheet.absoluteFill}
+          />
           <Text
             style={{
               fontFamily: font('playfair', '700'),
@@ -151,6 +159,9 @@ export const OnboardingPartnerScreen: React.FC = () => (
           defaultValue="Alex"
           placeholder="Their name or nickname"
           maxLength={30}
+          autoCapitalize="words"
+          autoCorrect={false}
+          returnKeyType="done"
           style={{
             width: '100%',
             backgroundColor: colors.surface,
@@ -180,19 +191,35 @@ export const OnboardingPartnerScreen: React.FC = () => (
         Choose a color
       </Text>
       <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
-        {SWATCH_GRADIENTS.map((grad, i) => (
+        {SWATCH_GRADIENTS.map((cols, i) => (
           <Pressable
             key={i}
+            accessibilityRole="button"
+            accessibilityLabel={`Color option ${i + 1}`}
+            accessibilityState={{ selected: i === 0 }}
             style={{
               width: 32,
               height: 32,
               borderRadius: 16,
-              ...gradientStyle(grad),
+              overflow: 'hidden',
               borderWidth: 2.5,
               borderColor: i === 0 ? 'white' : 'transparent',
-              boxShadow: i === 0 ? '0 0 0 2.5px #C07858' : 'none',
+              ...(i === 0 ? {
+                shadowColor: '#C07858',
+                shadowOffset: { width: 0, height: 0 },
+                shadowOpacity: 1,
+                shadowRadius: 2.5,
+                elevation: 2,
+              } : null),
             }}
-          />
+          >
+            <LinearGradient
+              colors={cols}
+              start={gradientPoints.diagonal.start}
+              end={gradientPoints.diagonal.end}
+              style={StyleSheet.absoluteFill}
+            />
+          </Pressable>
         ))}
       </View>
 
@@ -213,6 +240,8 @@ export const OnboardingPartnerScreen: React.FC = () => (
 
       {/* Solo row */}
       <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Solo — track without a partner"
         style={{
           flexDirection: 'row',
           alignItems: 'center',
@@ -231,15 +260,24 @@ export const OnboardingPartnerScreen: React.FC = () => (
             width: 44,
             height: 44,
             borderRadius: 22,
-            ...gradientStyle('linear-gradient(135deg, #9A8878, #6A5848)'),
             alignItems: 'center',
             justifyContent: 'center',
             borderWidth: 2,
             borderColor: 'white',
-            boxShadow: '0 2px 8px rgba(61,43,37,0.12)',
-            flexShrink: 0,
+            overflow: 'hidden',
+            shadowColor: '#3D2B25',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.12,
+            shadowRadius: 8,
+            elevation: 2,
           }}
         >
+          <LinearGradient
+            colors={['#9A8878', '#6A5848']}
+            start={gradientPoints.diagonal.start}
+            end={gradientPoints.diagonal.end}
+            style={StyleSheet.absoluteFill}
+          />
           <Text style={{ fontSize: 22 }}>✨</Text>
         </View>
         <View style={{ flex: 1 }}>
@@ -253,7 +291,7 @@ export const OnboardingPartnerScreen: React.FC = () => (
     </ScrollView>
 
     {/* Bottom area */}
-    <View style={{ flexShrink: 0, paddingHorizontal: 28, paddingBottom: 32 }}>
+    <View style={{ paddingHorizontal: 28, paddingBottom: 32 }}>
       <GradientButton label="Add Alex" />
       <Pressable style={{ alignItems: 'center', paddingVertical: 4, marginBottom: 12 }}>
         <Text

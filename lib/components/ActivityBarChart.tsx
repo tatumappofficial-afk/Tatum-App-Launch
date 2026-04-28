@@ -1,6 +1,7 @@
 import React from 'react'
 import { Text, View } from 'react-native'
-import { colors, font, fontFamily, gradientStyle } from '../theme'
+import { LinearGradient } from 'expo-linear-gradient'
+import { colors, font, fontFamily, gradientPoints, gradients } from '../theme'
 
 export interface ActivityBarItem {
   emoji: string
@@ -21,7 +22,6 @@ export const ActivityBarChart: React.FC<ActivityBarChartProps> = ({ activities }
     borderRadius: 14,
     padding: 12,
     paddingHorizontal: 14,
-    flexShrink: 0,
   }}>
     {activities.map((a, i) => (
       <View key={a.label} style={{
@@ -30,12 +30,11 @@ export const ActivityBarChart: React.FC<ActivityBarChartProps> = ({ activities }
         gap: 7,
         marginBottom: i < activities.length - 1 ? 7 : 0,
       }}>
-        <Text style={{ fontSize: 13, width: 18, textAlign: 'center', flexShrink: 0 }}>{a.emoji}</Text>
+        <Text style={{ fontSize: 13, width: 18, textAlign: 'center' }}>{a.emoji}</Text>
         <Text style={{
           fontSize: 10,
           color: colors.stone,
           width: 62,
-          flexShrink: 0,
           fontFamily: fontFamily.dmSans,
         }}>{a.label}</Text>
         <View style={{
@@ -45,19 +44,22 @@ export const ActivityBarChart: React.FC<ActivityBarChartProps> = ({ activities }
           borderRadius: 3,
           overflow: 'hidden',
         }}>
-          <View style={{
-            height: 5,
-            ...gradientStyle('linear-gradient(to right, #C07858, #B07080)'),
-            borderRadius: 3,
-            width: `${a.percent}%` as unknown as number,
-          }} />
+          <LinearGradient
+            colors={gradients.activityBar}
+            start={gradientPoints.horizontal.start}
+            end={gradientPoints.horizontal.end}
+            style={{
+              height: 5,
+              borderRadius: 3,
+              width: `${a.percent}%`,
+            }}
+          />
         </View>
         <Text style={{
           fontSize: 10,
           color: colors.mauve,
           width: 12,
           textAlign: 'right',
-          flexShrink: 0,
           fontFamily: font('dmSans', '500'),
         }}>{a.count}</Text>
       </View>

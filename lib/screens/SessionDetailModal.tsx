@@ -147,8 +147,12 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
           <SectionLabel label="Notes" />
           <View style={{
             marginHorizontal: 20, marginBottom: 14, borderRadius: 16, overflow: 'hidden',
-            borderWidth: 1, borderColor: 'rgba(160,100,80,0.14)', position: 'relative',
-            boxShadow: '3px 4px 0 0 #EDE3D8',
+            borderWidth: 1, borderColor: 'rgba(160,100,80,0.14)',
+            shadowColor: '#EDE3D8',
+            shadowOffset: { width: 3, height: 4 },
+            shadowOpacity: 1,
+            shadowRadius: 0,
+            elevation: 2,
           }}>
             <View style={{
               position: 'relative', backgroundColor: colors.surface,

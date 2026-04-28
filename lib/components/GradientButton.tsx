@@ -1,6 +1,7 @@
 import React from 'react'
-import { Pressable, Text } from 'react-native'
-import { colors, font, fontFamily, gradientStyle } from '../theme'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
+import { colors, font, gradientPoints, gradients, shadows } from '../theme'
 
 export interface GradientButtonProps {
   label: string
@@ -31,36 +32,48 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
     <Pressable
       onPress={onPress}
       disabled={disabled}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled }}
       style={{
         width: fullWidth ? '100%' : undefined,
         height,
+        borderRadius: 9999,
+        overflow: 'hidden',
+        borderWidth: isPrimary ? 0 : 1.5,
+        borderColor: isPrimary ? undefined : colors.terra,
+        backgroundColor: isPrimary ? undefined : 'transparent',
+        opacity: disabled ? 0.4 : 1,
+        ...(isPrimary && !disabled ? shadows.primaryButtonStrong : null),
+      }}
+    >
+      {isPrimary && (
+        <LinearGradient
+          colors={gradients.primaryCta}
+          start={gradientPoints.diagonal.start}
+          end={gradientPoints.diagonal.end}
+          style={StyleSheet.absoluteFill}
+        />
+      )}
+      <View style={{
+        flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         gap: icon ? 7 : 0,
-        ...(isPrimary
-          ? gradientStyle('linear-gradient(135deg, #C07858, #7C4A5A)')
-          : { backgroundColor: 'transparent' }),
-        borderWidth: isPrimary ? 0 : 1.5,
-        borderColor: isPrimary ? undefined : colors.terra,
-        borderRadius: 9999,
-        boxShadow: isPrimary && !disabled
-          ? '0 6px 20px rgba(124,74,90,0.32), inset 0 1px 0 rgba(255,255,255,0.15)'
-          : undefined,
         paddingHorizontal: fullWidth ? undefined : height * 0.54,
-        opacity: disabled ? 0.4 : 1,
-      }}
-    >
-      {icon}
-      <Text style={{
-        fontFamily: font('dmSans', '500'),
-        fontSize,
-        letterSpacing,
-        textTransform: 'uppercase',
-        color: isPrimary ? colors.white : colors.terra,
       }}>
-        {label}
-      </Text>
+        {icon}
+        <Text style={{
+          fontFamily: font('dmSans', '500'),
+          fontSize,
+          letterSpacing,
+          textTransform: 'uppercase',
+          color: isPrimary ? colors.white : colors.terra,
+        }}>
+          {label}
+        </Text>
+      </View>
     </Pressable>
   )
 }
