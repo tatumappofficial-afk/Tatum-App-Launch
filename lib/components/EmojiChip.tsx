@@ -57,7 +57,7 @@ export const EmojiChip: React.FC<EmojiChipProps> = ({
           colors={SELECTED_COLORS}
           start={gradientPoints.diagonal.start}
           end={gradientPoints.diagonal.end}
-          style={StyleSheet.absoluteFill}
+          style={[StyleSheet.absoluteFill, { borderRadius }]}
         />
       )}
       <Text style={{ fontSize: flex ? 20 : size * 0.52 }}>{emoji}</Text>

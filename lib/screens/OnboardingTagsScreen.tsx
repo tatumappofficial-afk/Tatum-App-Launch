@@ -27,7 +27,7 @@ const GradientButton: React.FC<{ label: string; onPress?: () => void }> = ({ lab
       colors={gradients.primaryCta}
       start={gradientPoints.diagonal.start}
       end={gradientPoints.diagonal.end}
-      style={StyleSheet.absoluteFill}
+      style={[StyleSheet.absoluteFill, { borderRadius: 9999 }]}
     />
     <Text
       style={{
@@ -106,7 +106,7 @@ const TagChip: React.FC<{ emoji: string; label: string; active?: boolean }> = ({
           colors={gradients.primaryCta}
           start={gradientPoints.diagonal.start}
           end={gradientPoints.diagonal.end}
-          style={StyleSheet.absoluteFill}
+          style={[StyleSheet.absoluteFill, { borderRadius: 32 }]}
         />
       )}
       <Text style={{ fontSize: 26 }}>{emoji}</Text>

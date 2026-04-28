@@ -103,7 +103,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab = 'home', onTabP
               colors={gradients.primaryCta}
               start={gradientPoints.diagonal.start}
               end={gradientPoints.diagonal.end}
-              style={StyleSheet.absoluteFill}
+              style={[StyleSheet.absoluteFill, { borderRadius: 26 }]}
             />
             <Svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round">
               <Line x1={12} y1={5} x2={12} y2={19} />

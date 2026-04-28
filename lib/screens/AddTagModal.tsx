@@ -168,7 +168,7 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
                 colors={['rgba(192,120,88,0.15)', 'rgba(124,74,90,0.1)']}
                 start={gradientPoints.diagonal.start}
                 end={gradientPoints.diagonal.end}
-                style={StyleSheet.absoluteFill}
+                style={[StyleSheet.absoluteFill, { borderRadius: 14 }]}
               />
               <Text style={{ fontSize: 26 }}>{selectedEmoji}</Text>
             </View>

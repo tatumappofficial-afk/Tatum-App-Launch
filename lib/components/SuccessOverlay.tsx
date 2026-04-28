@@ -56,7 +56,7 @@ export const SuccessOverlay: React.FC<SuccessOverlayProps> = ({ visible, label }
             colors={gradients.positive}
             start={gradientPoints.diagonal.start}
             end={gradientPoints.diagonal.end}
-            style={StyleSheet.absoluteFill}
+            style={[StyleSheet.absoluteFill, { borderRadius: 24 }]}
           />
           <Svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke={colors.white} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
             <Polyline points="5 12 10 17 19 8" />

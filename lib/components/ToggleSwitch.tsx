@@ -31,7 +31,7 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ enabled, onToggle })
         colors={gradients.primaryCta}
         start={gradientPoints.diagonal.start}
         end={gradientPoints.diagonal.end}
-        style={StyleSheet.absoluteFill}
+        style={[StyleSheet.absoluteFill, { borderRadius: 13 }]}
       />
     )}
     <View style={{

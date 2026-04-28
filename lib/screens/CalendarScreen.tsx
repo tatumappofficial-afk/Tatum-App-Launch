@@ -146,7 +146,7 @@ const Legend: React.FC = () => (
           colors={gradients.primaryCta}
           start={gradientPoints.diagonal.start}
           end={gradientPoints.diagonal.end}
-          style={StyleSheet.absoluteFill}
+          style={[StyleSheet.absoluteFill, { borderRadius: 5 }]}
         />
       </View>
       <Text style={{ fontFamily: fontFamily.dmSans, fontSize: 8.5, color: colors.stone }}>Today</Text>

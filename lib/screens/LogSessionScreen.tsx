@@ -94,6 +94,7 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
   showSuccess = false,
   successLabel = 'Session added',
 }) => {
+  const canSave = selectedPartnerIds.length > 0 && selectedActivityIds.length > 0
 
   return (
     <KeyboardAvoidingView
@@ -153,7 +154,7 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
                   colors={gradients.primaryCta}
                   start={gradientPoints.diagonal.start}
                   end={gradientPoints.diagonal.end}
-                  style={StyleSheet.absoluteFill}
+                  style={[StyleSheet.absoluteFill, { borderRadius: 9999 }]}
                 />
                 <Text style={{ fontSize: 12, fontWeight: '500', color: colors.white }}>{date}</Text>
                 <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
@@ -214,7 +215,7 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
                         colors={parseGradientColors(p.gradient)}
                         start={gradientPoints.diagonal.start}
                         end={gradientPoints.diagonal.end}
-                        style={StyleSheet.absoluteFill}
+                        style={[StyleSheet.absoluteFill, { borderRadius: 23 }]}
                       />
                       <Text style={{
                         fontFamily: font('playfair', '700'),
@@ -343,7 +344,7 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
           borderTopColor: 'rgba(160,100,80,0.1)',
           backgroundColor: colors.warmSand,
         }}>
-          <GradientButton label={saveLabel} onPress={onSave} height={50} />
+          <GradientButton label={saveLabel} onPress={onSave} height={50} disabled={!canSave} />
           {onDelete && (
             <Pressable
               onPress={onDelete}

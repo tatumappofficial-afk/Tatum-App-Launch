@@ -59,7 +59,7 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
           colors={gradients.primaryCta}
           start={gradientPoints.diagonal.start}
           end={gradientPoints.diagonal.end}
-          style={StyleSheet.absoluteFill}
+          style={[StyleSheet.absoluteFill, { borderRadius: 9999 }]}
         />
       )}
       <View style={{

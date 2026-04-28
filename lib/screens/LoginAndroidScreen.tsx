@@ -97,7 +97,7 @@ export const LoginAndroidScreen: React.FC = () => (
             colors={['#C98060', '#7C4A5A']}
             start={gradientPoints.steepDiagonal.start}
             end={gradientPoints.steepDiagonal.end}
-            style={StyleSheet.absoluteFill}
+            style={[StyleSheet.absoluteFill, { borderRadius: 22 }]}
           />
           <Text style={{ fontSize: 36, color: colors.white, lineHeight: 36 }}>&#10022;</Text>
         </View>

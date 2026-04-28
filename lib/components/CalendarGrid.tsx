@@ -68,7 +68,7 @@ const DayCell: React.FC<{
           colors={gradients.primaryCta}
           start={gradientPoints.diagonal.start}
           end={gradientPoints.diagonal.end}
-          style={StyleSheet.absoluteFill}
+          style={[StyleSheet.absoluteFill, { borderRadius: 9999 }]}
         />
       )}
       <Text style={{

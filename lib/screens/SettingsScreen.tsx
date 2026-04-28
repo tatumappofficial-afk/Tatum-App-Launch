@@ -129,7 +129,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             colors={gradients.primaryCta}
             start={gradientPoints.diagonal.start}
             end={gradientPoints.diagonal.end}
-            style={StyleSheet.absoluteFill}
+            style={[StyleSheet.absoluteFill, { borderRadius: 16 }]}
           />
           {/* Decorative circle */}
           <View style={{

@@ -57,8 +57,10 @@ export default function EditPartnerSheet() {
   }
 
   function handleInitialsChange(text: string) {
-    setInitials(text.toUpperCase().slice(0, 2))
-    setManuallyEdited(true)
+    const cleaned = text.toUpperCase().slice(0, 2)
+    setInitials(cleaned)
+    // Clearing the field releases the latch so future name edits re-derive.
+    setManuallyEdited(cleaned.length > 0)
   }
 
   function handleSave() {
@@ -325,7 +327,7 @@ export default function EditPartnerSheet() {
                   colors={opt.colors}
                   start={gradientPoints.diagonal.start}
                   end={gradientPoints.diagonal.end}
-                  style={StyleSheet.absoluteFill}
+                  style={[StyleSheet.absoluteFill, { borderRadius: 26 }]}
                 />
                 {isSelected && (
                   <Text style={{ color: colors.white, fontSize: 18 }}>{'✓'}</Text>

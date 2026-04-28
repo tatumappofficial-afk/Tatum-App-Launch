@@ -27,7 +27,7 @@ const GradientButton: React.FC<{ label: string; onPress?: () => void }> = ({ lab
       colors={gradients.primaryCta}
       start={gradientPoints.diagonal.start}
       end={gradientPoints.diagonal.end}
-      style={StyleSheet.absoluteFill}
+      style={[StyleSheet.absoluteFill, { borderRadius: 9999 }]}
     />
     <Text
       style={{
@@ -130,7 +130,7 @@ export const OnboardingPartnerScreen: React.FC = () => (
             colors={SWATCH_GRADIENTS[0]}
             start={gradientPoints.diagonal.start}
             end={gradientPoints.diagonal.end}
-            style={StyleSheet.absoluteFill}
+            style={[StyleSheet.absoluteFill, { borderRadius: 40 }]}
           />
           <Text
             style={{
@@ -219,7 +219,7 @@ export const OnboardingPartnerScreen: React.FC = () => (
               colors={cols}
               start={gradientPoints.diagonal.start}
               end={gradientPoints.diagonal.end}
-              style={StyleSheet.absoluteFill}
+              style={[StyleSheet.absoluteFill, { borderRadius: 16 }]}
             />
           </Pressable>
         ))}
@@ -278,7 +278,7 @@ export const OnboardingPartnerScreen: React.FC = () => (
             colors={['#9A8878', '#6A5848']}
             start={gradientPoints.diagonal.start}
             end={gradientPoints.diagonal.end}
-            style={StyleSheet.absoluteFill}
+            style={[StyleSheet.absoluteFill, { borderRadius: 22 }]}
           />
           <Text style={{ fontSize: 22 }}>✨</Text>
         </View>

@@ -95,7 +95,7 @@ export const OnboardingPrivacyScreen: React.FC = () => (
             colors={gradients.primaryCta}
             start={gradientPoints.diagonal.start}
             end={gradientPoints.diagonal.end}
-            style={StyleSheet.absoluteFill}
+            style={[StyleSheet.absoluteFill, { borderRadius: 18 }]}
           />
           <Text style={{ fontSize: 16, color: colors.white, lineHeight: 16 }}>&#10022;</Text>
         </View>

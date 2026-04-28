@@ -48,7 +48,7 @@ export const LaunchScreen: React.FC = () => (
         colors={gradients.primaryCta}
         start={gradientPoints.diagonal.start}
         end={gradientPoints.diagonal.end}
-        style={StyleSheet.absoluteFill}
+        style={[StyleSheet.absoluteFill, { borderRadius: 24 }]}
       />
       <Text style={{
         fontSize: 24,

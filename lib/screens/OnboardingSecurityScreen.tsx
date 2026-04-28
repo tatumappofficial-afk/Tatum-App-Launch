@@ -27,7 +27,7 @@ const GradientButton: React.FC<{ label: string; onPress?: () => void }> = ({ lab
       colors={gradients.primaryCta}
       start={gradientPoints.diagonal.start}
       end={gradientPoints.diagonal.end}
-      style={StyleSheet.absoluteFill}
+      style={[StyleSheet.absoluteFill, { borderRadius: 9999 }]}
     />
     <Text
       style={{
@@ -148,7 +148,7 @@ const SecurityCard: React.FC<SecurityCardProps> = ({ icon, title, desc, selected
           colors={gradients.primaryCta}
           start={gradientPoints.diagonal.start}
           end={gradientPoints.diagonal.end}
-          style={StyleSheet.absoluteFill}
+          style={[StyleSheet.absoluteFill, { borderRadius: 11 }]}
         />
         <CheckIcon />
       </View>

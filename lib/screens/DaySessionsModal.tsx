@@ -87,7 +87,7 @@ const SessionCard: React.FC<{
                   colors={parseGradientColors(session.partners[0].gradient)}
                   start={gradientPoints.diagonal.start}
                   end={gradientPoints.diagonal.end}
-                  style={StyleSheet.absoluteFill}
+                  style={[StyleSheet.absoluteFill, { borderRadius: 19 }]}
                 />
                 <Text style={{ fontFamily: font('playfair', '700'), fontSize: 13, color: 'white' }}>
                   {session.partners[0].initials}
@@ -105,7 +105,7 @@ const SessionCard: React.FC<{
                   colors={parseGradientColors(session.partners[1].gradient)}
                   start={gradientPoints.diagonal.start}
                   end={gradientPoints.diagonal.end}
-                  style={StyleSheet.absoluteFill}
+                  style={[StyleSheet.absoluteFill, { borderRadius: 19 }]}
                 />
                 <Text style={{ fontFamily: font('playfair', '700'), fontSize: 13, color: 'white' }}>
                   {session.partners[1].initials}
@@ -124,7 +124,7 @@ const SessionCard: React.FC<{
                 colors={parseGradientColors(session.partners[0].gradient)}
                 start={gradientPoints.diagonal.start}
                 end={gradientPoints.diagonal.end}
-                style={StyleSheet.absoluteFill}
+                style={[StyleSheet.absoluteFill, { borderRadius: 19 }]}
               />
               <Text style={{ fontFamily: font('playfair', '700'), fontSize: 13, color: 'white' }}>
                 {session.partners[0].initials}
