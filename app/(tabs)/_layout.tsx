@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router/tabs'
 import { Pressable, StyleSheet, View } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
+import * as Haptics from 'expo-haptics'
 import Svg, { Circle, Line, Path, Rect } from 'react-native-svg'
 import { useRouter } from 'expo-router'
 import { colors, fontFamily, gradientPoints, gradients } from '@/lib/theme'
@@ -47,8 +48,10 @@ function FAB(props: any) {
   return (
     <Pressable
       {...props}
+      accessibilityRole="button"
+      accessibilityLabel="Log a session"
       onPress={() => {
-        console.log('FAB pressed - navigating to log-session')
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
         router.push('/(sheets)/log-session')
       }}
       style={[props.style, { alignItems: 'center', justifyContent: 'center' }]}

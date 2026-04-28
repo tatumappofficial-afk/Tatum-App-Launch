@@ -304,6 +304,8 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
             multiline
             numberOfLines={3}
             maxLength={3000}
+            autoCapitalize="sentences"
+            autoCorrect
             style={{
               width: '100%',
               backgroundColor: colors.surface,

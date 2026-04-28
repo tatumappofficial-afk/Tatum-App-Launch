@@ -1,6 +1,7 @@
 import React from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
+import * as Haptics from 'expo-haptics'
 import { colors, font, gradientPoints, gradients, shadows } from '../theme'
 
 export interface GradientButtonProps {
@@ -28,9 +29,15 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
 }) => {
   const isPrimary = variant === 'primary'
 
+  const handlePress = () => {
+    if (disabled) return
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+    onPress?.()
+  }
+
   return (
     <Pressable
-      onPress={onPress}
+      onPress={handlePress}
       disabled={disabled}
       accessibilityRole="button"
       accessibilityLabel={label}

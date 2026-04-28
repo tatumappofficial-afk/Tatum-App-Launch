@@ -1,6 +1,7 @@
 import React from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
+import * as Haptics from 'expo-haptics'
 import Svg, { Circle, Line, Path, Rect } from 'react-native-svg'
 import { colors, font, gradientPoints, gradients } from '../../theme'
 
@@ -77,7 +78,10 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab = 'home', onTabP
         return (
           <Pressable
             key="log"
-            onPress={() => onTabPress?.('log')}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+              onTabPress?.('log')
+            }}
             accessibilityRole="button"
             accessibilityLabel="Log a session"
             style={{
@@ -112,7 +116,14 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab = 'home', onTabP
       return (
         <Pressable
           key={tab.id}
-          onPress={() => onTabPress?.(tab.id)}
+          onPress={() => {
+            if (!isActive) Haptics.selectionAsync()
+            onTabPress?.(tab.id)
+          }}
+          accessibilityRole="tab"
+          accessibilityLabel={tab.label}
+          accessibilityState={{ selected: isActive }}
+          hitSlop={8}
           style={{ alignItems: 'center', gap: 2 }}
         >
           <TabIcon name={tab.id} size={21} color={isActive ? colors.terra : colors.stone} />

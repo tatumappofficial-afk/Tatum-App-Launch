@@ -179,6 +179,10 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
               placeholder="e.g. Playful, Romantic..."
               placeholderTextColor={colors.muted}
               maxLength={20}
+              autoCapitalize="words"
+              autoCorrect={false}
+              returnKeyType="done"
+              onSubmitEditing={onAddTag}
               style={{
                 flex: 1,
                 backgroundColor: colors.surface2,

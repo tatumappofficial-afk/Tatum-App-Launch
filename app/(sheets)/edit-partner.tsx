@@ -235,6 +235,9 @@ export default function EditPartnerSheet() {
           onChangeText={handleNameChange}
           placeholder="Partner name"
           placeholderTextColor={colors.muted}
+          autoCapitalize="words"
+          autoCorrect={false}
+          returnKeyType="next"
           style={{
             fontFamily: font('dmSans', '400'),
             fontSize: 15,

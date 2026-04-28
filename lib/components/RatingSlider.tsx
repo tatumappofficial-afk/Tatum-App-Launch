@@ -1,6 +1,7 @@
 import React, { useRef, useState, useCallback } from 'react'
 import { View, Text, PanResponder, type LayoutChangeEvent } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
+import * as Haptics from 'expo-haptics'
 import { colors, font, gradientPoints, gradients, shadows } from '../theme'
 
 interface RatingSliderProps {
@@ -31,20 +32,27 @@ export const RatingSlider: React.FC<RatingSliderProps> = ({
     return Math.round(ratio * STEPS)
   }
 
+  const lastSteppedRef = useRef(value)
+
+  const emitStep = (next: number) => {
+    setDragValue(next)
+    if (next !== lastSteppedRef.current) {
+      Haptics.selectionAsync()
+      lastSteppedRef.current = next
+    }
+    onChange?.(next)
+  }
+
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: () => true,
       onPanResponderGrant: (evt) => {
         setDragging(true)
-        const stepped = clampToStep(evt.nativeEvent.pageX)
-        setDragValue(stepped)
-        onChange?.(stepped)
+        emitStep(clampToStep(evt.nativeEvent.pageX))
       },
       onPanResponderMove: (evt) => {
-        const stepped = clampToStep(evt.nativeEvent.pageX)
-        setDragValue(stepped)
-        onChange?.(stepped)
+        emitStep(clampToStep(evt.nativeEvent.pageX))
       },
       onPanResponderRelease: () => {
         setDragging(false)

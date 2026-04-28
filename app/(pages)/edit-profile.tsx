@@ -59,6 +59,10 @@ export default function EditProfileModal() {
           onChangeText={setDisplayName}
           placeholder="Your name"
           placeholderTextColor={colors.muted}
+          autoCapitalize="words"
+          autoCorrect={false}
+          returnKeyType="done"
+          onSubmitEditing={handleSave}
           style={{
             fontFamily: font('dmSans', '400'),
             fontSize: 16,
