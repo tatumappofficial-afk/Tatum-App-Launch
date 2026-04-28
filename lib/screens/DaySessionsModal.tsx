@@ -1,5 +1,6 @@
 import React from 'react'
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { FlashList } from '@shopify/flash-list'
 import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Circle, Line, Polyline } from 'react-native-svg'
 import { colors, font, fontFamily, gradientPoints, parseGradientColors } from '../theme'
@@ -237,13 +238,14 @@ export const DaySessionsModal: React.FC<DaySessionsModalProps> = ({
     </View>
 
     {/* Session cards scroll */}
-    <ScrollView style={{
-      flex: 1, paddingHorizontal: 16, paddingTop: 12,
-    }}>
-      {sessions.map((s) => (
-        <SessionCard key={s.id} session={s} onPress={() => onSessionPress?.(s.id)} />
-      ))}
-    </ScrollView>
+    <FlashList
+      data={sessions}
+      keyExtractor={(s) => s.id}
+      contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 12 }}
+      renderItem={({ item }) => (
+        <SessionCard session={item} onPress={() => onSessionPress?.(item.id)} />
+      )}
+    />
 
     {/* Footer */}
     <View style={{

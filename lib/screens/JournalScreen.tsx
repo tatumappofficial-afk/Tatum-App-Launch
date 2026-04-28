@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { FlashList } from '@shopify/flash-list'
 import { Image } from 'expo-image'
 import Svg, { Line, Polyline } from 'react-native-svg'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -798,18 +799,17 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({
       {isEmpty ? (
         <EmptyState onLogSession={onLogFirstSession} />
       ) : (
-        <ScrollView style={{
-          flex: 1,
-          paddingTop: 12,
-          paddingHorizontal: 20,
-        }}>
-          {entries.map((entry, idx) => (
-            <React.Fragment key={entry.id}>
-              {entry.monthSeparator && <MonthSeparator label={entry.monthSeparator} />}
-              <EntryCard entry={entry} onPress={() => onEntryPress?.(entry.id)} />
-            </React.Fragment>
-          ))}
-        </ScrollView>
+        <FlashList
+          data={entries}
+          keyExtractor={(entry) => entry.id}
+          contentContainerStyle={{ paddingTop: 12, paddingHorizontal: 20 }}
+          renderItem={({ item }) => (
+            <>
+              {item.monthSeparator && <MonthSeparator label={item.monthSeparator} />}
+              <EntryCard entry={item} onPress={() => onEntryPress?.(item.id)} />
+            </>
+          )}
+        />
       )}
     </View>
   )
