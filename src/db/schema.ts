@@ -1,27 +1,40 @@
 import { z } from 'zod'
 
-// ── Activity Emoji (fixed set, not stored) ──
+// ── Activity Tag ──
 
-export const ActivityEmojiSchema = z.object({
-  code: z.string(),
-  label: z.string(),
-  category: z.enum(['sexual', 'intimate', 'milestone', 'cycle']),
+export const ActivityTagSchema = z.object({
+  id: z.string(),
+  emoji: z.string(),
+  label: z.string().max(50),
+  sortOrder: z.number(),
+  isDefault: z.boolean(),
+  isActive: z.boolean(),
 })
 
-export type ActivityEmoji = z.infer<typeof ActivityEmojiSchema>
+export type ActivityTag = z.infer<typeof ActivityTagSchema>
 
-export const ACTIVITY_EMOJIS: ActivityEmoji[] = [
-  { code: '🍆', label: 'Intercourse', category: 'sexual' },
-  { code: '✋', label: 'Hand', category: 'sexual' },
-  { code: '👉', label: 'Fingering', category: 'sexual' },
-  { code: '💋', label: 'Oral (received)', category: 'sexual' },
-  { code: '🌬️', label: 'Oral (given)', category: 'sexual' },
-  { code: '😘', label: 'Kiss', category: 'intimate' },
-  { code: '🍑', label: 'Anal', category: 'sexual' },
-  { code: '✨', label: 'Solo', category: 'sexual' },
-  { code: '🌙', label: 'Cuddle', category: 'intimate' },
-  { code: '🩷', label: 'First I Love You', category: 'milestone' },
-  { code: '🩸', label: 'Period Start', category: 'cycle' },
+export const DEFAULT_ACTIVITY_TAGS: { emoji: string; label: string }[] = [
+  { emoji: '🍆', label: 'Penetration' },
+  { emoji: '👉', label: 'Fingering' },
+  { emoji: '🫱', label: 'Manual' },
+  { emoji: '💋', label: 'Giving' },
+  { emoji: '😛', label: 'Receiving' },
+  { emoji: '🌬️', label: 'Blow Job' },
+  { emoji: '🍑', label: 'Anal' },
+  { emoji: '💦', label: 'Cumming' },
+  { emoji: '✨', label: 'Solo' },
+  { emoji: '💃', label: 'She Initiated' },
+  { emoji: '🤝', label: 'Mutual' },
+  { emoji: '😴', label: 'Sleepy' },
+  { emoji: '⌛️', label: 'Long' },
+  { emoji: '🏁', label: 'Fast' },
+  { emoji: '🌙', label: 'Night' },
+  { emoji: '🌄', label: 'Morning' },
+  { emoji: '🛁', label: 'Shower' },
+  { emoji: '🏡', label: 'At Home' },
+  { emoji: '🏖', label: 'Vacation' },
+  { emoji: '😡', label: 'Angry' },
+  { emoji: '🩸', label: 'Period' },
 ]
 
 // ── Encounter ──
@@ -29,12 +42,10 @@ export const ACTIVITY_EMOJIS: ActivityEmoji[] = [
 export const EncounterSchema = z.object({
   id: z.string().uuid(),
   date: z.string(), // ISO date YYYY-MM-DD
-  activities: z.array(z.string()), // emoji codes
+  activities: z.array(z.string()).min(1), // emoji codes, at least one required
   partnerId: z.string().uuid().nullable(),
-  rating: z.enum(['up', 'down']).nullable(),
-  stars: z.number().min(1).max(10).nullable(),
-  vibes: z.array(z.string()),
-  noteId: z.string().uuid().nullable(),
+  stars: z.number().min(0).max(10).nullable(),
+  notes: z.string().max(3000).nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
 })
@@ -55,20 +66,6 @@ export const PartnerSchema = z.object({
 })
 
 export type Partner = z.infer<typeof PartnerSchema>
-
-// ── Private Note ──
-
-export const PrivateNoteSchema = z.object({
-  id: z.string().uuid(),
-  encounterId: z.string().uuid().nullable(),
-  partnerId: z.string().uuid().nullable(),
-  body: z.string(),
-  emojiTags: z.array(z.string()),
-  createdAt: z.string(),
-  updatedAt: z.string(),
-})
-
-export type PrivateNote = z.infer<typeof PrivateNoteSchema>
 
 // ── Desire Entry (Safe Space) ──
 

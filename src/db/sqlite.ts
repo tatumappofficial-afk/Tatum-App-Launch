@@ -2,11 +2,35 @@ import * as SQLite from 'expo-sqlite'
 
 const DB_NAME = 'tatum.db'
 
+// Bump this number whenever the schema changes to force a fresh database.
+// Since this is a pre-release app, we simply drop and recreate rather than migrate.
+const SCHEMA_VERSION = 2
+
 let db: SQLite.SQLiteDatabase | null = null
 
 export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
   if (db) return db
   db = await SQLite.openDatabaseAsync(DB_NAME)
+
+  // Check schema version — drop all tables if stale
+  const versionRows = await db.getAllAsync<{ user_version: number }>('PRAGMA user_version')
+  const currentVersion = versionRows[0]?.user_version ?? 0
+  if (currentVersion < SCHEMA_VERSION) {
+    console.log(`Schema version ${currentVersion} → ${SCHEMA_VERSION}, recreating tables…`)
+    await db.execAsync(`
+      DROP TABLE IF EXISTS whisper_messages;
+      DROP TABLE IF EXISTS desire_entries;
+      DROP TABLE IF EXISTS encounters;
+      DROP TABLE IF EXISTS partners;
+      DROP TABLE IF EXISTS affirmations;
+      DROP TABLE IF EXISTS activity_tags;
+      DROP TABLE IF EXISTS user_settings;
+      DROP TABLE IF EXISTS user_profile;
+      DROP TABLE IF EXISTS private_notes;
+    `)
+    await db.execAsync(`PRAGMA user_version = ${SCHEMA_VERSION}`)
+  }
+
   await initializeTables(db)
   return db
 }
@@ -32,24 +56,10 @@ async function initializeTables(database: SQLite.SQLiteDatabase) {
       date TEXT NOT NULL,
       activities TEXT NOT NULL DEFAULT '[]',
       partnerId TEXT,
-      rating TEXT,
       stars INTEGER,
-      vibes TEXT NOT NULL DEFAULT '[]',
-      noteId TEXT,
+      notes TEXT,
       createdAt TEXT NOT NULL,
       updatedAt TEXT NOT NULL,
-      FOREIGN KEY (partnerId) REFERENCES partners(id)
-    );
-
-    CREATE TABLE IF NOT EXISTS private_notes (
-      id TEXT PRIMARY KEY NOT NULL,
-      encounterId TEXT,
-      partnerId TEXT,
-      body TEXT NOT NULL DEFAULT '',
-      emojiTags TEXT NOT NULL DEFAULT '[]',
-      createdAt TEXT NOT NULL,
-      updatedAt TEXT NOT NULL,
-      FOREIGN KEY (encounterId) REFERENCES encounters(id),
       FOREIGN KEY (partnerId) REFERENCES partners(id)
     );
 
@@ -96,6 +106,15 @@ async function initializeTables(database: SQLite.SQLiteDatabase) {
       premiumExpiresAt TEXT
     );
 
+    CREATE TABLE IF NOT EXISTS activity_tags (
+      id TEXT PRIMARY KEY NOT NULL,
+      emoji TEXT NOT NULL,
+      label TEXT NOT NULL,
+      sortOrder INTEGER NOT NULL,
+      isDefault INTEGER NOT NULL DEFAULT 1,
+      isActive INTEGER NOT NULL DEFAULT 1
+    );
+
     CREATE TABLE IF NOT EXISTS user_settings (
       key TEXT PRIMARY KEY NOT NULL,
       value TEXT NOT NULL
@@ -103,7 +122,6 @@ async function initializeTables(database: SQLite.SQLiteDatabase) {
 
     CREATE INDEX IF NOT EXISTS idx_encounters_date ON encounters(date);
     CREATE INDEX IF NOT EXISTS idx_encounters_partnerId ON encounters(partnerId);
-    CREATE INDEX IF NOT EXISTS idx_private_notes_encounterId ON private_notes(encounterId);
   `)
 }
 

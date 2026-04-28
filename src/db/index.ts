@@ -1,8 +1,9 @@
 import { getDatabase } from './sqlite'
-import { initCollections, encounters, partners, privateNotes, desireEntries, whisperMessages, affirmations, userProfiles } from './collections'
-import { DEFAULT_SETTINGS, type UserSettings } from './schema'
+import { initCollections, activityTags, encounters, partners, desireEntries, whisperMessages, affirmations, userProfiles } from './collections'
+import { DEFAULT_ACTIVITY_TAGS, DEFAULT_SETTINGS, type UserSettings } from './schema'
+import { generateId as uuid } from '@/src/utils/uuid'
 
-export { encounters, partners, privateNotes, desireEntries, whisperMessages, affirmations, userProfiles } from './collections'
+export { activityTags, encounters, partners, desireEntries, whisperMessages, affirmations, userProfiles } from './collections'
 export * from './schema'
 
 let initialized = false
@@ -20,6 +21,18 @@ export async function initDatabase() {
       'INSERT INTO user_profile (id, displayName, createdAt, tier, premiumExpiresAt) VALUES (?, ?, ?, ?, ?)',
       ['default', null, now, 'free', null],
     )
+  }
+
+  // Ensure default activity tags exist
+  const existingTags = await db.getAllAsync<{ id: string }>('SELECT id FROM activity_tags LIMIT 1')
+  if (existingTags.length === 0) {
+    for (let i = 0; i < DEFAULT_ACTIVITY_TAGS.length; i++) {
+      const tag = DEFAULT_ACTIVITY_TAGS[i]
+      await db.runAsync(
+        'INSERT INTO activity_tags (id, emoji, label, sortOrder, isDefault, isActive) VALUES (?, ?, ?, ?, 1, 1)',
+        [uuid(), tag.emoji, tag.label, i],
+      )
+    }
   }
 
   // Ensure default settings exist
@@ -65,10 +78,10 @@ export async function resetAllData() {
   await db.execAsync(`
     DELETE FROM whisper_messages;
     DELETE FROM desire_entries;
-    DELETE FROM private_notes;
     DELETE FROM encounters;
     DELETE FROM partners;
     DELETE FROM affirmations;
+    DELETE FROM activity_tags;
     DELETE FROM user_settings;
     DELETE FROM user_profile;
   `)
@@ -78,6 +91,13 @@ export async function resetAllData() {
     'INSERT INTO user_profile (id, displayName, createdAt, tier, premiumExpiresAt) VALUES (?, ?, ?, ?, ?)',
     ['default', null, now, 'free', null],
   )
+  for (let i = 0; i < DEFAULT_ACTIVITY_TAGS.length; i++) {
+    const tag = DEFAULT_ACTIVITY_TAGS[i]
+    await db.runAsync(
+      'INSERT INTO activity_tags (id, emoji, label, sortOrder, isDefault, isActive) VALUES (?, ?, ?, ?, 1, 1)',
+      [uuid(), tag.emoji, tag.label, i],
+    )
+  }
   for (const [key, value] of Object.entries(DEFAULT_SETTINGS)) {
     await db.runAsync(
       'INSERT INTO user_settings (key, value) VALUES (?, ?)',
@@ -90,6 +110,5 @@ export async function getDbStats() {
   const db = await getDatabase()
   const [p] = await db.getAllAsync<{ count: number }>('SELECT COUNT(*) as count FROM partners')
   const [e] = await db.getAllAsync<{ count: number }>('SELECT COUNT(*) as count FROM encounters')
-  const [n] = await db.getAllAsync<{ count: number }>('SELECT COUNT(*) as count FROM private_notes')
-  return { partners: p.count, encounters: e.count, notes: n.count }
+  return { partners: p.count, encounters: e.count }
 }
