@@ -48,7 +48,7 @@ function FAB(props: any) {
       {...props}
       onPress={() => {
         console.log('FAB pressed - navigating to log-session')
-        router.push('/(modals)/log-session')
+        router.push('/(sheets)/log-session')
       }}
       style={[props.style, { alignItems: 'center', justifyContent: 'center' }]}
     >

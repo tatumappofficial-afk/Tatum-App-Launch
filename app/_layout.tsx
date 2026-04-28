@@ -3,6 +3,7 @@ import * as Font from 'expo-font'
 import { Stack } from 'expo-router/stack'
 import * as SplashScreen from 'expo-splash-screen'
 import { useEffect, useState } from 'react'
+import { Platform } from 'react-native'
 import { PlayfairDisplay_400Regular, PlayfairDisplay_400Regular_Italic, PlayfairDisplay_600SemiBold, PlayfairDisplay_700Bold } from '@expo-google-fonts/playfair-display'
 import { DMSans_300Light, DMSans_400Regular, DMSans_500Medium } from '@expo-google-fonts/dm-sans'
 import { initDatabase } from '@/src/db'
@@ -42,7 +43,24 @@ export default function RootLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="(modals)" />
+      <Stack.Screen
+        name="(sheets)"
+        options={Platform.select({
+          ios: {
+            presentation: 'formSheet' as const,
+            sheetAllowedDetents: [0.85],
+            sheetInitialDetentIndex: 0,
+            sheetGrabberVisible: true,
+            sheetCornerRadius: 24,
+            sheetExpandsWhenScrolledToEdge: false,
+          },
+          default: {
+            presentation: 'transparentModal' as const,
+            animation: 'slide_from_bottom' as const,
+          },
+        })}
+      />
+      <Stack.Screen name="(pages)" />
     </Stack>
   )
 }

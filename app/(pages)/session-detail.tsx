@@ -1,12 +1,8 @@
 import { useLiveQuery } from '@tanstack/react-db'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { SessionDetailScreen } from '@/lib/screens/SessionDetailScreen'
-import { encounters, partners, privateNotes } from '@/src/db'
-import { ACTIVITY_EMOJIS } from '@/src/db/schema'
-
-function getInitials(name: string): string {
-  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
-}
+import { encounters, partners } from '@/src/db'
+import { useActivityTagMap } from '@/src/hooks/useActivityTagMap'
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
@@ -19,9 +15,7 @@ export default function SessionDetailRoute() {
   const { data: allPartners = [] } = useLiveQuery((q) =>
     q.from({ partners }).select(({ partners }) => ({ ...partners }))
   )
-  const { data: allNotes = [] } = useLiveQuery((q) =>
-    q.from({ privateNotes }).select(({ privateNotes }) => ({ ...privateNotes }))
-  )
+  const tagMap = useActivityTagMap()
 
   const encounter = allEncounters.find(e => e.id === id)
 
@@ -40,9 +34,8 @@ export default function SessionDetailRoute() {
   }
 
   const partner = allPartners.find(p => p.id === encounter.partnerId)
-  const note = allNotes.find(n => n.encounterId === encounter.id)
 
-  const dateObj = new Date(encounter.date)
+  const dateObj = new Date(encounter.date + 'T00:00:00')
   const dayOfWeek = DAY_NAMES[dateObj.getDay()]
   const dateStr = dateObj.toLocaleDateString('en-US', {
     weekday: 'long',
@@ -52,21 +45,20 @@ export default function SessionDetailRoute() {
   })
 
   const sessionPartners = partner ? [{
-    initials: getInitials(partner.displayName),
+    initials: partner.avatarValue,
     name: partner.displayName,
     gradient: partner.avatarGradient,
     sessionCount: allEncounters.filter(e => e.partnerId === partner.id).length,
     avgSatisfaction: (() => {
-      const pEnc = allEncounters.filter(e => e.partnerId === partner.id)
-      return pEnc.length > 0
-        ? Math.round(pEnc.reduce((s, e) => s + (e.stars || 0), 0) / pEnc.length * 10) / 10
+      const rated = allEncounters.filter(e => e.partnerId === partner.id && e.stars && e.stars > 0)
+      return rated.length > 0
+        ? Math.round(rated.reduce((s, e) => s + (e.stars || 0), 0) / rated.length * 10) / 10
         : 0
     })(),
   }] : []
 
   const activities = encounter.activities.map(emoji => {
-    const known = ACTIVITY_EMOJIS.find(a => a.code === emoji)
-    return { emoji, label: known?.label || emoji }
+    return { emoji, label: tagMap.get(emoji) || emoji }
   })
 
   return (
@@ -77,11 +69,12 @@ export default function SessionDetailRoute() {
       rating={encounter.stars || 0}
       dayOfWeek={dayOfWeek.slice(0, 3)}
       activities={activities}
-      note={note?.body}
+      note={encounter.notes ?? undefined}
       onBack={() => router.back()}
-      onPartnerPress={(p) => {
-        const matched = allPartners.find(mp => getInitials(mp.displayName) === p.initials)
-        if (matched) router.push(`/(modals)/partner-profile?id=${matched.id}`)
+      onEdit={() => router.push(`/(sheets)/log-session?id=${encounter.id}`)}
+      onEditNote={() => router.push(`/(sheets)/log-session?id=${encounter.id}`)}
+      onPartnerPress={() => {
+        if (partner) router.push(`/(pages)/partner-profile?id=${partner.id}`)
       }}
     />
   )

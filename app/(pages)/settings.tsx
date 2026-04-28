@@ -12,7 +12,6 @@ export default function SettingsRoute() {
     <SettingsScreen
       biometricsEnabled={biometricsEnabled}
       onBack={() => router.back()}
-      onDevTools={() => router.push('/(modals)/dev-tools')}
       onToggleBiometrics={() => {
         const next = !biometricsEnabled
         setBiometricsEnabled(next)

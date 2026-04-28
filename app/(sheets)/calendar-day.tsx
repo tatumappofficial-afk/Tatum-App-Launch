@@ -1,12 +1,7 @@
 import { useLiveQuery } from '@tanstack/react-db'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { BottomSheet } from '@/lib/components/BottomSheet'
 import { CalendarDayModal } from '@/lib/screens/CalendarDayModal'
-import { encounters, partners, privateNotes } from '@/src/db'
-
-function getInitials(name: string): string {
-  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
-}
+import { encounters, partners } from '@/src/db'
 
 const MONTH_NAMES = [
   '', 'January', 'February', 'March', 'April', 'May', 'June',
@@ -29,13 +24,9 @@ export default function CalendarDayRoute() {
   const { data: allPartners = [] } = useLiveQuery((q) =>
     q.from({ partners }).select(({ partners }) => ({ ...partners }))
   )
-  const { data: allNotes = [] } = useLiveQuery((q) =>
-    q.from({ privateNotes }).select(({ privateNotes }) => ({ ...privateNotes }))
-  )
-
   // Build date string for this day
   const dateStr = `${yearNum}-${String(monthNum).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`
-  const dateObj = new Date(dateStr)
+  const dateObj = new Date(dateStr + 'T00:00:00')
   const dayOfWeek = DAY_NAMES[dateObj.getDay()]
   const dayLabel = `${dayOfWeek}, ${MONTH_NAMES[monthNum]} ${dayNum}`
 
@@ -45,15 +36,14 @@ export default function CalendarDayRoute() {
   // Build sessions list
   const sessions = dayEncounters.map(enc => {
     const partner = allPartners.find(p => p.id === enc.partnerId)
-    const note = allNotes.find(n => n.encounterId === enc.id)
     return {
       id: enc.id,
       partnerName: partner?.displayName || 'Solo',
-      initials: partner ? getInitials(partner.displayName) : '✨',
+      initials: partner ? partner.avatarValue : "\u2728",
       gradient: partner?.avatarGradient || 'linear-gradient(135deg, #8BA888, #5A8060)',
       tags: enc.activities,
       rating: enc.stars || 0,
-      noteSnippet: note?.body?.slice(0, 80),
+      noteSnippet: enc.notes?.slice(0, 80),
     }
   })
 
@@ -73,7 +63,7 @@ export default function CalendarDayRoute() {
   }
   const loggedDays = [...loggedDaysMap.entries()].map(([d, data]) => ({
     day: d,
-    emoji: data.emojis[0] || '✨',
+    emoji: data.emojis[0] || '\u2728',
     hasMultiple: data.count > 1 || data.emojis.length > 1,
   }))
 
@@ -81,19 +71,18 @@ export default function CalendarDayRoute() {
   const isCurrentMonth = monthNum === now.getMonth() + 1 && yearNum === now.getFullYear()
 
   return (
-    <BottomSheet>
-      <CalendarDayModal
-        month={monthNum}
-        year={yearNum}
-        today={isCurrentMonth ? now.getDate() : undefined}
-        loggedDays={loggedDays}
-        selectedDay={dayNum}
-        dayLabel={dayLabel}
-        sessions={sessions}
-        onLogSession={() => router.push('/(modals)/log-session')}
-        onSessionPress={(id) => router.push(`/(modals)/session-detail?id=${id}`)}
-        onDismiss={() => router.back()}
-      />
-    </BottomSheet>
+    <CalendarDayModal
+      month={monthNum}
+      year={yearNum}
+      today={isCurrentMonth ? now.getDate() : undefined}
+      loggedDays={loggedDays}
+      selectedDay={dayNum}
+      dayLabel={dayLabel}
+      sessions={sessions}
+      onLogSession={() => router.push('/(sheets)/log-session')}
+      onSessionPress={(id) => router.push(`/(sheets)/session-detail?id=${id}`)}
+      onDismiss={() => router.back()}
+      onClose={() => router.dismiss()}
+    />
   )
 }
