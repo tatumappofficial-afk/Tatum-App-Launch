@@ -20,6 +20,7 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   args: {
     initials: 'AL',
+    gradient: 'linear-gradient(135deg, #C07858, #7C4A5A)',
     name: 'Alex',
     since: 'Logging since February 2026',
     sessions: 28,

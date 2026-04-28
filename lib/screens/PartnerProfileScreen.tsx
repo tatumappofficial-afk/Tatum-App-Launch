@@ -21,11 +21,12 @@ interface Session {
   /** Star fill 0-100 */
   rating: number
   tags: string[]
-  note: string
+  note?: string
 }
 
 export interface PartnerProfileScreenProps {
   initials: string
+  gradient: string
   name: string
   since: string
   sessions: number
@@ -41,6 +42,7 @@ export interface PartnerProfileScreenProps {
 
 export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
   initials,
+  gradient,
   name,
   since,
   sessions,
@@ -110,7 +112,7 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
     }}>
       <AvatarCircle
         initials={initials}
-        gradient="linear-gradient(135deg, #C07858, #7C4A5A)"
+        gradient={gradient}
         size={72}
         borderWidth={3}
       />

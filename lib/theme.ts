@@ -25,6 +25,23 @@ export const gradients = {
   negative: ['#B07080', '#7C4A5A'] as const,
 } as const
 
+// Partner avatar gradients — single source of truth for the swatch palette.
+// The chosen string is persisted on partner.avatarGradient.
+export const partnerGradients = [
+  { key: 'terra', gradient: 'linear-gradient(135deg, #C07858, #7C4A5A)' },
+  { key: 'mauve', gradient: 'linear-gradient(135deg, #B07080, #7C4A5A)' },
+  { key: 'sage', gradient: 'linear-gradient(135deg, #8BA888, #5A8060)' },
+  { key: 'gold', gradient: 'linear-gradient(135deg, #C4993A, #8A6A20)' },
+  { key: 'fig', gradient: 'linear-gradient(135deg, #7C4A5A, #3D2B25)' },
+  { key: 'blush', gradient: 'linear-gradient(135deg, #E8C4B0, #C07858)' },
+  { key: 'stone', gradient: 'linear-gradient(135deg, #9A8878, #6A5A4A)' },
+  { key: 'rust', gradient: 'linear-gradient(135deg, #A85230, #6E2E18)' },
+  { key: 'blue', gradient: 'linear-gradient(135deg, #5A7A98, #3D5470)' },
+  { key: 'ink', gradient: 'linear-gradient(135deg, #3D2B25, #6A4A40)' },
+] as const
+
+export type PartnerGradientKey = typeof partnerGradients[number]['key']
+
 // ── Font helpers ──
 // On web (Storybook), CSS font-family names work via Google Fonts @import.
 // On native, each weight is a separate registered font name.
@@ -96,8 +113,7 @@ export function gradientStyle(gradient: string): ViewStyle {
 export const typography = {
   screenTitle: {
     fontFamily: fonts.playfair.bold,
-    fontWeight: '700' as const,
-    fontSize: 28,
+    fontSize: 20,
     color: colors.ink,
   } satisfies TextStyle,
   sectionLabel: {
@@ -111,9 +127,9 @@ export const typography = {
   sectionLabelTerra: {
     fontFamily: fonts.dmSans.medium,
     fontWeight: '500' as const,
-    fontSize: 9,
+    fontSize: 11,
     textTransform: 'uppercase' as const,
-    letterSpacing: 4,
+    letterSpacing: 2.2,
     color: colors.terra,
   } satisfies TextStyle,
   cardTitle: {
