@@ -5,6 +5,7 @@ import Svg, { Rect, Line, Path, Polyline } from 'react-native-svg'
 import { colors, font, gradientPoints, gradients } from '../theme'
 import { GradientButton } from '../components/GradientButton'
 import { RadialGlow } from './shared/DecorativeGlow'
+import { StatusBarSpacer } from './shared/StatusBarSpacer'
 
 const CalendarIcon: React.FC = () => (
   <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
@@ -92,7 +93,7 @@ export const OnboardingReadyScreen: React.FC = () => (
       }}
     />
 
-    <View style={{ height: 54 }} />
+    <StatusBarSpacer />
 
     {/* Main content -- centered vertically */}
     <View

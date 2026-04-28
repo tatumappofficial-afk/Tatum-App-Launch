@@ -5,6 +5,7 @@ import Svg, { Line, Polyline } from 'react-native-svg'
 import { LinearGradient } from 'expo-linear-gradient'
 import { colors, font, fontFamily, gradientPoints, gradients, shadows, typography } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
+import { StatusBarSpacer } from './shared/StatusBarSpacer'
 import { AvatarCircle } from '../components/AvatarCircle'
 import { GradientButton } from '../components/GradientButton'
 
@@ -674,7 +675,7 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({
       overflow: 'hidden',
     }}>
       <DecorativeGlow position="top-right" size={200} opacity={0.08} />
-      <View style={{ height: 54 }} />
+      <StatusBarSpacer />
 
       {/* Screen header */}
       <View style={{

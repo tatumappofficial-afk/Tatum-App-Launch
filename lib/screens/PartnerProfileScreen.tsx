@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Polyline } from 'react-native-svg'
 import { colors, font, gradientPoints } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
+import { StatusBarSpacer } from './shared/StatusBarSpacer'
 import { SectionLabel } from './shared/SectionLabel'
 import { AvatarCircle } from '../components/AvatarCircle'
 import { StatStrip } from '../components/StatStrip'
@@ -62,7 +63,7 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
   }}>
     {/* Glow */}
     <DecorativeGlow position="center" size={320} opacity={0.13} />
-    <View style={{ height: 54 }} />
+    <StatusBarSpacer />
 
     {/* Header: back + edit */}
     <View style={{

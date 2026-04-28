@@ -3,6 +3,7 @@ import { StyleSheet, View, Text } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { colors, font, fontFamily, gradientPoints, gradients } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
+import { StatusBarSpacer } from './shared/StatusBarSpacer'
 import { GradientButton } from '../components/GradientButton'
 
 /* -- Shared onboarding primitives -- */
@@ -60,7 +61,7 @@ export const OnboardingPrivacyScreen: React.FC = () => (
     }}
   >
     <DecorativeGlow position="center" size={320} opacity={0.13} />
-    <View style={{ height: 54 }} />
+    <StatusBarSpacer />
 
     {/* Content */}
     <View

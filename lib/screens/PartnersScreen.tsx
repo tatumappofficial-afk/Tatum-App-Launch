@@ -3,6 +3,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native'
 import Svg, { Circle, Line, Path, Polyline } from 'react-native-svg'
 import { colors, font, fontFamily } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
+import { StatusBarSpacer } from './shared/StatusBarSpacer'
 import { AvatarCircle } from '../components/AvatarCircle'
 
 /* ── Types ── */
@@ -60,7 +61,7 @@ export const PartnersScreen: React.FC<PartnersScreenProps> = ({
       flexDirection: 'column',
     }}>
       <DecorativeGlow position="top-right" size={240} opacity={0.09} />
-      <View style={{ height: 54 }} />
+      <StatusBarSpacer />
 
       {/* ── Screen Header ── */}
       <View style={{

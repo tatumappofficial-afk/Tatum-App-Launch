@@ -3,6 +3,7 @@ import { View, Text, Pressable, ScrollView } from 'react-native'
 import Svg, { Circle, Path, Polyline, Line } from 'react-native-svg'
 import { colors, font, fontFamily, typography } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
+import { StatusBarSpacer } from './shared/StatusBarSpacer'
 import { SectionLabel } from './shared/SectionLabel'
 import { AvatarCircle } from '../components/AvatarCircle'
 import { StatStrip } from '../components/StatStrip'
@@ -108,7 +109,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
       flexDirection: 'column',
     }}>
       <DecorativeGlow position="top-right" size={220} opacity={0.09} />
-      <View style={{ height: 54 }} />
+      <StatusBarSpacer />
 
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 24 }}>
 

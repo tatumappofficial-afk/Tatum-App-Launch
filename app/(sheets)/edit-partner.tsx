@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import { useLiveQuery } from '@tanstack/react-db'
-import { Alert, StyleSheet, View, Text, TextInput, Pressable, ScrollView } from 'react-native'
+import { Alert, KeyboardAvoidingView, Platform, StyleSheet, View, Text, TextInput, Pressable, ScrollView } from 'react-native'
 import Svg, { Line } from 'react-native-svg'
 import { generateId } from '@/src/utils/uuid'
 import { deriveInitials } from '@/src/utils/initials'
@@ -141,7 +141,10 @@ export default function EditPartnerSheet() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.warmSand }}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={{ flex: 1, backgroundColor: colors.warmSand }}
+    >
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
@@ -365,6 +368,6 @@ export default function EditPartnerSheet() {
       </View>
 
       <SuccessOverlay visible={showSuccess} label={successLabel} />
-    </View>
+    </KeyboardAvoidingView>
   )
 }

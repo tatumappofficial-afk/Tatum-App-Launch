@@ -6,6 +6,7 @@ import Svg, { Circle, Line, Path, Polyline, Rect } from 'react-native-svg'
 import { colors, font, fontFamily, gradientPoints, gradients, shadows } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { SectionLabel } from './shared/SectionLabel'
+import { StatusBarSpacer } from './shared/StatusBarSpacer'
 import { AvatarCircle } from '../components/AvatarCircle'
 import { StarRating } from '../components/StarRating'
 
@@ -631,7 +632,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         backgroundColor: colors.warmSand,
       }}>
         <DecorativeGlow position="center" size={320} />
-        <View style={{ height: 54 }} />
+        <StatusBarSpacer />
         <Wordmark />
         <PeriodTabs isEmpty />
 
@@ -649,7 +650,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           <View style={{ marginTop: 16, marginBottom: 10 }}>
             <SectionLabel label="Partners" style={INLINE_LABEL_STYLE} />
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ overflow: 'visible' }}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={{ flexDirection: 'row', gap: 8, paddingRight: 40 }}>
               {emptyPartners.map((p, i) => (
                 <EmptyPartnerCard key={i} partner={p} />
@@ -677,7 +678,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       backgroundColor: colors.warmSand,
     }}>
       <DecorativeGlow position="top-right" size={240} />
-      <View style={{ height: 54 }} />
+      <StatusBarSpacer />
       <Wordmark />
       <PeriodTabs activeIndex={activePeriod} dateLabel={periodDateLabel} />
 
@@ -703,7 +704,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
           <SectionLabel label="Partners" showChevron style={INLINE_LABEL_STYLE} />
 
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginRight: -24, overflow: 'visible' }}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginRight: -24 }}>
             <View style={{ flexDirection: 'row', gap: 8, paddingRight: 40 }}>
               {partners.map((p, i) => (
                 <HomePartnerCard key={i} partner={p} onPress={() => onPartnerPress?.(i)} />
@@ -713,7 +714,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
           <SectionLabel label="Sessions" style={INLINE_LABEL_STYLE} />
 
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginRight: -24, overflow: 'visible' }}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginRight: -24 }}>
             <View style={{ flexDirection: 'row', gap: 8, paddingRight: 40 }}>
               {recentSessions.map((s, i) => (
                 <HomeSessionCard key={i} session={s} onPress={() => onSessionPress?.(i)} />

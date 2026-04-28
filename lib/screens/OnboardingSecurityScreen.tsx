@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Path, Circle, Polyline } from 'react-native-svg'
 import { colors, font, gradientPoints, gradients, shadows } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
+import { StatusBarSpacer } from './shared/StatusBarSpacer'
 import { StepDots } from '../components/StepDots'
 
 const GradientButton: React.FC<{ label: string; onPress?: () => void }> = ({ label, onPress }) => (
@@ -178,7 +179,7 @@ export const OnboardingSecurityScreen: React.FC = () => (
     }}
   >
     <DecorativeGlow position="top-right" size={240} opacity={0.1} />
-    <View style={{ height: 54 }} />
+    <StatusBarSpacer />
 
     {/* Content */}
     <View

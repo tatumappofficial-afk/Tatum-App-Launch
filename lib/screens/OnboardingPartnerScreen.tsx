@@ -1,9 +1,10 @@
 import React from 'react'
-import { StyleSheet, View, Text, Pressable, TextInput, ScrollView } from 'react-native'
+import { KeyboardAvoidingView, Platform, StyleSheet, View, Text, Pressable, TextInput, ScrollView } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Polyline } from 'react-native-svg'
 import { colors, font, fontFamily, gradientPoints, gradients, shadows } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
+import { StatusBarSpacer } from './shared/StatusBarSpacer'
 import { StepDots } from '../components/StepDots'
 
 const GradientButton: React.FC<{ label: string; onPress?: () => void }> = ({ label, onPress }) => (
@@ -60,7 +61,8 @@ const ChevronRight: React.FC = () => (
 )
 
 export const OnboardingPartnerScreen: React.FC = () => (
-  <View
+  <KeyboardAvoidingView
+    behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     style={{
       flex: 1,
       overflow: 'hidden',
@@ -68,7 +70,7 @@ export const OnboardingPartnerScreen: React.FC = () => (
     }}
   >
     <DecorativeGlow position="top-right" size={240} opacity={0.1} />
-    <View style={{ height: 54 }} />
+    <StatusBarSpacer />
 
     <ScrollView
       style={{ flex: 1, paddingHorizontal: 28 }}
@@ -306,5 +308,5 @@ export const OnboardingPartnerScreen: React.FC = () => (
       </Pressable>
       <StepDots current={2} />
     </View>
-  </View>
+  </KeyboardAvoidingView>
 )

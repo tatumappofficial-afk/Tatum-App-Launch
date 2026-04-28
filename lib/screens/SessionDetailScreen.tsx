@@ -3,6 +3,7 @@ import { View, Text, Pressable, ScrollView } from 'react-native'
 import Svg, { Path, Polyline } from 'react-native-svg'
 import { colors, font, fontFamily } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
+import { StatusBarSpacer } from './shared/StatusBarSpacer'
 import { SectionLabel } from './shared/SectionLabel'
 import { AvatarCircle } from '../components/AvatarCircle'
 import { StatStrip } from '../components/StatStrip'
@@ -361,7 +362,7 @@ export const SessionDetailScreen: React.FC<SessionDetailScreenProps> = ({
     backgroundColor: colors.warmSand,
   }}>
     <DecorativeGlow position="center" size={320} opacity={0.12} />
-    <View style={{ height: 54 }} />
+    <StatusBarSpacer />
     <ScreenHeader onBack={onBack} onEdit={onEdit} />
 
     <Hero partners={partners} partnerNames={partnerNames} date={date} />

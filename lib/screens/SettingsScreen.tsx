@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Path, Polyline, Rect } from 'react-native-svg'
 import { colors, font, gradientPoints, gradients } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
+import { StatusBarSpacer } from './shared/StatusBarSpacer'
 import { SectionLabel } from './shared/SectionLabel'
 import { SettingsRow } from '../components/SettingsRow'
 import { ToggleSwitch } from '../components/ToggleSwitch'
@@ -85,7 +86,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       overflow: 'hidden',
     }}>
       <DecorativeGlow position="top-right" size={220} opacity={0.07} />
-      <View style={{ height: 54 }} />
+      <StatusBarSpacer />
 
       {/* ── Screen Header ── */}
       <View style={{

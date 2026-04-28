@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Polyline } from 'react-native-svg'
 import { colors, font, fontFamily, gradientPoints, gradients, typography } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
+import { StatusBarSpacer } from './shared/StatusBarSpacer'
 import { SectionLabel } from './shared/SectionLabel'
 import { CalendarGrid } from '../components/CalendarGrid'
 import { EmojiChip } from '../components/EmojiChip'
@@ -272,7 +273,7 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
     backgroundColor: colors.warmSand,
   }}>
     <DecorativeGlow position="top-right" size={220} opacity={0.09} />
-    <View style={{ height: 54 }} />
+    <StatusBarSpacer />
     <NavHeader />
 
     <View style={{ flexShrink: 0, position: 'relative', zIndex: 1 }}>

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useRouter } from 'expo-router'
 import { useLiveQuery } from '@tanstack/react-db'
-import { View, Text, TextInput, Pressable, ScrollView } from 'react-native'
+import { KeyboardAvoidingView, Platform, View, Text, TextInput, Pressable, ScrollView } from 'react-native'
 import { colors, font } from '@/lib/theme'
 import { GradientButton } from '@/lib/components/GradientButton'
 import { userProfiles } from '@/src/db'
@@ -26,7 +26,10 @@ export default function EditProfileModal() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.warmSand }}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={{ flex: 1, backgroundColor: colors.warmSand }}
+    >
       <ScrollView
         contentContainerStyle={{ padding: 28, paddingTop: 48 }}
         keyboardShouldPersistTaps="handled"
@@ -82,6 +85,6 @@ export default function EditProfileModal() {
           </Text>
         </Pressable>
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   )
 }

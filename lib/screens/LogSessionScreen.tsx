@@ -96,10 +96,13 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
 }) => {
 
   return (
-    <View style={{
-      flex: 1,
-      backgroundColor: colors.warmSand,
-    }}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={{
+        flex: 1,
+        backgroundColor: colors.warmSand,
+      }}
+    >
         {/* Scrollable form body — header scrolls with content */}
         <ScrollView
           style={{
@@ -110,6 +113,7 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
             paddingHorizontal: 20,
             paddingBottom: 16,
           }}
+          keyboardShouldPersistTaps="handled"
         >
           {/* Header */}
           <View style={{
@@ -357,7 +361,7 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
         </View>
 
         <SuccessOverlay visible={showSuccess} label={successLabel} />
-    </View>
+    </KeyboardAvoidingView>
   )
 }
 

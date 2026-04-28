@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Path } from 'react-native-svg'
 import { colors, font, gradientPoints } from '../theme'
 import { RadialGlow } from './shared/DecorativeGlow'
+import { StatusBarSpacer } from './shared/StatusBarSpacer'
 
 const AppleLogo: React.FC = () => (
   <Svg width={19} height={19} viewBox="0 0 24 24" fill="white">
@@ -34,7 +35,7 @@ export const LoginIOSScreen: React.FC = () => (
       <RadialGlow size={200} color="rgb(124,74,90)" opacity={0.09} falloff={70} />
     </View>
 
-    <View style={{ height: 54 }} />
+    <StatusBarSpacer />
 
     {/* Main content */}
     <View style={{
