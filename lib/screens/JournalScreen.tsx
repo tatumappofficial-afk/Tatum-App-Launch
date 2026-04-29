@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { FlashList } from '@shopify/flash-list'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { FlashList, type FlashListRef, type ViewToken } from '@shopify/flash-list'
 import { Image } from 'expo-image'
 import Svg, { Line, Polyline } from 'react-native-svg'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -8,7 +8,10 @@ import { colors, font, fontFamily, gradientPoints, gradients, shadows, typograph
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { StatusBarSpacer } from './shared/StatusBarSpacer'
 import { AvatarCircle } from '../components/AvatarCircle'
+import { AvatarStack } from '../components/AvatarStack'
 import { GradientButton } from '../components/GradientButton'
+import { DatePickerDropdown } from '../components/DatePickerDropdown'
+import type { LoggedDay } from '../components/CalendarGrid'
 
 /* ── Types ── */
 
@@ -21,7 +24,10 @@ export interface JournalEntry {
   id: string
   partners: JournalPartner[]
   partnerName: string
+  /** Display label, e.g. "Sat, Mar 14" */
   date: string
+  /** Raw ISO date YYYY-MM-DD — used for calendar navigation and visible-month tracking */
+  isoDate: string
   score: number
   maxScore?: number
   tags: string[] // emoji strings
@@ -30,22 +36,27 @@ export interface JournalEntry {
   monthSeparator?: string // rendered before this entry
 }
 
-export interface CalendarDay {
-  day: number | null
-  logged?: boolean
-  emoji?: string
-  hasPlus?: boolean
-  isToday?: boolean
-}
-
 export interface JournalScreenProps {
   entries: JournalEntry[]
-  currentMonth?: string
-  entryCount?: number
-  calendarDays?: CalendarDay[]
-  showCalendar?: boolean
+  /** Storybook-only override; in the app the screen tracks the visible month from scroll. */
+  initialVisibleIsoDate?: string
   onEntryPress?: (id: string) => void
   onLogFirstSession?: () => void
+}
+
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+]
+
+function isoToParts(iso: string): { year: number; month: number; day: number } {
+  const [y, m, d] = iso.split('-').map((s) => parseInt(s, 10))
+  return { year: y, month: m - 1, day: d }
+}
+
+function monthLabelFromIso(iso: string): string {
+  const { year, month } = isoToParts(iso)
+  return `${MONTH_NAMES[month]} ${year}`
 }
 
 /* ── Sub-components ── */
@@ -115,7 +126,6 @@ const MonthSeparator: React.FC<{ label: string }> = ({ label }) => (
 
 const EntryCard: React.FC<{ entry: JournalEntry; onPress?: () => void }> = ({ entry, onPress }) => {
   const isCompact = !entry.note
-  const hasMultiplePartners = entry.partners.length > 1
 
   return (
     <View style={{
@@ -173,41 +183,8 @@ const EntryCard: React.FC<{ entry: JournalEntry; onPress?: () => void }> = ({ en
         }}>
           {/* Left side */}
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            {hasMultiplePartners && entry.partners[0] && entry.partners[1] ? (
-              <View style={{ position: 'relative', width: 46, height: 32, flexShrink: 0 }}>
-                <View style={{ position: 'absolute', left: 0, zIndex: 2 }}>
-                  <AvatarCircle
-                    initials={entry.partners[0].initials}
-                    gradient={entry.partners[0].gradient}
-                    size={32}
-                    borderWidth={2}
-                  />
-                </View>
-                <View style={{ position: 'absolute', left: 14, zIndex: 1 }}>
-                  <AvatarCircle
-                    initials={entry.partners[1].initials}
-                    gradient={entry.partners[1].gradient}
-                    size={32}
-                    borderWidth={2}
-                  />
-                </View>
-              </View>
-            ) : entry.partners[0] ? (
-              <AvatarCircle
-                initials={entry.partners[0].initials}
-                gradient={entry.partners[0].gradient}
-                size={32}
-                borderWidth={2}
-              />
-            ) : (
-              <AvatarCircle
-                initials="✨"
-                gradient="linear-gradient(135deg, #8BA888, #5A8060)"
-                size={32}
-                borderWidth={2}
-              />
-            )}
-            <View style={hasMultiplePartners ? { marginLeft: 8 } : undefined}>
+            <AvatarStack partners={entry.partners} size={32} borderWidth={2} />
+            <View>
               <Text style={{
                 fontFamily: font('playfair', '600'),
                 fontSize: 13,
@@ -345,194 +322,6 @@ const EntryCard: React.FC<{ entry: JournalEntry; onPress?: () => void }> = ({ en
   )
 }
 
-/* ── Calendar Dropdown ── */
-
-const DOW_LABELS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
-
-const CalendarDropdown: React.FC<{
-  monthLabel: string
-  days: CalendarDay[]
-}> = ({ monthLabel, days }) => (
-  <View style={{
-    position: 'absolute',
-    top: 48,
-    left: 24,
-    width: 318,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: 'rgba(160,100,80,0.18)',
-    borderRadius: 22,
-    shadowColor: '#3D2B25',
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.18,
-    shadowRadius: 48,
-    elevation: 14,
-    zIndex: 200,
-    overflow: 'hidden',
-  }}>
-    {/* Nav */}
-    <View style={{
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingTop: 14,
-      paddingHorizontal: 16,
-      paddingBottom: 10,
-      borderBottomWidth: 1,
-      borderBottomColor: 'rgba(160,100,80,0.1)',
-    }}>
-      <Pressable style={{
-        width: 30,
-        height: 30,
-        borderRadius: 15,
-        backgroundColor: colors.surface2,
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
-        <ChevronBack />
-      </Pressable>
-      <Text style={{
-        fontFamily: font('playfair', '600'),
-        fontSize: 16,
-        color: colors.ink,
-      }}>
-        {monthLabel}
-      </Text>
-      <Pressable style={{
-        width: 30,
-        height: 30,
-        borderRadius: 15,
-        backgroundColor: colors.surface2,
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
-        <ChevronForward />
-      </Pressable>
-    </View>
-
-    {/* Day-of-week header */}
-    <View style={{
-      flexDirection: 'row',
-      paddingTop: 8,
-      paddingHorizontal: 10,
-      paddingBottom: 3,
-    }}>
-      {DOW_LABELS.map((d) => (
-        <View key={d} style={{ flex: 1, alignItems: 'center' }}>
-          <Text style={{
-            fontSize: 8,
-            fontWeight: '500',
-            letterSpacing: 0.8,
-            textTransform: 'uppercase',
-            color: colors.stone,
-            paddingVertical: 3,
-          }}>
-            {d}
-          </Text>
-        </View>
-      ))}
-    </View>
-
-    {/* Day grid */}
-    <View style={{
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      paddingTop: 2,
-      paddingHorizontal: 10,
-      paddingBottom: 14,
-    }}>
-      {days.map((d, i) => {
-        const isEmpty = d.day === null
-        const isToday = d.isToday
-        const cellSize = (318 - 20) / 7 // account for horizontal padding
-        return (
-          <View key={i} style={{
-            width: cellSize,
-            aspectRatio: 1,
-            borderRadius: cellSize / 2,
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden',
-          }}>
-            {isToday && (
-              <LinearGradient
-                colors={gradients.primaryCta}
-                start={gradientPoints.diagonal.start}
-                end={gradientPoints.diagonal.end}
-                style={[StyleSheet.absoluteFill, { borderRadius: cellSize / 2 }]}
-              />
-            )}
-            <Text style={{
-              fontSize: 11,
-              fontWeight: isToday ? '700' : d.logged ? '500' : '400',
-              color: isToday ? 'white' : d.logged ? colors.terra : colors.ink,
-              lineHeight: 11,
-              opacity: isEmpty ? 0 : 1,
-            }}>
-              {d.day ?? ''}
-            </Text>
-            {d.logged && !isToday && (
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 1 }}>
-                <Text style={{ fontSize: 7 }}>{d.emoji}</Text>
-                {d.hasPlus && (
-                  <Text style={{ fontSize: 6, fontWeight: '600', color: colors.mauve, marginLeft: 1 }}>+</Text>
-                )}
-              </View>
-            )}
-          </View>
-        )
-      })}
-    </View>
-
-    {/* Legend */}
-    <View style={{
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 14,
-      paddingTop: 8,
-      paddingHorizontal: 16,
-      paddingBottom: 12,
-      borderTopWidth: 1,
-      borderTopColor: 'rgba(160,100,80,0.1)',
-    }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-        <Text style={{ fontSize: 10 }}>&#x1F346;</Text>
-        <Text style={{ fontSize: 9, color: colors.stone }}>Logged</Text>
-      </View>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-        <Text style={{ fontSize: 10, color: colors.terra, fontWeight: '600' }}>&#x1F346;+</Text>
-        <Text style={{ fontSize: 9, color: colors.stone }}>Multiple</Text>
-      </View>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-        <View style={{ width: 10, height: 10, borderRadius: 5, overflow: 'hidden' }}>
-          <LinearGradient
-            colors={gradients.primaryCta}
-            start={gradientPoints.diagonal.start}
-            end={gradientPoints.diagonal.end}
-            style={[StyleSheet.absoluteFill, { borderRadius: 5 }]}
-          />
-        </View>
-        <Text style={{ fontSize: 9, color: colors.stone }}>Today</Text>
-      </View>
-    </View>
-
-    {/* Hint */}
-    <View style={{
-      alignItems: 'center',
-      paddingHorizontal: 16,
-      paddingBottom: 12,
-    }}>
-      <Text style={{
-        fontSize: 9,
-        fontWeight: '300',
-        color: colors.muted,
-        fontStyle: 'italic',
-      }}>
-        Tap a date to jump to that entry
-      </Text>
-    </View>
-  </View>
-)
 
 /* ── Empty State ── */
 
@@ -659,15 +448,83 @@ const EmptyState: React.FC<{ onLogSession?: () => void }> = ({ onLogSession }) =
 
 export const JournalScreen: React.FC<JournalScreenProps> = ({
   entries,
-  currentMonth = 'March 2026',
-  entryCount = 8,
-  calendarDays = [],
-  showCalendar: showCalendarProp,
+  initialVisibleIsoDate,
   onEntryPress,
   onLogFirstSession,
 }) => {
-  const [calendarOpen, setCalendarOpen] = useState(showCalendarProp ?? false)
   const isEmpty = entries.length === 0
+
+  // Visible-month tracking — initialised to the topmost (newest) entry, then
+  // updated as the user scrolls.
+  const initialIso = initialVisibleIsoDate ?? entries[0]?.isoDate ?? new Date().toISOString().split('T')[0]
+  const [visibleIso, setVisibleIso] = useState(initialIso)
+  const visibleParts = isoToParts(visibleIso)
+  const visibleMonthLabel = monthLabelFromIso(visibleIso)
+
+  // Calendar dropdown state — independent so user can navigate months freely.
+  const [calendarOpen, setCalendarOpen] = useState(false)
+  const [calMonth, setCalMonth] = useState(visibleParts.month)
+  const [calYear, setCalYear] = useState(visibleParts.year)
+
+  // Today (for highlighting the current day in the calendar).
+  const todayObj = new Date()
+  const todayIsCurrentMonth = todayObj.getMonth() === calMonth && todayObj.getFullYear() === calYear
+
+  // Logged days for the calendar's currently displayed month.
+  const loggedDays = useMemo<LoggedDay[]>(() => {
+    const prefix = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-`
+    const byDay = new Map<number, { emoji: string; count: number }>()
+    for (const e of entries) {
+      if (!e.isoDate.startsWith(prefix)) continue
+      const day = parseInt(e.isoDate.slice(8, 10), 10)
+      const existing = byDay.get(day)
+      const emoji = e.tags[0] ?? '✨'
+      if (existing) existing.count++
+      else byDay.set(day, { emoji, count: 1 })
+    }
+    return [...byDay.entries()].map(([day, v]) => ({ day, emoji: v.emoji, hasMultiple: v.count > 1 }))
+  }, [entries, calMonth, calYear])
+
+  // Entry count for the visible-month pill badge.
+  const visibleMonthCount = useMemo(() => {
+    const prefix = `${visibleParts.year}-${String(visibleParts.month + 1).padStart(2, '0')}-`
+    return entries.filter((e) => e.isoDate.startsWith(prefix)).length
+  }, [entries, visibleParts.year, visibleParts.month])
+
+  const listRef = useRef<FlashListRef<JournalEntry>>(null)
+
+  function openCalendar() {
+    setCalMonth(visibleParts.month)
+    setCalYear(visibleParts.year)
+    setCalendarOpen(true)
+  }
+
+  function changeCalMonth(delta: number) {
+    let m = calMonth + delta
+    let y = calYear
+    if (m < 0) { m = 11; y-- }
+    else if (m > 11) { m = 0; y++ }
+    setCalMonth(m)
+    setCalYear(y)
+  }
+
+  function handleDayPick(day: number) {
+    const picked = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+    setCalendarOpen(false)
+    // We render with loggedOnly so non-logged days are non-pressable; an
+    // exact-match find is enough.
+    const idx = entries.findIndex((e) => e.isoDate === picked)
+    if (idx >= 0) {
+      listRef.current?.scrollToIndex({ index: idx, animated: true })
+    }
+  }
+
+  const onViewableItemsChanged = useCallback(({ viewableItems }: { viewableItems: ViewToken<JournalEntry>[] }) => {
+    const top = viewableItems[0]?.item
+    if (top?.isoDate) setVisibleIso(top.isoDate)
+  }, [])
+
+  const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 50 }).current
 
   return (
     <View style={{
@@ -725,9 +582,9 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({
           </View>
         ) : (
           <Pressable
-            onPress={() => setCalendarOpen(!calendarOpen)}
+            onPress={() => (calendarOpen ? setCalendarOpen(false) : openCalendar())}
             accessibilityRole="button"
-            accessibilityLabel={`Toggle calendar, ${currentMonth}`}
+            accessibilityLabel={`Toggle calendar, ${visibleMonthLabel}`}
             accessibilityState={{ expanded: calendarOpen }}
             style={{
               flexDirection: 'row',
@@ -754,7 +611,7 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({
               color: 'white',
               letterSpacing: 0.3,
             }}>
-              {currentMonth}
+              {visibleMonthLabel}
             </Text>
             <Text style={{
               backgroundColor: 'rgba(255,255,255,0.2)',
@@ -767,15 +624,26 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({
               letterSpacing: 0.5,
               overflow: 'hidden',
             }}>
-              {entryCount}
+              {visibleMonthCount}
             </Text>
             {calendarOpen ? <ChevronUp /> : <ChevronDown />}
           </Pressable>
         )}
 
         {/* Calendar dropdown */}
-        {calendarOpen && calendarDays.length > 0 && (
-          <CalendarDropdown monthLabel={currentMonth} days={calendarDays} />
+        {calendarOpen && (
+          <View style={{ position: 'absolute', top: 48, left: 24, right: 24, zIndex: 200 }}>
+            <DatePickerDropdown
+              month={calMonth}
+              year={calYear}
+              today={todayIsCurrentMonth ? todayObj.getDate() : undefined}
+              loggedDays={loggedDays}
+              onMonthChange={changeCalMonth}
+              onDaySelect={handleDayPick}
+              loggedOnly
+              hint="Tap a logged date to jump to that entry"
+            />
+          </View>
         )}
       </View>
 
@@ -800,9 +668,12 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({
         <EmptyState onLogSession={onLogFirstSession} />
       ) : (
         <FlashList
+          ref={listRef}
           data={entries}
           keyExtractor={(entry) => entry.id}
           contentContainerStyle={{ paddingTop: 12, paddingHorizontal: 20 }}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={viewabilityConfig}
           renderItem={({ item }) => (
             <>
               {item.monthSeparator && <MonthSeparator label={item.monthSeparator} />}

@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { SessionDetailScreen } from '@/lib/screens/SessionDetailScreen'
 import { encounters, partners } from '@/src/db'
 import { useActivityTagMap } from '@/src/hooks/useActivityTagMap'
+import { formatPartnerLabel } from '@/src/utils/partnerLabel'
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
@@ -33,8 +34,6 @@ export default function SessionDetailRoute() {
     )
   }
 
-  const partner = allPartners.find(p => p.id === encounter.partnerId)
-
   const dateObj = new Date(encounter.date + 'T00:00:00')
   const dayOfWeek = DAY_NAMES[dateObj.getDay()]
   const dateStr = dateObj.toLocaleDateString('en-US', {
@@ -44,18 +43,24 @@ export default function SessionDetailRoute() {
     year: 'numeric',
   })
 
-  const sessionPartners = partner ? [{
-    initials: partner.avatarValue,
-    name: partner.displayName,
-    gradient: partner.avatarGradient,
-    sessionCount: allEncounters.filter(e => e.partnerId === partner.id).length,
-    avgSatisfaction: (() => {
-      const rated = allEncounters.filter(e => e.partnerId === partner.id && e.stars && e.stars > 0)
-      return rated.length > 0
+  const sessionPartners = encounter.partnerIds
+    .map(pid => allPartners.find(p => p.id === pid))
+    .filter((p): p is NonNullable<typeof p> => Boolean(p))
+    .map(p => {
+      const pEncs = allEncounters.filter(e => e.partnerIds.includes(p.id))
+      const rated = pEncs.filter(e => e.stars && e.stars > 0)
+      const avg = rated.length > 0
         ? Math.round(rated.reduce((s, e) => s + (e.stars || 0), 0) / rated.length * 10) / 10
         : 0
-    })(),
-  }] : []
+      return {
+        id: p.id,
+        initials: p.avatarValue,
+        name: p.displayName,
+        gradient: p.avatarGradient,
+        sessionCount: pEncs.length,
+        avgSatisfaction: avg,
+      }
+    })
 
   const activities = encounter.activities.map(emoji => {
     return { emoji, label: tagMap.get(emoji) || emoji }
@@ -64,7 +69,7 @@ export default function SessionDetailRoute() {
   return (
     <SessionDetailScreen
       partners={sessionPartners}
-      partnerNames={partner?.displayName || 'Solo'}
+      partnerNames={formatPartnerLabel(sessionPartners.map(p => p.name))}
       date={dateStr}
       rating={encounter.stars || 0}
       dayOfWeek={dayOfWeek.slice(0, 3)}
@@ -73,9 +78,7 @@ export default function SessionDetailRoute() {
       onBack={() => router.back()}
       onEdit={() => router.push(`/(sheets)/log-session?id=${encounter.id}`)}
       onEditNote={() => router.push(`/(sheets)/log-session?id=${encounter.id}`)}
-      onPartnerPress={() => {
-        if (partner) router.push(`/(pages)/partner-profile?id=${partner.id}`)
-      }}
+      onPartnerPress={(p) => router.push(`/(pages)/partner-profile?id=${p.id}`)}
     />
   )
 }

@@ -1,5 +1,7 @@
 import React from 'react'
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
+import { KeyboardAvoidingView, KeyboardAwareScrollView } from 'react-native-keyboard-controller'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Svg, { Line } from 'react-native-svg'
 import { LinearGradient } from 'expo-linear-gradient'
 import { colors, fontFamily, gradientPoints, typography } from '../theme'
@@ -30,8 +32,9 @@ export interface AddTagModalProps {
   onTagNameChange?: (name: string) => void
 }
 
-const EMOJI_CELL_BASIS = `${100 / 7}%`
-const EMOJI_GRID_MAX_HEIGHT = 280
+const EMOJI_CELL_SIZE = 46
+const EMOJI_GAP = 6
+const EMOJI_ROWS = 5
 
 /* ── Inline icon helpers ── */
 
@@ -59,35 +62,43 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
   const isDuplicate = trimmedName.length > 0
     && existingTags.some(t => t.name.toLowerCase() === trimmedName.toLowerCase())
   const addTagDisabled = trimmedName.length === 0 || isDuplicate
+  const insets = useSafeAreaInsets()
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={{ flex: 1, backgroundColor: colors.surface }}
-    >
-        {/* Header */}
-        <View style={{
-          paddingTop: 20,
-          paddingHorizontal: 20,
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}>
-          <Text style={typography.screenTitle}>Add a tag</Text>
-          <Pressable
-            onPress={onClose}
-            style={{
-              width: 30,
-              height: 30,
-              borderRadius: 15,
-              backgroundColor: colors.surface2,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <CloseIcon />
-          </Pressable>
-        </View>
+    <KeyboardAvoidingView behavior="padding" style={{ flex: 1, backgroundColor: colors.surface }}>
+        <KeyboardAwareScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+          bottomOffset={20}
+          bounces={false}
+        >
+          {/* Header — scrolls with content */}
+          <View style={{
+            paddingTop: 20,
+            paddingHorizontal: 20,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}>
+            <Text style={typography.screenTitle}>Add a tag</Text>
+            <Pressable
+              onPress={onClose}
+              accessibilityRole="button"
+              accessibilityLabel="Close"
+              hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
+              style={{
+                width: 30,
+                height: 30,
+                borderRadius: 15,
+                backgroundColor: colors.surface2,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <CloseIcon />
+            </Pressable>
+          </View>
 
         {/* ── Existing tags strip ── */}
         {existingTags.length > 0 && (
@@ -114,16 +125,19 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
         }} />
 
         {/* ── Emoji picker ── */}
-        <View style={{ paddingTop: 12, paddingHorizontal: 20 }}>
-          <Text style={[typography.sectionLabel, { marginBottom: 8 }]}>Choose an emoji</Text>
+        <View style={{ paddingTop: 12 }}>
+          <Text style={[typography.sectionLabel, { marginBottom: 8, paddingHorizontal: 20 }]}>Choose an emoji</Text>
 
           <ScrollView
-            style={{ maxHeight: EMOJI_GRID_MAX_HEIGHT, marginBottom: 8 }}
-            showsVerticalScrollIndicator={true}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={{ marginBottom: 8 }}
             contentContainerStyle={{
-              flexDirection: 'row',
+              flexDirection: 'column',
               flexWrap: 'wrap',
-              gap: 4,
+              height: EMOJI_ROWS * EMOJI_CELL_SIZE + (EMOJI_ROWS - 1) * EMOJI_GAP,
+              gap: EMOJI_GAP,
+              paddingHorizontal: 20,
               paddingBottom: 4,
             }}
           >
@@ -134,7 +148,7 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
                 <EmojiChip
                   key={i}
                   emoji={emoji}
-                  flexBasis={EMOJI_CELL_BASIS}
+                  size={EMOJI_CELL_SIZE}
                   borderRadius={10}
                   selected={isSelected}
                   disabled={isUsed}
@@ -210,6 +224,7 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
             </Text>
           )}
         </View>
+        </KeyboardAwareScrollView>
 
         {/* ── Footer ── */}
         <View style={{
@@ -217,7 +232,7 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
           gap: 8,
           paddingTop: 14,
           paddingHorizontal: 20,
-          paddingBottom: 20,
+          paddingBottom: Math.max(insets.bottom, 20),
         }}>
           <Pressable
             onPress={onCancel}

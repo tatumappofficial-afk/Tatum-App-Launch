@@ -68,12 +68,16 @@ export default function CalendarRoute() {
 
   const dayEncounters = allEncounters.filter(e => e.date === selectedDateStr)
   const daySessions = dayEncounters.map(enc => {
-    const partner = allPartners.find(p => p.id === enc.partnerId)
+    const sessionPartners = enc.partnerIds
+      .map(pid => allPartners.find(p => p.id === pid))
+      .filter((p): p is NonNullable<typeof p> => Boolean(p))
     return {
       id: enc.id,
-      partnerName: partner?.displayName || 'Solo',
-      partnerInitials: partner ? partner.avatarValue : "\u2728",
-      partnerGradient: partner?.avatarGradient || 'linear-gradient(135deg, #8BA888, #5A8060)',
+      partners: sessionPartners.map(p => ({
+        initials: p.avatarValue,
+        gradient: p.avatarGradient,
+        name: p.displayName,
+      })),
       rating: enc.stars || 0,
       tags: enc.activities.map(emoji => ({
         emoji,
@@ -96,13 +100,16 @@ export default function CalendarRoute() {
   }
 
   function handleQuickLog(emoji: string) {
+    if (allPartners.length === 0) return // can't log without a partner
     const nowStr = new Date().toISOString()
     const dateStr = nowStr.split('T')[0]
+    // Quick-log defaults to the first partner; user can edit the session
+    // afterwards to reassign or add others.
     encounters.insert({
       id: uuid(),
       date: dateStr,
       activities: [emoji],
-      partnerId: null,
+      partnerIds: [allPartners[0].id],
       stars: null,
       notes: null,
       createdAt: nowStr,

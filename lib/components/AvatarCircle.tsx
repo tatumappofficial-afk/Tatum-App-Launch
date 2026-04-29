@@ -40,6 +40,7 @@ export const AvatarCircle: React.FC<AvatarCircleProps> = ({
         fontFamily: font('playfair', '700'),
         fontSize,
         color: colors.white,
+        textAlign: 'center',
       }}>
         {initials}
       </Text>

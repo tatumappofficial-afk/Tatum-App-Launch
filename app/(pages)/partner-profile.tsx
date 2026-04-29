@@ -20,7 +20,7 @@ export default function PartnerProfileRoute() {
   const tagMap = useActivityTagMap()
 
   const partner = allPartners.find(p => p.id === id)
-  const partnerEncounters = allEncounters.filter(e => e.partnerId === id)
+  const partnerEncounters = allEncounters.filter(e => e.partnerIds.includes(id))
     .sort((a, b) => b.date.localeCompare(a.date))
 
   if (!partner) {

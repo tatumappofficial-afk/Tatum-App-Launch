@@ -17,6 +17,14 @@ export interface CalendarGridProps {
   loggedDays: LoggedDay[]
   onDayPress?: (day: number) => void
   compact?: boolean
+  /** 'day' (default): selected day highlighted as a circle.
+   *  'week': the entire row containing `selectedDay` is highlighted, signalling
+   *  that a tap selects the week the chosen day falls into. */
+  mode?: 'day' | 'week'
+  /** When true, non-logged day cells are dimmed and not pressable —
+   *  used in browse contexts (e.g. the journal) where tapping a date
+   *  with no entry would land nowhere. */
+  loggedOnly?: boolean
 }
 
 /* ── Helpers ── */
@@ -39,8 +47,9 @@ const DayCell: React.FC<{
   isSelected: boolean
   logged?: LoggedDay
   compact: boolean
+  muted?: boolean
   onPress?: () => void
-}> = ({ day, isToday, isSelected, logged, compact, onPress }) => {
+}> = ({ day, isToday, isSelected, logged, compact, muted = false, onPress }) => {
   const isLoggedDay = !!logged
   const fontSize = compact ? 11 : 12
   const emojiFontSize = compact ? 7 : 8
@@ -48,16 +57,18 @@ const DayCell: React.FC<{
 
   return (
     <Pressable
-      onPress={onPress}
+      onPress={muted ? undefined : onPress}
+      disabled={muted}
       accessibilityRole="button"
       accessibilityLabel={`Day ${day}${isToday ? ', today' : ''}${isSelected ? ', selected' : ''}`}
-      accessibilityState={{ selected: isSelected }}
+      accessibilityState={{ selected: isSelected, disabled: muted }}
       style={{
         aspectRatio: 1,
         borderRadius: 9999,
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'hidden',
+        opacity: muted ? 0.3 : 1,
         ...(isSelected && !isToday
           ? { backgroundColor: 'rgba(192,120,88,0.15)', borderWidth: 2, borderColor: colors.terra }
           : null),
@@ -106,6 +117,8 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
   loggedDays,
   onDayPress,
   compact = false,
+  mode = 'day',
+  loggedOnly = false,
 }) => {
   const daysInMonth = getDaysInMonth(month, year)
   const firstDow = getFirstDayOfWeek(month, year)
@@ -123,18 +136,27 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
   }
   for (let d = 1; d <= daysInMonth; d++) {
     const day = d
+    const logged = logMap.get(day)
     cells.push(
       <DayCell
         key={day}
         day={day}
         isToday={day === today}
-        isSelected={day === selectedDay}
-        logged={logMap.get(day)}
+        // Per-cell circle highlight is suppressed in week mode — the row
+        // background carries the selection signal instead.
+        isSelected={mode === 'day' && day === selectedDay}
+        logged={logged}
         compact={compact}
+        muted={loggedOnly && !logged}
         onPress={() => onDayPress?.(day)}
       />
     )
   }
+
+  const selectedRowIndex =
+    mode === 'week' && selectedDay !== undefined
+      ? Math.floor((firstDow + selectedDay - 1) / 7)
+      : undefined
 
   // Render as rows of 7 (flex-based grid)
   const headerRow = (
@@ -158,13 +180,29 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
   // Build rows of 7 from cells
   const rows: React.ReactNode[] = []
   for (let i = 0; i < cells.length; i += 7) {
+    const rowIndex = i / 7
     const rowCells = cells.slice(i, i + 7)
     // Pad last row
     while (rowCells.length < 7) {
       rowCells.push(<View key={`pad-${rowCells.length}`} style={{ flex: 1 }} />)
     }
+    const isSelectedRow = rowIndex === selectedRowIndex
     rows.push(
-      <View key={`row-${i}`} style={{ flexDirection: 'row', gap: compact ? 0 : 2 }}>
+      <View
+        key={`row-${i}`}
+        style={{
+          flexDirection: 'row',
+          gap: compact ? 0 : 2,
+          ...(isSelectedRow
+            ? {
+                backgroundColor: 'rgba(192,120,88,0.13)',
+                borderRadius: 9999,
+                borderWidth: 1,
+                borderColor: colors.terra,
+              }
+            : null),
+        }}
+      >
         {rowCells.map((cell, j) => (
           <View key={j} style={{ flex: 1 }}>{cell}</View>
         ))}

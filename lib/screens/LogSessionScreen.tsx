@@ -1,5 +1,7 @@
 import React from 'react'
-import { StyleSheet, View, Text, Pressable, ScrollView, TextInput, KeyboardAvoidingView, Platform } from 'react-native'
+import { StyleSheet, View, Text, Pressable, ScrollView, TextInput } from 'react-native'
+import { KeyboardAvoidingView, KeyboardAwareScrollView } from 'react-native-keyboard-controller'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Line, Polyline } from 'react-native-svg'
 import { colors, font, fontFamily, gradientPoints, gradients, parseGradientColors } from '../theme'
@@ -15,7 +17,6 @@ export interface Partner {
   initials: string
   name: string
   gradient: string
-  isSolo?: boolean
 }
 
 export interface ActivityTag {
@@ -38,7 +39,6 @@ export interface LogSessionScreenProps {
   onActivityToggle?: (id: string) => void
   onRatingChange?: (value: number) => void
   onNotesChange?: (value: string) => void
-  onAddPartner?: () => void
   onSave?: () => void
   onDelete?: () => void
   onClose?: () => void
@@ -54,7 +54,7 @@ export interface LogSessionScreenProps {
 const defaultPartners: Partner[] = [
   { id: 'alex', initials: 'AL', name: 'Alex', gradient: `linear-gradient(135deg, ${colors.terra}, ${colors.fig})` },
   { id: 'jordan', initials: 'JO', name: 'Jordan', gradient: `linear-gradient(135deg, ${colors.mauve}, ${colors.fig})` },
-  { id: 'solo', initials: '', name: 'Solo', gradient: `linear-gradient(135deg, ${colors.stone}, #6A5848)`, isSolo: true },
+  { id: 'solo', initials: '✨', name: 'Solo', gradient: `linear-gradient(135deg, ${colors.stone}, #6A5848)` },
 ]
 
 const defaultActivities: ActivityTag[] = [
@@ -67,6 +67,10 @@ const defaultActivities: ActivityTag[] = [
   { id: 'toys', emoji: '\u{1FA84}', label: 'Toys' },
   { id: 'period', emoji: '\u{1FA78}', label: 'Period' },
 ]
+
+const ACTIVITY_ROWS = 4
+const ACTIVITY_ROW_HEIGHT = 33
+const ACTIVITY_GAP = 6
 
 /* ── Component ── */
 
@@ -84,7 +88,6 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
   onActivityToggle,
   onRatingChange,
   onNotesChange,
-  onAddPartner,
   onSave,
   onDelete,
   onClose,
@@ -95,28 +98,28 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
   successLabel = 'Session added',
 }) => {
   const canSave = selectedPartnerIds.length > 0 && selectedActivityIds.length > 0
+  const insets = useSafeAreaInsets()
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior="padding"
       style={{
         flex: 1,
         backgroundColor: colors.warmSand,
       }}
     >
-        {/* Scrollable form body — header scrolls with content */}
-        <ScrollView
-          style={{
-            flex: 1,
-          }}
+        <KeyboardAwareScrollView
+          style={{ flex: 1 }}
           contentContainerStyle={{
             paddingTop: 8,
             paddingHorizontal: 20,
             paddingBottom: 16,
           }}
           keyboardShouldPersistTaps="handled"
+          bottomOffset={20}
+          bounces={false}
         >
-          {/* Header */}
+          {/* Header — scrolls with content */}
           <View style={{
             flexDirection: 'row',
             alignItems: 'center',
@@ -163,6 +166,9 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
               </Pressable>
               <Pressable
                 onPress={onClose}
+                accessibilityRole="button"
+                accessibilityLabel="Close"
+                hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
                 style={{
                   width: 30, height: 30, borderRadius: 15,
                   backgroundColor: colors.surface2,
@@ -176,6 +182,7 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
               </Pressable>
             </View>
           </View>
+
 
           {/* ── Date picker dropdown ── */}
           {calendarOpen && calendarContent && (
@@ -219,9 +226,9 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
                       />
                       <Text style={{
                         fontFamily: font('playfair', '700'),
-                        fontSize: p.isSolo ? 20 : 15,
+                        fontSize: 15,
                         color: colors.white,
-                      }}>{p.isSolo ? '\u2728' : p.initials}</Text>
+                      }}>{p.initials}</Text>
                     </View>
                     {selected && (
                       <View style={{
@@ -249,34 +256,23 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
                 </Pressable>
               )
             })}
-            {/* Add button */}
-            <Pressable onPress={() => onAddPartner?.()} style={{ flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-              <View style={{ position: 'relative' }}>
-                <View style={{
-                  width: 46,
-                  height: 46,
-                  borderRadius: 23,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: 'transparent',
-                  borderWidth: 1.5,
-                  borderStyle: 'dashed',
-                  borderColor: 'rgba(192,120,88,0.35)',
-                }}>
-                  <Text style={{
-                    color: colors.terra,
-                    fontFamily: fontFamily.dmSans,
-                    fontSize: 20,
-                  }}>{'\uFF0B'}</Text>
-                </View>
-              </View>
-              <Text style={{ fontSize: 9, fontWeight: '400', color: colors.terra }}>Add</Text>
-            </Pressable>
           </View>
 
           {/* ── WHAT HAPPENED (activity tags) ── */}
           <FormLabel>What happened</FormLabel>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 16 }}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={{ marginBottom: 16, marginHorizontal: -20 }}
+            contentContainerStyle={{
+              flexDirection: 'column',
+              flexWrap: 'wrap',
+              height: ACTIVITY_ROWS * ACTIVITY_ROW_HEIGHT + (ACTIVITY_ROWS - 1) * ACTIVITY_GAP,
+              columnGap: ACTIVITY_GAP,
+              rowGap: ACTIVITY_GAP,
+              paddingHorizontal: 20,
+            }}
+          >
             {activities.map((tag) => (
               <TagPill
                 key={tag.id}
@@ -287,7 +283,7 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
                 onPress={() => onActivityToggle?.(tag.id)}
               />
             ))}
-          </View>
+          </ScrollView>
 
           {/* ── RATING ── */}
           <FormLabel>Rating</FormLabel>
@@ -303,6 +299,7 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
             placeholder={"How did it feel? What made this moment special\u2026"}
             placeholderTextColor={colors.muted}
             multiline
+            scrollEnabled={false}
             numberOfLines={3}
             maxLength={3000}
             autoCapitalize="sentences"
@@ -332,14 +329,14 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
             fontFamily: fontFamily.dmSans,
             marginBottom: 4,
           }}>{notes?.length || 0} / 3,000</Text>
-        </ScrollView>
+        </KeyboardAwareScrollView>
 
         {/* ── Footer ── */}
         <View style={{
           flexShrink: 0,
-          paddingVertical: 10,
+          paddingTop: 10,
           paddingHorizontal: 20,
-          paddingBottom: 34,
+          paddingBottom: Math.max(insets.bottom, 10),
           borderTopWidth: 1,
           borderTopColor: 'rgba(160,100,80,0.1)',
           backgroundColor: colors.warmSand,

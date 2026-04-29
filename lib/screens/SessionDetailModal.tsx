@@ -3,7 +3,7 @@ import { View, Text, Pressable, ScrollView } from 'react-native'
 import Svg, { Line, Path, Polyline } from 'react-native-svg'
 import { colors, font, fontFamily } from '../theme'
 import { SectionLabel } from './shared/SectionLabel'
-import { AvatarCircle } from '../components/AvatarCircle'
+import { AvatarStack } from '../components/AvatarStack'
 import { StatStrip } from '../components/StatStrip'
 import { TagPill } from '../components/TagPill'
 
@@ -20,6 +20,12 @@ export interface ActivityTag {
   label: string
 }
 
+export interface ModalPartner {
+  initials: string
+  gradient: string
+  name: string
+}
+
 export interface SessionDetailModalProps {
   month: number
   year: number
@@ -27,9 +33,8 @@ export interface SessionDetailModalProps {
   loggedDays?: LoggedDay[]
   selectedDay: number
   backLabel: string        // e.g. "March 7"
-  partnerName: string
-  partnerInitials: string
-  partnerGradient: string
+  partners: ModalPartner[]
+  partnerName: string      // formatted label e.g. "Jane & Alex"
   dateLabel: string        // e.g. "Saturday, March 7, 2026 · Evening"
   rating: number           // out of 10
   dayOfWeek: string        // e.g. "Sat"
@@ -45,7 +50,7 @@ export interface SessionDetailModalProps {
 /* ── Main Component ── */
 
 export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
-  backLabel, partnerName, partnerInitials, partnerGradient,
+  backLabel, partners, partnerName,
   dateLabel, rating, dayOfWeek, tags, noteText,
   onBack, onEdit, onEditNote, onDelete, onClose,
 }) => (
@@ -85,6 +90,9 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
         </Pressable>
         <Pressable
           onPress={onClose}
+          accessibilityRole="button"
+          accessibilityLabel="Close"
+          hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
           style={{
             width: 30, height: 30, borderRadius: 15,
             backgroundColor: colors.surface2,
@@ -107,12 +115,7 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
         paddingTop: 16, paddingHorizontal: 24,
       }}>
         <View style={{ marginBottom: 10 }}>
-          <AvatarCircle
-            initials={partnerInitials}
-            gradient={partnerGradient}
-            size={68}
-            borderWidth={3}
-          />
+          <AvatarStack partners={partners} size={68} borderWidth={3} max={3} />
         </View>
         <Text style={{
           fontFamily: font('playfair', '700'), fontSize: 22,

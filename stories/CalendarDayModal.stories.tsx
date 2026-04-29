@@ -42,8 +42,7 @@ export const Empty: Story = {
 const sessionsData: SessionRow[] = [
   {
     id: '1',
-    initials: 'AL',
-    gradient: 'linear-gradient(135deg, #C07858, #7C4A5A)',
+    partners: [{ initials: 'AL', gradient: 'linear-gradient(135deg, #C07858, #7C4A5A)' }],
     partnerName: 'Alex',
     tags: ['🍆', '💋', '😘'],
     rating: 4,
@@ -51,8 +50,7 @@ const sessionsData: SessionRow[] = [
   },
   {
     id: '2',
-    initials: 'JO',
-    gradient: 'linear-gradient(135deg, #B07080, #7C4A5A)',
+    partners: [{ initials: 'JO', gradient: 'linear-gradient(135deg, #B07080, #7C4A5A)' }],
     partnerName: 'Jordan',
     tags: ['✋', '😘'],
     rating: 3.5,

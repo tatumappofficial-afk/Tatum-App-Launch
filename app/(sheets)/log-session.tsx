@@ -43,7 +43,7 @@ export default function LogSessionRoute() {
       setSelectedDate(dateObj)
       setCalMonth(dateObj.getMonth())
       setCalYear(dateObj.getFullYear())
-      setSelectedPartnerIds(existingEncounter.partnerId ? [existingEncounter.partnerId] : [])
+      setSelectedPartnerIds(existingEncounter.partnerIds)
       setSelectedActivities(existingEncounter.activities)
       setRating(existingEncounter.stars ?? 7)
       setNotes(existingEncounter.notes ?? '')
@@ -149,37 +149,43 @@ export default function LogSessionRoute() {
       Alert.alert('Missing activity', 'Must choose one activity')
       return
     }
+    if (selectedPartnerIds.length === 0) {
+      Alert.alert('Missing partner', 'Select at least one partner')
+      return
+    }
 
     const nowStr = new Date().toISOString()
     const dateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`
-    const partnerId = selectedPartnerIds[0] || null
 
     try {
       if (isEditing && existingEncounter) {
+        console.log('[log-session] update', { id, dateStr, selectedPartnerIds, selectedActivities, rating })
         encounters.update(id, (draft) => {
           draft.date = dateStr
           draft.activities = selectedActivities
-          draft.partnerId = partnerId
+          draft.partnerIds = selectedPartnerIds
           draft.stars = rating
           draft.notes = notes || null
           draft.updatedAt = nowStr
         })
       } else {
-        encounters.insert({
+        const payload = {
           id: uuid(),
           date: dateStr,
           activities: selectedActivities,
-          partnerId,
+          partnerIds: selectedPartnerIds,
           stars: rating,
           notes: notes || null,
           createdAt: nowStr,
           updatedAt: nowStr,
-        })
+        }
+        console.log('[log-session] insert payload', payload)
+        encounters.insert(payload)
       }
       setShowSuccess(true)
       setTimeout(() => router.back(), 900)
     } catch (err) {
-      console.error('Failed to save encounter:', err)
+      console.error('[log-session] save threw:', err)
       router.back()
     }
   }
@@ -217,7 +223,6 @@ export default function LogSessionRoute() {
       onNotesChange={setNotes}
       onSave={handleSave}
       onDelete={isEditing ? handleDelete : undefined}
-      onAddPartner={() => router.push('/(sheets)/edit-partner')}
       onClose={() => router.dismiss()}
       onDatePress={() => setCalendarOpen(prev => !prev)}
       calendarOpen={calendarOpen}

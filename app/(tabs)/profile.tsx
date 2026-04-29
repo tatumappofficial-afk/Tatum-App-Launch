@@ -34,10 +34,12 @@ export default function ProfileRoute() {
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 5)
     .map(enc => {
-      const partner = allPartners.find(p => p.id === enc.partnerId)
+      const sessionPartners = enc.partnerIds
+        .map(pid => allPartners.find(p => p.id === pid))
+        .filter((p): p is NonNullable<typeof p> => Boolean(p))
+        .map(p => ({ initials: p.avatarValue, gradient: p.avatarGradient }))
       return {
-        partnerInitials: partner ? partner.avatarValue : '✨',
-        partnerGradient: partner?.avatarGradient || 'linear-gradient(135deg, #8BA888, #5A8060)',
+        partners: sessionPartners,
         date: new Date(enc.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         rating: enc.stars || 0,
         tags: enc.activities,
@@ -68,6 +70,10 @@ export default function ProfileRoute() {
       onPartnersSection={() => router.push('/(pages)/partners')}
       onAddTag={() => router.push('/(sheets)/add-tag')}
       onAddPartner={() => router.push('/(sheets)/edit-partner')}
+      onPartnerPress={(index) => {
+        const partner = allPartners.filter(p => p.isActive)[index]
+        if (partner) router.push(`/(pages)/partner-profile?id=${partner.id}`)
+      }}
     />
   )
 }

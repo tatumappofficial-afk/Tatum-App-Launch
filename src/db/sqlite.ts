@@ -4,7 +4,7 @@ const DB_NAME = 'tatum.db'
 
 // Bump this number whenever the schema changes to force a fresh database.
 // Since this is a pre-release app, we simply drop and recreate rather than migrate.
-const SCHEMA_VERSION = 2
+const SCHEMA_VERSION = 5
 
 let db: SQLite.SQLiteDatabase | null = null
 
@@ -55,12 +55,11 @@ async function initializeTables(database: SQLite.SQLiteDatabase) {
       id TEXT PRIMARY KEY NOT NULL,
       date TEXT NOT NULL,
       activities TEXT NOT NULL DEFAULT '[]',
-      partnerId TEXT,
+      partnerIds TEXT NOT NULL DEFAULT '[]',
       stars INTEGER,
       notes TEXT,
       createdAt TEXT NOT NULL,
-      updatedAt TEXT NOT NULL,
-      FOREIGN KEY (partnerId) REFERENCES partners(id)
+      updatedAt TEXT NOT NULL
     );
 
     CREATE TABLE IF NOT EXISTS desire_entries (
@@ -121,7 +120,6 @@ async function initializeTables(database: SQLite.SQLiteDatabase) {
     );
 
     CREATE INDEX IF NOT EXISTS idx_encounters_date ON encounters(date);
-    CREATE INDEX IF NOT EXISTS idx_encounters_partnerId ON encounters(partnerId);
   `)
 }
 

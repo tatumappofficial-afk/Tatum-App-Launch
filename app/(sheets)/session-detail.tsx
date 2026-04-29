@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { SessionDetailModal } from '@/lib/screens/SessionDetailModal'
 import { encounters, partners } from '@/src/db'
 import { useActivityTagMap } from '@/src/hooks/useActivityTagMap'
+import { formatPartnerLabel } from '@/src/utils/partnerLabel'
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 const MONTH_NAMES = [
@@ -31,8 +32,7 @@ export default function SheetSessionDetailRoute() {
         selectedDay={1}
         backLabel="Back"
         partnerName=""
-        partnerInitials="?"
-        partnerGradient="linear-gradient(135deg, #8BA888, #5A8060)"
+        partners={[]}
         dateLabel=""
         rating={0}
         dayOfWeek=""
@@ -42,7 +42,9 @@ export default function SheetSessionDetailRoute() {
     )
   }
 
-  const partner = allPartners.find(p => p.id === encounter.partnerId)
+  const sessionPartners = encounter.partnerIds
+    .map(pid => allPartners.find(p => p.id === pid))
+    .filter((p): p is NonNullable<typeof p> => Boolean(p))
 
   const dateObj = new Date(encounter.date + 'T00:00:00')
   const dayOfWeek = DAY_NAMES[dateObj.getDay()]
@@ -63,9 +65,8 @@ export default function SheetSessionDetailRoute() {
       year={dateObj.getFullYear()}
       selectedDay={dayNum}
       backLabel={backLabel}
-      partnerName={partner?.displayName || 'Solo'}
-      partnerInitials={partner ? partner.avatarValue : "\u2728"}
-      partnerGradient={partner?.avatarGradient || 'linear-gradient(135deg, #8BA888, #5A8060)'}
+      partnerName={formatPartnerLabel(sessionPartners.map(p => p.displayName))}
+      partners={sessionPartners.map(p => ({ initials: p.avatarValue, gradient: p.avatarGradient, name: p.displayName }))}
       dateLabel={dateLabel}
       rating={encounter.stars || 0}
       dayOfWeek={dayOfWeek.slice(0, 3)}

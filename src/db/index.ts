@@ -36,6 +36,18 @@ export async function initDatabase() {
     }
   }
 
+  // Ensure at least one partner exists so the log-session picker is never
+  // empty. Solo is now a regular partner row — the user can rename or delete
+  // it like any other.
+  const existingPartners = await db.getAllAsync<{ id: string }>('SELECT id FROM partners LIMIT 1')
+  if (existingPartners.length === 0) {
+    const now = new Date().toISOString()
+    await db.runAsync(
+      'INSERT INTO partners (id, displayName, avatarType, avatarValue, avatarGradient, isActive, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [uuid(), 'Solo', 'emoji', '✨', 'linear-gradient(135deg, #9A8878, #6A5A4A)', 1, now, now],
+    )
+  }
+
   // Ensure default settings exist
   const settings = await db.getAllAsync<{ key: string }>('SELECT key FROM user_settings LIMIT 1')
   if (settings.length === 0) {
@@ -49,9 +61,11 @@ export async function initDatabase() {
 
   // Backfill 1-character partner initials written by the legacy
   // first-letter-of-each-word derivation. Skip rows where re-deriving
-  // can't produce 2+ chars (e.g. a 1-letter displayName).
+  // can't produce 2+ chars (e.g. a 1-letter displayName). Restrict to
+  // initials-type rows so we don't clobber emoji avatars (a single emoji
+  // is one "char" and would otherwise match the LENGTH < 2 filter).
   const stalePartners = await db.getAllAsync<{ id: string; displayName: string; avatarValue: string }>(
-    'SELECT id, displayName, avatarValue FROM partners WHERE LENGTH(avatarValue) < 2',
+    "SELECT id, displayName, avatarValue FROM partners WHERE LENGTH(avatarValue) < 2 AND avatarType = 'initials'",
   )
   for (const row of stalePartners) {
     const fresh = deriveInitials(row.displayName)

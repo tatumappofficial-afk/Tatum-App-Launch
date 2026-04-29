@@ -60,24 +60,21 @@ export const Default: Story = {
     ],
     recentSessions: [
       {
-        partnerInitials: 'AL',
-        partnerGradient: 'linear-gradient(135deg, #C07858, #7C4A5A)',
+        partners: [{ initials: 'AL', gradient: 'linear-gradient(135deg, #C07858, #7C4A5A)' }],
         date: 'Mar 18',
         rating: 80,
         tags: ['🍆', '💋'],
         note: '"had such a good night last night. so unexpected..."',
       },
       {
-        partnerInitials: 'JO',
-        partnerGradient: 'linear-gradient(135deg, #B07080, #7C4A5A)',
+        partners: [{ initials: 'JO', gradient: 'linear-gradient(135deg, #B07080, #7C4A5A)' }],
         date: 'Mar 17',
         rating: 70,
         tags: ['💋', '✋'],
         note: '"felt really connected tonight. needed that."',
       },
       {
-        partnerInitials: 'SO',
-        partnerGradient: 'linear-gradient(135deg, #9A8878, #6A5848)',
+        partners: [{ initials: 'SO', gradient: 'linear-gradient(135deg, #9A8878, #6A5848)' }],
         date: 'Mar 15',
         rating: 90,
         tags: ['✨'],

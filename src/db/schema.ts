@@ -43,7 +43,7 @@ export const EncounterSchema = z.object({
   id: z.string().uuid(),
   date: z.string(), // ISO date YYYY-MM-DD
   activities: z.array(z.string()).min(1), // emoji codes, at least one required
-  partnerId: z.string().uuid().nullable(),
+  partnerIds: z.array(z.string().uuid()).min(1), // at least one partner; "Solo" is a regular partner row
   stars: z.number().min(0).max(10).nullable(),
   notes: z.string().max(3000).nullable(),
   createdAt: z.string(),

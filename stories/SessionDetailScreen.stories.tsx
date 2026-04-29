@@ -17,6 +17,7 @@ export const Default: Story = {
   args: {
     partners: [
       {
+        id: 'alex',
         initials: 'AL',
         name: 'Alex',
         gradient: 'linear-gradient(135deg, #C07858, #7C4A5A)',
@@ -24,6 +25,7 @@ export const Default: Story = {
         avgSatisfaction: 8.6,
       },
       {
+        id: 'jordan',
         initials: 'JO',
         name: 'Jordan',
         gradient: 'linear-gradient(135deg, #B07080, #7C4A5A)',

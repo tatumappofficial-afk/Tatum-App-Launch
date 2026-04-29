@@ -2,6 +2,7 @@ import { useLiveQuery } from '@tanstack/react-db'
 import { useRouter } from 'expo-router'
 import { JournalScreen } from '@/lib/screens/JournalScreen'
 import { encounters, partners } from '@/src/db'
+import { formatPartnerLabel } from '@/src/utils/partnerLabel'
 
 export default function JournalRoute() {
   const router = useRouter()
@@ -14,19 +15,22 @@ export default function JournalRoute() {
   const entries = allEncounters
     .sort((a, b) => b.date.localeCompare(a.date))
     .map(enc => {
-      const partner = allPartners.find(p => p.id === enc.partnerId)
+      const sessionPartners = enc.partnerIds
+        .map(pid => allPartners.find(p => p.id === pid))
+        .filter((p): p is NonNullable<typeof p> => Boolean(p))
       return {
         id: enc.id,
-        partners: partner ? [{
-          initials: partner.avatarValue,
-          gradient: partner.avatarGradient,
-        }] : [],
-        partnerName: partner?.displayName || 'Solo',
+        partners: sessionPartners.map(p => ({
+          initials: p.avatarValue,
+          gradient: p.avatarGradient,
+        })),
+        partnerName: formatPartnerLabel(sessionPartners.map(p => p.displayName)),
         date: new Date(enc.date + 'T00:00:00').toLocaleDateString('en-US', {
           weekday: 'short',
           month: 'short',
           day: 'numeric',
         }),
+        isoDate: enc.date,
         score: enc.stars || 0,
         maxScore: 10,
         tags: enc.activities,

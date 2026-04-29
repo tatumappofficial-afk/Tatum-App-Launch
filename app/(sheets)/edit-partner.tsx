@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import { useLiveQuery } from '@tanstack/react-db'
-import { Alert, KeyboardAvoidingView, Platform, StyleSheet, View, Text, TextInput, Pressable, ScrollView } from 'react-native'
+import { Alert, StyleSheet, View, Text, TextInput, Pressable, ScrollView } from 'react-native'
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Svg, { Line } from 'react-native-svg'
 import { generateId } from '@/src/utils/uuid'
 import { deriveInitials } from '@/src/utils/initials'
@@ -24,7 +26,7 @@ export default function EditPartnerSheet() {
 
   const existing = id ? allPartners.find(p => p.id === id) : undefined
   const isEdit = Boolean(existing)
-  const partnerEncounters = id ? allEncounters.filter(e => e.partnerId === id) : []
+  const partnerEncounters = id ? allEncounters.filter(e => e.partnerIds.includes(id)) : []
 
   const [displayName, setDisplayName] = useState(existing?.displayName ?? '')
   const [initials, setInitials] = useState(
@@ -57,7 +59,8 @@ export default function EditPartnerSheet() {
   }
 
   function handleInitialsChange(text: string) {
-    const cleaned = text.toUpperCase().slice(0, 2)
+    // Letters get uppercased for visual consistency; emojis pass through unchanged.
+    const cleaned = text.toUpperCase().slice(0, 8)
     setInitials(cleaned)
     // Clearing the field releases the latch so future name edits re-derive.
     setManuallyEdited(cleaned.length > 0)
@@ -69,6 +72,19 @@ export default function EditPartnerSheet() {
 
     const finalInitials = initials.trim() || deriveInitials(name)
     const now = new Date().toISOString()
+
+    const collision = allPartners.find(p =>
+      p.id !== existing?.id &&
+      p.avatarValue === finalInitials &&
+      p.avatarGradient === selectedGradient
+    )
+    if (collision) {
+      Alert.alert(
+        'Already taken',
+        `Another partner already uses this initial and color combination. Pick a different color or change the initial.`,
+      )
+      return
+    }
 
     try {
       if (isEdit && existing) {
@@ -101,10 +117,18 @@ export default function EditPartnerSheet() {
 
   function handleDelete() {
     if (!existing) return
-    const sessionCount = partnerEncounters.length
-    const sessionNote = sessionCount > 0
-      ? ` This will also permanently delete ${sessionCount} logged ${sessionCount === 1 ? 'session' : 'sessions'} with them.`
-      : ''
+    // Split affected sessions: those where this partner is the sole entry
+    // get deleted entirely; those with multiple partners just lose this id.
+    const soleEncounters = partnerEncounters.filter(e => e.partnerIds.length === 1)
+    const sharedEncounters = partnerEncounters.filter(e => e.partnerIds.length > 1)
+    const noteParts: string[] = []
+    if (sharedEncounters.length > 0) {
+      noteParts.push(`${sharedEncounters.length} ${sharedEncounters.length === 1 ? 'session' : 'sessions'} will keep their other partners`)
+    }
+    if (soleEncounters.length > 0) {
+      noteParts.push(`${soleEncounters.length} ${soleEncounters.length === 1 ? 'session' : 'sessions'} where they were the only partner will be permanently deleted`)
+    }
+    const sessionNote = noteParts.length > 0 ? ` ${noteParts.join(' and ')}.` : ''
     Alert.alert(
       'Delete Partner',
       `Are you sure you want to delete ${existing.displayName}?${sessionNote} This can’t be undone.`,
@@ -115,8 +139,14 @@ export default function EditPartnerSheet() {
           style: 'destructive',
           onPress: () => {
             try {
-              for (const enc of partnerEncounters) {
+              for (const enc of soleEncounters) {
                 encounters.delete(enc.id)
+              }
+              for (const enc of sharedEncounters) {
+                encounters.update(enc.id, (draft) => {
+                  draft.partnerIds = draft.partnerIds.filter(pid => pid !== existing.id)
+                  draft.updatedAt = new Date().toISOString()
+                })
               }
               partners.delete(existing.id)
             } catch (err) {
@@ -133,6 +163,8 @@ export default function EditPartnerSheet() {
     )
   }
 
+  const insets = useSafeAreaInsets()
+
   const sectionLabelStyle = {
     fontSize: 8,
     fontWeight: '500' as const,
@@ -143,10 +175,7 @@ export default function EditPartnerSheet() {
   }
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={{ flex: 1, backgroundColor: colors.warmSand }}
-    >
+    <KeyboardAvoidingView behavior="padding" style={{ flex: 1, backgroundColor: colors.warmSand }}>
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
@@ -156,25 +185,26 @@ export default function EditPartnerSheet() {
         }}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Header — title centered, X right */}
+        {/* Header — scrolls with content */}
         <View style={{
           flexDirection: 'row',
           alignItems: 'center',
-          justifyContent: 'flex-end',
           paddingTop: 12,
           marginBottom: 18,
-          position: 'relative',
         }}>
+          <View style={{ width: 30 }} />
           <Text style={{
+            flex: 1,
+            textAlign: 'center',
             fontFamily: font('playfair', '700'),
             fontSize: 20,
             color: colors.ink,
-            position: 'absolute',
-            left: '50%',
-            transform: [{ translateX: '-50%' }],
           }}>{isEdit ? 'Edit Partner' : 'New Partner'}</Text>
           <Pressable
             onPress={() => router.dismiss()}
+            accessibilityRole="button"
+            accessibilityLabel="Close"
+            hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
             style={{
               width: 30, height: 30, borderRadius: 15,
               backgroundColor: colors.surface2,
@@ -275,7 +305,7 @@ export default function EditPartnerSheet() {
             placeholderTextColor={colors.muted}
             autoCapitalize="characters"
             autoCorrect={false}
-            maxLength={2}
+            maxLength={8}
             style={{
               width: 96,
               textAlign: 'center',
@@ -341,9 +371,9 @@ export default function EditPartnerSheet() {
       {/* Footer */}
       <View style={{
         flexShrink: 0,
-        paddingVertical: 10,
+        paddingTop: 10,
         paddingHorizontal: 20,
-        paddingBottom: 34,
+        paddingBottom: Math.max(insets.bottom, 10),
         borderTopWidth: 1,
         borderTopColor: 'rgba(160,100,80,0.1)',
         backgroundColor: colors.warmSand,

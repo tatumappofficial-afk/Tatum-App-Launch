@@ -13,7 +13,7 @@ export default function PartnersRoute() {
   )
 
   const partnerList = allPartners.map(p => {
-    const pEncounters = allEncounters.filter(e => e.partnerId === p.id)
+    const pEncounters = allEncounters.filter(e => e.partnerIds.includes(p.id))
     const rated = pEncounters.filter(e => e.stars && e.stars > 0)
     const avgSat = rated.length > 0
       ? Math.round(rated.reduce((s, e) => s + (e.stars || 0), 0) / rated.length * 10) / 10

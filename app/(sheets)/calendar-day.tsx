@@ -2,6 +2,7 @@ import { useLiveQuery } from '@tanstack/react-db'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { CalendarDayModal } from '@/lib/screens/CalendarDayModal'
 import { encounters, partners } from '@/src/db'
+import { formatPartnerLabel } from '@/src/utils/partnerLabel'
 
 const MONTH_NAMES = [
   '', 'January', 'February', 'March', 'April', 'May', 'June',
@@ -35,12 +36,16 @@ export default function CalendarDayRoute() {
 
   // Build sessions list
   const sessions = dayEncounters.map(enc => {
-    const partner = allPartners.find(p => p.id === enc.partnerId)
+    const sessionPartners = enc.partnerIds
+      .map(pid => allPartners.find(p => p.id === pid))
+      .filter((p): p is NonNullable<typeof p> => Boolean(p))
     return {
       id: enc.id,
-      partnerName: partner?.displayName || 'Solo',
-      initials: partner ? partner.avatarValue : "\u2728",
-      gradient: partner?.avatarGradient || 'linear-gradient(135deg, #8BA888, #5A8060)',
+      partnerName: formatPartnerLabel(sessionPartners.map(p => p.displayName)),
+      partners: sessionPartners.map(p => ({
+        initials: p.avatarValue,
+        gradient: p.avatarGradient,
+      })),
       tags: enc.activities,
       rating: enc.stars || 0,
       noteSnippet: enc.notes?.slice(0, 80),

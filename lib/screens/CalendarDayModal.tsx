@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Line, Polyline } from 'react-native-svg'
 import { colors, font, gradientPoints, gradients, shadows } from '../theme'
 import { AvatarCircle } from '../components/AvatarCircle'
+import { AvatarStack } from '../components/AvatarStack'
 import { StarRating } from '../components/StarRating'
 import { GradientButton } from '../components/GradientButton'
 
@@ -15,10 +16,14 @@ export interface LoggedDay {
   hasMultiple?: boolean
 }
 
-export interface SessionRow {
-  id: string
+export interface SessionRowPartner {
   initials: string
   gradient: string
+}
+
+export interface SessionRow {
+  id: string
+  partners: SessionRowPartner[]
   partnerName: string
   tags: string[]
   rating: number       // 1-10 rating
@@ -120,12 +125,7 @@ const SessionsState: React.FC<{
             borderRadius: 14, paddingVertical: 12, paddingHorizontal: 14, marginBottom: 8,
           }}
         >
-          <AvatarCircle
-            initials={s.initials}
-            gradient={s.gradient}
-            size={38}
-            borderWidth={2}
-          />
+          <AvatarStack partners={s.partners} size={38} borderWidth={2} />
           <View style={{ flex: 1 }}>
             <Text style={{
               fontFamily: font('dmSans', '500'), fontSize: 13, color: colors.ink,
@@ -213,6 +213,9 @@ export const CalendarDayModal: React.FC<CalendarDayModalProps> = ({
         </View>
         <Pressable
           onPress={onClose}
+          accessibilityRole="button"
+          accessibilityLabel="Close"
+          hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
           style={{
             width: 30, height: 30, borderRadius: 15,
             backgroundColor: colors.surface2,

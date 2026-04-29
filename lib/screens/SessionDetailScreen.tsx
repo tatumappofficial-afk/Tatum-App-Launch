@@ -6,6 +6,7 @@ import { DecorativeGlow } from './shared/DecorativeGlow'
 import { StatusBarSpacer } from './shared/StatusBarSpacer'
 import { SectionLabel } from './shared/SectionLabel'
 import { AvatarCircle } from '../components/AvatarCircle'
+import { AvatarStack } from '../components/AvatarStack'
 import { StatStrip } from '../components/StatStrip'
 import { TagPill } from '../components/TagPill'
 
@@ -17,6 +18,7 @@ export interface ActivityTag {
 }
 
 export interface SessionPartner {
+  id: string
   initials: string
   name: string
   gradient: string
@@ -109,16 +111,7 @@ const ScreenHeader: React.FC<{
 
 const HeroAvatars: React.FC<{ partners: SessionPartner[] }> = ({ partners }) => (
   <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
-    {partners.map((p, i) => (
-      <View key={p.initials} style={{ marginLeft: i > 0 ? -16 : 0 }}>
-        <AvatarCircle
-          initials={p.initials}
-          gradient={p.gradient}
-          size={68}
-          borderWidth={3}
-        />
-      </View>
-    ))}
+    <AvatarStack partners={partners} size={68} borderWidth={3} max={3} />
   </View>
 )
 
