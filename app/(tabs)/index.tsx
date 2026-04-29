@@ -1,133 +1,255 @@
+import { useCallback, useMemo, useState } from 'react'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useRouter } from 'expo-router'
 import { HomeScreen } from '@/lib/screens/HomeScreen'
-import { encounters, partners } from '@/src/db'
-import { useActivityTagMap } from '@/src/hooks/useActivityTagMap'
-import type { Encounter, Partner } from '@/src/db/schema'
+import { WeekView } from '@/lib/screens/home/WeekView'
+import { MonthView } from '@/lib/screens/home/MonthView'
+import { YearView } from '@/lib/screens/home/YearView'
+import { AllTimeView } from '@/lib/screens/home/AllTimeView'
+import { PlaceholderView } from '@/lib/screens/home/PlaceholderView'
+import {
+  activityTags,
+  desireEntries,
+  encounters,
+  partners,
+} from '@/src/db'
+import {
+  computeAllTimeStats,
+  computeMonthStats,
+  computeWeekStats,
+  computeYearStats,
+  findNearestEncounterDate,
+  firstEncounterYear,
+  formatPeriodCaption,
+  getWindow,
+  parseDateString,
+  type CalendarStartDay,
+  type Period,
+} from '@/lib/stats'
+import type { EmptyPeriodScenario } from '@/lib/screens/home/shared/EmptyPeriod'
+import { PeriodPicker } from '@/lib/screens/home/shared/PeriodPicker'
 
-function computeHomeProps(allEncounters: Encounter[], allPartners: Partner[], tagMap: Map<string, string>) {
-  if (allEncounters.length === 0) {
-    return {
-      isEmpty: true,
-      userName: 'Alanna',
-      emptyPartners: allPartners.map(p => ({
-        initials: p.avatarValue,
-        name: p.displayName,
-        gradient: p.avatarGradient,
-      })),
-    }
-  }
-
-  // Compute stats for the week
-  const now = new Date()
-  const weekAgo = new Date(now)
-  weekAgo.setDate(weekAgo.getDate() - 7)
-  const weekStr = weekAgo.toISOString().split('T')[0]
-
-  const weekEncounters = allEncounters.filter(e => e.date >= weekStr)
-  const sessionsCount = weekEncounters.length
-  const ratedWeekEncounters = weekEncounters.filter(e => e.stars && e.stars > 0)
-  const avgRating = ratedWeekEncounters.length > 0
-    ? ratedWeekEncounters.reduce((sum, e) => sum + (e.stars || 0), 0) / ratedWeekEncounters.length
-    : 0
-
-  // Top activities
-  const activityCounts = new Map<string, number>()
-  for (const enc of weekEncounters) {
-    for (const a of enc.activities) {
-      activityCounts.set(a, (activityCounts.get(a) || 0) + 1)
-    }
-  }
-  const maxCount = Math.max(...activityCounts.values(), 1)
-  const topActivities = [...activityCounts.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
-    .map(([emoji, count]) => {
-      return {
-        emoji,
-        label: tagMap.get(emoji) || emoji,
-        count,
-        percent: Math.round((count / maxCount) * 100),
-      }
-    })
-
-  // Partner stats
-  const partnerStats = allPartners.filter(p => p.isActive).map(p => {
-    const pEncounters = allEncounters.filter(e => e.partnerId === p.id)
-    const topEmoji = [...pEncounters.flatMap(e => e.activities)].sort()[0] || '✨'
-    return {
-      initials: p.avatarValue,
-      gradient: p.avatarGradient,
-      sessions: pEncounters.length,
-      avgSatisfaction: (() => {
-        const rated = pEncounters.filter(e => e.stars && e.stars > 0)
-        return rated.length > 0 ? rated.reduce((s, e) => s + (e.stars || 0), 0) / rated.length : 0
-      })(),
-      topActivityEmoji: topEmoji,
-    }
-  })
-
-  // Recent sessions
-  const recentSessions = allEncounters
-    .sort((a, b) => b.date.localeCompare(a.date))
-    .slice(0, 5)
-    .map(enc => {
-      const partner = allPartners.find(p => p.id === enc.partnerId)
-      return {
-        partnerInitials: partner ? partner.avatarValue : '✨',
-        partnerGradient: partner?.avatarGradient || 'linear-gradient(135deg, #8BA888, #5A8060)',
-        date: new Date(enc.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        rating: enc.stars || 0,
-        activityEmojis: enc.activities,
-        note: enc.notes ?? undefined,
-      }
-    })
-
-  return {
-    isEmpty: false,
-    activePeriod: 0,
-    periodDateLabel: `${now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`,
-    sessionsCount,
-    avgRating: Math.round(avgRating * 10) / 10,
-    topActivities,
-    partners: partnerStats,
-    recentSessions,
-    userName: 'Alanna',
-    emptyPartners: [],
-  }
-}
+// TODO: read from UserSettings (`calendarStartDay`) once a settings UI lands.
+const CALENDAR_START_DAY: CalendarStartDay = 'sunday'
 
 export default function HomeRoute() {
   const router = useRouter()
+
   const { data: allEncounters = [], isReady: encReady } = useLiveQuery((q) =>
     q.from({ encounters }).select(({ encounters }) => ({ ...encounters }))
   )
   const { data: allPartners = [], isReady: partReady } = useLiveQuery((q) =>
     q.from({ partners }).select(({ partners }) => ({ ...partners }))
   )
+  const { data: allTags = [] } = useLiveQuery((q) =>
+    q.from({ activityTags }).select(({ activityTags }) => ({ ...activityTags }))
+  )
+  const { data: allDesires = [] } = useLiveQuery((q) =>
+    q.from({ desireEntries }).select(({ desireEntries }) => ({ ...desireEntries }))
+  )
 
-  const readyEncounters = encReady ? allEncounters : []
-  const readyPartners = partReady ? allPartners : []
+  const ready = encReady && partReady
+  const readyEncounters = ready ? allEncounters : []
+  const readyPartners = ready ? allPartners : []
 
-  const tagMap = useActivityTagMap()
+  const [period, setPeriod] = useState<Period>('week')
+  const [anchor, setAnchor] = useState<Date>(() => new Date())
+  const [pickerOpen, setPickerOpen] = useState(false)
 
-  const props = computeHomeProps(readyEncounters, readyPartners, tagMap)
+  const handlePeriodChange = (next: Period) => {
+    setPeriod(next)
+    setAnchor(new Date())
+    setPickerOpen(false)
+  }
 
-  const sortedEncounters = [...readyEncounters].sort((a, b) => b.date.localeCompare(a.date))
+  const handleAnchorChange = useCallback((next: Date) => {
+    setAnchor(next)
+    setPickerOpen(false)
+  }, [])
+
+  const isEmpty = ready && readyEncounters.length === 0
+
+  const window = useMemo(
+    () =>
+      getWindow(period, anchor, {
+        calendarStartDay: CALENDAR_START_DAY,
+        encounters: readyEncounters,
+      }),
+    [period, anchor, readyEncounters],
+  )
+
+  const firstEncounterDate = useMemo(() => {
+    if (readyEncounters.length === 0) return undefined
+    return readyEncounters.reduce(
+      (min, e) => (e.date < min ? e.date : min),
+      readyEncounters[0].date,
+    )
+  }, [readyEncounters])
+
+  const caption = useMemo(
+    () =>
+      formatPeriodCaption(period, anchor, {
+        calendarStartDay: CALENDAR_START_DAY,
+        firstEncounterDate,
+      }),
+    [period, anchor, firstEncounterDate],
+  )
+
+  const emptyScenario: EmptyPeriodScenario = useMemo(() => {
+    if (!window) return 'past'
+    const now = new Date()
+    return now >= window.start && now < window.end ? 'current' : 'past'
+  }, [window])
+
+  const now = useMemo(() => new Date(), [])
+  const minYear = useMemo(() => firstEncounterYear(readyEncounters, now), [readyEncounters, now])
+  const maxYear = now.getFullYear()
+
+  const pickerContent = useMemo(() => {
+    if (period === 'all') return null
+    return (
+      <PeriodPicker
+        period={period}
+        anchor={anchor}
+        minYear={minYear}
+        maxYear={maxYear}
+        now={now}
+        calendarStartDay={CALENDAR_START_DAY}
+        onAnchorChange={handleAnchorChange}
+      />
+    )
+  }, [period, anchor, minYear, maxYear, now, handleAnchorChange])
+
+  const handleLookBack = useCallback(() => {
+    setAnchor(prev => {
+      const next = new Date(prev)
+      if (period === 'week') next.setDate(next.getDate() - 7)
+      else if (period === 'month') next.setMonth(next.getMonth() - 1)
+      else if (period === 'year') next.setFullYear(next.getFullYear() - 1)
+      return next
+    })
+  }, [period])
+
+  const handleJumpToNearest = useCallback(() => {
+    const nearest = findNearestEncounterDate(readyEncounters, anchor)
+    if (nearest) setAnchor(parseDateString(nearest))
+  }, [readyEncounters, anchor])
+
+  const handlePartnerPress = useCallback(
+    (id: string) => router.push(`/(pages)/partner-profile?id=${id}`),
+    [router],
+  )
+  const handleSessionPress = useCallback(
+    (id: string) => router.push(`/(pages)/session-detail?id=${id}`),
+    [router],
+  )
+
+  const viewContent = useMemo(() => {
+    if (!ready) return null
+    if (!window) {
+      // Should only happen when period === 'all' AND zero encounters, but the
+      // parent's isEmpty branch catches that — render a placeholder defensively.
+      return <PlaceholderView label="Nothing logged yet — and that's okay." />
+    }
+    if (period === 'week') {
+      const stats = computeWeekStats(readyEncounters, readyPartners, allTags, window, CALENDAR_START_DAY)
+      return (
+        <WeekView
+          stats={stats}
+          partners={readyPartners}
+          emptyScenario={emptyScenario}
+          onLookBack={handleLookBack}
+          onJumpToNearest={handleJumpToNearest}
+          onPartnerPress={handlePartnerPress}
+          onPartnersHeaderPress={() => router.push('/(pages)/partners')}
+          onSessionPress={(e) => handleSessionPress(e.id)}
+        />
+      )
+    }
+    if (period === 'month') {
+      const stats = computeMonthStats(readyEncounters, readyPartners, allTags, window, CALENDAR_START_DAY)
+      return (
+        <MonthView
+          stats={stats}
+          calendarStartDay={CALENDAR_START_DAY}
+          emptyScenario={emptyScenario}
+          onLookBack={handleLookBack}
+          onJumpToNearest={handleJumpToNearest}
+          onPartnerPress={(p) => handlePartnerPress(p.id)}
+          onViewAllPartners={() => router.push('/(pages)/partners')}
+          onSessionPress={(e) => handleSessionPress(e.id)}
+        />
+      )
+    }
+    if (period === 'year') {
+      const stats = computeYearStats(readyEncounters, readyPartners, allTags, allDesires, window, CALENDAR_START_DAY)
+      return (
+        <YearView
+          stats={stats}
+          calendarStartDay={CALENDAR_START_DAY}
+          emptyScenario={emptyScenario}
+          onLookBack={handleLookBack}
+          onJumpToNearest={handleJumpToNearest}
+          onPartnerPress={(p) => handlePartnerPress(p.id)}
+          onViewAllPartners={() => router.push('/(pages)/partners')}
+          onSessionPress={(e) => handleSessionPress(e.id)}
+        />
+      )
+    }
+    const stats = computeAllTimeStats(readyEncounters, readyPartners, allTags, window, CALENDAR_START_DAY)
+    return (
+      <AllTimeView
+        stats={stats}
+        calendarStartDay={CALENDAR_START_DAY}
+        onPartnerPress={(p) => handlePartnerPress(p.id)}
+        onViewAllPartners={() => router.push('/(pages)/partners')}
+        onSessionPress={(e) => handleSessionPress(e.id)}
+      />
+    )
+  }, [
+    ready,
+    period,
+    window,
+    readyEncounters,
+    readyPartners,
+    allTags,
+    allDesires,
+    emptyScenario,
+    handleLookBack,
+    handleJumpToNearest,
+    handlePartnerPress,
+    handleSessionPress,
+  ])
+
+  const emptyPartnersForHero = useMemo(
+    () =>
+      readyPartners.map((p) => ({
+        initials: p.avatarValue,
+        gradient: p.avatarGradient,
+      })),
+    [readyPartners],
+  )
 
   return (
     <HomeScreen
-      {...props}
+      period={period}
+      onPeriodChange={handlePeriodChange}
+      caption={caption}
+      staticPillCaption={firstEncounterDate ? caption : undefined}
+      onPickerPress={() => setPickerOpen((prev) => !prev)}
+      pickerOpen={pickerOpen && period !== 'all'}
+      pickerContent={pickerContent}
+      isEmpty={isEmpty}
+      userName="Alanna"
+      emptyPartners={emptyPartnersForHero}
       onPartnerPress={(index) => {
         const partner = readyPartners[index]
-        if (partner) router.push(`/(pages)/partner-profile?id=${partner.id}`)
-      }}
-      onSessionPress={(index) => {
-        const enc = sortedEncounters[index]
-        if (enc) router.push(`/(pages)/session-detail?id=${enc.id}`)
+        if (partner) handlePartnerPress(partner.id)
       }}
       onLogFirstSession={() => router.push('/(sheets)/log-session')}
       onAddPartner={() => router.push('/(sheets)/edit-partner')}
-    />
+    >
+      {viewContent}
+    </HomeScreen>
   )
 }

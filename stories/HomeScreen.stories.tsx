@@ -50,24 +50,21 @@ export const Default: Story = {
     ],
     recentSessions: [
       {
-        partnerInitials: 'AL',
-        partnerGradient: 'linear-gradient(135deg, #C07858, #7C4A5A)',
+        partners: [{ initials: 'AL', gradient: 'linear-gradient(135deg, #C07858, #7C4A5A)' }],
         date: 'Mar 18',
         rating: 80,
         activityEmojis: ['\uD83C\uDF46', '\uD83D\uDC8B', '\uD83D\uDE18'],
         note: '\u201Chad such a good night. so unexpected \u2014 felt really connected...\u201D',
       },
       {
-        partnerInitials: 'JO',
-        partnerGradient: 'linear-gradient(135deg, #B07080, #7C4A5A)',
+        partners: [{ initials: 'JO', gradient: 'linear-gradient(135deg, #B07080, #7C4A5A)' }],
         date: 'Mar 17',
         rating: 70,
         activityEmojis: ['\uD83D\uDC8B', '\u270B'],
         note: '\u201Cfelt really connected tonight. needed that.\u201D',
       },
       {
-        partnerInitials: 'SO',
-        partnerGradient: 'linear-gradient(135deg, #9A8878, #6A5848)',
+        partners: [{ initials: 'SO', gradient: 'linear-gradient(135deg, #9A8878, #6A5848)' }],
         date: 'Mar 15',
         rating: 90,
         activityEmojis: ['\u2728'],
@@ -84,12 +81,10 @@ export const Empty: Story = {
     emptyPartners: [
       {
         initials: 'AL',
-        name: 'Alex',
         gradient: 'linear-gradient(135deg, #C07858, #7C4A5A)',
       },
       {
         initials: '\u2728',
-        name: 'Solo',
         gradient: 'linear-gradient(135deg, #9A8878, #6A5848)',
       },
     ],

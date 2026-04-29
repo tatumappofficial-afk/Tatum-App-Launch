@@ -2,67 +2,47 @@ import React from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Image } from 'expo-image'
 import { LinearGradient } from 'expo-linear-gradient'
-import Svg, { Circle, Line, Path, Polyline, Rect } from 'react-native-svg'
+import Svg, { Circle, Line, Path } from 'react-native-svg'
 import { colors, font, fontFamily, gradientPoints, gradients, shadows } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { SectionLabel } from './shared/SectionLabel'
 import { StatusBarSpacer } from './shared/StatusBarSpacer'
 import { AvatarCircle } from '../components/AvatarCircle'
-import { StarRating } from '../components/StarRating'
+import { PeriodTabs } from './home/shared/PeriodTabs'
+import { PeriodCaptionRow } from './home/shared/PeriodCaptionRow'
+import type { Period } from '../stats'
 
-// Parent views provide spacing around these, so strip the shared defaults.
 const INLINE_LABEL_STYLE = { marginVertical: 0, marginHorizontal: 0, marginBottom: 0, flexShrink: 0 } as const
-
-// ── Types ──
-
-export interface Activity {
-  emoji: string
-  label: string
-  count: number
-  percent: number
-}
-
-export interface Partner {
-  initials: string
-  gradient: string
-  sessions: number
-  avgSatisfaction: number
-  topActivityEmoji: string
-}
-
-export interface Session {
-  partnerInitials: string
-  partnerGradient: string
-  date: string
-  rating: number
-  activityEmojis: string[]
-  note?: string
-}
 
 export interface EmptyPartner {
   initials: string
-  name: string
   gradient: string
 }
 
 export interface HomeScreenProps {
-  activePeriod?: number
-  periodDateLabel?: string
-  sessionsCount?: number
-  avgRating?: number
-  topActivities?: Activity[]
-  partners?: Partner[]
-  recentSessions?: Session[]
+  period: Period
+  onPeriodChange: (period: Period) => void
+  /** Date-range caption shown under the tabs (e.g. "Apr 26 – May 2"). */
+  caption: string
+  /** When `period === 'all'`, the "since X" caption rendered inside the static pill. */
+  staticPillCaption?: string
+  onPickerPress?: () => void
+  /** Whether the period picker dropdown is open. */
+  pickerOpen?: boolean
+  /** The dropdown JSX shown beneath the caption row when `pickerOpen`. */
+  pickerContent?: React.ReactNode
+  /** True only when the user has zero encounters anywhere — Scenario A empty. */
   isEmpty?: boolean
   userName?: string
   emptyPartners?: EmptyPartner[]
   onPartnerPress?: (index: number) => void
-  onSessionPress?: (index: number) => void
   onLogFirstSession?: () => void
   onAddPartner?: () => void
+  /** The active period view's content. Ignored when `isEmpty`. */
+  children?: React.ReactNode
 }
 
-// ── Sub-components ──
+// ── Wordmark ──
 
 const Wordmark: React.FC = () => (
   <View style={{
@@ -84,323 +64,7 @@ const Wordmark: React.FC = () => (
   </View>
 )
 
-interface PeriodTabsProps {
-  activeIndex?: number
-  dateLabel?: string
-  isEmpty?: boolean
-}
-
-const periodNames = ['Week', 'Month', 'Year', 'All Time']
-
-const PeriodTabs: React.FC<PeriodTabsProps> = ({ activeIndex, dateLabel, isEmpty }) => (
-  <View style={{
-    paddingHorizontal: 24,
-    paddingTop: 10,
-    paddingBottom: 14,
-    flexDirection: 'row',
-    gap: 6,
-    flexShrink: 0,
-    position: 'relative',
-    zIndex: 2,
-  }}>
-    {periodNames.map((name, i) => {
-      const isActive = !isEmpty && activeIndex === i
-      return (
-        <Pressable
-          key={name}
-          accessibilityRole="tab"
-          accessibilityState={{ selected: isActive }}
-          accessibilityLabel={name}
-          style={{
-            flex: 1,
-            borderRadius: 9999,
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: isActive ? undefined : colors.surface2,
-            height: 32,
-            overflow: 'hidden',
-            ...(isActive ? shadows.pillSoft : shadows.pillFlat),
-          }}
-        >
-          {isActive && (
-            <LinearGradient
-              colors={gradients.primaryCta}
-              start={gradientPoints.diagonal.start}
-              end={gradientPoints.diagonal.end}
-              style={[StyleSheet.absoluteFill, { borderRadius: 9999 }]}
-            />
-          )}
-          <Text style={{
-            fontFamily: font('dmSans', '500'),
-            fontSize: 11,
-            letterSpacing: 0.5,
-            lineHeight: 13.2,
-            color: isActive ? colors.white : colors.stone,
-          }}>{name}</Text>
-          {isActive && dateLabel && (
-            <Text style={{
-              fontFamily: font('dmSans', '300'),
-              fontSize: 8,
-              opacity: 0.8,
-              lineHeight: 9.6,
-              color: colors.white,
-            }}>{dateLabel}</Text>
-          )}
-        </Pressable>
-      )
-    })}
-  </View>
-)
-
-const OverviewCard: React.FC<{
-  sessionsCount: number
-  avgRating: number
-}> = ({ sessionsCount, avgRating }) => {
-  const stats = [
-    { label: 'Sessions', value: String(sessionsCount) },
-    { label: 'Avg Rating', value: avgRating.toFixed(1) },
-  ]
-  return (
-    <View style={{
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 16,
-      paddingVertical: 14,
-      paddingHorizontal: 16,
-      flexDirection: 'row',
-      flexShrink: 0,
-    }}>
-      {stats.map((s, i) => (
-        <View key={s.label} style={{
-          flex: 1,
-          paddingHorizontal: 10,
-          borderRightWidth: i < stats.length - 1 ? 1 : 0,
-          borderRightColor: 'rgba(160,100,80,0.12)',
-          alignItems: 'center',
-        }}>
-          <Text style={{
-            fontSize: 7.5,
-            letterSpacing: 1.5,
-            textTransform: 'uppercase',
-            color: colors.stone,
-            marginBottom: 3,
-            fontFamily: font('dmSans', '500'),
-          }}>{s.label}</Text>
-          <Text style={{
-            fontFamily: font('playfair', '600'),
-            fontSize: 28,
-            color: colors.terra,
-            lineHeight: 28,
-            marginBottom: 2,
-          }}>{s.value}</Text>
-        </View>
-      ))}
-    </View>
-  )
-}
-
-const ActivityBar: React.FC<{ activities: Activity[] }> = ({ activities }) => (
-  <View style={{
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 14,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    flexShrink: 0,
-  }}>
-    {activities.map((a, i) => (
-      <View key={a.label} style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 7,
-        marginBottom: i < activities.length - 1 ? 7 : 0,
-      }}>
-        <Text style={{ fontSize: 16, width: 24, textAlign: 'center', flexShrink: 0 }}>{a.emoji}</Text>
-        <Text style={{
-          fontSize: 10,
-          color: colors.stone,
-          width: 62,
-          flexShrink: 0,
-          fontFamily: fontFamily.dmSans,
-        }}>{a.label}</Text>
-        <View style={{
-          flex: 1,
-          height: 5,
-          backgroundColor: colors.surface2,
-          borderRadius: 3,
-          overflow: 'hidden',
-        }}>
-          <LinearGradient
-            colors={gradients.activityBar}
-            start={gradientPoints.horizontal.start}
-            end={gradientPoints.horizontal.end}
-            style={{ height: 5, borderRadius: 3, width: `${a.percent}%` }}
-          />
-        </View>
-        <Text style={{
-          fontSize: 10,
-          color: colors.mauve,
-          width: 12,
-          textAlign: 'right',
-          flexShrink: 0,
-          fontFamily: font('dmSans', '500'),
-        }}>{a.count}</Text>
-      </View>
-    ))}
-  </View>
-)
-
-const HomePartnerCard: React.FC<{ partner: Partner; onPress?: () => void }> = ({ partner, onPress }) => (
-  <Pressable onPress={onPress} style={{
-    flexShrink: 0,
-    width: 126,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 16,
-    paddingVertical: 16,
-    paddingHorizontal: 12,
-    alignItems: 'center',
-    gap: 8,
-    overflow: 'hidden',
-  }}>
-    <AvatarCircle
-      initials={partner.initials}
-      gradient={partner.gradient}
-      size={52}
-      borderWidth={2.5}
-    />
-    <View style={{ flexDirection: 'row', gap: 8, width: '100%' }}>
-      <View style={{ flex: 1, alignItems: 'center' }}>
-        <Text style={{
-          fontFamily: font('playfair', '600'),
-          fontSize: 17,
-          color: colors.terra,
-          lineHeight: 17,
-        }}>{partner.sessions}</Text>
-        <Text style={{
-          fontSize: 7,
-          letterSpacing: 0.5,
-          textTransform: 'uppercase',
-          color: colors.stone,
-          marginTop: 2,
-          fontFamily: fontFamily.dmSans,
-        }}>Sessions</Text>
-      </View>
-      <View style={{ flex: 1, alignItems: 'center' }}>
-        <Text style={{
-          fontFamily: font('playfair', '600'),
-          fontSize: 17,
-          color: colors.terra,
-          lineHeight: 17,
-        }}>{partner.avgSatisfaction.toFixed(1)}</Text>
-        <Text style={{
-          fontSize: 7,
-          letterSpacing: 0.5,
-          textTransform: 'uppercase',
-          color: colors.stone,
-          marginTop: 2,
-          fontFamily: fontFamily.dmSans,
-        }}>Avg Sat.</Text>
-      </View>
-    </View>
-    {partner.sessions > 0 && (
-      <Text style={{
-        fontSize: 10,
-        color: colors.muted,
-        fontFamily: font('dmSans', '300'),
-      }}>{partner.topActivityEmoji} Most common</Text>
-    )}
-  </Pressable>
-)
-
-const HomeSessionCard: React.FC<{ session: Session; onPress?: () => void }> = ({ session, onPress }) => (
-  <Pressable onPress={onPress} style={{
-    flexShrink: 0,
-    width: 158,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 16,
-    padding: 16,
-    paddingHorizontal: 14,
-    gap: 10,
-  }}>
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
-      <AvatarCircle
-        initials={session.partnerInitials}
-        gradient={session.partnerGradient}
-        size={36}
-        borderWidth={2}
-      />
-      <Text style={{
-        fontSize: 9,
-        color: colors.stone,
-        fontFamily: font('dmSans', '300'),
-      }}>{session.date}</Text>
-    </View>
-    <StarRating rating={session.rating} size={13} />
-    <View style={{ flexDirection: 'row', gap: 5, flexWrap: 'wrap' }}>
-      {session.activityEmojis.map((e, i) => (
-        <View key={i} style={{
-          backgroundColor: colors.surface2,
-          borderRadius: 6,
-          paddingVertical: 3,
-          paddingHorizontal: 6,
-        }}>
-          <Text style={{ fontSize: 14 }}>{e}</Text>
-        </View>
-      ))}
-    </View>
-    <Text numberOfLines={2} style={{
-      fontSize: 10,
-      color: colors.stone,
-      fontStyle: 'italic',
-      lineHeight: 14.5,
-      borderTopWidth: 1,
-      borderTopColor: 'rgba(160,100,80,0.1)',
-      paddingTop: 6,
-      marginTop: 2,
-      fontFamily: font('dmSans', '300'),
-    }}>{session.note}</Text>
-  </Pressable>
-)
-
-const ViewAllCard: React.FC = () => (
-  <Pressable style={{
-    flexShrink: 0,
-    width: 72,
-    backgroundColor: 'transparent',
-    borderWidth: 1.5,
-    borderStyle: 'dashed',
-    borderColor: 'rgba(160,100,80,0.28)',
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 5,
-    marginRight: 24,
-  }}>
-    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-      <Rect x={3} y={3} width={7} height={7} />
-      <Rect x={14} y={3} width={7} height={7} />
-      <Rect x={3} y={14} width={7} height={7} />
-      <Rect x={14} y={14} width={7} height={7} />
-    </Svg>
-    <Text style={{
-      fontSize: 8,
-      letterSpacing: 1,
-      textTransform: 'uppercase',
-      color: colors.terra,
-      textAlign: 'center',
-      lineHeight: 10.4,
-      fontFamily: font('dmSans', '500'),
-    }}>View All</Text>
-  </Pressable>
-)
-
-// ── Empty State Sub-components ──
+// ── Empty-state (Scenario A — zero encounters anywhere) ──
 
 const HeroEmpty: React.FC<{ userName: string; onLogSession?: () => void }> = ({ userName, onLogSession }) => (
   <View style={{
@@ -507,8 +171,8 @@ const EmptyStatsStrip: React.FC = () => {
   )
 }
 
-const EmptyPartnerCard: React.FC<{ partner: EmptyPartner }> = ({ partner }) => (
-  <View style={{
+const EmptyPartnerCard: React.FC<{ partner: EmptyPartner; onPress?: () => void }> = ({ partner, onPress }) => (
+  <Pressable onPress={onPress} style={{
     flexShrink: 0,
     width: 110,
     backgroundColor: colors.surface,
@@ -527,17 +191,12 @@ const EmptyPartnerCard: React.FC<{ partner: EmptyPartner }> = ({ partner }) => (
       borderWidth={2}
     />
     <Text style={{
-      fontSize: 12,
-      color: colors.ink,
-      fontFamily: font('dmSans', '500'),
-    }}>{partner.name}</Text>
-    <Text style={{
       fontSize: 10,
       color: '#C4B0A0',
       fontStyle: 'italic',
       fontFamily: font('dmSans', '300'),
     }}>No sessions yet</Text>
-  </View>
+  </Pressable>
 )
 
 const AddPartnerChip: React.FC<{ onPress?: () => void }> = ({ onPress }) => (
@@ -591,7 +250,7 @@ const EmptySessionsPlaceholder: React.FC = () => (
     paddingHorizontal: 20,
     alignItems: 'center',
   }}>
-    <Text style={{ fontSize: 28, marginBottom: 8, opacity: 0.5 }}>{'\uD83D\uDCD6'}</Text>
+    <Text style={{ fontSize: 28, marginBottom: 8, opacity: 0.5 }}>{'📖'}</Text>
     <Text style={{
       fontSize: 12,
       color: colors.stone,
@@ -604,23 +263,23 @@ const EmptySessionsPlaceholder: React.FC = () => (
   </View>
 )
 
-// ── Main Component ──
+// ── Main ──
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
-  activePeriod = 0,
-  periodDateLabel,
-  sessionsCount = 0,
-  avgRating = 0,
-  topActivities = [],
-  partners = [],
-  recentSessions = [],
+  period,
+  onPeriodChange,
+  caption,
+  staticPillCaption,
+  onPickerPress,
+  pickerOpen = false,
+  pickerContent,
   isEmpty = false,
   userName = 'Alanna',
   emptyPartners = [],
   onPartnerPress,
-  onSessionPress,
   onLogFirstSession,
   onAddPartner,
+  children,
 }) => {
   if (isEmpty) {
     return (
@@ -634,7 +293,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         <DecorativeGlow position="center" size={320} />
         <StatusBarSpacer />
         <Wordmark />
-        <PeriodTabs isEmpty />
+        <PeriodTabs active={period} onChange={onPeriodChange} inert />
 
         <ScrollView
           style={{ flex: 1, paddingHorizontal: 24, position: 'relative', zIndex: 1 }}
@@ -653,7 +312,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={{ flexDirection: 'row', gap: 8, paddingRight: 40 }}>
               {emptyPartners.map((p, i) => (
-                <EmptyPartnerCard key={i} partner={p} />
+                <EmptyPartnerCard key={i} partner={p} onPress={() => onPartnerPress?.(i)} />
               ))}
               <AddPartnerChip onPress={onAddPartner} />
             </View>
@@ -663,7 +322,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             <SectionLabel label="Recent Sessions" style={INLINE_LABEL_STYLE} />
           </View>
           <EmptySessionsPlaceholder />
-
         </ScrollView>
       </View>
     )
@@ -680,50 +338,31 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       <DecorativeGlow position="top-right" size={240} />
       <StatusBarSpacer />
       <Wordmark />
-      <PeriodTabs activeIndex={activePeriod} dateLabel={periodDateLabel} />
+      <PeriodTabs active={period} onChange={onPeriodChange} />
+      <PeriodCaptionRow
+        period={period}
+        caption={caption}
+        staticPillCaption={staticPillCaption}
+        onPickerPress={onPickerPress}
+      />
 
-      {/* Main content */}
+      {pickerOpen && pickerContent && (
+        <View style={{ paddingHorizontal: 24, paddingBottom: 8, position: 'relative', zIndex: 50 }}>
+          {pickerContent}
+        </View>
+      )}
+
       <ScrollView
         style={{
           flex: 1,
           paddingHorizontal: 24,
-          paddingTop: 10,
+          paddingTop: 4,
           position: 'relative',
           zIndex: 1,
         }}
         contentContainerStyle={{ paddingBottom: 100 }}
       >
-        <View style={{ gap: 9 }}>
-          <OverviewCard
-            sessionsCount={sessionsCount}
-            avgRating={avgRating}
-          />
-
-          <SectionLabel label="Top Activities" style={INLINE_LABEL_STYLE} />
-          <ActivityBar activities={topActivities} />
-
-          <SectionLabel label="Partners" showChevron style={INLINE_LABEL_STYLE} />
-
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginRight: -24 }}>
-            <View style={{ flexDirection: 'row', gap: 8, paddingRight: 40 }}>
-              {partners.map((p, i) => (
-                <HomePartnerCard key={i} partner={p} onPress={() => onPartnerPress?.(i)} />
-              ))}
-            </View>
-          </ScrollView>
-
-          <SectionLabel label="Sessions" style={INLINE_LABEL_STYLE} />
-
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginRight: -24 }}>
-            <View style={{ flexDirection: 'row', gap: 8, paddingRight: 40 }}>
-              {recentSessions.map((s, i) => (
-                <HomeSessionCard key={i} session={s} onPress={() => onSessionPress?.(i)} />
-              ))}
-              <ViewAllCard />
-            </View>
-          </ScrollView>
-        </View>
-
+        {children}
       </ScrollView>
     </View>
   )

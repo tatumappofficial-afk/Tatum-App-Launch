@@ -17,6 +17,14 @@ export interface DatePickerDropdownProps {
   loggedDays?: LoggedDay[]
   onDaySelect?: (day: number) => void
   onMonthChange?: (delta: number) => void
+  /** 'day' (default) selects a single day. 'week' highlights the entire row
+   *  containing `selectedDay` — tapping any day in week mode picks that day's week. */
+  mode?: 'day' | 'week'
+  /** Footer hint shown beneath the grid. Defaults to a day-mode hint. */
+  hint?: string
+  /** When true, dim and disable non-logged days. Use in browse contexts
+   *  (journal) where empty days have nothing to navigate to. */
+  loggedOnly?: boolean
 }
 
 export const DatePickerDropdown: React.FC<DatePickerDropdownProps> = ({
@@ -27,6 +35,9 @@ export const DatePickerDropdown: React.FC<DatePickerDropdownProps> = ({
   loggedDays = [],
   onDaySelect,
   onMonthChange,
+  mode = 'day',
+  hint,
+  loggedOnly = false,
 }) => (
   <View style={{
     backgroundColor: colors.surface,
@@ -100,6 +111,8 @@ export const DatePickerDropdown: React.FC<DatePickerDropdownProps> = ({
         loggedDays={loggedDays}
         onDayPress={onDaySelect}
         compact
+        mode={mode}
+        loggedOnly={loggedOnly}
       />
     </View>
 
@@ -117,7 +130,7 @@ export const DatePickerDropdown: React.FC<DatePickerDropdownProps> = ({
         color: colors.muted,
         fontStyle: 'italic',
       }}>
-        Tap any date to log for that day
+        {hint ?? (mode === 'week' ? 'Tap any day to pick that week' : 'Tap any date to log for that day')}
       </Text>
     </View>
   </View>
