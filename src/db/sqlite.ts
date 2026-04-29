@@ -100,6 +100,8 @@ async function initializeTables(database: SQLite.SQLiteDatabase) {
     CREATE TABLE IF NOT EXISTS user_profile (
       id TEXT PRIMARY KEY NOT NULL,
       displayName TEXT,
+      avatarValue TEXT,
+      avatarGradient TEXT,
       createdAt TEXT NOT NULL,
       tier TEXT NOT NULL DEFAULT 'free',
       premiumExpiresAt TEXT
@@ -121,6 +123,25 @@ async function initializeTables(database: SQLite.SQLiteDatabase) {
 
     CREATE INDEX IF NOT EXISTS idx_encounters_date ON encounters(date);
   `)
+
+  // Non-destructive column additions for existing DBs that pre-date these fields.
+  // SQLite has no `ADD COLUMN IF NOT EXISTS`, so we swallow the duplicate-column
+  // error and continue.
+  await addColumnIfMissing(database, 'user_profile', 'avatarValue', 'TEXT')
+  await addColumnIfMissing(database, 'user_profile', 'avatarGradient', 'TEXT')
+}
+
+async function addColumnIfMissing(
+  database: SQLite.SQLiteDatabase,
+  table: string,
+  column: string,
+  type: string,
+): Promise<void> {
+  try {
+    await database.execAsync(`ALTER TABLE ${table} ADD COLUMN ${column} ${type}`)
+  } catch (e) {
+    // duplicate column name — already added in a previous run
+  }
 }
 
 // ── JSON column helpers ──

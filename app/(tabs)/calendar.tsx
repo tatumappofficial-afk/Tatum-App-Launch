@@ -5,6 +5,7 @@ import { generateId as uuid } from '@/src/utils/uuid'
 import { CalendarScreen } from '@/lib/screens/CalendarScreen'
 import { activityTags, encounters, partners } from '@/src/db'
 import { useActivityTagMap } from '@/src/hooks/useActivityTagMap'
+import { formatDateString } from '@/lib/stats/windows'
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 const MONTH_NAMES = [
@@ -101,8 +102,11 @@ export default function CalendarRoute() {
 
   function handleQuickLog(emoji: string) {
     if (allPartners.length === 0) return // can't log without a partner
-    const nowStr = new Date().toISOString()
-    const dateStr = nowStr.split('T')[0]
+    const now = new Date()
+    const nowStr = now.toISOString()
+    // Encounter.date is local-calendar 'YYYY-MM-DD' (see lib/stats/windows.ts).
+    // Using nowStr.split('T')[0] would give the UTC date — wrong after ~4pm PST.
+    const dateStr = formatDateString(now)
     // Quick-log defaults to the first partner; user can edit the session
     // afterwards to reassign or add others.
     encounters.insert({

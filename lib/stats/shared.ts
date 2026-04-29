@@ -147,6 +147,35 @@ export function mostEnjoyedActivity(
   return best
 }
 
+/**
+ * Top `count` activities by average stars among those meeting `minSample` rated
+ * encounters. Sorted highest avg first; ties broken by larger sample size.
+ */
+export function topEnjoyedActivities(
+  encounters: Encounter[],
+  tags: ActivityTag[],
+  count: number,
+  minSample = 3,
+): MostEnjoyedActivity[] {
+  const totals = new Map<string, { sum: number; n: number }>()
+  for (const enc of encounters) {
+    if (enc.stars === null) continue
+    for (const emoji of enc.activities) {
+      const cur = totals.get(emoji) ?? { sum: 0, n: 0 }
+      cur.sum += enc.stars
+      cur.n += 1
+      totals.set(emoji, cur)
+    }
+  }
+  const ranked: MostEnjoyedActivity[] = []
+  for (const [emoji, { sum, n }] of totals) {
+    if (n < minSample) continue
+    ranked.push({ emoji, label: lookupTagLabel(emoji, tags), averageStars: sum / n, sampleSize: n })
+  }
+  ranked.sort((a, b) => b.averageStars - a.averageStars || b.sampleSize - a.sampleSize)
+  return ranked.slice(0, count)
+}
+
 /** Sessions with stars ≥ threshold, newest first. */
 export function standoutSessions(encounters: Encounter[], threshold = 8): Encounter[] {
   return encounters

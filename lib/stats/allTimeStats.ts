@@ -4,10 +4,10 @@ import {
   emojiInventory,
   filterByWindow,
   monthOfYearHistogram,
-  mostEnjoyedActivity,
   partnersInWindow,
   standoutSessions,
   topActivities,
+  topEnjoyedActivities,
 } from './shared'
 import type { AllTimeStats } from './types'
 import type { CalendarStartDay, DateWindow } from './windows'
@@ -26,7 +26,7 @@ export function computeAllTimeStats(
     weeklyRhythm: dayOfWeekHistogram(inWindow, calendarStartDay),
     monthOfYear: monthOfYearHistogram(inWindow),
     topActivities: topActivities(inWindow, tags, 5),
-    mostEnjoyedActivity: mostEnjoyedActivity(inWindow, tags, 3),
+    topEnjoyedActivities: topEnjoyedActivities(inWindow, tags, 3, 3),
     emojiInventory: emojiInventory(inWindow, tags),
     partners: partnersInWindow(inWindow, partners),
     standoutSessions: standoutSessions(inWindow, 8),

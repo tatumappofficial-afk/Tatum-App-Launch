@@ -68,7 +68,6 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
     <KeyboardAvoidingView behavior="padding" style={{ flex: 1, backgroundColor: colors.surface }}>
         <KeyboardAwareScrollView
           style={{ flex: 1 }}
-          contentContainerStyle={{ flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
           bottomOffset={20}
           bounces={false}

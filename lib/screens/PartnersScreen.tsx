@@ -128,13 +128,12 @@ export const PartnersScreen: React.FC<PartnersScreenProps> = ({
               elevation: 1,
             }}
           >
-            {/* Card top row */}
+            {/* Header row: avatar + name (header) + chevron */}
             <View style={{
               flexDirection: 'row',
               alignItems: 'center',
               gap: 12,
             }}>
-              {/* Avatar */}
               <AvatarCircle
                 initials={partner.initials}
                 gradient={partner.gradient}
@@ -142,11 +141,11 @@ export const PartnersScreen: React.FC<PartnersScreenProps> = ({
                 borderWidth={2.5}
               />
 
-              {/* Name + since */}
               <View style={{ flex: 1 }}>
                 <Text style={{
                   fontFamily: font('playfair', '700'),
-                  fontSize: 17,
+                  fontSize: 20,
+                  lineHeight: 24,
                   color: colors.ink,
                   marginBottom: 2,
                 }}>{partner.name}</Text>
@@ -157,57 +156,58 @@ export const PartnersScreen: React.FC<PartnersScreenProps> = ({
                 }}>{partner.since}</Text>
               </View>
 
-              {/* Stats */}
-              <View style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                flexShrink: 0,
-              }}>
-                <View style={{
-                  alignItems: 'center',
-                  paddingHorizontal: 10,
-                  borderRightWidth: 1,
-                  borderRightColor: 'rgba(160,100,80,0.12)',
-                }}>
-                  <Text style={{
-                    fontFamily: font('playfair', '600'),
-                    fontSize: 17,
-                    color: colors.terra,
-                    lineHeight: 17,
-                  }}>{partner.sessions}</Text>
-                  <Text style={{
-                    fontSize: 12,
-                    fontWeight: '500',
-                    letterSpacing: 0.8,
-                    textTransform: 'uppercase',
-                    color: colors.stone,
-                    marginTop: 2,
-                  }}>Sessions</Text>
-                </View>
-                <View style={{
-                  alignItems: 'center',
-                  paddingHorizontal: 10,
-                }}>
-                  <Text style={{
-                    fontFamily: font('playfair', '600'),
-                    fontSize: 17,
-                    color: colors.terra,
-                    lineHeight: 17,
-                  }}>{partner.avgSat}</Text>
-                  <Text style={{
-                    fontSize: 12,
-                    fontWeight: '500',
-                    letterSpacing: 0.8,
-                    textTransform: 'uppercase',
-                    color: colors.stone,
-                    marginTop: 2,
-                  }}>Avg Sat</Text>
-                </View>
-              </View>
-
-              {/* Chevron */}
               <View style={{ marginLeft: 6 }}>
                 <ChevronForwardIcon />
+              </View>
+            </View>
+
+            {/* Stats row — full width below the header */}
+            <View style={{
+              flexDirection: 'row',
+              marginTop: 12,
+              paddingTop: 10,
+              borderTopWidth: 1,
+              borderTopColor: 'rgba(160,100,80,0.08)',
+            }}>
+              <View style={{
+                flex: 1,
+                alignItems: 'center',
+                borderRightWidth: 1,
+                borderRightColor: 'rgba(160,100,80,0.12)',
+              }}>
+                <Text style={{
+                  fontFamily: font('playfair', '600'),
+                  fontSize: 17,
+                  color: colors.terra,
+                  lineHeight: 17,
+                }}>{partner.sessions}</Text>
+                <Text style={{
+                  fontSize: 12,
+                  fontWeight: '500',
+                  letterSpacing: 0.8,
+                  textTransform: 'uppercase',
+                  color: colors.stone,
+                  marginTop: 2,
+                }}>Sessions</Text>
+              </View>
+              <View style={{
+                flex: 1,
+                alignItems: 'center',
+              }}>
+                <Text style={{
+                  fontFamily: font('playfair', '600'),
+                  fontSize: 17,
+                  color: colors.terra,
+                  lineHeight: 17,
+                }}>{partner.avgSat}</Text>
+                <Text style={{
+                  fontSize: 12,
+                  fontWeight: '500',
+                  letterSpacing: 0.8,
+                  textTransform: 'uppercase',
+                  color: colors.stone,
+                  marginTop: 2,
+                }}>Avg Sat</Text>
               </View>
             </View>
 

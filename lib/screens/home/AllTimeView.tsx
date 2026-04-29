@@ -51,10 +51,14 @@ export const AllTimeView: React.FC<AllTimeViewProps> = ({
         </>
       )}
 
-      {stats.mostEnjoyedActivity && (
+      {stats.topEnjoyedActivities.length > 0 && (
         <>
           <SectionLabel label="Most enjoyed" style={INLINE_LABEL} />
-          <MostEnjoyedActivityCard activity={stats.mostEnjoyedActivity} />
+          <View style={{ gap: 8 }}>
+            {stats.topEnjoyedActivities.map((a) => (
+              <MostEnjoyedActivityCard key={a.emoji} activity={a} />
+            ))}
+          </View>
         </>
       )}
 

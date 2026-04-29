@@ -1,6 +1,6 @@
 import React from 'react'
 import { StyleSheet, View, Text, Pressable, ScrollView, TextInput } from 'react-native'
-import { KeyboardAvoidingView, KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller'
+import { KeyboardAvoidingView, KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Line, Polyline } from 'react-native-svg'
@@ -97,7 +97,7 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
   showSuccess = false,
   successLabel = 'Session added',
 }) => {
-  const canSave = selectedPartnerIds.length > 0 && selectedActivityIds.length > 0
+  const canSave = selectedActivityIds.length > 0
   const insets = useSafeAreaInsets()
 
   return (
@@ -248,22 +248,19 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
           >{notes?.length || 0} / 3,000</Text>
         </KeyboardAwareScrollView>
 
-        {/* ── Footer ── slides up above the keyboard when typing */}
-        <KeyboardStickyView offset={{ closed: 0, opened: -Math.max(insets.bottom - 10, 0) }}>
-          <View
-            style={[
-              styles.footer,
-              { paddingBottom: Math.max(insets.bottom, 10) },
-            ]}
-          >
-            <GradientButton label={saveLabel} onPress={onSave} height={50} disabled={!canSave} />
-            {onDelete && (
-              <Pressable onPress={onDelete} style={styles.deleteButton}>
-                <Text style={styles.deleteText}>Delete Session</Text>
-              </Pressable>
-            )}
-          </View>
-        </KeyboardStickyView>
+        <View
+          style={[
+            styles.footer,
+            { paddingBottom: Math.max(insets.bottom, 10) },
+          ]}
+        >
+          <GradientButton label={saveLabel} onPress={onSave} height={50} disabled={!canSave} />
+          {onDelete && (
+            <Pressable onPress={onDelete} style={styles.deleteButton}>
+              <Text style={styles.deleteText}>Delete Session</Text>
+            </Pressable>
+          )}
+        </View>
 
         <SuccessOverlay visible={showSuccess} label={successLabel} />
     </KeyboardAvoidingView>

@@ -373,21 +373,25 @@ export const SessionDetailScreen: React.FC<SessionDetailScreenProps> = ({
       <SectionLabel label="Notes" />
       <NotesCard note={note} onEditNote={onEditNote} />
 
-      <SectionLabel label="With" />
-      <View style={{
-        flexDirection: 'column',
-        gap: 8,
-        marginHorizontal: 24,
-        marginBottom: 14,
-      }}>
-        {partners.map((p) => (
-          <PartnerRow
-            key={p.initials}
-            partner={p}
-            onPress={() => onPartnerPress?.(p)}
-          />
-        ))}
-      </View>
+      {partners.length > 0 && (
+        <>
+          <SectionLabel label="With" />
+          <View style={{
+            flexDirection: 'column',
+            gap: 8,
+            marginHorizontal: 24,
+            marginBottom: 14,
+          }}>
+            {partners.map((p) => (
+              <PartnerRow
+                key={p.initials}
+                partner={p}
+                onPress={() => onPartnerPress?.(p)}
+              />
+            ))}
+          </View>
+        </>
+      )}
     </ScrollView>
 
   </View>
