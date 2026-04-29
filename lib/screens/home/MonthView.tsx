@@ -6,7 +6,8 @@ import { BarChart } from './shared/BarChart'
 import { TopActivitiesList } from './shared/TopActivitiesList'
 import { MostEnjoyedActivityCard } from './shared/MostEnjoyedActivityCard'
 import { EmojiInventoryGrid } from './shared/EmojiInventoryGrid'
-import { PartnerStrip } from './shared/PartnerStrip'
+import { RichPartnerStrip } from './shared/RichPartnerStrip'
+import { RecentSessionsScroller } from './shared/RecentSessionsScroller'
 import { StandoutSessions } from './shared/StandoutSessions'
 import { RecentReflections } from './shared/RecentReflections'
 import { EmptyPeriod, type EmptyPeriodScenario } from './shared/EmptyPeriod'
@@ -20,23 +21,28 @@ const WEEKDAY_LABELS_MONDAY: string[] = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su
 
 export interface MonthViewProps {
   stats: MonthStats
+  /** All partners — passed through to RecentSessionsScroller for avatar lookup. */
+  partners: Partner[]
   calendarStartDay: CalendarStartDay
   emptyScenario?: EmptyPeriodScenario
   onLookBack?: () => void
   onJumpToNearest?: () => void
-  onPartnerPress?: (partner: Partner) => void
+  onPartnerPress?: (partnerId: string) => void
   onViewAllPartners?: () => void
+  onSessionsHeaderPress?: () => void
   onSessionPress?: (encounter: Encounter) => void
 }
 
 export const MonthView: React.FC<MonthViewProps> = ({
   stats,
+  partners,
   calendarStartDay,
   emptyScenario = 'past',
   onLookBack,
   onJumpToNearest,
   onPartnerPress,
   onViewAllPartners,
+  onSessionsHeaderPress,
   onSessionPress,
 }) => {
   if (stats.sessionsCount === 0) {
@@ -80,10 +86,26 @@ export const MonthView: React.FC<MonthViewProps> = ({
         </>
       )}
 
-      {stats.partners.length > 0 && (
+      {stats.partnersLifetime.length > 0 && (
         <>
           <SectionLabel label="Partners" style={INLINE_LABEL} />
-          <PartnerStrip partners={stats.partners} onPress={onPartnerPress} onViewAll={onViewAllPartners} />
+          <RichPartnerStrip partners={stats.partnersLifetime} onPress={onPartnerPress} onViewAll={onViewAllPartners} />
+        </>
+      )}
+
+      {stats.recentSessions.length > 0 && (
+        <>
+          <SectionLabel
+            label="Sessions"
+            showChevron
+            style={INLINE_LABEL}
+            onPress={onSessionsHeaderPress}
+          />
+          <RecentSessionsScroller
+            sessions={stats.recentSessions}
+            partners={partners}
+            onPress={onSessionPress}
+          />
         </>
       )}
 

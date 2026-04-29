@@ -4,10 +4,11 @@ import {
   emojiInventory,
   filterByWindow,
   monthOfYearHistogram,
-  mostEnjoyedActivity,
   partnersInWindow,
+  recentEncounters,
   standoutSessions,
   topActivities,
+  topEnjoyedActivities,
 } from './shared'
 import type { DesireToAction, YearStats } from './types'
 import type { CalendarStartDay, DateWindow } from './windows'
@@ -28,9 +29,10 @@ export function computeYearStats(
     monthOfYear: monthOfYearHistogram(inWindow),
     weeklyRhythm: dayOfWeekHistogram(inWindow, calendarStartDay),
     topActivities: topActivities(inWindow, tags, 5),
-    mostEnjoyedActivity: mostEnjoyedActivity(inWindow, tags, 3),
+    topEnjoyedActivities: topEnjoyedActivities(inWindow, tags, 3, 3),
     emojiInventory: emojiInventory(inWindow, tags),
     partners: partnersInWindow(inWindow, partners),
+    recentSessions: recentEncounters(inWindow, 50),
     standoutSessions: standoutSessions(inWindow, 8),
     desireToAction: computeDesireToAction(desires, window),
     isYearToDate,

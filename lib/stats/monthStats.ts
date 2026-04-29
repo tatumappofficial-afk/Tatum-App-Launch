@@ -4,7 +4,9 @@ import {
   emojiInventory,
   filterByWindow,
   mostEnjoyedActivity,
+  partnerLifetimeStats,
   partnersInWindow,
+  recentEncounters,
   recentNotes,
   standoutSessions,
   topActivities,
@@ -27,6 +29,8 @@ export function computeMonthStats(
     mostEnjoyedActivity: mostEnjoyedActivity(inWindow, tags, 3),
     emojiInventory: emojiInventory(inWindow, tags),
     partners: partnersInWindow(inWindow, partners),
+    partnersLifetime: partnerLifetimeStats(encounters, partners),
+    recentSessions: recentEncounters(inWindow, 50),
     standoutSessions: standoutSessions(inWindow, 8),
     recentNotes: recentNotes(inWindow, 3),
   }

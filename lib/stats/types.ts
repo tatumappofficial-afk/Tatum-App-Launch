@@ -17,6 +17,8 @@ export interface MonthStats {
   mostEnjoyedActivity: MostEnjoyedActivity | null
   emojiInventory: ActivityCount[]
   partners: Partner[]
+  partnersLifetime: PartnerLifetimeStats[]
+  recentSessions: Encounter[]
   standoutSessions: Encounter[]
   recentNotes: Encounter[]
 }
@@ -26,9 +28,10 @@ export interface YearStats {
   monthOfYear: number[]
   weeklyRhythm: number[]
   topActivities: ActivityCount[]
-  mostEnjoyedActivity: MostEnjoyedActivity | null
+  topEnjoyedActivities: MostEnjoyedActivity[]
   emojiInventory: ActivityCount[]
   partners: Partner[]
+  recentSessions: Encounter[]
   standoutSessions: Encounter[]
   desireToAction: DesireToAction | null
   /** Whether the year is YTD (months past `currentMonthIndex` should render muted). */
@@ -43,7 +46,7 @@ export interface AllTimeStats {
   weeklyRhythm: number[]
   monthOfYear: number[]
   topActivities: ActivityCount[]
-  mostEnjoyedActivity: MostEnjoyedActivity | null
+  topEnjoyedActivities: MostEnjoyedActivity[]
   emojiInventory: ActivityCount[]
   partners: Partner[]
   standoutSessions: Encounter[]

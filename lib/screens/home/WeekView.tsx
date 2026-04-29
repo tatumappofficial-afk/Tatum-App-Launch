@@ -20,6 +20,7 @@ export interface WeekViewProps {
   onJumpToNearest?: () => void
   onPartnerPress?: (partnerId: string) => void
   onPartnersHeaderPress?: () => void
+  onSessionsHeaderPress?: () => void
   onSessionPress?: (encounter: Encounter) => void
 }
 
@@ -31,6 +32,7 @@ export const WeekView: React.FC<WeekViewProps> = ({
   onJumpToNearest,
   onPartnerPress,
   onPartnersHeaderPress,
+  onSessionsHeaderPress,
   onSessionPress,
 }) => {
   if (stats.sessionsCount === 0) {
@@ -73,7 +75,12 @@ export const WeekView: React.FC<WeekViewProps> = ({
 
       {stats.recentSessions.length > 0 && (
         <>
-          <SectionLabel label="Sessions" style={INLINE_LABEL} />
+          <SectionLabel
+            label="Sessions"
+            showChevron
+            style={INLINE_LABEL}
+            onPress={onSessionsHeaderPress}
+          />
           <RecentSessionsScroller
             sessions={stats.recentSessions}
             partners={partners}
