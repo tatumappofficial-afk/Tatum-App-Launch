@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { SessionDetailModal } from '@/lib/screens/SessionDetailModal'
@@ -14,7 +15,7 @@ const MONTH_NAMES = [
 export default function SheetSessionDetailRoute() {
   const router = useRouter()
   const { id } = useLocalSearchParams<{ id: string }>()
-  const { data: allEncounters = [] } = useLiveQuery((q) =>
+  const { data: allEncounters = [], isReady: encReady } = useLiveQuery((q) =>
     q.from({ encounters }).select(({ encounters }) => ({ ...encounters }))
   )
   const { data: allPartners = [] } = useLiveQuery((q) =>
@@ -23,6 +24,12 @@ export default function SheetSessionDetailRoute() {
   const tagMap = useActivityTagMap()
 
   const encounter = allEncounters.find(e => e.id === id)
+
+  useEffect(() => {
+    if (encReady && !encounter && router.canGoBack()) {
+      router.back()
+    }
+  }, [encReady, encounter, router])
 
   if (!encounter) {
     return (

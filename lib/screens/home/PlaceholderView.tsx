@@ -14,7 +14,7 @@ export const PlaceholderView: React.FC<{ label: string }> = ({ label }) => (
   }}>
     <Text style={{ fontSize: 28, opacity: 0.4, marginBottom: 10 }}>✨</Text>
     <Text style={{
-      fontSize: 12,
+      fontSize: 14,
       color: colors.stone,
       lineHeight: 18,
       fontFamily: font('dmSans', '300'),

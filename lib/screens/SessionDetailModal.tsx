@@ -72,7 +72,7 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
           <Polyline points="15 18 9 12 15 6" />
         </Svg>
         <Text style={{
-          fontFamily: fontFamily.dmSans, fontSize: 12, fontWeight: '400', color: colors.stone,
+          fontFamily: fontFamily.dmSans, fontSize: 14, fontWeight: '400', color: colors.stone,
         }}>{backLabel}</Text>
       </Pressable>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -84,7 +84,7 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
           }}
         >
           <Text style={{
-            fontFamily: font('dmSans', '500'), fontSize: 11, color: colors.terra,
+            fontFamily: font('dmSans', '500'), fontSize: 14, color: colors.terra,
             letterSpacing: 0.5,
           }}>Edit</Text>
         </Pressable>
@@ -122,7 +122,7 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
           color: colors.ink, marginBottom: 3,
         }}>{partnerName}</Text>
         <Text style={{
-          fontFamily: font('dmSans', '300'), fontSize: 11, color: colors.stone,
+          fontFamily: font('dmSans', '300'), fontSize: 14, color: colors.stone,
         }}>{dateLabel}</Text>
       </View>
 
@@ -164,7 +164,7 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
               {/* Note text */}
               <Text style={{
                 position: 'relative', zIndex: 1,
-                fontFamily: fontFamily.playfair, fontSize: 13, fontWeight: '400',
+                fontFamily: fontFamily.playfair, fontSize: 14, fontWeight: '400',
                 fontStyle: 'italic', color: '#5A3E36',
                 lineHeight: 27, paddingVertical: 12, paddingHorizontal: 16,
               }}>{noteText}</Text>
@@ -186,7 +186,7 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
                     <Path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
                   </Svg>
                   <Text style={{
-                    fontFamily: fontFamily.dmSans, fontSize: 11, color: colors.terra,
+                    fontFamily: fontFamily.dmSans, fontSize: 14, color: colors.terra,
                   }}>Edit note</Text>
                 </Pressable>
               </View>
@@ -199,7 +199,7 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
       <View style={{ alignItems: 'center', paddingTop: 4, paddingBottom: 24 }}>
         <Pressable onPress={onDelete}>
           <Text style={{
-            fontFamily: font('dmSans', '300'), fontSize: 11,
+            fontFamily: font('dmSans', '300'), fontSize: 14,
             color: '#C4B0A0', letterSpacing: 0.5,
           }}>Delete this session</Text>
         </Pressable>

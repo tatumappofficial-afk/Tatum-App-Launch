@@ -45,7 +45,7 @@ const FeaturePill: React.FC<{ icon: React.ReactNode; text: React.ReactNode }> = 
     }}
   >
     <View style={{ alignItems: 'center', justifyContent: 'center' }}>{icon}</View>
-    <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 12.5, color: '#6A4A40', lineHeight: 17.5, flex: 1 }}>{text}</Text>
+    <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: '#6A4A40', lineHeight: 17.5, flex: 1 }}>{text}</Text>
   </View>
 )
 
@@ -146,7 +146,7 @@ export const OnboardingReadyScreen: React.FC = () => (
       <Text
         style={{
           fontFamily: font('dmSans', '300'),
-          fontSize: 13,
+          fontSize: 14,
           color: colors.stone,
           textAlign: 'center',
           marginBottom: 18,
@@ -160,7 +160,7 @@ export const OnboardingReadyScreen: React.FC = () => (
         <FeaturePill
           icon={<CalendarIcon />}
           text={
-            <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 12.5, color: '#6A4A40', lineHeight: 17.5 }}>
+            <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: '#6A4A40', lineHeight: 17.5 }}>
               <Text style={{ fontWeight: '500', color: colors.ink }}>Calendar</Text> — every moment logged and mapped,
               month by month.
             </Text>
@@ -169,7 +169,7 @@ export const OnboardingReadyScreen: React.FC = () => (
         <FeaturePill
           icon={<HomeIcon />}
           text={
-            <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 12.5, color: '#6A4A40', lineHeight: 17.5 }}>
+            <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: '#6A4A40', lineHeight: 17.5 }}>
               <Text style={{ fontWeight: '500', color: colors.ink }}>Home</Text> — your stats, your partners, your
               patterns at a glance.
             </Text>
@@ -178,7 +178,7 @@ export const OnboardingReadyScreen: React.FC = () => (
         <FeaturePill
           icon={<BookIcon />}
           text={
-            <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 12.5, color: '#6A4A40', lineHeight: 17.5 }}>
+            <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: '#6A4A40', lineHeight: 17.5 }}>
               <Text style={{ fontWeight: '500', color: colors.ink }}>Journal</Text> — write notes on any session,
               private and encrypted.
             </Text>
@@ -196,7 +196,7 @@ export const OnboardingReadyScreen: React.FC = () => (
         style={{
           fontFamily: font('dmSans', '300'),
           textAlign: 'center',
-          fontSize: 11,
+          fontSize: 14,
           color: colors.muted,
           lineHeight: 16.5,
         }}

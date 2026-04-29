@@ -3,7 +3,7 @@ import * as Font from 'expo-font'
 import { Stack } from 'expo-router/stack'
 import * as SplashScreen from 'expo-splash-screen'
 import { useCallback, useEffect, useState } from 'react'
-import { Platform, View } from 'react-native'
+import { Platform, Text, View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
 import { PlayfairDisplay_400Regular, PlayfairDisplay_400Regular_Italic, PlayfairDisplay_600SemiBold, PlayfairDisplay_700Bold } from '@expo-google-fonts/playfair-display'
@@ -11,6 +11,11 @@ import { DMSans_300Light, DMSans_400Regular, DMSans_500Medium } from '@expo-goog
 import { initDatabase } from '@/src/db'
 
 SplashScreen.preventAutoHideAsync()
+
+// Cap accessibility font scaling app-wide so layouts don't break at extreme sizes.
+// See "Tori's Vault/Expo Best Practices/Typography.md".
+;(Text as any).defaultProps = (Text as any).defaultProps || {}
+;(Text as any).defaultProps.maxFontSizeMultiplier = 1.5
 
 export default function RootLayout() {
   const [ready, setReady] = useState(false)

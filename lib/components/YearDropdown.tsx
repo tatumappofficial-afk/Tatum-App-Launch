@@ -44,7 +44,7 @@ export const YearDropdown: React.FC<YearDropdownProps> = ({
       }}>
         <Text style={{
           fontFamily: font('playfair', '600'),
-          fontSize: 14,
+          fontSize: 16,
           color: colors.ink,
           textAlign: 'center',
         }}>
@@ -82,7 +82,7 @@ export const YearDropdown: React.FC<YearDropdownProps> = ({
               )}
               <Text style={{
                 fontFamily: font('dmSans', isSelected ? '500' : '400'),
-                fontSize: 14,
+                fontSize: 16,
                 color: isSelected ? colors.white : colors.ink,
                 letterSpacing: 0.5,
               }}>

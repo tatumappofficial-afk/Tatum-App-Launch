@@ -28,7 +28,7 @@ export const MostEnjoyedActivityCard: React.FC<MostEnjoyedActivityCardProps> = (
         lineHeight: 20,
       }}>{activity.label}</Text>
       <Text style={{
-        fontSize: 10,
+        fontSize: 12,
         color: colors.stone,
         fontFamily: font('dmSans', '300'),
         marginTop: 2,

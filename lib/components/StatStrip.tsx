@@ -37,12 +37,12 @@ export const StatStrip: React.FC<StatStripProps> = ({ stats }) => (
         }}>
           {stat.value}
           {stat.unit && (
-            <Text style={{ fontSize: 12, fontWeight: '300', color: '#C4B0A0' }}>{stat.unit}</Text>
+            <Text style={{ fontSize: 14, fontWeight: '300', color: '#C4B0A0' }}>{stat.unit}</Text>
           )}
         </Text>
         <Text style={{
           fontFamily: font('dmSans', '500'),
-          fontSize: 7.5,
+          fontSize: 12,
           letterSpacing: 1.5,
           textTransform: 'uppercase',
           color: colors.stone,

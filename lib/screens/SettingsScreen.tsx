@@ -152,7 +152,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             flexShrink: 0,
           }}>
             <Text style={{
-              fontSize: 9,
+              fontSize: 12,
               fontWeight: '600',
               letterSpacing: 2,
               textTransform: 'uppercase',
@@ -163,12 +163,12 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           <View style={{ flex: 1 }}>
             <Text style={{
               fontFamily: font('playfair', '600'),
-              fontSize: 14,
+              fontSize: 16,
               color: colors.white,
               lineHeight: 17,
             }}>Tatum Premium</Text>
             <Text style={{
-              fontSize: 10,
+              fontSize: 12,
               fontWeight: '300',
               color: 'rgba(255,255,255,0.7)',
               marginTop: 2,
@@ -246,12 +246,12 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       }}>
         <Text style={{
           fontFamily: font('playfair', '600'),
-          fontSize: 13,
+          fontSize: 14,
           color: colors.ink,
           marginBottom: 5,
         }}>Your data stays on your device.</Text>
         <Text style={{
-          fontSize: 11,
+          fontSize: 14,
           fontWeight: '300',
           color: colors.stone,
           lineHeight: 19,
@@ -305,7 +305,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         paddingBottom: 4,
       }}>
         <Text style={{
-          fontSize: 9,
+          fontSize: 12,
           fontWeight: '300',
           color: 'rgba(154,136,120,0.4)',
           letterSpacing: 0.5,

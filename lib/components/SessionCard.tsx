@@ -47,7 +47,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
         borderWidth={2}
       />
       <Text style={{
-        fontSize: 9,
+        fontSize: 12,
         color: colors.stone,
         fontFamily: font('dmSans', '300'),
       }}>{date}</Text>
@@ -61,7 +61,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
           paddingVertical: 3,
           paddingHorizontal: 6,
         }}>
-          <Text style={{ fontSize: 14 }}>{e}</Text>
+          <Text style={{ fontSize: 16 }}>{e}</Text>
         </View>
       ))}
     </View>
@@ -69,7 +69,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
       <Text
         numberOfLines={2}
         style={{
-          fontSize: 10,
+          fontSize: 12,
           color: colors.stone,
           fontStyle: 'italic',
           lineHeight: 14.5,

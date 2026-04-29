@@ -134,7 +134,7 @@ const DesireActionCard: React.FC<{ data: DesireToAction }> = ({ data }) => (
       {data.acted} of {data.logged}
     </Text>
     <Text style={{
-      fontSize: 11,
+      fontSize: 14,
       color: colors.stone,
       lineHeight: 16,
       marginTop: 4,

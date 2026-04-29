@@ -32,7 +32,7 @@ const GradientButton: React.FC<{ label: string; onPress?: () => void }> = ({ lab
     <Text
       style={{
         fontFamily: font('dmSans', '500'),
-        fontSize: 13,
+        fontSize: 14,
         letterSpacing: 1.5,
         textTransform: 'uppercase',
         color: 'white',
@@ -114,7 +114,7 @@ const TagChip: React.FC<{ emoji: string; label: string; active?: boolean }> = ({
     <Text
       style={{
         fontFamily: font('dmSans', active ? '500' : '400'),
-        fontSize: 9,
+        fontSize: 12,
         color: active ? colors.terra : colors.stone,
         textAlign: 'center',
         lineHeight: 10.8,
@@ -148,7 +148,7 @@ const AddChip: React.FC = () => (
     <Text
       style={{
         fontFamily: fontFamily.dmSans,
-        fontSize: 9,
+        fontSize: 12,
         fontWeight: '400',
         color: colors.terra,
         textAlign: 'center',
@@ -216,7 +216,7 @@ export const OnboardingTagsScreen: React.FC = () => {
           <Text
             style={{
               fontFamily: font('dmSans', '500'),
-              fontSize: 9,
+              fontSize: 12,
               letterSpacing: 3.5,
               textTransform: 'uppercase',
               color: colors.terra,
@@ -236,7 +236,7 @@ export const OnboardingTagsScreen: React.FC = () => {
           >
             Make it{'\n'}yours
           </Text>
-          <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 13, color: colors.stone, lineHeight: 20.8 }}>
+          <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: colors.stone, lineHeight: 20.8 }}>
             These are your activity tags. Keep what fits, remove what doesn't, and add your own.
           </Text>
         </View>
@@ -258,7 +258,7 @@ export const OnboardingTagsScreen: React.FC = () => {
           }}
         >
           <Text style={{ fontSize: 18, flexShrink: 0, marginTop: 1 }}>🏷️</Text>
-          <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 12, color: '#7A5A50', lineHeight: 18.6, flex: 1 }}>
+          <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: '#7A5A50', lineHeight: 18.6, flex: 1 }}>
             <Text style={{ fontWeight: '500', color: colors.ink }}>Activity tags</Text> are the emoji labels you tap
             when logging a session. They're completely private and fully customizable — you can rename, delete, or add new
             ones at any time.
@@ -299,7 +299,7 @@ export const OnboardingTagsScreen: React.FC = () => {
           <Text
             style={{
               fontFamily: font('dmSans', '300'),
-              fontSize: 10,
+              fontSize: 12,
               color: '#C4B0A0',
               fontStyle: 'italic',
             }}

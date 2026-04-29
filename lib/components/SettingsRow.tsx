@@ -48,13 +48,13 @@ export const SettingsRow: React.FC<SettingsRowProps> = ({
     </View>
     <View style={{ flex: 1 }}>
       <Text style={{
-        fontSize: 14,
+        fontSize: 16,
         fontFamily: font('dmSans', '500'),
         color: destructive ? colors.mauve : colors.ink,
         lineHeight: 16.8,
       }}>{title}</Text>
       <Text style={{
-        fontSize: 11,
+        fontSize: 14,
         fontFamily: font('dmSans', '300'),
         color: colors.stone,
         marginTop: 1,

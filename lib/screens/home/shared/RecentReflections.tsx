@@ -27,17 +27,17 @@ export const RecentReflections: React.FC<RecentReflectionsProps> = ({ notes, onP
         <Text
           numberOfLines={3}
           style={{
-            fontSize: 11.5,
+            fontSize: 16,
             color: colors.stone,
             fontStyle: 'italic',
-            lineHeight: 16,
+            lineHeight: 20,
             fontFamily: font('dmSans', '300'),
           }}
         >
           {n.notes}
         </Text>
         <Text style={{
-          fontSize: 9,
+          fontSize: 12,
           color: colors.muted,
           fontFamily: fontFamily.dmSans,
           marginTop: 4,

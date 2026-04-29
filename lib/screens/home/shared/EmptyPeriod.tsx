@@ -45,7 +45,7 @@ export const EmptyPeriod: React.FC<EmptyPeriodProps> = ({ period, scenario, onLo
     }}>
       <Text style={{ fontSize: 28, opacity: 0.4 }}>🌙</Text>
       <Text style={{
-        fontSize: 13,
+        fontSize: 14,
         color: colors.stone,
         lineHeight: 19,
         fontFamily: font('dmSans', '300'),
@@ -66,7 +66,7 @@ export const EmptyPeriod: React.FC<EmptyPeriodProps> = ({ period, scenario, onLo
           }}
         >
           <Text style={{
-            fontSize: 11,
+            fontSize: 14,
             letterSpacing: 0.5,
             color: colors.terra,
             fontFamily: font('dmSans', '500'),

@@ -151,7 +151,7 @@ export const PartnersScreen: React.FC<PartnersScreenProps> = ({
                   marginBottom: 2,
                 }}>{partner.name}</Text>
                 <Text style={{
-                  fontSize: 10,
+                  fontSize: 12,
                   fontWeight: '300',
                   color: colors.stone,
                 }}>{partner.since}</Text>
@@ -176,7 +176,7 @@ export const PartnersScreen: React.FC<PartnersScreenProps> = ({
                     lineHeight: 17,
                   }}>{partner.sessions}</Text>
                   <Text style={{
-                    fontSize: 7,
+                    fontSize: 12,
                     fontWeight: '500',
                     letterSpacing: 0.8,
                     textTransform: 'uppercase',
@@ -195,7 +195,7 @@ export const PartnersScreen: React.FC<PartnersScreenProps> = ({
                     lineHeight: 17,
                   }}>{partner.avgSat}</Text>
                   <Text style={{
-                    fontSize: 7,
+                    fontSize: 12,
                     fontWeight: '500',
                     letterSpacing: 0.8,
                     textTransform: 'uppercase',
@@ -225,7 +225,7 @@ export const PartnersScreen: React.FC<PartnersScreenProps> = ({
               }}>
                 {partner.tags.map((tag, j) => (
                   <Text key={j} style={{
-                    fontSize: 13,
+                    fontSize: 14,
                     backgroundColor: colors.surface2,
                     borderRadius: 6,
                     paddingVertical: 2,
@@ -233,7 +233,7 @@ export const PartnersScreen: React.FC<PartnersScreenProps> = ({
                   }}>{tag}</Text>
                 ))}
                 <Text style={{
-                  fontSize: 10,
+                  fontSize: 12,
                   fontWeight: '300',
                   color: colors.stone,
                   paddingVertical: 2,
@@ -272,12 +272,12 @@ export const PartnersScreen: React.FC<PartnersScreenProps> = ({
           </View>
           <View>
             <Text style={{
-              fontSize: 14,
+              fontSize: 16,
               fontWeight: '400',
               color: colors.terra,
             }}>Add a partner</Text>
             <Text style={{
-              fontSize: 11,
+              fontSize: 14,
               fontWeight: '300',
               color: colors.muted,
               marginTop: 1,

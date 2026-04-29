@@ -52,7 +52,7 @@ export const PartnerCard: React.FC<PartnerCardProps> = ({
 
       {name && (
         <Text style={{
-          fontSize: 12,
+          fontSize: 14,
           color: colors.ink,
           fontFamily: font('dmSans', '500'),
         }}>{name}</Text>
@@ -68,7 +68,7 @@ export const PartnerCard: React.FC<PartnerCardProps> = ({
               lineHeight: 17,
             }}>{sessions}</Text>
             <Text style={{
-              fontSize: 7,
+              fontSize: 12,
               letterSpacing: 0.5,
               textTransform: 'uppercase',
               color: colors.stone,
@@ -84,7 +84,7 @@ export const PartnerCard: React.FC<PartnerCardProps> = ({
               lineHeight: 17,
             }}>{avgSatisfaction!.toFixed(1)}</Text>
             <Text style={{
-              fontSize: 7,
+              fontSize: 12,
               letterSpacing: 0.5,
               textTransform: 'uppercase',
               color: colors.stone,
@@ -97,7 +97,7 @@ export const PartnerCard: React.FC<PartnerCardProps> = ({
 
       {topActivityEmoji && (
         <Text style={{
-          fontSize: 10,
+          fontSize: 12,
           color: colors.muted,
           fontFamily: font('dmSans', '300'),
         }}>{topActivityEmoji} Most common</Text>
@@ -105,7 +105,7 @@ export const PartnerCard: React.FC<PartnerCardProps> = ({
 
       {emptyText && (
         <Text style={{
-          fontSize: 10,
+          fontSize: 12,
           color: '#C4B0A0',
           fontStyle: 'italic',
           fontFamily: font('dmSans', '300'),

@@ -51,7 +51,7 @@ export const LoginAndroidScreen: React.FC = () => (
     }}>
       <Text style={{
         fontFamily: font('dmSans', '500'),
-        fontSize: 13,
+        fontSize: 14,
         color: colors.stone,
       }}>9:41</Text>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
@@ -116,7 +116,7 @@ export const LoginAndroidScreen: React.FC = () => (
 
         {/* Tagline */}
         <Text style={{
-          fontSize: 8,
+          fontSize: 12,
           fontWeight: '400',
           letterSpacing: 2.5,
           color: colors.muted,
@@ -165,7 +165,7 @@ export const LoginAndroidScreen: React.FC = () => (
       <View style={{ alignItems: 'center', gap: 8, paddingBottom: 8 }}>
         <View style={{ width: 28, height: 1, backgroundColor: 'rgba(160,100,80,0.2)' }} />
         <Text style={{
-          fontSize: 11,
+          fontSize: 14,
           fontWeight: '300',
           color: colors.muted,
           textAlign: 'center',

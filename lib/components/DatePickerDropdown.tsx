@@ -125,7 +125,7 @@ export const DatePickerDropdown: React.FC<DatePickerDropdownProps> = ({
       paddingTop: 8,
     }}>
       <Text style={{
-        fontSize: 9,
+        fontSize: 12,
         fontWeight: '300',
         color: colors.muted,
         fontStyle: 'italic',

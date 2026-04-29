@@ -1,46 +1,24 @@
 import { Tabs } from 'expo-router/tabs'
-import { Pressable, StyleSheet, View } from 'react-native'
+import { Platform, Pressable, StyleSheet, View } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import * as Haptics from 'expo-haptics'
-import Svg, { Circle, Line, Path, Rect } from 'react-native-svg'
+import Svg, { Line } from 'react-native-svg'
+import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { colors, fontFamily, gradientPoints, gradients } from '@/lib/theme'
 
+const TAB_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
+  home: 'home-outline',
+  calendar: 'calendar-outline',
+  journal: 'book-outline',
+  profile: 'person-outline',
+}
+
 function TabIcon({ name, color, size = 22 }: { name: string; color: string; size?: number }) {
-  switch (name) {
-    case 'home':
-      return (
-        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-          <Path d="M3 12l9-8 9 8" />
-          <Path d="M5 10v9a1 1 0 001 1h3v-5h6v5h3a1 1 0 001-1v-9" />
-        </Svg>
-      )
-    case 'calendar':
-      return (
-        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-          <Rect x={3} y={4} width={18} height={18} rx={2} />
-          <Line x1={16} y1={2} x2={16} y2={6} />
-          <Line x1={8} y1={2} x2={8} y2={6} />
-          <Line x1={3} y1={10} x2={21} y2={10} />
-        </Svg>
-      )
-    case 'journal':
-      return (
-        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-          <Path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
-          <Path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
-        </Svg>
-      )
-    case 'profile':
-      return (
-        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-          <Path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-          <Circle cx={12} cy={7} r={4} />
-        </Svg>
-      )
-    default:
-      return null
-  }
+  const iconName = TAB_ICONS[name]
+  if (!iconName) return null
+  return <Ionicons name={iconName} size={size} color={color} />
 }
 
 function FAB(props: any) {
@@ -87,6 +65,25 @@ function FAB(props: any) {
 }
 
 export default function TabLayout() {
+  const insets = useSafeAreaInsets()
+  const androidExtra = insets.bottom + 12
+  // Only override paddingBottom / height on Android. On iOS, React Navigation
+  // applies the bottom safe-area inset automatically — overriding it (even with
+  // 0 / undefined) hides the bar behind the home indicator.
+  const tabBarStyle =
+    Platform.OS === 'android'
+      ? {
+          backgroundColor: colors.surface,
+          borderTopWidth: 1,
+          borderTopColor: 'rgba(160,100,80,0.15)',
+          paddingBottom: androidExtra,
+          height: 60 + androidExtra,
+        }
+      : {
+          backgroundColor: colors.surface,
+          borderTopWidth: 1,
+          borderTopColor: 'rgba(160,100,80,0.15)',
+        }
   return (
     <Tabs
       screenOptions={{
@@ -94,14 +91,10 @@ export default function TabLayout() {
         sceneStyle: { backgroundColor: colors.warmSand },
         tabBarActiveTintColor: colors.terra,
         tabBarInactiveTintColor: colors.stone,
-        tabBarStyle: {
-          backgroundColor: colors.surface,
-          borderTopWidth: 1,
-          borderTopColor: 'rgba(160,100,80,0.15)',
-        },
+        tabBarStyle,
         tabBarLabelStyle: {
           fontFamily: fontFamily.dmSans,
-          fontSize: 8.5,
+          fontSize: 12,
           fontWeight: '500',
           letterSpacing: 1,
           textTransform: 'uppercase',

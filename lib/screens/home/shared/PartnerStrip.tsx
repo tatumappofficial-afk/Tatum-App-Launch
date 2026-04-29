@@ -43,7 +43,7 @@ const ViewMoreChip: React.FC<{ count: number; onPress: () => void }> = ({ count,
     accessibilityLabel={`View ${count} more partners`}
     style={{
       flexShrink: 0,
-      width: 72,
+      width: 96,
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
@@ -64,7 +64,7 @@ const ViewMoreChip: React.FC<{ count: number; onPress: () => void }> = ({ count,
     <Text
       numberOfLines={1}
       style={{
-        fontSize: 9,
+        fontSize: 12,
         color: colors.stone,
         fontFamily: font('dmSans', '500'),
         letterSpacing: 0.5,
@@ -80,7 +80,7 @@ const PartnerChip: React.FC<{ partner: Partner; onPress?: () => void }> = ({ par
     accessibilityLabel={partner.displayName}
     style={{
       flexShrink: 0,
-      width: 72,
+      width: 96,
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
@@ -101,7 +101,7 @@ const PartnerChip: React.FC<{ partner: Partner; onPress?: () => void }> = ({ par
     <Text
       numberOfLines={1}
       style={{
-        fontSize: 10,
+        fontSize: 12,
         color: colors.ink,
         fontFamily: font('dmSans', '500'),
         textAlign: 'center',
@@ -111,7 +111,7 @@ const PartnerChip: React.FC<{ partner: Partner; onPress?: () => void }> = ({ par
     </Text>
     {!partner.isActive && (
       <Text style={{
-        fontSize: 8,
+        fontSize: 12,
         color: colors.muted,
         fontFamily: font('dmSans', '300'),
         fontStyle: 'italic',

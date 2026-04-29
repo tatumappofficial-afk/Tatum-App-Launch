@@ -107,7 +107,7 @@ export const MonthYearDropdown: React.FC<MonthYearDropdownProps> = ({
                 )}
                 <Text style={{
                   fontFamily: font('dmSans', '500'),
-                  fontSize: 12,
+                  fontSize: 14,
                   color: isSelected ? colors.white : colors.ink,
                   letterSpacing: 0.4,
                 }}>
@@ -128,7 +128,7 @@ export const MonthYearDropdown: React.FC<MonthYearDropdownProps> = ({
         paddingTop: 8,
       }}>
         <Text style={{
-          fontSize: 9,
+          fontSize: 12,
           fontWeight: '300',
           color: colors.muted,
           fontStyle: 'italic',

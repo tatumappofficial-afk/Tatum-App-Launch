@@ -128,7 +128,7 @@ const WeekOverviewCard: React.FC<WeekOverviewCardProps> = ({ sessionsCount, aver
           numberOfLines={1}
           style={{
             fontFamily: font('dmSans', '500'),
-            fontSize: 13,
+            fontSize: 14,
             color: colors.terra,
             lineHeight: 28,
             letterSpacing: 0.4,
@@ -160,7 +160,7 @@ const WeekOverviewCard: React.FC<WeekOverviewCardProps> = ({ sessionsCount, aver
           justifyContent: 'flex-end',
         }}>
           <Text style={{
-            fontSize: 7.5,
+            fontSize: 12,
             letterSpacing: 1.5,
             textTransform: 'uppercase',
             color: colors.stone,

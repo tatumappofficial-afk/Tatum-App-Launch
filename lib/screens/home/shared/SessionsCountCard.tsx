@@ -39,7 +39,7 @@ export const SessionsCountCard: React.FC<SessionsCountCardProps> = ({
           alignItems: 'center',
         }}>
           <Text style={{
-            fontSize: 7.5,
+            fontSize: 12,
             letterSpacing: 1.5,
             textTransform: 'uppercase',
             color: colors.stone,

@@ -29,7 +29,7 @@ export const TopActivitiesList: React.FC<TopActivitiesListProps> = ({ activities
         }}>
           <Text style={{ fontSize: 16, width: 24, textAlign: 'center', flexShrink: 0 }}>{a.emoji}</Text>
           <Text style={{
-            fontSize: 10,
+            fontSize: 12,
             color: colors.stone,
             width: 80,
             flexShrink: 0,
@@ -50,7 +50,7 @@ export const TopActivitiesList: React.FC<TopActivitiesListProps> = ({ activities
             />
           </View>
           <Text style={{
-            fontSize: 10,
+            fontSize: 12,
             color: colors.mauve,
             minWidth: 16,
             textAlign: 'right',

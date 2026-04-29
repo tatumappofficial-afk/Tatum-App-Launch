@@ -43,7 +43,7 @@ const ViewMoreCard: React.FC<{ count: number; onPress: () => void }> = ({ count,
     accessibilityLabel={`View ${count} more partners`}
     style={{
       flexShrink: 0,
-      width: 126,
+      width: 168,
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
@@ -65,7 +65,7 @@ const ViewMoreCard: React.FC<{ count: number; onPress: () => void }> = ({ count,
     <Text
       numberOfLines={1}
       style={{
-        fontSize: 10,
+        fontSize: 12,
         color: colors.stone,
         fontFamily: font('dmSans', '500'),
         letterSpacing: 0.5,
@@ -83,7 +83,7 @@ const RichPartnerCard: React.FC<{ stats: PartnerLifetimeStats; onPress?: () => v
       accessibilityLabel={partner.displayName}
       style={{
         flexShrink: 0,
-        width: 126,
+        width: 168,
         backgroundColor: colors.surface,
         borderWidth: 1,
         borderColor: colors.border,
@@ -104,7 +104,7 @@ const RichPartnerCard: React.FC<{ stats: PartnerLifetimeStats; onPress?: () => v
       <Text
         numberOfLines={1}
         style={{
-          fontSize: 11,
+          fontSize: 14,
           color: colors.ink,
           fontFamily: font('dmSans', '500'),
         }}
@@ -119,14 +119,17 @@ const RichPartnerCard: React.FC<{ stats: PartnerLifetimeStats; onPress?: () => v
             color: colors.terra,
             lineHeight: 17,
           }}>{sessionCount}</Text>
-          <Text style={{
-            fontSize: 7,
-            letterSpacing: 0.5,
-            textTransform: 'uppercase',
-            color: colors.stone,
-            marginTop: 2,
-            fontFamily: fontFamily.dmSans,
-          }}>Sessions</Text>
+          <Text
+            numberOfLines={1}
+            style={{
+              fontSize: 10,
+              letterSpacing: 0.4,
+              textTransform: 'uppercase',
+              color: colors.stone,
+              marginTop: 2,
+              fontFamily: fontFamily.dmSans,
+            }}
+          >Sessions</Text>
         </View>
         <View style={{ flex: 1, alignItems: 'center' }}>
           <Text style={{
@@ -135,19 +138,22 @@ const RichPartnerCard: React.FC<{ stats: PartnerLifetimeStats; onPress?: () => v
             color: colors.terra,
             lineHeight: 17,
           }}>{averageStars === null ? '—' : averageStars.toFixed(1)}</Text>
-          <Text style={{
-            fontSize: 7,
-            letterSpacing: 0.5,
-            textTransform: 'uppercase',
-            color: colors.stone,
-            marginTop: 2,
-            fontFamily: fontFamily.dmSans,
-          }}>Avg Rating</Text>
+          <Text
+            numberOfLines={1}
+            style={{
+              fontSize: 10,
+              letterSpacing: 0.4,
+              textTransform: 'uppercase',
+              color: colors.stone,
+              marginTop: 2,
+              fontFamily: fontFamily.dmSans,
+            }}
+          >Avg Rating</Text>
         </View>
       </View>
       {topActivityEmoji && (
         <Text style={{
-          fontSize: 10,
+          fontSize: 12,
           color: colors.muted,
           fontFamily: font('dmSans', '300'),
         }}>{topActivityEmoji} Most common</Text>

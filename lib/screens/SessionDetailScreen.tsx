@@ -100,7 +100,7 @@ const ScreenHeader: React.FC<{
       })}
     >
       <Text style={{
-        fontSize: 11,
+        fontSize: 14,
         fontFamily: font('dmSans', '500'),
         color: colors.terra,
         letterSpacing: 0.5,
@@ -139,7 +139,7 @@ const Hero: React.FC<{
       {partnerNames}
     </Text>
     <Text style={{
-      fontSize: 11,
+      fontSize: 14,
       fontFamily: font('dmSans', '300'),
       color: colors.stone,
       letterSpacing: 0.3,
@@ -217,7 +217,7 @@ const NotesCard: React.FC<{
         <Text style={{
           position: 'relative', zIndex: 1,
           fontFamily: fontFamily.playfair,
-          fontSize: 13, fontWeight: '400', fontStyle: 'italic',
+          fontSize: 14, fontWeight: '400', fontStyle: 'italic',
           color: '#5A3E36', lineHeight: 27,
           paddingVertical: 12, paddingHorizontal: 16,
         }}>{note}</Text>
@@ -225,7 +225,7 @@ const NotesCard: React.FC<{
         <Text style={{
           position: 'relative', zIndex: 1,
           paddingVertical: 14, paddingHorizontal: 16,
-          fontSize: 12, fontFamily: font('dmSans', '300'),
+          fontSize: 14, fontFamily: font('dmSans', '300'),
           color: '#C4B0A0', fontStyle: 'italic',
           lineHeight: 27,
         }}>No notes yet...</Text>
@@ -250,7 +250,7 @@ const NotesCard: React.FC<{
         >
           <PencilIcon />
           <Text style={{
-            fontSize: 11, fontWeight: '400',
+            fontSize: 14, fontWeight: '400',
             fontFamily: fontFamily.dmSans,
             color: colors.terra,
           }}>
@@ -292,13 +292,13 @@ const PartnerRow: React.FC<{
     <View style={{ flex: 1 }}>
       <Text style={{
         fontFamily: font('playfair', '600'),
-        fontSize: 14,
+        fontSize: 16,
         color: colors.ink,
       }}>
         {partner.name}
       </Text>
       <Text style={{
-        fontSize: 10,
+        fontSize: 12,
         fontFamily: font('dmSans', '300'),
         color: colors.stone,
         marginTop: 1,
@@ -316,7 +316,7 @@ const PartnerRow: React.FC<{
         {partner.avgSatisfaction}
       </Text>
       <Text style={{
-        fontSize: 7,
+        fontSize: 12,
         letterSpacing: 1,
         textTransform: 'uppercase',
         fontFamily: fontFamily.dmSans,

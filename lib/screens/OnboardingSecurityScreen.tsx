@@ -32,7 +32,7 @@ const GradientButton: React.FC<{ label: string; onPress?: () => void }> = ({ lab
     <Text
       style={{
         fontFamily: font('dmSans', '500'),
-        fontSize: 13,
+        fontSize: 14,
         letterSpacing: 2,
         textTransform: 'uppercase',
         color: 'white',
@@ -126,10 +126,10 @@ const SecurityCard: React.FC<SecurityCardProps> = ({ icon, title, desc, selected
       {icon}
     </View>
     <View style={{ flex: 1 }}>
-      <Text style={{ fontFamily: font('dmSans', '500'), fontSize: 14, color: colors.ink, marginBottom: 2 }}>
+      <Text style={{ fontFamily: font('dmSans', '500'), fontSize: 16, color: colors.ink, marginBottom: 2 }}>
         {title}
       </Text>
-      <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 11, color: colors.stone, lineHeight: 15.4 }}>
+      <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: colors.stone, lineHeight: 15.4 }}>
         {desc}
       </Text>
     </View>
@@ -196,7 +196,7 @@ export const OnboardingSecurityScreen: React.FC = () => (
         <Text
           style={{
             fontFamily: font('dmSans', '500'),
-            fontSize: 9,
+            fontSize: 12,
             letterSpacing: 3.5,
             textTransform: 'uppercase',
             color: colors.terra,
@@ -216,7 +216,7 @@ export const OnboardingSecurityScreen: React.FC = () => (
         >
           Protect{'\n'}your space
         </Text>
-        <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 13, color: colors.stone, lineHeight: 20.8 }}>
+        <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: colors.stone, lineHeight: 20.8 }}>
           Choose how you want to lock Tatum. This keeps your data private even if someone picks up your phone.
         </Text>
       </View>
@@ -245,7 +245,7 @@ export const OnboardingSecurityScreen: React.FC = () => (
         <Text
           style={{
             fontFamily: font('dmSans', '300'),
-            fontSize: 12,
+            fontSize: 14,
             color: colors.muted,
           }}
         >

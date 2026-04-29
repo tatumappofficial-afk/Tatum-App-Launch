@@ -155,15 +155,15 @@ const Legend: React.FC = () => (
           style={[StyleSheet.absoluteFill, { borderRadius: 5 }]}
         />
       </View>
-      <Text style={{ fontFamily: fontFamily.dmSans, fontSize: 8.5, color: colors.stone }}>Today</Text>
+      <Text style={{ fontFamily: fontFamily.dmSans, fontSize: 12, color: colors.stone }}>Today</Text>
     </View>
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-      <Text style={{ fontSize: 10 }}>{'\uD83C\uDF46'}</Text>
-      <Text style={{ fontFamily: fontFamily.dmSans, fontSize: 8.5, color: colors.stone }}>Logged</Text>
+      <Text style={{ fontSize: 12 }}>{'\uD83C\uDF46'}</Text>
+      <Text style={{ fontFamily: fontFamily.dmSans, fontSize: 12, color: colors.stone }}>Logged</Text>
     </View>
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-      <Text style={{ fontSize: 10, color: colors.terra, fontWeight: '600' }}>{'\uD83C\uDF46'}+</Text>
-      <Text style={{ fontFamily: fontFamily.dmSans, fontSize: 8.5, color: colors.stone }}>Multiple</Text>
+      <Text style={{ fontSize: 12, color: colors.terra, fontWeight: '600' }}>{'\uD83C\uDF46'}+</Text>
+      <Text style={{ fontFamily: fontFamily.dmSans, fontSize: 12, color: colors.stone }}>Multiple</Text>
     </View>
   </View>
 )
@@ -183,7 +183,7 @@ const QuickLogWidget: React.FC<{ onQuickLog?: (emoji: string) => void; emojis?: 
     <View style={{ marginBottom: 10 }}>
       <Text style={{
         fontFamily: font('dmSans', '500'),
-        fontSize: 8,
+        fontSize: 12,
         letterSpacing: 2.5,
         textTransform: 'uppercase',
         color: colors.terra,
@@ -191,7 +191,7 @@ const QuickLogWidget: React.FC<{ onQuickLog?: (emoji: string) => void; emojis?: 
       }}>Quick Log</Text>
       <Text style={{
         fontFamily: font('dmSans', '300'),
-        fontSize: 9,
+        fontSize: 12,
         color: colors.muted,
         fontStyle: 'italic',
       }}>Drag to a date · Tap to log today</Text>
@@ -227,7 +227,7 @@ const SessionRow: React.FC<{ session: DaySession; onPress?: () => void }> = ({ s
       <View style={{ flex: 1 }}>
         <Text style={{
           fontFamily: font('playfair', '600'),
-          fontSize: 14,
+          fontSize: 16,
           color: colors.ink,
         }}>{formatPartnerLabel(session.partners.map(p => p.name))}</Text>
       </View>
@@ -240,7 +240,7 @@ const SessionRow: React.FC<{ session: DaySession; onPress?: () => void }> = ({ s
     </View>
     {session.noteSnippet && (
       <Text numberOfLines={1} style={{
-        fontSize: 11,
+        fontSize: 14,
         color: colors.stone,
         fontStyle: 'italic',
         fontFamily: font('dmSans', '300'),
@@ -307,7 +307,7 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
           ) : (
             <Text style={{
               marginHorizontal: 16,
-              fontSize: 12,
+              fontSize: 14,
               color: colors.muted,
               fontStyle: 'italic',
               fontFamily: font('dmSans', '300'),

@@ -40,7 +40,7 @@ export const TagPill: React.FC<TagPillProps> = ({
       <Text style={{ fontSize: 16, lineHeight: 18 }}>{emoji}</Text>
       <Text style={{
         fontFamily: font('dmSans', isActive ? '500' : '400'),
-        fontSize: 12,
+        fontSize: 14,
         color: isActive ? colors.terra : '#6A4A40',
       }}>{label}</Text>
     </Pressable>

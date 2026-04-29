@@ -30,9 +30,9 @@ export const ActivityBarChart: React.FC<ActivityBarChartProps> = ({ activities }
         gap: 7,
         marginBottom: i < activities.length - 1 ? 7 : 0,
       }}>
-        <Text style={{ fontSize: 13, width: 18, textAlign: 'center' }}>{a.emoji}</Text>
+        <Text style={{ fontSize: 14, width: 18, textAlign: 'center' }}>{a.emoji}</Text>
         <Text style={{
-          fontSize: 10,
+          fontSize: 12,
           color: colors.stone,
           width: 62,
           fontFamily: fontFamily.dmSans,
@@ -56,7 +56,7 @@ export const ActivityBarChart: React.FC<ActivityBarChartProps> = ({ activities }
           />
         </View>
         <Text style={{
-          fontSize: 10,
+          fontSize: 12,
           color: colors.mauve,
           width: 12,
           textAlign: 'right',

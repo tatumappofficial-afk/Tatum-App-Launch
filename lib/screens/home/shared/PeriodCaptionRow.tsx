@@ -42,7 +42,7 @@ export const PeriodCaptionRow: React.FC<PeriodCaptionRowProps> = ({
       <Text
         style={{
           fontFamily: font('dmSans', '400'),
-          fontSize: 11,
+          fontSize: 14,
           letterSpacing: 0.3,
           color: colors.stone,
           flexShrink: 1,
@@ -67,7 +67,7 @@ export const PeriodCaptionRow: React.FC<PeriodCaptionRowProps> = ({
         >
           <Text style={{
             fontFamily: font('dmSans', '400'),
-            fontSize: 10,
+            fontSize: 12,
             letterSpacing: 0.3,
             color: colors.stone,
           }}>
@@ -95,7 +95,7 @@ export const PeriodCaptionRow: React.FC<PeriodCaptionRowProps> = ({
         >
           <Text style={{
             fontFamily: font('dmSans', '500'),
-            fontSize: 10,
+            fontSize: 12,
             letterSpacing: 0.5,
             color: colors.terra,
           }}>

@@ -102,32 +102,34 @@ export function font(family: 'playfair' | 'dmSans', weight: string = '400'): str
 }
 
 // ── Typography presets ──
+// Sizes target HIG body floor (16) and Material body minimum (14sp). See
+// "Tori's Vault/Expo Best Practices/Typography.md" for the full rationale.
 export const typography = {
   screenTitle: {
     fontFamily: fonts.playfair.bold,
-    fontSize: 20,
+    fontSize: 22,
     color: colors.ink,
   } satisfies TextStyle,
   sectionLabel: {
     fontFamily: fonts.dmSans.medium,
     fontWeight: '500' as const,
-    fontSize: 9,
+    fontSize: 14,
     textTransform: 'uppercase' as const,
-    letterSpacing: 3,
+    letterSpacing: 2,
     color: colors.stone,
   } satisfies TextStyle,
   sectionLabelTerra: {
     fontFamily: fonts.dmSans.medium,
     fontWeight: '500' as const,
-    fontSize: 11,
+    fontSize: 14,
     textTransform: 'uppercase' as const,
-    letterSpacing: 2.2,
+    letterSpacing: 1.8,
     color: colors.terra,
   } satisfies TextStyle,
   cardTitle: {
     fontFamily: fonts.playfair.semiBold,
     fontWeight: '600' as const,
-    fontSize: 18,
+    fontSize: 20,
     color: colors.ink,
   } satisfies TextStyle,
   statNumber: {
@@ -139,35 +141,35 @@ export const typography = {
   body: {
     fontFamily: fonts.dmSans.light,
     fontWeight: '300' as const,
-    fontSize: 12,
+    fontSize: 16,
     color: colors.ink,
   } satisfies TextStyle,
   bodyRegular: {
     fontFamily: fonts.dmSans.regular,
     fontWeight: '400' as const,
-    fontSize: 12,
+    fontSize: 16,
     color: colors.ink,
   } satisfies TextStyle,
   hint: {
     fontFamily: fonts.dmSans.light,
     fontWeight: '300' as const,
-    fontSize: 10,
+    fontSize: 14,
     fontStyle: 'italic' as const,
     color: colors.muted,
   } satisfies TextStyle,
   tagLabel: {
     fontFamily: fonts.dmSans.medium,
     fontWeight: '500' as const,
-    fontSize: 9,
+    fontSize: 14,
     textTransform: 'uppercase' as const,
-    letterSpacing: 1.5,
+    letterSpacing: 1.2,
   } satisfies TextStyle,
   navLabel: {
     fontFamily: fonts.dmSans.medium,
     fontWeight: '500' as const,
-    fontSize: 8.5,
+    fontSize: 14,
     textTransform: 'uppercase' as const,
-    letterSpacing: 1.5,
+    letterSpacing: 1.2,
   } satisfies TextStyle,
 } as const
 

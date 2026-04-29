@@ -90,7 +90,7 @@ export const RatingSlider: React.FC<RatingSliderProps> = ({
               fontSize: 22,
               color: colors.terra,
             }}>{displayValue}</Text>
-            <Text style={{ fontSize: 11, fontWeight: '300', color: colors.stone }}> / 10</Text>
+            <Text style={{ fontSize: 14, fontWeight: '300', color: colors.stone }}> / 10</Text>
           </>
         )}
       </View>
@@ -156,7 +156,7 @@ export const RatingSlider: React.FC<RatingSliderProps> = ({
             key={label}
             onPress={() => onChange?.(i)}
             style={{
-              fontSize: 8.5,
+              fontSize: 12,
               fontWeight: displayValue === i ? '600' : '300',
               color: displayValue === i ? colors.terra : '#C4B0A0',
             }}

@@ -44,7 +44,7 @@ export const RecentSessionsScroller: React.FC<RecentSessionsScrollerProps> = ({
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
                 <AvatarStack partners={sessionPartners} size={36} borderWidth={2} />
                 <Text style={{
-                  fontSize: 9,
+                  fontSize: 12,
                   color: colors.stone,
                   fontFamily: font('dmSans', '300'),
                 }}>{formatDateShort(s.date)}</Text>
@@ -59,14 +59,14 @@ export const RecentSessionsScroller: React.FC<RecentSessionsScrollerProps> = ({
                       paddingVertical: 2,
                       paddingHorizontal: 5,
                     }}>
-                      <Text style={{ fontSize: 13 }}>{e}</Text>
+                      <Text style={{ fontSize: 14 }}>{e}</Text>
                     </View>
                   ))}
                 </View>
               )}
               {s.notes && (
                 <Text numberOfLines={2} style={{
-                  fontSize: 10,
+                  fontSize: 12,
                   color: colors.stone,
                   fontStyle: 'italic',
                   lineHeight: 13.5,

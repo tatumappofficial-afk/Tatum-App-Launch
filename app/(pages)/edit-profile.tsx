@@ -45,7 +45,7 @@ export default function EditProfileModal() {
 
         <Text style={{
           fontFamily: font('dmSans', '500'),
-          fontSize: 13,
+          fontSize: 14,
           color: colors.stone,
           marginBottom: 8,
           textTransform: 'uppercase',
@@ -82,7 +82,7 @@ export default function EditProfileModal() {
         <Pressable onPress={() => router.back()} style={{ alignItems: 'center', marginTop: 16 }}>
           <Text style={{
             fontFamily: font('dmSans', '500'),
-            fontSize: 14,
+            fontSize: 16,
             color: colors.terra,
           }}>
             Cancel

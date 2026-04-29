@@ -83,7 +83,7 @@ export const BarChart: React.FC<BarChartProps> = ({
               key={i}
               style={{
                 flex: 1,
-                fontSize: 9,
+                fontSize: 12,
                 textAlign: 'center',
                 color: isMuted ? colors.muted : colors.stone,
                 fontFamily: font('dmSans', '500'),

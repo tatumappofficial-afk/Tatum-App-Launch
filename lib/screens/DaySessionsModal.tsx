@@ -89,7 +89,7 @@ const SessionCard: React.FC<{
                   end={gradientPoints.diagonal.end}
                   style={[StyleSheet.absoluteFill, { borderRadius: 19 }]}
                 />
-                <Text style={{ fontFamily: font('playfair', '700'), fontSize: 13, color: 'white' }}>
+                <Text style={{ fontFamily: font('playfair', '700'), fontSize: 14, color: 'white' }}>
                   {session.partners[0].initials}
                 </Text>
               </View>
@@ -107,7 +107,7 @@ const SessionCard: React.FC<{
                   end={gradientPoints.diagonal.end}
                   style={[StyleSheet.absoluteFill, { borderRadius: 19 }]}
                 />
-                <Text style={{ fontFamily: font('playfair', '700'), fontSize: 13, color: 'white' }}>
+                <Text style={{ fontFamily: font('playfair', '700'), fontSize: 14, color: 'white' }}>
                   {session.partners[1].initials}
                 </Text>
               </View>
@@ -126,17 +126,17 @@ const SessionCard: React.FC<{
                 end={gradientPoints.diagonal.end}
                 style={[StyleSheet.absoluteFill, { borderRadius: 19 }]}
               />
-              <Text style={{ fontFamily: font('playfair', '700'), fontSize: 13, color: 'white' }}>
+              <Text style={{ fontFamily: font('playfair', '700'), fontSize: 14, color: 'white' }}>
                 {session.partners[0].initials}
               </Text>
             </View>
           )}
           <View style={{ marginLeft: isMultiPartner ? 6 : 0 }}>
             <Text style={{
-              fontFamily: font('playfair', '600'), fontSize: 14, color: colors.ink,
+              fontFamily: font('playfair', '600'), fontSize: 16, color: colors.ink,
             }}>{session.partnerName}</Text>
             <Text style={{
-              fontFamily: font('dmSans', '300'), fontSize: 9, color: colors.stone, marginTop: 2,
+              fontFamily: font('dmSans', '300'), fontSize: 12, color: colors.stone, marginTop: 2,
             }}>{session.time}</Text>
           </View>
         </View>
@@ -145,8 +145,8 @@ const SessionCard: React.FC<{
             <Text style={{
               fontFamily: font('playfair', '700'), fontSize: 24, color: colors.terra,
             }}>{session.score}</Text>
-            <Text style={{ fontSize: 13, fontWeight: '300', color: '#C4B0A0', marginHorizontal: 1 }}>/</Text>
-            <Text style={{ fontSize: 12, fontWeight: '300', color: '#C4B0A0' }}>10</Text>
+            <Text style={{ fontSize: 14, fontWeight: '300', color: '#C4B0A0', marginHorizontal: 1 }}>/</Text>
+            <Text style={{ fontSize: 14, fontWeight: '300', color: '#C4B0A0' }}>10</Text>
           </View>
           <Pressable style={{
             opacity: 0.45, padding: 0,
@@ -179,7 +179,7 @@ const SessionCard: React.FC<{
               <Circle cx={12} cy={12} r={10} /><Polyline points="12 6 12 12 16 14" />
             </Svg>
             <Text style={{
-              fontFamily: font('dmSans', '300'), fontSize: 9.5, color: colors.muted,
+              fontFamily: font('dmSans', '300'), fontSize: 12, color: colors.muted,
             }}>{session.duration}</Text>
           </View>
         )}
@@ -190,7 +190,7 @@ const SessionCard: React.FC<{
         <Text
           numberOfLines={2}
           style={{
-            fontFamily: fontFamily.playfair, fontSize: 12, fontStyle: 'italic',
+            fontFamily: fontFamily.playfair, fontSize: 14, fontStyle: 'italic',
             color: '#7A5040', lineHeight: 26, position: 'relative', zIndex: 1,
           }}
         >{session.noteSnippet}</Text>
@@ -215,7 +215,7 @@ export const DaySessionsModal: React.FC<DaySessionsModalProps> = ({
         <Text style={{ fontFamily: font('playfair', '700'), fontSize: 22, color: colors.ink }}>
           {dayLabel}
         </Text>
-        <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 12, color: colors.stone, marginTop: 2 }}>
+        <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: colors.stone, marginTop: 2 }}>
           {sessionCount} session{sessionCount !== 1 ? 's' : ''} logged
         </Text>
       </View>
@@ -232,7 +232,7 @@ export const DaySessionsModal: React.FC<DaySessionsModalProps> = ({
           <Line x1={12} y1={5} x2={12} y2={19} /><Line x1={5} y1={12} x2={19} y2={12} />
         </Svg>
         <Text style={{
-          fontFamily: fontFamily.dmSans, fontSize: 11, fontWeight: '400', color: colors.terra,
+          fontFamily: fontFamily.dmSans, fontSize: 14, fontWeight: '400', color: colors.terra,
         }}>Log another</Text>
       </Pressable>
     </View>
@@ -264,7 +264,7 @@ export const DaySessionsModal: React.FC<DaySessionsModalProps> = ({
           <Line x1={12} y1={5} x2={12} y2={19} /><Line x1={5} y1={12} x2={19} y2={12} />
         </Svg>
         <Text style={{
-          fontFamily: font('dmSans', '500'), fontSize: 12,
+          fontFamily: font('dmSans', '500'), fontSize: 14,
           letterSpacing: 1.5, textTransform: 'uppercase', color: colors.terra,
         }}>Log a Session</Text>
       </Pressable>

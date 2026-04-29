@@ -75,7 +75,7 @@ const EmptyState: React.FC<{ onLogSession?: () => void }> = ({ onLogSession }) =
       color: colors.ink, marginBottom: 6, textAlign: 'center',
     }}>Nothing logged yet</Text>
     <Text style={{
-      fontFamily: font('dmSans', '300'), fontSize: 13,
+      fontFamily: font('dmSans', '300'), fontSize: 14,
       color: colors.stone, lineHeight: 13 * 1.6, marginBottom: 24, textAlign: 'center',
     }}>You haven't logged anything for this day. Want to capture a moment?</Text>
     <Pressable
@@ -99,7 +99,7 @@ const EmptyState: React.FC<{ onLogSession?: () => void }> = ({ onLogSession }) =
         <Line x1={12} y1={5} x2={12} y2={19} /><Line x1={5} y1={12} x2={19} y2={12} />
       </Svg>
       <Text style={{
-        fontFamily: font('dmSans', '500'), fontSize: 13,
+        fontFamily: font('dmSans', '500'), fontSize: 14,
         letterSpacing: 1.5, textTransform: 'uppercase', color: 'white',
       }}>Log a Session</Text>
     </Pressable>
@@ -128,18 +128,18 @@ const SessionsState: React.FC<{
           <AvatarStack partners={s.partners} size={38} borderWidth={2} />
           <View style={{ flex: 1 }}>
             <Text style={{
-              fontFamily: font('dmSans', '500'), fontSize: 13, color: colors.ink,
+              fontFamily: font('dmSans', '500'), fontSize: 14, color: colors.ink,
             }}>{s.partnerName}</Text>
             <View style={{ flexDirection: 'row', gap: 4, marginTop: 3 }}>
               {s.tags.map((t, i) => (
-                <Text key={i} style={{ fontSize: 13 }}>{t}</Text>
+                <Text key={i} style={{ fontSize: 14 }}>{t}</Text>
               ))}
             </View>
             {s.noteSnippet && (
               <Text
                 numberOfLines={1}
                 style={{
-                  fontFamily: font('dmSans', '300'), fontSize: 10,
+                  fontFamily: font('dmSans', '300'), fontSize: 12,
                   color: colors.muted, fontStyle: 'italic', marginTop: 3,
                   maxWidth: 140,
                 }}
@@ -207,7 +207,7 @@ export const CalendarDayModal: React.FC<CalendarDayModalProps> = ({
             fontFamily: font('playfair', '700'), fontSize: 22, color: colors.ink,
           }}>{dayLabel}</Text>
           <Text style={{
-            fontFamily: font('dmSans', '300'), fontSize: 12,
+            fontFamily: font('dmSans', '300'), fontSize: 14,
             color: colors.stone, marginTop: 1,
           }}>{subtitle}</Text>
         </View>

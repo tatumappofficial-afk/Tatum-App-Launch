@@ -79,7 +79,7 @@ export const NotesCard: React.FC<NotesCardProps> = ({ note, onEditNote, showStac
       {note ? (
         <Text style={{
           fontFamily: fontFamily.playfair,
-          fontSize: 13,
+          fontSize: 14,
           fontWeight: '400',
           fontStyle: 'italic',
           color: '#5A3E36',
@@ -94,7 +94,7 @@ export const NotesCard: React.FC<NotesCardProps> = ({ note, onEditNote, showStac
         <Text style={{
           padding: 14,
           paddingHorizontal: 16,
-          fontSize: 12,
+          fontSize: 14,
           fontFamily: font('dmSans', '300'),
           color: '#C4B0A0',
           fontStyle: 'italic',
@@ -122,7 +122,7 @@ export const NotesCard: React.FC<NotesCardProps> = ({ note, onEditNote, showStac
         >
           <PencilIcon />
           <Text style={{
-            fontSize: 11,
+            fontSize: 14,
             fontWeight: '400',
             fontFamily: fontFamily.dmSans,
             color: colors.terra,

@@ -248,7 +248,7 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
           >
             <Text style={{
               ...typography.tagLabel,
-              fontSize: 12,
+              fontSize: 14,
               letterSpacing: 1,
               color: colors.stone,
             }}>Cancel</Text>

@@ -59,7 +59,7 @@ export const PeriodTabs: React.FC<PeriodTabsProps> = ({ active, onChange, inert 
           )}
           <Text style={{
             fontFamily: font('dmSans', '500'),
-            fontSize: 11,
+            fontSize: 14,
             letterSpacing: 0.5,
             lineHeight: 13.2,
             color: isActive ? colors.white : colors.stone,

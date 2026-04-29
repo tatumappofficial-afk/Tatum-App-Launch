@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { SessionDetailScreen } from '@/lib/screens/SessionDetailScreen'
@@ -10,7 +11,7 @@ const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Frid
 export default function SessionDetailRoute() {
   const router = useRouter()
   const { id } = useLocalSearchParams<{ id: string }>()
-  const { data: allEncounters = [] } = useLiveQuery((q) =>
+  const { data: allEncounters = [], isReady: encReady } = useLiveQuery((q) =>
     q.from({ encounters }).select(({ encounters }) => ({ ...encounters }))
   )
   const { data: allPartners = [] } = useLiveQuery((q) =>
@@ -19,6 +20,15 @@ export default function SessionDetailRoute() {
   const tagMap = useActivityTagMap()
 
   const encounter = allEncounters.find(e => e.id === id)
+
+  // If the encounter is gone (e.g. the user deleted it via the edit sheet),
+  // pop this page so the user lands on whatever they were viewing before —
+  // not a blank detail screen.
+  useEffect(() => {
+    if (encReady && !encounter && router.canGoBack()) {
+      router.back()
+    }
+  }, [encReady, encounter, router])
 
   if (!encounter) {
     return (

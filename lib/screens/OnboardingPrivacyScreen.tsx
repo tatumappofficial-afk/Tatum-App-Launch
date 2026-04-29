@@ -38,10 +38,10 @@ const PromiseItem: React.FC<{ emoji: string; title: string; desc: string }> = ({
   <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 12 }}>
     <Text style={{ fontSize: 20, flexShrink: 0, marginTop: 1 }}>{emoji}</Text>
     <View>
-      <Text style={{ fontFamily: font('dmSans', '500'), fontSize: 13, color: colors.ink, marginBottom: 2 }}>
+      <Text style={{ fontFamily: font('dmSans', '500'), fontSize: 14, color: colors.ink, marginBottom: 2 }}>
         {title}
       </Text>
-      <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 12, color: colors.stone, lineHeight: 18.6 }}>
+      <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: colors.stone, lineHeight: 18.6 }}>
         {desc}
       </Text>
     </View>
@@ -106,7 +106,7 @@ export const OnboardingPrivacyScreen: React.FC = () => (
         <Text
           style={{
             fontFamily: fontFamily.playfair,
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: '400',
             fontStyle: 'italic',
             color: colors.stone,
@@ -131,7 +131,7 @@ export const OnboardingPrivacyScreen: React.FC = () => (
         <Text
           style={{
             fontFamily: font('dmSans', '300'),
-            fontSize: 13,
+            fontSize: 14,
             color: '#7A5A50',
             lineHeight: 22.1,
             textAlign: 'center',
@@ -165,7 +165,7 @@ export const OnboardingPrivacyScreen: React.FC = () => (
 
       {/* Signature */}
       <View style={{ alignItems: 'center', marginBottom: 14 }}>
-        <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 11, color: colors.stone, marginBottom: 3 }}>with love,</Text>
+        <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: colors.stone, marginBottom: 3 }}>with love,</Text>
         <Text
           style={{
             fontFamily: font('playfair', '600'),

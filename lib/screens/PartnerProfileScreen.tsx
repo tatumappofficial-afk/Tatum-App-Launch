@@ -99,7 +99,7 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
       >
         <Text style={{
           fontFamily: font('dmSans', '500'),
-          fontSize: 11, color: colors.terra,
+          fontSize: 14, color: colors.terra,
           letterSpacing: 0.5,
         }}>Edit</Text>
       </Pressable>
@@ -124,7 +124,7 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
         fontSize: 26, color: colors.ink, marginBottom: 2,
       }}>{name}</Text>
       <Text style={{
-        fontSize: 10, fontWeight: '300', color: colors.stone, letterSpacing: 0.5,
+        fontSize: 12, fontWeight: '300', color: colors.stone, letterSpacing: 0.5,
       }}>{since}</Text>
     </View>
 
@@ -154,8 +154,8 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
           flexDirection: 'row', alignItems: 'center', gap: 8,
           marginBottom: i < activities.length - 1 ? 7 : 0,
         }}>
-          <Text style={{ fontSize: 13, width: 18, textAlign: 'center', flexShrink: 0 }}>{a.emoji}</Text>
-          <Text style={{ fontSize: 10, color: colors.stone, width: 68, flexShrink: 0 }}>{a.label}</Text>
+          <Text style={{ fontSize: 14, width: 18, textAlign: 'center', flexShrink: 0 }}>{a.emoji}</Text>
+          <Text style={{ fontSize: 12, color: colors.stone, width: 68, flexShrink: 0 }}>{a.label}</Text>
           <View style={{
             flex: 1, height: 5, backgroundColor: colors.surface2,
             borderRadius: 3, overflow: 'hidden',
@@ -168,7 +168,7 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
             />
           </View>
           <Text style={{
-            fontSize: 10, fontWeight: '500', color: colors.mauve,
+            fontSize: 12, fontWeight: '500', color: colors.mauve,
             width: 14, textAlign: 'right', flexShrink: 0,
           }}>{a.count}</Text>
         </View>
@@ -198,14 +198,14 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
           }}>
             {/* Top row */}
             <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-              <Text style={{ fontSize: 9, color: colors.stone, fontWeight: '300', paddingTop: 2 }}>{s.date}</Text>
+              <Text style={{ fontSize: 12, color: colors.stone, fontWeight: '300', paddingTop: 2 }}>{s.date}</Text>
               <StarRating rating={s.rating} size={12} />
             </View>
             {/* Tags */}
             <View style={{ flexDirection: 'row', gap: 4, flexWrap: 'wrap' }}>
               {s.tags.map((t, ti) => (
                 <Text key={ti} style={{
-                  fontSize: 13, backgroundColor: colors.surface2,
+                  fontSize: 14, backgroundColor: colors.surface2,
                   borderRadius: 6, paddingVertical: 2, paddingHorizontal: 5,
                 }}>{t}</Text>
               ))}
@@ -214,7 +214,7 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
             <Text
               numberOfLines={2}
               style={{
-                fontSize: 10, fontWeight: '300', color: colors.stone,
+                fontSize: 12, fontWeight: '300', color: colors.stone,
                 fontStyle: 'italic', lineHeight: 14.5,
                 overflow: 'hidden',
                 borderTopWidth: 1,

@@ -32,7 +32,7 @@ const GradientButton: React.FC<{ label: string; onPress?: () => void }> = ({ lab
     <Text
       style={{
         fontFamily: font('dmSans', '500'),
-        fontSize: 13,
+        fontSize: 14,
         letterSpacing: 1.5,
         textTransform: 'uppercase',
         color: 'white',
@@ -81,7 +81,7 @@ export const OnboardingPartnerScreen: React.FC = () => (
         <Text
           style={{
             fontFamily: font('dmSans', '500'),
-            fontSize: 9,
+            fontSize: 12,
             letterSpacing: 3.5,
             textTransform: 'uppercase',
             color: colors.terra,
@@ -101,7 +101,7 @@ export const OnboardingPartnerScreen: React.FC = () => (
         >
           Add a{'\n'}partner
         </Text>
-        <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 13, color: colors.stone, lineHeight: 20.8 }}>
+        <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: colors.stone, lineHeight: 20.8 }}>
           Give them a name and a color. You can always add more from your profile later.
         </Text>
       </View>
@@ -173,7 +173,7 @@ export const OnboardingPartnerScreen: React.FC = () => (
             paddingVertical: 13,
             paddingHorizontal: 16,
             fontFamily: fontFamily.dmSans,
-            fontSize: 14,
+            fontSize: 16,
             color: colors.ink,
           }}
         />
@@ -183,7 +183,7 @@ export const OnboardingPartnerScreen: React.FC = () => (
       <Text
         style={{
           fontFamily: font('dmSans', '500'),
-          fontSize: 9,
+          fontSize: 12,
           letterSpacing: 2,
           textTransform: 'uppercase',
           color: colors.stone,
@@ -229,7 +229,7 @@ export const OnboardingPartnerScreen: React.FC = () => (
       <Text
         style={{
           fontFamily: fontFamily.dmSans,
-          fontSize: 10,
+          fontSize: 12,
           color: '#C4B0A0',
           textAlign: 'center',
           marginVertical: 12,
@@ -283,8 +283,8 @@ export const OnboardingPartnerScreen: React.FC = () => (
           <Text style={{ fontSize: 22 }}>✨</Text>
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={{ fontFamily: font('dmSans', '500'), fontSize: 14, color: colors.ink }}>Solo ✨</Text>
-          <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 11, color: colors.stone }}>
+          <Text style={{ fontFamily: font('dmSans', '500'), fontSize: 16, color: colors.ink }}>Solo ✨</Text>
+          <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: colors.stone }}>
             Track your own experiences without adding a partner
           </Text>
         </View>
@@ -299,7 +299,7 @@ export const OnboardingPartnerScreen: React.FC = () => (
         <Text
           style={{
             fontFamily: font('dmSans', '300'),
-            fontSize: 12,
+            fontSize: 14,
             color: colors.muted,
           }}
         >

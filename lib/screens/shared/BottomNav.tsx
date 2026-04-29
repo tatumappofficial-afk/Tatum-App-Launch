@@ -2,7 +2,8 @@ import React from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import * as Haptics from 'expo-haptics'
-import Svg, { Circle, Line, Path, Rect } from 'react-native-svg'
+import Svg, { Line } from 'react-native-svg'
+import { Ionicons } from '@expo/vector-icons'
 import { colors, font, gradientPoints, gradients } from '../../theme'
 
 type Tab = 'home' | 'calendar' | 'log' | 'journal' | 'profile'
@@ -20,41 +21,16 @@ const tabs: { id: Tab; label: string }[] = [
   { id: 'profile', label: 'Profile' },
 ]
 
+const TAB_ICONS: Record<Exclude<Tab, 'log'>, keyof typeof Ionicons.glyphMap> = {
+  home: 'home-outline',
+  calendar: 'calendar-outline',
+  journal: 'book-outline',
+  profile: 'person-outline',
+}
+
 const TabIcon: React.FC<{ name: Tab; size: number; color: string }> = ({ name, size, color }) => {
-  switch (name) {
-    case 'home':
-      return (
-        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-          <Path d="M3 12l9-8 9 8" />
-          <Path d="M5 10v9a1 1 0 001 1h3v-5h6v5h3a1 1 0 001-1v-9" />
-        </Svg>
-      )
-    case 'calendar':
-      return (
-        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-          <Rect x={3} y={4} width={18} height={18} rx={2} />
-          <Line x1={16} y1={2} x2={16} y2={6} />
-          <Line x1={8} y1={2} x2={8} y2={6} />
-          <Line x1={3} y1={10} x2={21} y2={10} />
-        </Svg>
-      )
-    case 'journal':
-      return (
-        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-          <Path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
-          <Path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
-        </Svg>
-      )
-    case 'profile':
-      return (
-        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-          <Path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-          <Circle cx={12} cy={7} r={4} />
-        </Svg>
-      )
-    default:
-      return null
-  }
+  if (name === 'log') return null
+  return <Ionicons name={TAB_ICONS[name]} size={size} color={color} />
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({ activeTab = 'home', onTabPress }) => (
@@ -129,7 +105,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab = 'home', onTabP
           <TabIcon name={tab.id} size={21} color={isActive ? colors.terra : colors.stone} />
           <Text style={{
             fontFamily: font('dmSans', '500'),
-            fontSize: 6.5,
+            fontSize: 11,
             letterSpacing: 0.8,
             textTransform: 'uppercase',
             color: isActive ? colors.terra : colors.stone,
