@@ -42,17 +42,21 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityState={{ disabled }}
-      style={{
+      style={({ pressed }) => ({
         width: fullWidth ? '100%' : undefined,
         height,
         borderRadius: 9999,
         overflow: 'hidden',
         borderWidth: isPrimary ? 0 : 1.5,
         borderColor: isPrimary ? undefined : colors.terra,
-        backgroundColor: isPrimary ? undefined : 'transparent',
-        opacity: disabled ? 0.4 : 1,
+        backgroundColor: isPrimary
+          ? undefined
+          : pressed && !disabled
+            ? 'rgba(160,100,80,0.08)'
+            : 'transparent',
+        opacity: disabled ? 0.4 : pressed ? 0.8 : 1,
         ...(isPrimary && !disabled ? shadows.primaryButtonStrong : null),
-      }}
+      })}
     >
       {isPrimary && (
         <LinearGradient

@@ -38,7 +38,12 @@ export const SectionLabel: React.FC<SectionLabelProps> = ({ label, showChevron =
 
   if (onPress) {
     return (
-      <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} style={containerStyle}>
+      <Pressable
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        style={({ pressed }) => [containerStyle, pressed && { opacity: 0.6 }]}
+      >
         {content}
       </Pressable>
     )

@@ -19,6 +19,7 @@ interface Activity {
 }
 
 interface Session {
+  id: string
   date: string
   /** Star fill 0-100 */
   rating: number
@@ -38,6 +39,7 @@ export interface PartnerProfileScreenProps {
   recentSessions: Session[]
   onBack?: () => void
   onEdit?: () => void
+  onSessionPress?: (id: string) => void
 }
 
 /* ── main component ── */
@@ -54,6 +56,7 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
   recentSessions,
   onBack,
   onEdit,
+  onSessionPress,
 }) => (
   <View style={{
     flex: 1,
@@ -187,15 +190,24 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
           paddingRight: 40,
         }}
       >
-        {recentSessions.map((s, i) => (
-          <View key={i} style={{
-            flexShrink: 0, width: 155,
-            backgroundColor: colors.surface,
-            borderWidth: 1,
-            borderColor: 'rgba(160,100,80,0.15)',
-            borderRadius: 14, padding: 12,
-            flexDirection: 'column', gap: 6,
-          }}>
+        {recentSessions.map((s) => (
+          <Pressable
+            key={s.id}
+            onPress={() => onSessionPress?.(s.id)}
+            accessibilityRole="button"
+            style={({ pressed }) => ({
+              flexShrink: 0,
+              width: 155,
+              backgroundColor: pressed ? colors.surface2 : colors.surface,
+              borderWidth: 1,
+              borderColor: 'rgba(160,100,80,0.15)',
+              borderRadius: 14,
+              padding: 12,
+              flexDirection: 'column',
+              gap: 6,
+              opacity: pressed ? 0.85 : 1,
+            })}
+          >
             {/* Top row */}
             <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' }}>
               <Text style={{ fontSize: 12, color: colors.stone, fontWeight: '300', paddingTop: 2 }}>{s.date}</Text>
@@ -222,7 +234,7 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
                 paddingTop: 5, marginTop: 1,
               }}
             >{s.note}</Text>
-          </View>
+          </Pressable>
         ))}
       </ScrollView>
     </View>

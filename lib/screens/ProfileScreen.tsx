@@ -30,6 +30,7 @@ export interface RecentSessionPartner {
 }
 
 export interface RecentSession {
+  id: string
   partners: RecentSessionPartner[]
   date: string
   /** 0-100 percentage for the star fill width */
@@ -41,6 +42,7 @@ export interface RecentSession {
 export interface ProfileScreenProps {
   userName: string
   userInitial: string
+  userGradient?: string
   sinceDate: string
   tagline?: string
   stats: {
@@ -57,6 +59,7 @@ export interface ProfileScreenProps {
   onAddTag?: () => void
   onPartnersSection?: () => void
   onPartnerPress?: (index: number) => void
+  onSessionPress?: (id: string) => void
 }
 
 /* ── Inline icon helpers ── */
@@ -88,6 +91,7 @@ const AddIcon: React.FC<{ size?: number; color?: string }> = ({ size = 12, color
 export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   userName,
   userInitial,
+  userGradient = 'linear-gradient(135deg, #C07858, #7C4A5A)',
   sinceDate,
   tagline,
   stats,
@@ -100,6 +104,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   onAddTag,
   onPartnersSection,
   onPartnerPress,
+  onSessionPress,
 }) => {
   return (
     <View style={{
@@ -129,14 +134,16 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <Pressable
             onPress={onEdit}
-            style={{
-              backgroundColor: 'transparent',
+            accessibilityRole="button"
+            style={({ pressed }) => ({
+              backgroundColor: pressed ? 'rgba(160,100,80,0.12)' : 'transparent',
               borderWidth: 1,
               borderColor: 'rgba(160,100,80,0.3)',
               borderRadius: 9999,
               paddingVertical: 5,
               paddingHorizontal: 14,
-            }}
+              opacity: pressed ? 0.85 : 1,
+            })}
           >
             <Text style={{
               fontSize: 14,
@@ -148,14 +155,15 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
           <Pressable
             onPress={onSettings}
             accessibilityLabel="Settings"
-            style={{
+            style={({ pressed }) => ({
               width: 34,
               height: 34,
               borderRadius: 17,
               backgroundColor: colors.surface2,
               alignItems: 'center',
               justifyContent: 'center',
-            }}
+              opacity: pressed ? 0.7 : 1,
+            })}
           >
             <SettingsIcon />
           </Pressable>
@@ -173,7 +181,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
       }}>
         <AvatarCircle
           initials={userInitial}
-          gradient="linear-gradient(135deg, #C07858, #7C4A5A)"
+          gradient={userGradient}
           size={58}
           borderWidth={3}
         />
@@ -223,19 +231,25 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
           paddingRight: 40,
         }}>
           {partners.map((p, i) => (
-            <Pressable key={i} onPress={() => onPartnerPress?.(i)} style={{
-              flexShrink: 0,
-              width: 110,
-              backgroundColor: colors.surface,
-              borderWidth: 1,
-              borderColor: 'rgba(160,100,80,0.15)',
-              borderRadius: 14,
-              paddingVertical: 12,
-              paddingHorizontal: 10,
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 5,
-            }}>
+            <Pressable
+              key={i}
+              onPress={() => onPartnerPress?.(i)}
+              accessibilityRole="button"
+              style={({ pressed }) => ({
+                flexShrink: 0,
+                width: 110,
+                backgroundColor: pressed ? colors.surface2 : colors.surface,
+                borderWidth: 1,
+                borderColor: 'rgba(160,100,80,0.15)',
+                borderRadius: 14,
+                paddingVertical: 12,
+                paddingHorizontal: 10,
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 5,
+                opacity: pressed ? 0.85 : 1,
+              })}
+            >
               <AvatarCircle
                 initials={p.initials}
                 gradient={p.gradient}
@@ -252,9 +266,11 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
           {/* Add partner ghost card */}
           <Pressable
             onPress={onAddPartner}
-            style={{
+            accessibilityRole="button"
+            style={({ pressed }) => ({
               flexShrink: 0,
               width: 72,
+              backgroundColor: pressed ? 'rgba(160,100,80,0.08)' : 'transparent',
               borderWidth: 1.5,
               borderStyle: 'dashed',
               borderColor: 'rgba(160,100,80,0.28)',
@@ -264,7 +280,8 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               justifyContent: 'center',
               gap: 4,
               marginRight: 24,
-            }}
+              opacity: pressed ? 0.85 : 1,
+            })}
           >
             <AddCircleIcon />
             <Text style={{
@@ -290,22 +307,29 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
           {/* Add tag chip */}
           <Pressable
             onPress={onAddTag}
-            style={{
-              backgroundColor: 'transparent',
-              borderWidth: 1,
+            accessibilityRole="button"
+            style={({ pressed }) => ({
+              backgroundColor: pressed ? 'rgba(160,100,80,0.08)' : 'transparent',
+              borderWidth: 1.5,
               borderStyle: 'dashed',
-              borderColor: 'rgba(160,100,80,0.15)',
+              borderColor: 'rgba(160,100,80,0.28)',
               borderRadius: 9999,
               paddingVertical: 5,
               paddingHorizontal: 10,
               flexDirection: 'row',
               alignItems: 'center',
               gap: 5,
-              opacity: 0.5,
-            }}
+              opacity: pressed ? 0.85 : 1,
+            })}
           >
-            <AddIcon />
-            <Text style={{ fontSize: 12, fontWeight: '400', color: colors.stone }}>Add tag</Text>
+            <AddIcon color={colors.terra} />
+            <Text style={{
+              fontSize: 12,
+              fontWeight: '500',
+              letterSpacing: 0.5,
+              color: colors.terra,
+              opacity: 0.6,
+            }}>Add tag</Text>
           </Pressable>
         </View>
       </View>
@@ -318,18 +342,24 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
           paddingLeft: 24,
           paddingRight: 40,
         }}>
-          {recentSessions.map((session, i) => (
-            <View key={i} style={{
-              flexShrink: 0,
-              width: 150,
-              backgroundColor: colors.surface,
-              borderWidth: 1,
-              borderColor: 'rgba(160,100,80,0.15)',
-              borderRadius: 14,
-              padding: 12,
-              flexDirection: 'column',
-              gap: 7,
-            }}>
+          {recentSessions.map((session) => (
+            <Pressable
+              key={session.id}
+              onPress={() => onSessionPress?.(session.id)}
+              accessibilityRole="button"
+              style={({ pressed }) => ({
+                flexShrink: 0,
+                width: 150,
+                backgroundColor: pressed ? colors.surface2 : colors.surface,
+                borderWidth: 1,
+                borderColor: 'rgba(160,100,80,0.15)',
+                borderRadius: 14,
+                padding: 12,
+                flexDirection: 'column',
+                gap: 7,
+                opacity: pressed ? 0.85 : 1,
+              })}
+            >
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
                 <AvatarStack partners={session.partners} size={32} borderWidth={1.5} />
                 <Text style={{
@@ -364,7 +394,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                   marginTop: 2,
                 }}
               >{session.note}</Text>
-            </View>
+            </Pressable>
           ))}
         </ScrollView>
       </View>

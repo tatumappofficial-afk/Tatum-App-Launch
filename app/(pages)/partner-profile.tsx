@@ -80,6 +80,7 @@ export default function PartnerProfileRoute() {
 
   // Recent sessions
   const recentSessions = partnerEncounters.slice(0, 5).map(enc => ({
+    id: enc.id,
     date: new Date(enc.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     rating: enc.stars || 0,
     tags: enc.activities,
@@ -99,6 +100,7 @@ export default function PartnerProfileRoute() {
       recentSessions={recentSessions}
       onBack={() => router.back()}
       onEdit={() => router.push(`/(sheets)/edit-partner?id=${id}`)}
+      onSessionPress={(sessionId) => router.push(`/(pages)/session-detail?id=${sessionId}`)}
     />
   )
 }

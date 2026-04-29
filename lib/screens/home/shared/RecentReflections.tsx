@@ -15,14 +15,15 @@ export const RecentReflections: React.FC<RecentReflectionsProps> = ({ notes, onP
         key={n.id}
         onPress={() => onPress?.(n)}
         accessibilityRole="button"
-        style={{
-          backgroundColor: colors.surface,
+        style={({ pressed }) => ({
+          backgroundColor: pressed ? colors.surface2 : colors.surface,
           borderWidth: 1,
           borderColor: colors.border,
           borderRadius: 12,
           paddingVertical: 10,
           paddingHorizontal: 14,
-        }}
+          opacity: pressed ? 0.85 : 1,
+        })}
       >
         <Text
           numberOfLines={3}
