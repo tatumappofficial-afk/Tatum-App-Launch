@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import { useLiveQuery } from '@tanstack/react-db'
 import { Alert, StyleSheet, View, Text, TextInput, Pressable, ScrollView } from 'react-native'
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
+import { KeyboardAvoidingView, KeyboardStickyView } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Svg, { Line } from 'react-native-svg'
 import { generateId } from '@/src/utils/uuid'
@@ -166,7 +166,7 @@ export default function EditPartnerSheet() {
   const insets = useSafeAreaInsets()
 
   const sectionLabelStyle = {
-    fontSize: 8,
+    fontSize: 12,
     fontWeight: '500' as const,
     letterSpacing: 3,
     textTransform: 'uppercase' as const,
@@ -250,7 +250,7 @@ export default function EditPartnerSheet() {
                   />
                   <Text style={{
                     fontFamily: font('dmSans', '400'),
-                    fontSize: 12,
+                    fontSize: 14,
                     color: colors.ink,
                   }}>{p.displayName}</Text>
                 </View>
@@ -368,39 +368,41 @@ export default function EditPartnerSheet() {
         </View>
       </ScrollView>
 
-      {/* Footer */}
-      <View style={{
-        flexShrink: 0,
-        paddingTop: 10,
-        paddingHorizontal: 20,
-        paddingBottom: Math.max(insets.bottom, 10),
-        borderTopWidth: 1,
-        borderTopColor: 'rgba(160,100,80,0.1)',
-        backgroundColor: colors.warmSand,
-      }}>
-        <GradientButton
-          label={isEdit ? 'Save Changes' : 'Save Partner'}
-          onPress={handleSave}
-          height={50}
-          disabled={!displayName.trim()}
-        />
-        {isEdit && (
-          <Pressable
-            onPress={handleDelete}
-            style={{
-              alignItems: 'center',
-              paddingTop: 14,
-            }}
-          >
-            <Text style={{
-              fontSize: 13,
-              fontFamily: font('dmSans', '500'),
-              color: '#B04040',
-              letterSpacing: 0.3,
-            }}>Delete Partner</Text>
-          </Pressable>
-        )}
-      </View>
+      {/* Footer — slides up above the keyboard when typing */}
+      <KeyboardStickyView offset={{ closed: 0, opened: -Math.max(insets.bottom - 10, 0) }}>
+        <View style={{
+          flexShrink: 0,
+          paddingTop: 10,
+          paddingHorizontal: 20,
+          paddingBottom: Math.max(insets.bottom, 10),
+          borderTopWidth: 1,
+          borderTopColor: 'rgba(160,100,80,0.1)',
+          backgroundColor: colors.warmSand,
+        }}>
+          <GradientButton
+            label={isEdit ? 'Save Changes' : 'Save Partner'}
+            onPress={handleSave}
+            height={50}
+            disabled={!displayName.trim()}
+          />
+          {isEdit && (
+            <Pressable
+              onPress={handleDelete}
+              style={{
+                alignItems: 'center',
+                paddingTop: 14,
+              }}
+            >
+              <Text style={{
+                fontSize: 14,
+                fontFamily: font('dmSans', '500'),
+                color: '#B04040',
+                letterSpacing: 0.3,
+              }}>Delete Partner</Text>
+            </Pressable>
+          )}
+        </View>
+      </KeyboardStickyView>
 
       <SuccessOverlay visible={showSuccess} label={successLabel} />
     </KeyboardAvoidingView>

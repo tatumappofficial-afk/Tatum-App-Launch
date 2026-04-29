@@ -139,7 +139,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             }}
           >
             <Text style={{
-              fontSize: 11,
+              fontSize: 14,
               color: colors.terra,
               letterSpacing: 0.5,
               fontFamily: font('dmSans', '500'),
@@ -185,7 +185,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             lineHeight: 22,
           }}>{userName}</Text>
           <Text style={{
-            fontSize: 10,
+            fontSize: 12,
             fontWeight: '300',
             color: colors.stone,
             letterSpacing: 0.5,
@@ -194,7 +194,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
           {tagline && (
             <Text style={{
               fontFamily: fontFamily.playfair,
-              fontSize: 11,
+              fontSize: 14,
               fontStyle: 'italic',
               color: colors.mauve,
               marginTop: 3,
@@ -243,7 +243,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 borderWidth={2}
               />
               <Text style={{
-                fontSize: 9,
+                fontSize: 12,
                 color: colors.stone,
                 fontWeight: '300',
               }}>{p.since}</Text>
@@ -268,7 +268,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
           >
             <AddCircleIcon />
             <Text style={{
-              fontSize: 8,
+              fontSize: 12,
               fontWeight: '500',
               letterSpacing: 1,
               textTransform: 'uppercase',
@@ -305,7 +305,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             }}
           >
             <AddIcon />
-            <Text style={{ fontSize: 10, fontWeight: '400', color: colors.stone }}>Add tag</Text>
+            <Text style={{ fontSize: 12, fontWeight: '400', color: colors.stone }}>Add tag</Text>
           </Pressable>
         </View>
       </View>
@@ -333,7 +333,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
                 <AvatarStack partners={session.partners} size={32} borderWidth={1.5} />
                 <Text style={{
-                  fontSize: 8.5,
+                  fontSize: 12,
                   color: colors.stone,
                   fontWeight: '300',
                 }}>{session.date}</Text>
@@ -342,7 +342,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4, overflow: 'hidden', maxHeight: 52 }}>
                 {session.tags.map((tag, j) => (
                   <Text key={j} style={{
-                    fontSize: 13,
+                    fontSize: 14,
                     backgroundColor: colors.surface2,
                     borderRadius: 6,
                     paddingVertical: 2,
@@ -353,7 +353,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               <Text
                 numberOfLines={2}
                 style={{
-                  fontSize: 10,
+                  fontSize: 12,
                   fontWeight: '300',
                   color: colors.stone,
                   fontStyle: 'italic',
