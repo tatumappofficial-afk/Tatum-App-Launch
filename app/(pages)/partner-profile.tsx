@@ -101,6 +101,7 @@ export default function PartnerProfileRoute() {
       onBack={() => router.back()}
       onEdit={() => router.push(`/(sheets)/edit-partner?id=${id}`)}
       onSessionPress={(sessionId) => router.push(`/(pages)/session-detail?id=${sessionId}`)}
+      onViewAllSessions={() => router.push(`/(pages)/sessions-list?partnerId=${id}`)}
     />
   )
 }

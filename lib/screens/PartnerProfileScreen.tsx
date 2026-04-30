@@ -40,6 +40,7 @@ export interface PartnerProfileScreenProps {
   onBack?: () => void
   onEdit?: () => void
   onSessionPress?: (id: string) => void
+  onViewAllSessions?: () => void
 }
 
 /* ── main component ── */
@@ -57,6 +58,7 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
   onBack,
   onEdit,
   onSessionPress,
+  onViewAllSessions,
 }) => (
   <View style={{
     flex: 1,
@@ -179,7 +181,11 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
     </View>
 
     {/* Recent Sessions */}
-    <SectionLabel label="Recent Sessions" />
+    <SectionLabel
+      label="Recent Sessions"
+      showChevron={Boolean(onViewAllSessions) && recentSessions.length > 0}
+      onPress={recentSessions.length > 0 ? onViewAllSessions : undefined}
+    />
     <View style={{ flexShrink: 0, overflow: 'hidden' }}>
       <ScrollView
         horizontal

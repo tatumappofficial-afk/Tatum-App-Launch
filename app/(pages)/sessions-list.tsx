@@ -40,7 +40,7 @@ function titleFor(period: Period, anchor: Date, now: Date): string {
 
 export default function SessionsListRoute() {
   const router = useRouter()
-  const params = useLocalSearchParams<{ period?: string; anchor?: string }>()
+  const params = useLocalSearchParams<{ period?: string; anchor?: string; partnerId?: string }>()
 
   const { data: allEncounters = [] } = useLiveQuery((q) =>
     q.from({ encounters }).select(({ encounters }) => ({ ...encounters })),
@@ -48,6 +48,9 @@ export default function SessionsListRoute() {
   const { data: allPartners = [] } = useLiveQuery((q) =>
     q.from({ partners }).select(({ partners }) => ({ ...partners })),
   )
+
+  const partnerId = params.partnerId
+  const partnerFiltered = Boolean(partnerId)
 
   const period: Period = isValidPeriod(params.period) ? params.period : 'week'
   const anchor = useMemo(() => {
@@ -67,14 +70,16 @@ export default function SessionsListRoute() {
     [period, anchor, allEncounters, now],
   )
 
-  const inWindow = useMemo(
-    () => (window ? filterByWindow(allEncounters, window) : []),
-    [allEncounters, window],
-  )
+  const filteredEncounters = useMemo(() => {
+    if (partnerFiltered) {
+      return allEncounters.filter(e => e.partnerIds.includes(partnerId!))
+    }
+    return window ? filterByWindow(allEncounters, window) : []
+  }, [partnerFiltered, partnerId, allEncounters, window])
 
   const entries: SessionsListEntry[] = useMemo(() => {
     const partnerById = new Map(allPartners.map(p => [p.id, p]))
-    return inWindow
+    return filteredEncounters
       .slice()
       .sort((a, b) => b.date.localeCompare(a.date))
       .map(enc => {
@@ -98,14 +103,21 @@ export default function SessionsListRoute() {
           note: enc.notes ?? undefined,
         }
       })
-  }, [inWindow, allPartners])
+  }, [filteredEncounters, allPartners])
 
-  const title = titleFor(period, anchor, now)
-  const caption = formatPeriodCaption(period, anchor, {
-    calendarStartDay: CALENDAR_START_DAY,
-    now,
-  })
-  const subtitle = `${caption} · ${entries.length} ${entries.length === 1 ? 'session' : 'sessions'}`
+  const focusedPartner = partnerFiltered ? allPartners.find(p => p.id === partnerId) : undefined
+  const title = partnerFiltered
+    ? (focusedPartner ? `Sessions with ${focusedPartner.displayName}` : 'Sessions')
+    : titleFor(period, anchor, now)
+  const subtitle = partnerFiltered
+    ? `${entries.length} ${entries.length === 1 ? 'session' : 'sessions'}`
+    : (() => {
+        const caption = formatPeriodCaption(period, anchor, {
+          calendarStartDay: CALENDAR_START_DAY,
+          now,
+        })
+        return `${caption} · ${entries.length} ${entries.length === 1 ? 'session' : 'sessions'}`
+      })()
 
   return (
     <SessionsListScreen
