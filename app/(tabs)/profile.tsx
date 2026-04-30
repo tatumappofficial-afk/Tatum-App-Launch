@@ -1,7 +1,8 @@
 import { useLiveQuery } from '@tanstack/react-db'
 import { useRouter } from 'expo-router'
 import { ProfileScreen } from '@/lib/screens/ProfileScreen'
-import { activityTags, encounters, partners } from '@/src/db'
+import { activityTags, encounters, partners, userProfiles } from '@/src/db'
+import { deriveInitials } from '@/src/utils/initials'
 
 export default function ProfileRoute() {
   const router = useRouter()
@@ -15,6 +16,14 @@ export default function ProfileRoute() {
   const { data: allTags = [] } = useLiveQuery((q) =>
     q.from({ activityTags }).select(({ activityTags }) => ({ ...activityTags }))
   )
+
+  const { data: profiles = [] } = useLiveQuery((q) =>
+    q.from({ userProfiles }).select(({ userProfiles }) => ({ ...userProfiles }))
+  )
+  const profile = profiles.find(p => p.id === 'default')
+  const userName = profile?.displayName ?? 'Alanna'
+  const userInitial = profile?.avatarValue ?? deriveInitials(userName) ?? 'A'
+  const userGradient = profile?.avatarGradient ?? 'linear-gradient(135deg, #C07858, #7C4A5A)'
 
   // All active activity tags from the DB, sorted by sortOrder
   const activityTagList = allTags
@@ -39,6 +48,7 @@ export default function ProfileRoute() {
         .filter((p): p is NonNullable<typeof p> => Boolean(p))
         .map(p => ({ initials: p.avatarValue, gradient: p.avatarGradient }))
       return {
+        id: enc.id,
         partners: sessionPartners,
         date: new Date(enc.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         rating: enc.stars || 0,
@@ -54,8 +64,9 @@ export default function ProfileRoute() {
 
   return (
     <ProfileScreen
-      userName="Alanna"
-      userInitial="A"
+      userName={userName}
+      userInitial={userInitial}
+      userGradient={userGradient}
       sinceDate="April 2026"
       stats={{
         sessions: allEncounters.length,
@@ -74,6 +85,7 @@ export default function ProfileRoute() {
         const partner = allPartners.filter(p => p.isActive)[index]
         if (partner) router.push(`/(pages)/partner-profile?id=${partner.id}`)
       }}
+      onSessionPress={(id) => router.push(`/(pages)/session-detail?id=${id}`)}
     />
   )
 }

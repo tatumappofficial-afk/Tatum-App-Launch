@@ -41,10 +41,10 @@ const ViewMoreCard: React.FC<{ count: number; onPress: () => void }> = ({ count,
     onPress={onPress}
     accessibilityRole="button"
     accessibilityLabel={`View ${count} more partners`}
-    style={{
+    style={({ pressed }) => ({
       flexShrink: 0,
       width: 168,
-      backgroundColor: colors.surface,
+      backgroundColor: pressed ? colors.surface2 : colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
       borderStyle: 'dashed',
@@ -54,7 +54,8 @@ const ViewMoreCard: React.FC<{ count: number; onPress: () => void }> = ({ count,
       alignItems: 'center',
       justifyContent: 'center',
       gap: 6,
-    }}
+      opacity: pressed ? 0.85 : 1,
+    })}
   >
     <Text style={{
       fontFamily: font('playfair', '600'),
@@ -81,10 +82,10 @@ const RichPartnerCard: React.FC<{ stats: PartnerLifetimeStats; onPress?: () => v
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={partner.displayName}
-      style={{
+      style={({ pressed }) => ({
         flexShrink: 0,
         width: 168,
-        backgroundColor: colors.surface,
+        backgroundColor: pressed ? colors.surface2 : colors.surface,
         borderWidth: 1,
         borderColor: colors.border,
         borderRadius: 16,
@@ -93,7 +94,8 @@ const RichPartnerCard: React.FC<{ stats: PartnerLifetimeStats; onPress?: () => v
         alignItems: 'center',
         gap: 8,
         overflow: 'hidden',
-      }}
+        opacity: pressed ? 0.85 : 1,
+      })}
     >
       <AvatarCircle
         initials={partner.avatarValue}

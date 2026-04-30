@@ -41,10 +41,10 @@ const ViewMoreChip: React.FC<{ count: number; onPress: () => void }> = ({ count,
     onPress={onPress}
     accessibilityRole="button"
     accessibilityLabel={`View ${count} more partners`}
-    style={{
+    style={({ pressed }) => ({
       flexShrink: 0,
       width: 96,
-      backgroundColor: colors.surface,
+      backgroundColor: pressed ? colors.surface2 : colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
       borderStyle: 'dashed',
@@ -54,7 +54,8 @@ const ViewMoreChip: React.FC<{ count: number; onPress: () => void }> = ({ count,
       alignItems: 'center',
       justifyContent: 'center',
       gap: 4,
-    }}
+      opacity: pressed ? 0.85 : 1,
+    })}
   >
     <Text style={{
       fontFamily: font('playfair', '600'),
@@ -78,18 +79,21 @@ const PartnerChip: React.FC<{ partner: Partner; onPress?: () => void }> = ({ par
     onPress={onPress}
     accessibilityRole="button"
     accessibilityLabel={partner.displayName}
-    style={{
-      flexShrink: 0,
-      width: 96,
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 14,
-      paddingVertical: 10,
-      paddingHorizontal: 6,
-      alignItems: 'center',
-      gap: 6,
-      opacity: partner.isActive ? 1 : 0.6,
+    style={({ pressed }) => {
+      const baseOpacity = partner.isActive ? 1 : 0.6
+      return {
+        flexShrink: 0,
+        width: 96,
+        backgroundColor: pressed ? colors.surface2 : colors.surface,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 14,
+        paddingVertical: 10,
+        paddingHorizontal: 6,
+        alignItems: 'center',
+        gap: 6,
+        opacity: pressed ? baseOpacity * 0.85 : baseOpacity,
+      }
     }}
   >
     <AvatarCircle

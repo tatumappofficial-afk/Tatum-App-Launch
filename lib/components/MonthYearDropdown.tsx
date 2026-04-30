@@ -1,8 +1,10 @@
-import React from 'react'
+import React, { useRef, useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Polyline } from 'react-native-svg'
 import { colors, font, gradientPoints, gradients } from '../theme'
+
+const PICK_FEEDBACK_MS = 220
 
 const MONTH_SHORT = [
   'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -35,6 +37,19 @@ export const MonthYearDropdown: React.FC<MonthYearDropdownProps> = ({
 }) => {
   const canPrev = year > minYear
   const canNext = year < maxYear
+
+  const [pendingMonth, setPendingMonth] = useState<number | null>(null)
+  const pickTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  function handleMonthPress(m: number) {
+    if (pickTimer.current) clearTimeout(pickTimer.current)
+    setPendingMonth(m)
+    pickTimer.current = setTimeout(() => {
+      pickTimer.current = null
+      setPendingMonth(null)
+      onSelect(m, year)
+    }, PICK_FEEDBACK_MS)
+  }
 
   return (
     <View style={{
@@ -79,25 +94,27 @@ export const MonthYearDropdown: React.FC<MonthYearDropdownProps> = ({
         {MONTH_SHORT.map((label, m) => {
           const disabled = year === maxYear && currentMonthInMaxYear !== undefined && m > currentMonthInMaxYear
           const isSelected = selectedMonth === m
+          const isPending = pendingMonth === m
+          const showHighlight = isSelected || isPending
           return (
             <View key={m} style={{ width: '25%', padding: 4 }}>
               <Pressable
-                onPress={() => !disabled && onSelect(m, year)}
-                disabled={disabled}
+                onPress={() => !disabled && handleMonthPress(m)}
+                disabled={disabled || pendingMonth !== null}
                 accessibilityRole="button"
                 accessibilityLabel={`${label} ${year}`}
-                accessibilityState={{ selected: isSelected, disabled }}
+                accessibilityState={{ selected: showHighlight, disabled }}
                 style={{
                   height: 36,
                   borderRadius: 9999,
                   alignItems: 'center',
                   justifyContent: 'center',
                   overflow: 'hidden',
-                  backgroundColor: isSelected ? undefined : colors.surface2,
+                  backgroundColor: showHighlight ? undefined : colors.surface2,
                   opacity: disabled ? 0.35 : 1,
                 }}
               >
-                {isSelected && (
+                {showHighlight && (
                   <LinearGradient
                     colors={gradients.primaryCta}
                     start={gradientPoints.diagonal.start}
@@ -108,7 +125,7 @@ export const MonthYearDropdown: React.FC<MonthYearDropdownProps> = ({
                 <Text style={{
                   fontFamily: font('dmSans', '500'),
                   fontSize: 14,
-                  color: isSelected ? colors.white : colors.ink,
+                  color: showHighlight ? colors.white : colors.ink,
                   letterSpacing: 0.4,
                 }}>
                   {label}

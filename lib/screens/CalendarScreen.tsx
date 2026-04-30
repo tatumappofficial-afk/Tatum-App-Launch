@@ -111,32 +111,34 @@ const CalendarHeader: React.FC<{
       <Pressable
         onPress={onPrev}
         accessibilityLabel="Previous month"
-        style={{
+        style={({ pressed }) => ({
           width: 30,
           height: 30,
           borderRadius: 15,
-          backgroundColor: colors.surface,
+          backgroundColor: pressed ? colors.surface2 : colors.surface,
           borderWidth: 1,
           borderColor: 'rgba(160,100,80,0.18)',
           alignItems: 'center',
           justifyContent: 'center',
-        }}
+          opacity: pressed ? 0.85 : 1,
+        })}
       >
         <ChevronIcon direction="back" />
       </Pressable>
       <Pressable
         onPress={onNext}
         accessibilityLabel="Next month"
-        style={{
+        style={({ pressed }) => ({
           width: 30,
           height: 30,
           borderRadius: 15,
-          backgroundColor: colors.surface,
+          backgroundColor: pressed ? colors.surface2 : colors.surface,
           borderWidth: 1,
           borderColor: 'rgba(160,100,80,0.18)',
           alignItems: 'center',
           justifyContent: 'center',
-        }}
+          opacity: pressed ? 0.85 : 1,
+        })}
       >
         <ChevronIcon direction="forward" />
       </Pressable>
@@ -210,8 +212,9 @@ const QuickLogWidget: React.FC<{ onQuickLog?: (emoji: string) => void; emojis?: 
 const SessionRow: React.FC<{ session: DaySession; onPress?: () => void }> = ({ session, onPress }) => (
   <Pressable
     onPress={onPress}
-    style={{
-      backgroundColor: colors.surface,
+    accessibilityRole="button"
+    style={({ pressed }) => ({
+      backgroundColor: pressed ? colors.surface2 : colors.surface,
       borderWidth: 1,
       borderColor: 'rgba(160,100,80,0.15)',
       borderRadius: 14,
@@ -220,7 +223,8 @@ const SessionRow: React.FC<{ session: DaySession; onPress?: () => void }> = ({ s
       marginHorizontal: 16,
       marginBottom: 8,
       gap: 10,
-    }}
+      opacity: pressed ? 0.85 : 1,
+    })}
   >
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
       <AvatarStack partners={session.partners} size={36} borderWidth={2} />

@@ -30,16 +30,17 @@ export const RecentSessionsScroller: React.FC<RecentSessionsScrollerProps> = ({
               key={s.id}
               onPress={() => onPress?.(s)}
               accessibilityRole="button"
-              style={{
+              style={({ pressed }) => ({
                 flexShrink: 0,
                 width: 158,
-                backgroundColor: colors.surface,
+                backgroundColor: pressed ? colors.surface2 : colors.surface,
                 borderWidth: 1,
                 borderColor: colors.border,
                 borderRadius: 16,
                 padding: 14,
                 gap: 10,
-              }}
+                opacity: pressed ? 0.85 : 1,
+              })}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
                 <AvatarStack partners={sessionPartners} size={36} borderWidth={2} />

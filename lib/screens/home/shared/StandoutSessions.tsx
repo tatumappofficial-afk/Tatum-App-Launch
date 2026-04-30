@@ -26,16 +26,17 @@ export const StandoutSessions: React.FC<StandoutSessionsProps> = ({ sessions, pa
               key={s.id}
               onPress={() => onPress?.(s)}
               accessibilityRole="button"
-              style={{
+              style={({ pressed }) => ({
                 flexShrink: 0,
                 width: 158,
-                backgroundColor: colors.surface,
+                backgroundColor: pressed ? colors.surface2 : colors.surface,
                 borderWidth: 1,
                 borderColor: colors.border,
                 borderRadius: 16,
                 padding: 14,
                 gap: 8,
-              }}
+                opacity: pressed ? 0.85 : 1,
+              })}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
                 <AvatarStack partners={sessionPartners} size={32} borderWidth={2} />
