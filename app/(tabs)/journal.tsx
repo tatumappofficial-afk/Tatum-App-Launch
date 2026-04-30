@@ -31,7 +31,7 @@ export default function JournalRoute() {
           day: 'numeric',
         }),
         isoDate: enc.date,
-        score: enc.stars || 0,
+        score: enc.stars && enc.stars > 0 ? enc.stars : null,
         maxScore: 10,
         tags: enc.activities,
         note: enc.notes ?? undefined,

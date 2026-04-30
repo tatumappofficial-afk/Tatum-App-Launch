@@ -149,10 +149,6 @@ export default function LogSessionRoute() {
       Alert.alert('Missing activity', 'Must choose one activity')
       return
     }
-    if (selectedPartnerIds.length === 0) {
-      Alert.alert('Missing partner', 'Select at least one partner')
-      return
-    }
 
     const nowStr = new Date().toISOString()
     const dateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`

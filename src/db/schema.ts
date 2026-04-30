@@ -43,7 +43,7 @@ export const EncounterSchema = z.object({
   id: z.string().uuid(),
   date: z.string(), // ISO date YYYY-MM-DD
   activities: z.array(z.string()).min(1), // emoji codes, at least one required
-  partnerIds: z.array(z.string().uuid()).min(1), // at least one partner; "Solo" is a regular partner row
+  partnerIds: z.array(z.string().uuid()), // optional — sessions can be logged without a partner
   stars: z.number().min(0).max(10).nullable(),
   notes: z.string().max(3000).nullable(),
   createdAt: z.string(),
@@ -126,6 +126,8 @@ export type UserSettings = z.infer<typeof UserSettingsSchema>
 export const UserProfileSchema = z.object({
   id: z.string().uuid(),
   displayName: z.string().nullable(),
+  avatarValue: z.string().nullable(),
+  avatarGradient: z.string().nullable(),
   createdAt: z.string(),
   tier: z.enum(['free', 'premium']),
   premiumExpiresAt: z.string().nullable(),

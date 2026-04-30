@@ -1,7 +1,7 @@
 import React from 'react'
-import { StyleSheet, View, Text, Pressable } from 'react-native'
+import { ScrollView, StyleSheet, View, Text, Pressable } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
-import Svg, { Path, Polyline, Rect } from 'react-native-svg'
+import Svg, { Line, Path, Polyline, Rect } from 'react-native-svg'
 import { colors, font, gradientPoints, gradients } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { StatusBarSpacer } from './shared/StatusBarSpacer'
@@ -19,7 +19,8 @@ export interface SettingsScreenProps {
   onChangePasscode?: () => void
   onToggleBiometrics?: () => void
   onSubmitFeedback?: () => void
-  onPrivacyInfo?: () => void
+  onPrivacyPolicy?: () => void
+  onTerms?: () => void
   onEraseEverything?: () => void
 }
 
@@ -53,16 +54,28 @@ const ChatbubbleIcon: React.FC = () => (
   </Svg>
 )
 
-const ShieldIcon: React.FC = () => (
-  <Svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke={colors.stone} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-    <Path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-  </Svg>
-)
-
 const TrashIcon: React.FC = () => (
   <Svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke={colors.mauve} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
     <Polyline points="3 6 5 6 21 6" />
     <Path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+  </Svg>
+)
+
+const DocumentIcon: React.FC<{ stroke?: string }> = ({ stroke = colors.terra }) => (
+  <Svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+    <Polyline points="14 2 14 8 20 8" />
+    <Line x1="9" y1="13" x2="15" y2="13" />
+    <Line x1="9" y1="17" x2="13" y2="17" />
+  </Svg>
+)
+
+/** "Open in new" / external-link icon — signals that tapping leaves the app. */
+const ExternalLinkIcon: React.FC<{ color?: string }> = ({ color = '#C4B0A0' }) => (
+  <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
+    <Polyline points="15 3 21 3 21 9" />
+    <Line x1="10" y1="14" x2="21" y2="3" />
   </Svg>
 )
 
@@ -75,7 +88,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   onChangePasscode,
   onToggleBiometrics,
   onSubmitFeedback,
-  onPrivacyInfo,
+  onPrivacyPolicy,
+  onTerms,
   onEraseEverything,
 }) => {
   return (
@@ -108,6 +122,11 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         <View style={{ width: 34 }} />
       </View>
 
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 24 }}
+        showsVerticalScrollIndicator={false}
+      >
       {/* ── Pro Membership Card ── */}
       <View style={{ marginTop: 14, flexShrink: 0 }}>
         <Pressable
@@ -172,7 +191,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               fontWeight: '300',
               color: 'rgba(255,255,255,0.7)',
               marginTop: 2,
-            }}>$4.99 / month {'\u00B7'} Renews Apr 18</Text>
+            }}>Lifetime access · $24.99 paid</Text>
           </View>
           {/* Arrow */}
           <ChevronForwardIcon color="rgba(255,255,255,0.6)" />
@@ -274,14 +293,6 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           overflow: 'hidden',
         }}>
           <SettingsRow
-            icon={<ShieldIcon />}
-            iconBg="rgba(160,100,80,0.08)"
-            title="Privacy and Data Info"
-            subtitle="How Tatum handles your information"
-            trailing={<ChevronForwardIcon />}
-            onPress={onPrivacyInfo}
-          />
-          <SettingsRow
             icon={<TrashIcon />}
             iconBg="rgba(176,112,128,0.1)"
             title="Erase Everything"
@@ -296,12 +307,43 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         </View>
       </View>
 
+      {/* ── Legal Section ── */}
+      <SectionLabel label="Legal" />
+      <View style={{
+        backgroundColor: colors.surface,
+        borderWidth: 1,
+        borderColor: 'rgba(160,100,80,0.15)',
+        borderRadius: 16,
+        marginHorizontal: 20,
+        overflow: 'hidden',
+        flexShrink: 0,
+      }}>
+        <SettingsRow
+          icon={<DocumentIcon stroke={colors.terra} />}
+          iconBg="rgba(192,120,88,0.1)"
+          title="Privacy Policy"
+          subtitle="How Tatum handles your information"
+          trailing={<ExternalLinkIcon />}
+          onPress={onPrivacyPolicy}
+        />
+        <SettingsRow
+          icon={<DocumentIcon stroke={colors.stone} />}
+          iconBg="rgba(154,136,120,0.12)"
+          title="Terms & Conditions"
+          subtitle="Opens in your browser"
+          trailing={<ExternalLinkIcon />}
+          onPress={onTerms}
+          showBorder={false}
+        />
+      </View>
 
-      {/* ── Footer ── */}
+
+      {/* ── Footer ── pushes to bottom on short content via flexGrow, scrolls with content on overflow */}
       <View style={{
         flex: 1,
         alignItems: 'center',
         justifyContent: 'flex-end',
+        paddingTop: 24,
         paddingBottom: 4,
       }}>
         <Text style={{
@@ -315,6 +357,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           Tatum v1.0.0 {'\u00B7'} {'\u00A9'} 2026 Tatum
         </Text>
       </View>
+      </ScrollView>
 
     </View>
   )

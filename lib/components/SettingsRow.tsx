@@ -25,14 +25,20 @@ export const SettingsRow: React.FC<SettingsRowProps> = ({
 }) => (
   <Pressable
     onPress={onPress}
-    style={{
+    accessibilityRole={onPress ? 'button' : undefined}
+    accessibilityLabel={title}
+    android_ripple={{ color: 'rgba(192,120,88,0.12)' }}
+    style={({ pressed }) => ({
       flexDirection: 'row',
       alignItems: 'center',
       padding: 14,
       paddingHorizontal: 16,
       borderBottomWidth: showBorder ? 1 : 0,
       borderBottomColor: 'rgba(160,100,80,0.1)',
-    }}
+      // Press feedback: subtle dim + warm tint, only when there's an action.
+      backgroundColor: pressed && onPress ? 'rgba(192,120,88,0.08)' : 'transparent',
+      opacity: pressed && onPress ? 0.85 : 1,
+    })}
   >
     <View style={{
       width: 32,

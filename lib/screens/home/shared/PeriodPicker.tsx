@@ -2,6 +2,7 @@ import React from 'react'
 import { DatePickerDropdown } from '../../../components/DatePickerDropdown'
 import { MonthYearDropdown } from '../../../components/MonthYearDropdown'
 import { YearDropdown } from '../../../components/YearDropdown'
+import type { Encounter } from '@/src/db/schema'
 import type { CalendarStartDay, Period } from '../../../stats'
 
 export interface PeriodPickerProps {
@@ -15,6 +16,8 @@ export interface PeriodPickerProps {
   /** "Today" (any Date) used to determine the forward boundary in pickers. */
   now: Date
   calendarStartDay: CalendarStartDay
+  /** All encounters — used by the week picker to render emoji previews on days. */
+  encounters?: Encounter[]
   onAnchorChange: (next: Date) => void
 }
 
@@ -39,6 +42,7 @@ const WeekPicker: React.FC<PeriodPickerProps> = ({
   minYear,
   maxYear,
   now,
+  encounters,
   onAnchorChange,
 }) => {
   const [view, setView] = React.useState({
@@ -67,6 +71,29 @@ const WeekPicker: React.FC<PeriodPickerProps> = ({
     [minYear, maxYear, now],
   )
 
+  // Build emoji previews for the visible month from encounters.
+  const loggedDays = React.useMemo(() => {
+    if (!encounters || encounters.length === 0) return []
+    const monthStr = `${view.year}-${String(view.month + 1).padStart(2, '0')}`
+    const monthEncounters = encounters.filter(e => e.date.startsWith(monthStr))
+    const map = new Map<number, { emojis: string[]; count: number }>()
+    for (const enc of monthEncounters) {
+      const day = parseInt(enc.date.split('-')[2], 10)
+      const existing = map.get(day)
+      if (existing) {
+        existing.emojis.push(...enc.activities)
+        existing.count++
+      } else {
+        map.set(day, { emojis: [...enc.activities], count: 1 })
+      }
+    }
+    return [...map.entries()].map(([day, data]) => ({
+      day,
+      emoji: data.emojis[0] || '✨',
+      hasMultiple: data.count > 1 || data.emojis.length > 1,
+    }))
+  }, [encounters, view.month, view.year])
+
   const isCurrentMonth = view.month === now.getMonth() && view.year === now.getFullYear()
   const showSelected = anchor.getMonth() === view.month && anchor.getFullYear() === view.year
 
@@ -76,6 +103,7 @@ const WeekPicker: React.FC<PeriodPickerProps> = ({
       year={view.year}
       today={isCurrentMonth ? now.getDate() : undefined}
       selectedDay={showSelected ? anchor.getDate() : undefined}
+      loggedDays={loggedDays}
       onDaySelect={(day) => onAnchorChange(new Date(view.year, view.month, day))}
       onMonthChange={stepMonth}
       mode="week"

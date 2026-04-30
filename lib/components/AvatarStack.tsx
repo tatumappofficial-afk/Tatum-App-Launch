@@ -22,7 +22,26 @@ export const AvatarStack: React.FC<AvatarStackProps> = ({
   borderWidth = 2,
   max = 3,
 }) => {
-  if (partners.length === 0) return null
+  // Solo session — render a sparkle in a stone-colored circle so the layout
+  // still has an avatar slot.
+  if (partners.length === 0) {
+    return (
+      <View
+        style={{
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          backgroundColor: colors.surface2,
+          borderWidth,
+          borderColor: colors.white,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Text style={{ fontSize: Math.round(size * 0.45) }}>✨</Text>
+      </View>
+    )
+  }
 
   const visible = partners.slice(0, max)
   const overflow = partners.length - visible.length
