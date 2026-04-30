@@ -32,6 +32,8 @@ function AndroidSheetChrome({ children }: { children: React.ReactNode }) {
   }
 
   const panGesture = Gesture.Pan()
+    .hitSlop({ bottom: 30 })
+    .activeOffsetY([10, Infinity])
     .onUpdate((event) => {
       if (dismissing.value) return
       if (event.translationY > 0) {
