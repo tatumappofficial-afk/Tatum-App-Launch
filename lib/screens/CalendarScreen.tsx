@@ -1,7 +1,9 @@
-import React from 'react'
+import React, { useCallback, useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
+import * as Haptics from 'expo-haptics'
 import Svg, { Polyline } from 'react-native-svg'
+import { Draggable } from 'react-native-reanimated-dnd'
 import { colors, font, fontFamily, gradientPoints, gradients, typography } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { StatusBarSpacer } from './shared/StatusBarSpacer'
@@ -40,6 +42,9 @@ export interface CalendarScreenProps {
   month: number       // 1-12
   year: number
   today?: number
+  /** True when the rendered month is the current real-world month. Combined
+   *  with `today`, gates drag-and-drop drops on future cells. */
+  isCurrentMonth?: boolean
   loggedDays?: LoggedDay[]
   selectedDay?: number | null
   selectedDayLabel?: string
@@ -48,6 +53,8 @@ export interface CalendarScreenProps {
   onNextMonth?: () => void
   onDayPress?: (day: number) => void
   onQuickLog?: (emoji: string) => void
+  /** Fires when an emoji chip is dropped onto a day cell via drag-and-drop. */
+  onDayDrop?: (day: number, emoji: string) => void
   onSessionPress?: (id: string) => void
   quickLogEmojis?: string[]
 }
@@ -170,7 +177,14 @@ const Legend: React.FC = () => (
   </View>
 )
 
-const QuickLogWidget: React.FC<{ onQuickLog?: (emoji: string) => void; emojis?: string[] }> = ({ onQuickLog, emojis = [] }) => (
+interface QuickLogWidgetProps {
+  onQuickLog?: (emoji: string) => void
+  emojis?: string[]
+  onDragStart?: () => void
+  onDragEnd?: () => void
+}
+
+const QuickLogWidget: React.FC<QuickLogWidgetProps> = ({ onQuickLog, emojis = [], onDragStart, onDragEnd }) => (
   <View style={{
     backgroundColor: colors.surface,
     borderRadius: 18,
@@ -201,7 +215,18 @@ const QuickLogWidget: React.FC<{ onQuickLog?: (emoji: string) => void; emojis?: 
     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
       <View style={{ flexDirection: 'row', gap: 7 }}>
         {emojis.map((emoji, i) => (
-          <EmojiChip key={i} emoji={emoji} size={46} borderRadius={12} onPress={() => onQuickLog?.(emoji)} />
+          <Draggable<string>
+            key={i}
+            data={emoji}
+            preDragDelay={250}
+            onDragStart={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+              onDragStart?.()
+            }}
+            onDragEnd={() => onDragEnd?.()}
+          >
+            <EmojiChip emoji={emoji} size={46} borderRadius={12} onPress={() => onQuickLog?.(emoji)} />
+          </Draggable>
         ))}
       </View>
     </ScrollView>
@@ -259,6 +284,7 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
   month,
   year,
   today,
+  isCurrentMonth = false,
   loggedDays = [],
   selectedDay,
   selectedDayLabel,
@@ -267,9 +293,15 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
   onNextMonth,
   onDayPress,
   onQuickLog,
+  onDayDrop,
   onSessionPress,
   quickLogEmojis = [],
-}) => (
+}) => {
+  const [isDragging, setIsDragging] = useState(false)
+  const handleDragStart = useCallback(() => setIsDragging(true), [])
+  const handleDragEnd = useCallback(() => setIsDragging(false), [])
+
+  return (
   <View style={{
     width: '100%',
     flex: 1,
@@ -288,9 +320,12 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
           month={month - 1}
           year={year}
           today={today}
+          isCurrentMonth={isCurrentMonth}
           selectedDay={selectedDay ?? undefined}
           loggedDays={loggedDays}
           onDayPress={onDayPress}
+          onDayDrop={onDayDrop}
+          isDragging={isDragging}
         />
       </View>
       <Legend />
@@ -299,7 +334,12 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
     <View style={{ height: 1, backgroundColor: 'rgba(160,100,80,0.12)', marginHorizontal: 22, marginTop: 10, flexShrink: 0 }} />
 
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 16 }}>
-      <QuickLogWidget onQuickLog={onQuickLog} emojis={quickLogEmojis} />
+      <QuickLogWidget
+        onQuickLog={onQuickLog}
+        emojis={quickLogEmojis}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      />
 
       {selectedDay != null && (
         <>
@@ -322,4 +362,5 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
     </ScrollView>
 
   </View>
-)
+  )
+}

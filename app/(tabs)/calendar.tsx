@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import * as Haptics from 'expo-haptics'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useRouter } from 'expo-router'
 import { generateId as uuid } from '@/src/utils/uuid'
@@ -82,13 +83,9 @@ export default function CalendarRoute() {
     setSelectedDay(1)
   }
 
-  function handleQuickLog(emoji: string) {
+  function insertQuickEncounter(emoji: string, dateStr: string) {
     if (allPartners.length === 0) return // can't log without a partner
-    const now = new Date()
-    const nowStr = now.toISOString()
-    // Encounter.date is local-calendar 'YYYY-MM-DD' (see lib/stats/windows.ts).
-    // Using nowStr.split('T')[0] would give the UTC date — wrong after ~4pm PST.
-    const dateStr = formatDateString(now)
+    const nowStr = new Date().toISOString()
     // Quick-log defaults to the first partner; user can edit the session
     // afterwards to reassign or add others.
     encounters.insert({
@@ -103,11 +100,25 @@ export default function CalendarRoute() {
     })
   }
 
+  function handleQuickLog(emoji: string) {
+    // Encounter.date is local-calendar 'YYYY-MM-DD' (see lib/stats/windows.ts).
+    // Using new Date().toISOString().split('T')[0] would give the UTC date —
+    // wrong after ~4pm PST.
+    insertQuickEncounter(emoji, formatDateString(new Date()))
+  }
+
+  function handleDayDrop(day: number, emoji: string) {
+    const dateStr = formatDateString(new Date(year, month - 1, day))
+    insertQuickEncounter(emoji, dateStr)
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+  }
+
   return (
     <CalendarScreen
       month={month}
       year={year}
       today={isCurrentMonth ? now.getDate() : undefined}
+      isCurrentMonth={isCurrentMonth}
       loggedDays={loggedDays}
       selectedDay={selectedDay}
       selectedDayLabel={selectedDayLabel}
@@ -116,6 +127,7 @@ export default function CalendarRoute() {
       onNextMonth={handleNextMonth}
       onDayPress={setSelectedDay}
       onQuickLog={handleQuickLog}
+      onDayDrop={handleDayDrop}
       onSessionPress={(id) => router.push(`/(pages)/session-detail?id=${id}`)}
       quickLogEmojis={quickLogEmojis}
     />
