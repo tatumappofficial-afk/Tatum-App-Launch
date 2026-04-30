@@ -10,6 +10,7 @@ import Animated, {
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import { colors } from '@/lib/theme'
 
+const ACTIVATION_OFFSET_PX = 10
 const DISMISS_DISTANCE_PX = 50
 const DISMISS_VELOCITY_PX_PER_S = 500
 const SNAP_BACK_DURATION_MS = 100
@@ -21,6 +22,7 @@ function AndroidSheetChrome({ children }: { children: React.ReactNode }) {
 
   const translateY = useSharedValue(0)
   const startTranslateY = useSharedValue(0)
+  const activationTranslationY = useSharedValue(0)
   const dismissing = useSharedValue(false)
 
   const dismiss = () => {
@@ -28,23 +30,27 @@ function AndroidSheetChrome({ children }: { children: React.ReactNode }) {
   }
 
   const panGesture = Gesture.Pan()
+    .activeOffsetY([ACTIVATION_OFFSET_PX, Number.MAX_SAFE_INTEGER])
     .shouldCancelWhenOutside(false)
-    .onBegin(() => {
+    .onStart((event) => {
       'worklet'
       if (dismissing.value) return
       startTranslateY.value = translateY.value
+      activationTranslationY.value = event.translationY
     })
     .onUpdate((event) => {
       'worklet'
       if (dismissing.value) return
-      const next = startTranslateY.value + event.translationY
+      const delta = event.translationY - activationTranslationY.value
+      const next = startTranslateY.value + delta
       translateY.value = next > 0 ? next : 0
     })
     .onEnd((event) => {
       'worklet'
       if (dismissing.value) return
+      const delta = event.translationY - activationTranslationY.value
       const shouldDismiss =
-        event.translationY > DISMISS_DISTANCE_PX ||
+        delta > DISMISS_DISTANCE_PX ||
         event.velocityY > DISMISS_VELOCITY_PX_PER_S
       if (shouldDismiss) {
         dismissing.value = true
@@ -69,25 +75,25 @@ function AndroidSheetChrome({ children }: { children: React.ReactNode }) {
         ]}
       />
       <View style={{ flex: 1, justifyContent: 'flex-end' }} pointerEvents="box-none">
-        <Animated.View
-          style={[
-            {
-              height: sheetHeight,
-              backgroundColor: colors.warmSand,
-              borderTopLeftRadius: 24,
-              borderTopRightRadius: 24,
-              overflow: 'hidden',
-            },
-            sheetStyle,
-          ]}
-        >
-          <GestureDetector gesture={panGesture}>
+        <GestureDetector gesture={panGesture}>
+          <Animated.View
+            style={[
+              {
+                height: sheetHeight,
+                backgroundColor: colors.warmSand,
+                borderTopLeftRadius: 24,
+                borderTopRightRadius: 24,
+                overflow: 'hidden',
+              },
+              sheetStyle,
+            ]}
+          >
             <View style={styles.handleArea}>
               <View style={styles.handle} />
             </View>
-          </GestureDetector>
-          <View style={{ flex: 1 }}>{children}</View>
-        </Animated.View>
+            <View style={{ flex: 1 }}>{children}</View>
+          </Animated.View>
+        </GestureDetector>
       </View>
     </View>
   )
