@@ -11,6 +11,7 @@ import { colors, font, gradientPoints, partnerGradients } from '@/lib/theme'
 import { AvatarCircle } from '@/lib/components/AvatarCircle'
 import { StatusBarSpacer } from '@/lib/screens/shared/StatusBarSpacer'
 import { activityTags, partners, userProfiles } from '@/src/db'
+import { useUserProfile } from '@/src/hooks/useUserProfile'
 import { deriveInitials } from '@/src/utils/initials'
 
 const DEFAULT_GRADIENT = partnerGradients[0].gradient
@@ -19,17 +20,13 @@ export default function EditProfilePage() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
 
-  const { data: profiles = [] } = useLiveQuery((q) =>
-    q.from({ userProfiles }).select(({ userProfiles }) => ({ ...userProfiles }))
-  )
+  const { raw: profile } = useUserProfile()
   const { data: allTags = [] } = useLiveQuery((q) =>
     q.from({ activityTags }).select(({ activityTags }) => ({ ...activityTags }))
   )
   const { data: allPartners = [] } = useLiveQuery((q) =>
     q.from({ partners }).select(({ partners }) => ({ ...partners }))
   )
-
-  const profile = profiles.find(p => p.id === 'default')
 
   // Local form state — initialized from profile, kept in sync via useEffect
   // (live-query may hydrate after first render).

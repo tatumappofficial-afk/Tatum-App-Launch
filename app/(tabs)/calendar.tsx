@@ -5,6 +5,7 @@ import { generateId as uuid } from '@/src/utils/uuid'
 import { CalendarScreen } from '@/lib/screens/CalendarScreen'
 import { activityTags, encounters, partners } from '@/src/db'
 import { useActivityTagMap } from '@/src/hooks/useActivityTagMap'
+import { useLoggedDaysForMonth } from '@/src/hooks/useLoggedDaysForMonth'
 import { formatDateString } from '@/lib/stats/windows'
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -37,27 +38,8 @@ export default function CalendarRoute() {
     .sort((a, b) => a.sortOrder - b.sortOrder)
     .map(t => t.emoji)
 
-  // Compute logged days for current month
-  const monthStr = `${year}-${String(month).padStart(2, '0')}`
-  const monthEncounters = allEncounters.filter(e => e.date.startsWith(monthStr))
-
-  const loggedDaysMap = new Map<number, { emojis: string[]; count: number }>()
-  for (const enc of monthEncounters) {
-    const day = parseInt(enc.date.split('-')[2], 10)
-    const existing = loggedDaysMap.get(day)
-    if (existing) {
-      existing.emojis.push(...enc.activities)
-      existing.count++
-    } else {
-      loggedDaysMap.set(day, { emojis: [...enc.activities], count: 1 })
-    }
-  }
-
-  const loggedDays = [...loggedDaysMap.entries()].map(([day, data]) => ({
-    day,
-    emoji: data.emojis[0] || '\u2728',
-    hasMultiple: data.count > 1 || data.emojis.length > 1,
-  }))
+  // useLoggedDaysForMonth uses 0-indexed month; this screen tracks 1-indexed.
+  const loggedDays = useLoggedDaysForMonth(month - 1, year, allEncounters)
 
   const isCurrentMonth = month === now.getMonth() + 1 && year === now.getFullYear()
 

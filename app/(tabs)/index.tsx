@@ -12,23 +12,20 @@ import {
   desireEntries,
   encounters,
   partners,
-  userProfiles,
 } from '@/src/db'
+import { useUserProfile } from '@/src/hooks/useUserProfile'
 import {
   computeAllTimeStats,
   computeMonthStats,
   computeWeekStats,
   computeYearStats,
   findNearestEncounterDate,
-  firstEncounterYear,
-  formatPeriodCaption,
-  getWindow,
   parseDateString,
   type CalendarStartDay,
   type Period,
 } from '@/lib/stats'
-import type { EmptyPeriodScenario } from '@/lib/screens/home/shared/EmptyPeriod'
 import { PeriodPicker } from '@/lib/screens/home/shared/PeriodPicker'
+import { usePeriodWindow } from '@/src/hooks/usePeriodWindow'
 
 // TODO: read from UserSettings (`calendarStartDay`) once a settings UI lands.
 const CALENDAR_START_DAY: CalendarStartDay = 'sunday'
@@ -48,10 +45,7 @@ export default function HomeRoute() {
   const { data: allDesires = [] } = useLiveQuery((q) =>
     q.from({ desireEntries }).select(({ desireEntries }) => ({ ...desireEntries }))
   )
-  const { data: profiles = [] } = useLiveQuery((q) =>
-    q.from({ userProfiles }).select(({ userProfiles }) => ({ ...userProfiles }))
-  )
-  const userName = profiles.find(p => p.id === 'default')?.displayName ?? 'Alanna'
+  const { displayName: userName } = useUserProfile()
 
   const ready = encReady && partReady
   const readyEncounters = ready ? allEncounters : []
@@ -74,41 +68,8 @@ export default function HomeRoute() {
 
   const isEmpty = ready && readyEncounters.length === 0
 
-  const window = useMemo(
-    () =>
-      getWindow(period, anchor, {
-        calendarStartDay: CALENDAR_START_DAY,
-        encounters: readyEncounters,
-      }),
-    [period, anchor, readyEncounters],
-  )
-
-  const firstEncounterDate = useMemo(() => {
-    if (readyEncounters.length === 0) return undefined
-    return readyEncounters.reduce(
-      (min, e) => (e.date < min ? e.date : min),
-      readyEncounters[0].date,
-    )
-  }, [readyEncounters])
-
-  const caption = useMemo(
-    () =>
-      formatPeriodCaption(period, anchor, {
-        calendarStartDay: CALENDAR_START_DAY,
-        firstEncounterDate,
-      }),
-    [period, anchor, firstEncounterDate],
-  )
-
-  const emptyScenario: EmptyPeriodScenario = useMemo(() => {
-    if (!window) return 'past'
-    const now = new Date()
-    return now >= window.start && now < window.end ? 'current' : 'past'
-  }, [window])
-
-  const now = useMemo(() => new Date(), [])
-  const minYear = useMemo(() => firstEncounterYear(readyEncounters, now), [readyEncounters, now])
-  const maxYear = now.getFullYear()
+  const { window, caption, emptyScenario, firstEncounterDate, minYear, maxYear, now } =
+    usePeriodWindow(period, anchor, readyEncounters, CALENDAR_START_DAY)
 
   const pickerContent = useMemo(() => {
     if (period === 'all') return null

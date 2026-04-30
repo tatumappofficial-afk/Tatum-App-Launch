@@ -6,6 +6,7 @@ import { generateId as uuid } from '@/src/utils/uuid'
 import { LogSessionScreen } from '@/lib/screens/LogSessionScreen'
 import { DatePickerDropdown } from '@/lib/components/DatePickerDropdown'
 import { activityTags, encounters, partners } from '@/src/db'
+import { useLoggedDaysForMonth } from '@/src/hooks/useLoggedDaysForMonth'
 
 export default function LogSessionRoute() {
   const router = useRouter()
@@ -74,24 +75,7 @@ export default function LogSessionRoute() {
     }))
 
   // Logged days for the calendar dropdown's current month view
-  const calMonthStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}`
-  const monthEncounters = allEncounters.filter(e => e.date.startsWith(calMonthStr))
-  const loggedDaysMap = new Map<number, { emojis: string[]; count: number }>()
-  for (const enc of monthEncounters) {
-    const day = parseInt(enc.date.split('-')[2], 10)
-    const existing = loggedDaysMap.get(day)
-    if (existing) {
-      existing.emojis.push(...enc.activities)
-      existing.count++
-    } else {
-      loggedDaysMap.set(day, { emojis: [...enc.activities], count: 1 })
-    }
-  }
-  const loggedDays = [...loggedDaysMap.entries()].map(([day, data]) => ({
-    day,
-    emoji: data.emojis[0] || '✨',
-    hasMultiple: data.count > 1 || data.emojis.length > 1,
-  }))
+  const loggedDays = useLoggedDaysForMonth(calMonth, calYear, allEncounters)
 
   const isCalCurrentMonth = calMonth === now.getMonth() && calYear === now.getFullYear()
 

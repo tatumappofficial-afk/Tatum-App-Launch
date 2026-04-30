@@ -1,8 +1,8 @@
 import { useLiveQuery } from '@tanstack/react-db'
 import { useRouter } from 'expo-router'
 import { ProfileScreen } from '@/lib/screens/ProfileScreen'
-import { activityTags, encounters, partners, userProfiles } from '@/src/db'
-import { deriveInitials } from '@/src/utils/initials'
+import { activityTags, encounters, partners } from '@/src/db'
+import { useUserProfile } from '@/src/hooks/useUserProfile'
 
 export default function ProfileRoute() {
   const router = useRouter()
@@ -17,13 +17,7 @@ export default function ProfileRoute() {
     q.from({ activityTags }).select(({ activityTags }) => ({ ...activityTags }))
   )
 
-  const { data: profiles = [] } = useLiveQuery((q) =>
-    q.from({ userProfiles }).select(({ userProfiles }) => ({ ...userProfiles }))
-  )
-  const profile = profiles.find(p => p.id === 'default')
-  const userName = profile?.displayName ?? 'Alanna'
-  const userInitial = profile?.avatarValue ?? deriveInitials(userName) ?? 'A'
-  const userGradient = profile?.avatarGradient ?? 'linear-gradient(135deg, #C07858, #7C4A5A)'
+  const { displayName: userName, initials: userInitial, gradient: userGradient } = useUserProfile()
 
   // All active activity tags from the DB, sorted by sortOrder
   const activityTagList = allTags

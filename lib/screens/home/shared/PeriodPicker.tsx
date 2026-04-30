@@ -3,6 +3,7 @@ import { DatePickerDropdown } from '../../../components/DatePickerDropdown'
 import { MonthYearDropdown } from '../../../components/MonthYearDropdown'
 import { YearDropdown } from '../../../components/YearDropdown'
 import type { Encounter } from '@/src/db/schema'
+import { useLoggedDaysForMonth } from '@/src/hooks/useLoggedDaysForMonth'
 import type { CalendarStartDay, Period } from '../../../stats'
 
 export interface PeriodPickerProps {
@@ -71,28 +72,7 @@ const WeekPicker: React.FC<PeriodPickerProps> = ({
     [minYear, maxYear, now],
   )
 
-  // Build emoji previews for the visible month from encounters.
-  const loggedDays = React.useMemo(() => {
-    if (!encounters || encounters.length === 0) return []
-    const monthStr = `${view.year}-${String(view.month + 1).padStart(2, '0')}`
-    const monthEncounters = encounters.filter(e => e.date.startsWith(monthStr))
-    const map = new Map<number, { emojis: string[]; count: number }>()
-    for (const enc of monthEncounters) {
-      const day = parseInt(enc.date.split('-')[2], 10)
-      const existing = map.get(day)
-      if (existing) {
-        existing.emojis.push(...enc.activities)
-        existing.count++
-      } else {
-        map.set(day, { emojis: [...enc.activities], count: 1 })
-      }
-    }
-    return [...map.entries()].map(([day, data]) => ({
-      day,
-      emoji: data.emojis[0] || '✨',
-      hasMultiple: data.count > 1 || data.emojis.length > 1,
-    }))
-  }, [encounters, view.month, view.year])
+  const loggedDays = useLoggedDaysForMonth(view.month, view.year, encounters ?? [])
 
   const isCurrentMonth = view.month === now.getMonth() && view.year === now.getFullYear()
   const showSelected = anchor.getMonth() === view.month && anchor.getFullYear() === view.year
