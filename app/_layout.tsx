@@ -5,6 +5,7 @@ import * as SplashScreen from 'expo-splash-screen'
 import { useCallback, useEffect, useState } from 'react'
 import { Platform, Text, View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
 import { PlayfairDisplay_400Regular, PlayfairDisplay_400Regular_Italic, PlayfairDisplay_600SemiBold, PlayfairDisplay_700Bold } from '@expo-google-fonts/playfair-display'
 import { DMSans_300Light, DMSans_400Regular, DMSans_500Medium } from '@expo-google-fonts/dm-sans'
@@ -51,32 +52,34 @@ export default function RootLayout() {
   if (!ready) return null
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#F5EFE8' }} onLayout={onLayoutRootView}>
-      <SafeAreaProvider>
-        <KeyboardProvider>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen
-              name="(sheets)"
-              options={Platform.select({
-                ios: {
-                  presentation: 'formSheet' as const,
-                  sheetAllowedDetents: [0.85],
-                  sheetInitialDetentIndex: 0,
-                  sheetGrabberVisible: true,
-                  sheetCornerRadius: 24,
-                  sheetExpandsWhenScrolledToEdge: false,
-                },
-                default: {
-                  presentation: 'transparentModal' as const,
-                  animation: 'slide_from_bottom' as const,
-                },
-              })}
-            />
-            <Stack.Screen name="(pages)" />
-          </Stack>
-        </KeyboardProvider>
-      </SafeAreaProvider>
-    </View>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <View style={{ flex: 1, backgroundColor: '#F5EFE8' }} onLayout={onLayoutRootView}>
+        <SafeAreaProvider>
+          <KeyboardProvider>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen
+                name="(sheets)"
+                options={Platform.select({
+                  ios: {
+                    presentation: 'formSheet' as const,
+                    sheetAllowedDetents: [0.85],
+                    sheetInitialDetentIndex: 0,
+                    sheetGrabberVisible: true,
+                    sheetCornerRadius: 24,
+                    sheetExpandsWhenScrolledToEdge: false,
+                  },
+                  default: {
+                    presentation: 'transparentModal' as const,
+                    animation: 'slide_from_bottom' as const,
+                  },
+                })}
+              />
+              <Stack.Screen name="(pages)" />
+            </Stack>
+          </KeyboardProvider>
+        </SafeAreaProvider>
+      </View>
+    </GestureHandlerRootView>
   )
 }
