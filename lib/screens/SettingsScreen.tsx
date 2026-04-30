@@ -1,5 +1,5 @@
 import React from 'react'
-import { ScrollView, StyleSheet, View, Text, Pressable } from 'react-native'
+import { ScrollView, StyleSheet, View, Text } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Line, Path, Polyline, Rect } from 'react-native-svg'
 import { colors, font, gradientPoints, gradients } from '../theme'
@@ -15,7 +15,6 @@ import { BackButton } from '../components/BackButton'
 export interface SettingsScreenProps {
   biometricsEnabled?: boolean
   onBack?: () => void
-  onProTap?: () => void
   onChangePasscode?: () => void
   onToggleBiometrics?: () => void
   onSubmitFeedback?: () => void
@@ -84,7 +83,6 @@ const ExternalLinkIcon: React.FC<{ color?: string }> = ({ color = '#C4B0A0' }) =
 export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   biometricsEnabled = true,
   onBack,
-  onProTap,
   onChangePasscode,
   onToggleBiometrics,
   onSubmitFeedback,
@@ -129,9 +127,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       >
       {/* ── Pro Membership Card ── */}
       <View style={{ marginTop: 14, flexShrink: 0 }}>
-        <Pressable
-          onPress={onProTap}
-          accessibilityRole="button"
+        <View
           accessibilityLabel="Tatum Premium"
           style={{
             marginHorizontal: 20,
@@ -193,9 +189,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               marginTop: 2,
             }}>Lifetime access · $24.99 paid</Text>
           </View>
-          {/* Arrow */}
-          <ChevronForwardIcon color="rgba(255,255,255,0.6)" />
-        </Pressable>
+        </View>
       </View>
 
       {/* ── Security Section ── */}

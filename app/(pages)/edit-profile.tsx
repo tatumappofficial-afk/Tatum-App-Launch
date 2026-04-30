@@ -142,7 +142,7 @@ export default function EditProfilePage() {
             <Polyline points="15 18 9 12 15 6" />
           </Svg>
         </Pressable>
-        <Text style={styles.headerTitle}>Edit Profile</Text>
+        <Text style={styles.headerTitle} pointerEvents="none">Edit Profile</Text>
         <Pressable
           onPress={handleSavePress}
           accessibilityRole="button"
@@ -332,8 +332,9 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: colors.ink,
     position: 'absolute',
-    left: '50%',
-    transform: [{ translateX: '-50%' }],
+    left: 0,
+    right: 0,
+    textAlign: 'center',
   },
   saveButton: {
     height: 34,

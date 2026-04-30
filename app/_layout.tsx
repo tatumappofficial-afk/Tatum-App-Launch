@@ -1,5 +1,6 @@
 import '@/src/utils/crypto-polyfill'
 import * as Font from 'expo-font'
+import { useKeepAwake } from 'expo-keep-awake'
 import { Stack } from 'expo-router/stack'
 import * as SplashScreen from 'expo-splash-screen'
 import { useCallback, useEffect, useState } from 'react'
@@ -19,6 +20,7 @@ SplashScreen.preventAutoHideAsync()
 ;(Text as any).defaultProps.maxFontSizeMultiplier = 1.5
 
 export default function RootLayout() {
+  useKeepAwake()
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
