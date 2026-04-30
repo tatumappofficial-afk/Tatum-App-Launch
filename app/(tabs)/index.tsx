@@ -12,6 +12,7 @@ import {
   desireEntries,
   encounters,
   partners,
+  userProfiles,
 } from '@/src/db'
 import {
   computeAllTimeStats,
@@ -47,6 +48,10 @@ export default function HomeRoute() {
   const { data: allDesires = [] } = useLiveQuery((q) =>
     q.from({ desireEntries }).select(({ desireEntries }) => ({ ...desireEntries }))
   )
+  const { data: profiles = [] } = useLiveQuery((q) =>
+    q.from({ userProfiles }).select(({ userProfiles }) => ({ ...userProfiles }))
+  )
+  const userName = profiles.find(p => p.id === 'default')?.displayName ?? 'Alanna'
 
   const ready = encReady && partReady
   const readyEncounters = ready ? allEncounters : []
@@ -115,10 +120,11 @@ export default function HomeRoute() {
         maxYear={maxYear}
         now={now}
         calendarStartDay={CALENDAR_START_DAY}
+        encounters={readyEncounters}
         onAnchorChange={handleAnchorChange}
       />
     )
-  }, [period, anchor, minYear, maxYear, now, handleAnchorChange])
+  }, [period, anchor, minYear, maxYear, now, readyEncounters, handleAnchorChange])
 
   const handleLookBack = useCallback(() => {
     setAnchor(prev => {
@@ -143,6 +149,11 @@ export default function HomeRoute() {
     (id: string) => router.push(`/(pages)/session-detail?id=${id}`),
     [router],
   )
+  const handleSessionsHeaderPress = useCallback(() => {
+    if (period === 'all') return
+    const anchorIso = anchor.toISOString().split('T')[0]
+    router.push(`/(pages)/sessions-list?period=${period}&anchor=${anchorIso}`)
+  }, [router, period, anchor])
 
   const viewContent = useMemo(() => {
     if (!ready) return null
@@ -162,6 +173,7 @@ export default function HomeRoute() {
           onJumpToNearest={handleJumpToNearest}
           onPartnerPress={handlePartnerPress}
           onPartnersHeaderPress={() => router.push('/(pages)/partners')}
+          onSessionsHeaderPress={handleSessionsHeaderPress}
           onSessionPress={(e) => handleSessionPress(e.id)}
         />
       )
@@ -171,12 +183,14 @@ export default function HomeRoute() {
       return (
         <MonthView
           stats={stats}
+          partners={readyPartners}
           calendarStartDay={CALENDAR_START_DAY}
           emptyScenario={emptyScenario}
           onLookBack={handleLookBack}
           onJumpToNearest={handleJumpToNearest}
-          onPartnerPress={(p) => handlePartnerPress(p.id)}
+          onPartnerPress={handlePartnerPress}
           onViewAllPartners={() => router.push('/(pages)/partners')}
+          onSessionsHeaderPress={handleSessionsHeaderPress}
           onSessionPress={(e) => handleSessionPress(e.id)}
         />
       )
@@ -186,12 +200,14 @@ export default function HomeRoute() {
       return (
         <YearView
           stats={stats}
+          partners={readyPartners}
           calendarStartDay={CALENDAR_START_DAY}
           emptyScenario={emptyScenario}
           onLookBack={handleLookBack}
           onJumpToNearest={handleJumpToNearest}
           onPartnerPress={(p) => handlePartnerPress(p.id)}
           onViewAllPartners={() => router.push('/(pages)/partners')}
+          onSessionsHeaderPress={handleSessionsHeaderPress}
           onSessionPress={(e) => handleSessionPress(e.id)}
         />
       )
@@ -219,6 +235,8 @@ export default function HomeRoute() {
     handleJumpToNearest,
     handlePartnerPress,
     handleSessionPress,
+    handleSessionsHeaderPress,
+    router,
   ])
 
   const emptyPartnersForHero = useMemo(
@@ -240,7 +258,7 @@ export default function HomeRoute() {
       pickerOpen={pickerOpen && period !== 'all'}
       pickerContent={pickerContent}
       isEmpty={isEmpty}
-      userName="Alanna"
+      userName={userName}
       emptyPartners={emptyPartnersForHero}
       onPartnerPress={(index) => {
         const partner = readyPartners[index]

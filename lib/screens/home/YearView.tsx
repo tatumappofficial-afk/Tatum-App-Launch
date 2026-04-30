@@ -8,6 +8,7 @@ import { TopActivitiesList } from './shared/TopActivitiesList'
 import { MostEnjoyedActivityCard } from './shared/MostEnjoyedActivityCard'
 import { EmojiInventoryGrid } from './shared/EmojiInventoryGrid'
 import { PartnerStrip } from './shared/PartnerStrip'
+import { RecentSessionsScroller } from './shared/RecentSessionsScroller'
 import { StandoutSessions } from './shared/StandoutSessions'
 import { EmptyPeriod, type EmptyPeriodScenario } from './shared/EmptyPeriod'
 import type { Encounter, Partner } from '@/src/db/schema'
@@ -21,23 +22,28 @@ const WEEKDAY_LABELS_MONDAY: string[] = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su
 
 export interface YearViewProps {
   stats: YearStats
+  /** All partners — passed through to RecentSessionsScroller for avatar lookup. */
+  partners: Partner[]
   calendarStartDay: CalendarStartDay
   emptyScenario?: EmptyPeriodScenario
   onLookBack?: () => void
   onJumpToNearest?: () => void
   onPartnerPress?: (partner: Partner) => void
   onViewAllPartners?: () => void
+  onSessionsHeaderPress?: () => void
   onSessionPress?: (encounter: Encounter) => void
 }
 
 export const YearView: React.FC<YearViewProps> = ({
   stats,
+  partners,
   calendarStartDay,
   emptyScenario = 'past',
   onLookBack,
   onJumpToNearest,
   onPartnerPress,
   onViewAllPartners,
+  onSessionsHeaderPress,
   onSessionPress,
 }) => {
   if (stats.sessionsCount === 0) {
@@ -74,10 +80,14 @@ export const YearView: React.FC<YearViewProps> = ({
         </>
       )}
 
-      {stats.mostEnjoyedActivity && (
+      {stats.topEnjoyedActivities.length > 0 && (
         <>
           <SectionLabel label="Most enjoyed" style={INLINE_LABEL} />
-          <MostEnjoyedActivityCard activity={stats.mostEnjoyedActivity} />
+          <View style={{ gap: 8 }}>
+            {stats.topEnjoyedActivities.map((a) => (
+              <MostEnjoyedActivityCard key={a.emoji} activity={a} />
+            ))}
+          </View>
         </>
       )}
 
@@ -92,6 +102,22 @@ export const YearView: React.FC<YearViewProps> = ({
         <>
           <SectionLabel label="Partners this year" style={INLINE_LABEL} />
           <PartnerStrip partners={stats.partners} onPress={onPartnerPress} onViewAll={onViewAllPartners} />
+        </>
+      )}
+
+      {stats.recentSessions.length > 0 && (
+        <>
+          <SectionLabel
+            label="Sessions"
+            showChevron
+            style={INLINE_LABEL}
+            onPress={onSessionsHeaderPress}
+          />
+          <RecentSessionsScroller
+            sessions={stats.recentSessions}
+            partners={partners}
+            onPress={onSessionPress}
+          />
         </>
       )}
 
