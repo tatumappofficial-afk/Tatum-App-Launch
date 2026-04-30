@@ -77,13 +77,10 @@ const SessionCard: React.FC<{
           {isSolo ? (
             <View style={{
               width: 38, height: 38, borderRadius: 19,
-              alignItems: 'center', justifyContent: 'center',
               borderWidth: 2, borderColor: colors.warmSand,
               backgroundColor: colors.surface2,
               shadowColor: '#3D2B25', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 2,
-            }}>
-              <Text style={{ fontSize: 18 }}>✨</Text>
-            </View>
+            }} />
           ) : isMultiPartner ? (
             <View style={{ flexDirection: 'row', position: 'relative', width: 54, height: 38 }}>
               <View style={{

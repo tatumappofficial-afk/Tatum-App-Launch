@@ -22,8 +22,7 @@ export const AvatarStack: React.FC<AvatarStackProps> = ({
   borderWidth = 2,
   max = 3,
 }) => {
-  // Solo session — render a sparkle in a stone-colored circle so the layout
-  // still has an avatar slot.
+  // Solo session — plain stone circle so the layout keeps its avatar slot.
   if (partners.length === 0) {
     return (
       <View
@@ -34,12 +33,8 @@ export const AvatarStack: React.FC<AvatarStackProps> = ({
           backgroundColor: colors.surface2,
           borderWidth,
           borderColor: colors.white,
-          alignItems: 'center',
-          justifyContent: 'center',
         }}
-      >
-        <Text style={{ fontSize: Math.round(size * 0.45) }}>✨</Text>
-      </View>
+      />
     )
   }
 
