@@ -5,19 +5,14 @@ import Animated, {
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
+  withTiming,
 } from 'react-native-reanimated'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import { colors } from '@/lib/theme'
 
-const SPRING_CONFIG = {
-  damping: 20,
-  stiffness: 200,
-  mass: 0.5,
-}
-
-const DRAG_DISMISS_RATIO = 0.3
-const VELOCITY_DISMISS_THRESHOLD = 500
+const DISMISS_DISTANCE_PX = 50
+const DISMISS_VELOCITY_PX_PER_S = 500
+const SNAP_BACK_DURATION_MS = 100
 
 function AndroidSheetChrome({ children }: { children: React.ReactNode }) {
   const { height } = useWindowDimensions()
@@ -25,6 +20,7 @@ function AndroidSheetChrome({ children }: { children: React.ReactNode }) {
   const sheetHeight = height * 0.88
 
   const translateY = useSharedValue(0)
+  const startTranslateY = useSharedValue(0)
   const dismissing = useSharedValue(false)
 
   const dismiss = () => {
@@ -32,27 +28,30 @@ function AndroidSheetChrome({ children }: { children: React.ReactNode }) {
   }
 
   const panGesture = Gesture.Pan()
-    .hitSlop({ bottom: 30 })
-    .activeOffsetY([10, Infinity])
-    .onUpdate((event) => {
+    .shouldCancelWhenOutside(false)
+    .onBegin(() => {
+      'worklet'
       if (dismissing.value) return
-      if (event.translationY > 0) {
-        translateY.value = event.translationY
-      } else {
-        translateY.value = 0
-      }
+      startTranslateY.value = translateY.value
+    })
+    .onUpdate((event) => {
+      'worklet'
+      if (dismissing.value) return
+      const next = startTranslateY.value + event.translationY
+      translateY.value = next > 0 ? next : 0
     })
     .onEnd((event) => {
+      'worklet'
       if (dismissing.value) return
       const shouldDismiss =
-        event.translationY > sheetHeight * DRAG_DISMISS_RATIO ||
-        event.velocityY > VELOCITY_DISMISS_THRESHOLD
+        event.translationY > DISMISS_DISTANCE_PX ||
+        event.velocityY > DISMISS_VELOCITY_PX_PER_S
       if (shouldDismiss) {
         dismissing.value = true
-        translateY.value = withSpring(sheetHeight, SPRING_CONFIG)
+        translateY.value = withTiming(sheetHeight, { duration: SNAP_BACK_DURATION_MS })
         runOnJS(dismiss)()
       } else {
-        translateY.value = withSpring(0, SPRING_CONFIG)
+        translateY.value = withTiming(0, { duration: SNAP_BACK_DURATION_MS })
       }
     })
 
@@ -64,38 +63,40 @@ function AndroidSheetChrome({ children }: { children: React.ReactNode }) {
     <View style={{ flex: 1 }}>
       <Pressable
         onPress={dismiss}
-        style={{
-          flex: 1,
-          backgroundColor: 'rgba(30,18,12,0.4)',
-        }}
-      />
-      <Animated.View
         style={[
-          {
-            height: sheetHeight,
-            backgroundColor: colors.warmSand,
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
-            overflow: 'hidden',
-          },
-          sheetStyle,
+          StyleSheet.absoluteFillObject,
+          { backgroundColor: 'rgba(30,18,12,0.4)' },
         ]}
-      >
-        <GestureDetector gesture={panGesture}>
-          <View style={styles.handleArea}>
-            <View style={styles.handle} />
-          </View>
-        </GestureDetector>
-        <View style={{ flex: 1 }}>{children}</View>
-      </Animated.View>
+      />
+      <View style={{ flex: 1, justifyContent: 'flex-end' }} pointerEvents="box-none">
+        <Animated.View
+          style={[
+            {
+              height: sheetHeight,
+              backgroundColor: colors.warmSand,
+              borderTopLeftRadius: 24,
+              borderTopRightRadius: 24,
+              overflow: 'hidden',
+            },
+            sheetStyle,
+          ]}
+        >
+          <GestureDetector gesture={panGesture}>
+            <View style={styles.handleArea}>
+              <View style={styles.handle} />
+            </View>
+          </GestureDetector>
+          <View style={{ flex: 1 }}>{children}</View>
+        </Animated.View>
+      </View>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
   handleArea: {
-    paddingTop: 8,
-    paddingBottom: 8,
+    paddingTop: 12,
+    paddingBottom: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
