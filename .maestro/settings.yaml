@@ -1,5 +1,0 @@
-appId: host.exp.exponent
----
-- runFlow: seed-data.yaml
-- tapOn: "PROFILE"
-- assertVisible: "Alanna"

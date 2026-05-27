@@ -1,9 +1,0 @@
-appId: host.exp.exponent
----
-- runFlow: seed-data.yaml
-- tapOn: "CALENDAR"
-- waitForAnimationToEnd
-# Tap on a day that should have seeded data (today - 1 day)
-- tapOn:
-    point: "50%,40%"
-- waitForAnimationToEnd

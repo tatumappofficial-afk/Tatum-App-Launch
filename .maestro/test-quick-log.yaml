@@ -1,9 +1,0 @@
-appId: host.exp.exponent
----
-- runFlow: seed-data.yaml
-- tapOn: "CALENDAR"
-- assertVisible: "Quick Log"
-# Tap first emoji in quick log
-- tapOn:
-    point: "15%,82%"
-- waitForAnimationToEnd

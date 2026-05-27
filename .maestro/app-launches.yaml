@@ -1,4 +1,0 @@
-appId: host.exp.exponent
----
-- runFlow: seed-data.yaml
-- assertVisible: "TATUM"
