@@ -219,6 +219,54 @@ export interface PartnerLifetimeStats {
 }
 
 /**
+ * Per-partner stats computed against a pre-filtered set of encounters (typically
+ * the current period window). Only includes partners who actually appear in the
+ * given encounters — pass `partnersInWindow(...)` data if you want this scoped
+ * to the period. Inactive partners that had encounters in the window are
+ * included. Sorted by session count descending, name ascending for ties.
+ */
+export function partnerPeriodStats(
+  windowEncounters: Encounter[],
+  partners: Partner[],
+): PartnerLifetimeStats[] {
+  const partnerById = new Map(partners.map(p => [p.id, p]))
+  const buckets = new Map<string, Encounter[]>()
+  for (const enc of windowEncounters) {
+    for (const id of enc.partnerIds) {
+      if (!partnerById.has(id)) continue
+      const arr = buckets.get(id) ?? []
+      arr.push(enc)
+      buckets.set(id, arr)
+    }
+  }
+  const rows: PartnerLifetimeStats[] = []
+  for (const [id, pEnc] of buckets) {
+    const partner = partnerById.get(id)!
+    const rated = pEnc.filter(e => e.stars !== null)
+    const averageStars = rated.length === 0
+      ? null
+      : rated.reduce((s, e) => s + (e.stars ?? 0), 0) / rated.length
+    const counts = new Map<string, number>()
+    for (const enc of pEnc) {
+      for (const emoji of enc.activities) {
+        counts.set(emoji, (counts.get(emoji) ?? 0) + 1)
+      }
+    }
+    let topEmoji: string | null = null
+    let topCount = 0
+    for (const [emoji, count] of counts) {
+      if (count > topCount) { topEmoji = emoji; topCount = count }
+    }
+    rows.push({ partner, sessionCount: pEnc.length, averageStars, topActivityEmoji: topEmoji })
+  }
+  rows.sort((a, b) =>
+    b.sessionCount - a.sessionCount ||
+    a.partner.displayName.localeCompare(b.partner.displayName),
+  )
+  return rows
+}
+
+/**
  * Lifetime stats per active partner across all encounters (not period-filtered).
  * Inactive partners are excluded. Each partner's row is rendered even if
  * `sessionCount === 0` so brand-new partners are visible.

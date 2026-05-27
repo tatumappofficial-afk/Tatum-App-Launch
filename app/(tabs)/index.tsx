@@ -51,7 +51,7 @@ export default function HomeRoute() {
   const readyEncounters = ready ? allEncounters : []
   const readyPartners = ready ? allPartners : []
 
-  const [period, setPeriod] = useState<Period>('week')
+  const [period, setPeriod] = useState<Period>('month')
   const [anchor, setAnchor] = useState<Date>(() => new Date())
   const [pickerOpen, setPickerOpen] = useState(false)
 
@@ -123,6 +123,9 @@ export default function HomeRoute() {
       // parent's isEmpty branch catches that — render a placeholder defensively.
       return <PlaceholderView label="Nothing logged yet — and that's okay." />
     }
+    const anchorIso = anchor.toISOString().split('T')[0]
+    const goToPartnersPeriod = () =>
+      router.push(`/(pages)/partners-period?period=${period}&anchor=${anchorIso}`)
     if (period === 'week') {
       const stats = computeWeekStats(readyEncounters, readyPartners, allTags, window, CALENDAR_START_DAY)
       return (
@@ -133,7 +136,7 @@ export default function HomeRoute() {
           onLookBack={handleLookBack}
           onJumpToNearest={handleJumpToNearest}
           onPartnerPress={handlePartnerPress}
-          onPartnersHeaderPress={() => router.push('/(pages)/partners')}
+          onPartnersHeaderPress={goToPartnersPeriod}
           onSessionsHeaderPress={handleSessionsHeaderPress}
           onSessionPress={(e) => handleSessionPress(e.id)}
         />
@@ -150,7 +153,7 @@ export default function HomeRoute() {
           onLookBack={handleLookBack}
           onJumpToNearest={handleJumpToNearest}
           onPartnerPress={handlePartnerPress}
-          onViewAllPartners={() => router.push('/(pages)/partners')}
+          onViewAllPartners={goToPartnersPeriod}
           onSessionsHeaderPress={handleSessionsHeaderPress}
           onSessionPress={(e) => handleSessionPress(e.id)}
         />
@@ -167,7 +170,7 @@ export default function HomeRoute() {
           onLookBack={handleLookBack}
           onJumpToNearest={handleJumpToNearest}
           onPartnerPress={(p) => handlePartnerPress(p.id)}
-          onViewAllPartners={() => router.push('/(pages)/partners')}
+          onViewAllPartners={goToPartnersPeriod}
           onSessionsHeaderPress={handleSessionsHeaderPress}
           onSessionPress={(e) => handleSessionPress(e.id)}
         />
@@ -186,6 +189,7 @@ export default function HomeRoute() {
   }, [
     ready,
     period,
+    anchor,
     window,
     readyEncounters,
     readyPartners,

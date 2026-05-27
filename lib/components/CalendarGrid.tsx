@@ -1,6 +1,8 @@
 import React from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
+import * as Haptics from 'expo-haptics'
+import { Droppable } from 'react-native-reanimated-dnd'
 import { colors, font, gradientPoints, gradients } from '../theme'
 
 export interface LoggedDay {
@@ -25,6 +27,14 @@ export interface CalendarGridProps {
    *  used in browse contexts (e.g. the journal) where tapping a date
    *  with no entry would land nowhere. */
   loggedOnly?: boolean
+  /** Whether the rendered month is the current calendar month. Combined with
+   *  `today`, this gates which cells reject drag-and-drop drops (future days). */
+  isCurrentMonth?: boolean
+  /** Fired when an emoji is dropped onto a day cell via drag-and-drop. */
+  onDayDrop?: (day: number, emoji: string) => void
+  /** Visually dim future cells during an active drag. Caller flips this on/off
+   *  using the Draggable's onDragStart/onDragEnd lifecycle. */
+  isDragging?: boolean
 }
 
 /* ── Helpers ── */
@@ -119,6 +129,9 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
   compact = false,
   mode = 'day',
   loggedOnly = false,
+  isCurrentMonth = false,
+  onDayDrop,
+  isDragging = false,
 }) => {
   const daysInMonth = getDaysInMonth(month, year)
   const firstDow = getFirstDayOfWeek(month, year)
@@ -137,7 +150,8 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
   for (let d = 1; d <= daysInMonth; d++) {
     const day = d
     const logged = logMap.get(day)
-    cells.push(
+    const isFuture = isCurrentMonth && today != null && day > today
+    const cell = (
       <DayCell
         key={day}
         day={day}
@@ -150,6 +164,20 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
         muted={loggedOnly && !logged}
         onPress={() => onDayPress?.(day)}
       />
+    )
+    cells.push(
+      onDayDrop ? (
+        <Droppable<string>
+          key={day}
+          onDrop={(emoji) => onDayDrop(day, emoji)}
+          dropDisabled={isFuture}
+          onActiveChange={(active) => { if (active && !isFuture) Haptics.selectionAsync() }}
+          activeStyle={isFuture ? undefined : { backgroundColor: 'rgba(192,120,88,0.22)', borderRadius: 9999 }}
+          style={{ opacity: isDragging && isFuture ? 0.3 : 1 }}
+        >
+          {cell}
+        </Droppable>
+      ) : cell
     )
   }
 

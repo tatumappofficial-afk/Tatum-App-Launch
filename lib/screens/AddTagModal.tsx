@@ -1,5 +1,9 @@
-import React from 'react'
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { Keyboard, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+// ScrollView from RNGH (not RN) so nested horizontal scrollers coordinate with
+// the Android sheet's parent pan gesture. RN's stock ScrollView loses the
+// activation race even with `failOffsetX` set on the parent.
+import { ScrollView } from 'react-native-gesture-handler'
 import { KeyboardAvoidingView, KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Svg, { Line } from 'react-native-svg'
@@ -9,6 +13,7 @@ import { TagPill } from '../components/TagPill'
 import { EmojiChip } from '../components/EmojiChip'
 import { GradientButton } from '../components/GradientButton'
 import { TAG_EMOJIS } from '../data/tagEmojis'
+import { useSheetPanGesture } from '@/app/(sheets)/_layout'
 
 /* ── Types ── */
 
@@ -63,11 +68,34 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
     && existingTags.some(t => t.name.toLowerCase() === trimmedName.toLowerCase())
   const addTagDisabled = trimmedName.length === 0 || isDuplicate
   const insets = useSafeAreaInsets()
+  // On Android, link nested horizontal scrollers to the sheet's drag-to-dismiss
+  // pan so they can run simultaneously. On iOS this is null (no parent gesture).
+  const sheetPanRef = useSheetPanGesture()
+  const scrollProps = sheetPanRef ? { simultaneousHandlers: sheetPanRef as React.RefObject<any> } : {}
+
+  // Hide the footer while the keyboard is up. Avoids the iOS formSheet keyboard
+  // dance entirely — the user dismisses the keyboard (tap outside / Return)
+  // to bring the Cancel + Add Tag buttons back, then taps Save.
+  const [keyboardVisible, setKeyboardVisible] = useState(false)
+  useEffect(() => {
+    const show = Keyboard.addListener('keyboardWillShow', () => setKeyboardVisible(true))
+    const hide = Keyboard.addListener('keyboardWillHide', () => setKeyboardVisible(false))
+    // Android only fires the Did events, so listen to both pairs.
+    const showAndroid = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true))
+    const hideAndroid = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false))
+    return () => {
+      show.remove()
+      hide.remove()
+      showAndroid.remove()
+      hideAndroid.remove()
+    }
+  }, [])
 
   return (
     <KeyboardAvoidingView behavior="padding" style={{ flex: 1, backgroundColor: colors.surface }}>
         <KeyboardAwareScrollView
           style={{ flex: 1 }}
+          contentContainerStyle={{ paddingBottom: 16 }}
           keyboardShouldPersistTaps="handled"
           bottomOffset={20}
           bounces={false}
@@ -108,6 +136,7 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
               showsHorizontalScrollIndicator={false}
               style={{ paddingBottom: 2 }}
               contentContainerStyle={{ gap: 6 }}
+              {...scrollProps}
             >
               {existingTags.map((tag, i) => (
                 <TagPill key={i} emoji={tag.emoji} label={tag.name} variant="display" />
@@ -139,6 +168,7 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
               paddingHorizontal: 20,
               paddingBottom: 4,
             }}
+            {...scrollProps}
           >
             {TAG_EMOJIS.map((emoji, i) => {
               const isUsed = usedEmojis.includes(emoji)
@@ -195,7 +225,6 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
               autoCapitalize="words"
               autoCorrect={false}
               returnKeyType="done"
-              onSubmitEditing={onAddTag}
               style={{
                 flex: 1,
                 backgroundColor: colors.surface2,
@@ -225,13 +254,21 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
         </View>
         </KeyboardAwareScrollView>
 
-        {/* ── Footer ── */}
+        {/* ── Footer — hidden while keyboard is up ── */}
+        {!keyboardVisible && (
         <View style={{
+          flexShrink: 0,
           flexDirection: 'row',
           gap: 8,
           paddingTop: 14,
           paddingHorizontal: 20,
-          paddingBottom: Math.max(insets.bottom, 20),
+          // Add breathing room above the Android system nav bar (insets.bottom
+          // includes the nav bar's own space; without the extra bump the buttons
+          // sit flush against it).
+          paddingBottom: Math.max(insets.bottom, 10) + (Platform.OS === 'android' ? 12 : 0),
+          backgroundColor: colors.surface,
+          borderTopWidth: 1,
+          borderTopColor: 'rgba(160,100,80,0.1)',
         }}>
           <Pressable
             onPress={onCancel}
@@ -263,6 +300,7 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
             />
           </View>
         </View>
+        )}
     </KeyboardAvoidingView>
   )
 }

@@ -1,10 +1,11 @@
 import { useLiveQuery } from '@tanstack/react-db'
 import { PartnersScreen } from '@/lib/screens/PartnersScreen'
-import { useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { partners, encounters } from '@/src/db'
 
 export default function PartnersRoute() {
   const router = useRouter()
+  const { showAdd } = useLocalSearchParams<{ showAdd?: string }>()
   const { data: allPartners = [] } = useLiveQuery((q) =>
     q.from({ partners }).select(({ partners }) => ({ ...partners }))
   )
@@ -37,7 +38,7 @@ export default function PartnersRoute() {
         const partner = allPartners[index]
         if (partner) router.push(`/(pages)/partner-profile?id=${partner.id}`)
       }}
-      onAddPartner={() => router.push('/(sheets)/edit-partner')}
+      onAddPartner={showAdd ? () => router.push('/(sheets)/edit-partner') : undefined}
     />
   )
 }

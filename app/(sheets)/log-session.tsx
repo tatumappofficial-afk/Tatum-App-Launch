@@ -7,9 +7,11 @@ import { LogSessionScreen } from '@/lib/screens/LogSessionScreen'
 import { DatePickerDropdown } from '@/lib/components/DatePickerDropdown'
 import { activityTags, encounters, partners } from '@/src/db'
 import { useLoggedDaysForMonth } from '@/src/hooks/useLoggedDaysForMonth'
+import { useSheetDismiss } from '@/app/(sheets)/_layout'
 
 export default function LogSessionRoute() {
   const router = useRouter()
+  const dismissSheet = useSheetDismiss()
   const { id } = useLocalSearchParams<{ id?: string }>()
   const isEditing = !!id
   const now = new Date()
@@ -121,7 +123,7 @@ export default function LogSessionRoute() {
             } catch (err) {
               console.error('Failed to delete encounter:', err)
             }
-            router.dismiss()
+            dismissSheet()
           },
         },
       ],
@@ -163,10 +165,10 @@ export default function LogSessionRoute() {
         encounters.insert(payload)
       }
       setShowSuccess(true)
-      setTimeout(() => router.back(), 900)
+      setTimeout(dismissSheet, 900)
     } catch (err) {
       console.error('[log-session] save threw:', err)
-      router.back()
+      dismissSheet()
     }
   }
 
@@ -203,7 +205,7 @@ export default function LogSessionRoute() {
       onNotesChange={setNotes}
       onSave={handleSave}
       onDelete={isEditing ? handleDelete : undefined}
-      onClose={() => router.dismiss()}
+      onClose={dismissSheet}
       onDatePress={() => setCalendarOpen(prev => !prev)}
       calendarOpen={calendarOpen}
       calendarContent={calendarContent}

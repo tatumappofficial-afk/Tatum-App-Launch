@@ -1,5 +1,6 @@
 import React from 'react'
-import { Pressable, ScrollView, Text, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
+import { FlashList } from '@shopify/flash-list'
 import Svg, { Polyline } from 'react-native-svg'
 import { colors, font, fontFamily } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
@@ -15,7 +16,8 @@ export interface SessionsListPartner {
 export interface SessionsListEntry {
   id: string
   partners: SessionsListPartner[]
-  partnerName: string
+  /** Optional — when omitted, only the date is shown in the row's text column. */
+  partnerName?: string
   /** Display label, e.g. "Sat · Apr 25" */
   date: string
   rating: number | null
@@ -101,7 +103,8 @@ export const SessionsListScreen: React.FC<SessionsListScreenProps> = ({
         )}
       </View>
 
-      {/* List */}
+      {/* List — FlashList virtualizes rows so memory footprint stays flat
+          regardless of how many sessions there are. */}
       {entries.length === 0 ? (
         <View style={{ paddingHorizontal: 24, paddingTop: 24 }}>
           <Text style={{
@@ -112,13 +115,12 @@ export const SessionsListScreen: React.FC<SessionsListScreenProps> = ({
           }}>No sessions in this period.</Text>
         </View>
       ) : (
-        <ScrollView
-          style={{ flex: 1 }}
+        <FlashList
+          data={entries}
+          keyExtractor={(entry) => entry.id}
           contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: 32 }}
-        >
-          {entries.map(entry => (
+          renderItem={({ item: entry }) => (
             <Pressable
-              key={entry.id}
               onPress={() => onEntryPress?.(entry.id)}
               accessibilityRole="button"
               style={({ pressed }) => ({
@@ -136,17 +138,19 @@ export const SessionsListScreen: React.FC<SessionsListScreenProps> = ({
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                 <AvatarStack partners={entry.partners} size={36} borderWidth={2} />
                 <View style={{ flex: 1 }}>
-                  <Text style={{
-                    fontFamily: font('playfair', '600'),
-                    fontSize: 16,
-                    color: colors.ink,
-                    lineHeight: 18,
-                  }}>{entry.partnerName}</Text>
+                  {entry.partnerName && (
+                    <Text style={{
+                      fontFamily: font('playfair', '600'),
+                      fontSize: 16,
+                      color: colors.ink,
+                      lineHeight: 18,
+                    }}>{entry.partnerName}</Text>
+                  )}
                   <Text style={{
                     fontSize: 12,
                     color: colors.stone,
                     fontFamily: font('dmSans', '300'),
-                    marginTop: 2,
+                    marginTop: entry.partnerName ? 2 : 0,
                   }}>{entry.date}</Text>
                 </View>
                 {entry.rating !== null && entry.rating > 0 && (
@@ -180,8 +184,8 @@ export const SessionsListScreen: React.FC<SessionsListScreenProps> = ({
                 }}>{entry.note}</Text>
               )}
             </Pressable>
-          ))}
-        </ScrollView>
+          )}
+        />
       )}
     </View>
   )

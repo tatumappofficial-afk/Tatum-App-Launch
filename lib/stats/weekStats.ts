@@ -3,7 +3,7 @@ import {
   averageRating,
   distinctWeekdays,
   filterByWindow,
-  partnerLifetimeStats,
+  partnerPeriodStats,
   recentEncounters,
   topActivities,
 } from './shared'
@@ -22,7 +22,7 @@ export function computeWeekStats(
     sessionsCount: inWindow.length,
     weekdayList: distinctWeekdays(inWindow, calendarStartDay),
     topActivities: topActivities(inWindow, tags, 5),
-    partnersLifetime: partnerLifetimeStats(encounters, partners),
+    partnerStats: partnerPeriodStats(inWindow, partners),
     averageRating: averageRating(inWindow),
     recentSessions: recentEncounters(inWindow, 5),
   }

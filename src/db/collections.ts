@@ -130,7 +130,7 @@ export const partners = createSqliteCollection<Partner>({
   id: 'partners',
   table: 'partners',
   db,
-  boolColumns: ['isActive'],
+  boolColumns: ['isActive', 'isMain'],
 })
 
 export const desireEntries = createSqliteCollection<DesireEntry>({

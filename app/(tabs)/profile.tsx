@@ -26,10 +26,17 @@ export default function ProfileRoute() {
     .map(t => ({ emoji: t.emoji, label: t.label }))
 
   // Partners (matches ProfileScreen Partner interface: initials, gradient, since)
-  const partnerList = allPartners.filter(p => p.isActive).map(p => ({
+  // Main partner is always first; remaining sorted by createdAt (oldest first).
+  const activePartners = allPartners.filter(p => p.isActive)
+  const sortedActivePartners = [...activePartners].sort((a, b) => {
+    if (a.isMain !== b.isMain) return a.isMain ? -1 : 1
+    return a.createdAt.localeCompare(b.createdAt)
+  })
+  const partnerList = sortedActivePartners.map(p => ({
     initials: p.avatarValue,
     gradient: p.avatarGradient,
     since: new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+    isMain: p.isMain,
   }))
 
   // Recent sessions (matches RecentSession: partnerInitials, partnerGradient, date, ratingPercent, tags, note)
@@ -72,11 +79,11 @@ export default function ProfileRoute() {
       recentSessions={recentSessions}
       onEdit={() => router.push('/(pages)/edit-profile')}
       onSettings={() => router.push('/(pages)/settings')}
-      onPartnersSection={() => router.push('/(pages)/partners')}
+      onPartnersSection={() => router.push('/(pages)/partners?showAdd=1')}
       onAddTag={() => router.push('/(sheets)/add-tag')}
       onAddPartner={() => router.push('/(sheets)/edit-partner')}
       onPartnerPress={(index) => {
-        const partner = allPartners.filter(p => p.isActive)[index]
+        const partner = sortedActivePartners[index]
         if (partner) router.push(`/(pages)/partner-profile?id=${partner.id}`)
       }}
       onSessionPress={(id) => router.push(`/(pages)/session-detail?id=${id}`)}

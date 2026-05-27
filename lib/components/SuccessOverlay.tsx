@@ -1,20 +1,65 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
+import Animated, {
+  Easing,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated'
 import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Polyline } from 'react-native-svg'
 import { colors, font, gradientPoints, gradients } from '../theme'
+import { AvatarCircle } from './AvatarCircle'
+
+export interface SuccessOverlayDetails {
+  partnerInitials: string
+  partnerGradient: string
+  partnerName?: string
+  emoji: string
+  dateLabel: string
+}
 
 export interface SuccessOverlayProps {
   visible: boolean
   label: string
+  details?: SuccessOverlayDetails
 }
 
-export const SuccessOverlay: React.FC<SuccessOverlayProps> = ({ visible, label }) => {
-  if (!visible) return null
+export const SuccessOverlay: React.FC<SuccessOverlayProps> = ({ visible, label, details }) => {
+  // Keep the component mounted across the exit so the fade/scale animates out.
+  const [mounted, setMounted] = useState(visible)
+  const backdropOpacity = useSharedValue(0)
+  const cardOpacity = useSharedValue(0)
+  const cardScale = useSharedValue(0.85)
+
+  useEffect(() => {
+    if (visible) {
+      setMounted(true)
+      backdropOpacity.value = withTiming(1, { duration: 180, easing: Easing.out(Easing.quad) })
+      cardOpacity.value = withTiming(1, { duration: 180, easing: Easing.out(Easing.quad) })
+      cardScale.value = withSpring(1, { damping: 16, stiffness: 180, mass: 0.6 })
+    } else {
+      backdropOpacity.value = withTiming(0, { duration: 150, easing: Easing.in(Easing.quad) })
+      cardScale.value = withTiming(0.92, { duration: 150, easing: Easing.in(Easing.quad) })
+      cardOpacity.value = withTiming(0, { duration: 150, easing: Easing.in(Easing.quad) }, (finished) => {
+        if (finished) runOnJS(setMounted)(false)
+      })
+    }
+  }, [visible, backdropOpacity, cardOpacity, cardScale])
+
+  const backdropStyle = useAnimatedStyle(() => ({ opacity: backdropOpacity.value }))
+  const cardStyle = useAnimatedStyle(() => ({
+    opacity: cardOpacity.value,
+    transform: [{ scale: cardScale.value }],
+  }))
+
+  if (!mounted) return null
   return (
-    <View
+    <Animated.View
       pointerEvents="auto"
-      style={{
+      style={[{
         position: 'absolute',
         top: 0,
         left: 0,
@@ -23,9 +68,11 @@ export const SuccessOverlay: React.FC<SuccessOverlayProps> = ({ visible, label }
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: 'rgba(61,43,37,0.25)',
-      }}
+        zIndex: 1000,
+        elevation: 1000,
+      }, backdropStyle]}
     >
-      <View style={{
+      <Animated.View style={[{
         minWidth: 200,
         paddingVertical: 22,
         paddingHorizontal: 28,
@@ -38,7 +85,7 @@ export const SuccessOverlay: React.FC<SuccessOverlayProps> = ({ visible, label }
         shadowOpacity: 0.25,
         shadowRadius: 32,
         elevation: 12,
-      }}>
+      }, cardStyle]}>
         <View style={{
           width: 48,
           height: 48,
@@ -67,7 +114,25 @@ export const SuccessOverlay: React.FC<SuccessOverlayProps> = ({ visible, label }
           fontSize: 16,
           color: colors.ink,
         }}>{label}</Text>
-      </View>
-    </View>
+        {details && (
+          <View style={{ alignItems: 'center', gap: 8, marginTop: 4 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <AvatarCircle
+                initials={details.partnerInitials}
+                gradient={details.partnerGradient}
+                size={40}
+                borderWidth={2}
+              />
+              <Text style={{ fontSize: 28 }}>{details.emoji}</Text>
+            </View>
+            <Text style={{
+              fontFamily: font('dmSans', '400'),
+              fontSize: 13,
+              color: colors.stone,
+            }}>{details.dateLabel}</Text>
+          </View>
+        )}
+      </Animated.View>
+    </Animated.View>
   )
 }

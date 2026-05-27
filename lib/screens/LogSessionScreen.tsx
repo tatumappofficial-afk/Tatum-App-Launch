@@ -1,5 +1,8 @@
-import React from 'react'
-import { StyleSheet, View, Text, Pressable, ScrollView, TextInput } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { Keyboard, Platform, StyleSheet, View, Text, Pressable, TextInput } from 'react-native'
+// ScrollView from RNGH (not RN) so the nested horizontal activities strip
+// coordinates with the Android sheet's parent pan gesture.
+import { ScrollView } from 'react-native-gesture-handler'
 import { KeyboardAvoidingView, KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -9,6 +12,7 @@ import { GradientButton } from '../components/GradientButton'
 import { TagPill } from '../components/TagPill'
 import { RatingSlider } from '../components/RatingSlider'
 import { SuccessOverlay } from '../components/SuccessOverlay'
+import { useSheetPanGesture } from '@/app/(sheets)/_layout'
 
 /* ── Types ── */
 
@@ -99,6 +103,24 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
 }) => {
   const canSave = selectedActivityIds.length > 0
   const insets = useSafeAreaInsets()
+  // Android: link the activities horizontal scroller to the sheet's pan gesture.
+  const sheetPanRef = useSheetPanGesture()
+  const scrollProps = sheetPanRef ? { simultaneousHandlers: sheetPanRef as React.RefObject<any> } : {}
+
+  // Hide the footer while the keyboard is up — see AddTagModal for the rationale.
+  const [keyboardVisible, setKeyboardVisible] = useState(false)
+  useEffect(() => {
+    const show = Keyboard.addListener('keyboardWillShow', () => setKeyboardVisible(true))
+    const hide = Keyboard.addListener('keyboardWillHide', () => setKeyboardVisible(false))
+    const showAndroid = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true))
+    const hideAndroid = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false))
+    return () => {
+      show.remove()
+      hide.remove()
+      showAndroid.remove()
+      hideAndroid.remove()
+    }
+  }, [])
 
   return (
     <KeyboardAvoidingView behavior="padding" style={styles.container}>
@@ -185,15 +207,6 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
                       </View>
                     )}
                   </View>
-                  <Text
-                    style={[
-                      styles.partnerName,
-                      {
-                        fontWeight: selected ? '500' : '400',
-                        color: selected ? colors.terra : colors.stone,
-                      },
-                    ]}
-                  >{p.name}</Text>
                 </Pressable>
               )
             })}
@@ -206,6 +219,7 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
             showsHorizontalScrollIndicator={false}
             style={styles.activitiesScroll}
             contentContainerStyle={styles.activitiesContent}
+            {...scrollProps}
           >
             {activities.map((tag) => (
               <TagPill
@@ -248,19 +262,21 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
           >{notes?.length || 0} / 3,000</Text>
         </KeyboardAwareScrollView>
 
-        <View
-          style={[
-            styles.footer,
-            { paddingBottom: Math.max(insets.bottom, 10) },
-          ]}
-        >
-          <GradientButton label={saveLabel} onPress={onSave} height={50} disabled={!canSave} />
-          {onDelete && (
-            <Pressable onPress={onDelete} style={styles.deleteButton}>
-              <Text style={styles.deleteText}>Delete Session</Text>
-            </Pressable>
-          )}
-        </View>
+        {!keyboardVisible && (
+          <View
+            style={[
+              styles.footer,
+              { paddingBottom: Math.max(insets.bottom, 10) + (Platform.OS === 'android' ? 12 : 0) },
+            ]}
+          >
+            <GradientButton label={saveLabel} onPress={onSave} height={50} disabled={!canSave} />
+            {onDelete && (
+              <Pressable onPress={onDelete} style={styles.deleteButton}>
+                <Text style={styles.deleteText}>Delete Session</Text>
+              </Pressable>
+            )}
+          </View>
+        )}
 
         <SuccessOverlay visible={showSuccess} label={successLabel} />
     </KeyboardAvoidingView>
@@ -386,9 +402,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.white,
     fontWeight: '700',
-  },
-  partnerName: {
-    fontSize: 12,
   },
   activitiesScroll: {
     marginBottom: 16,

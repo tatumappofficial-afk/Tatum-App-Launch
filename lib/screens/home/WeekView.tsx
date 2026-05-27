@@ -61,7 +61,7 @@ export const WeekView: React.FC<WeekViewProps> = ({
         </>
       )}
 
-      {stats.partnersLifetime.length > 0 && (
+      {stats.partnerStats.length > 0 && (
         <>
           <SectionLabel
             label="Partners"
@@ -69,7 +69,7 @@ export const WeekView: React.FC<WeekViewProps> = ({
             style={INLINE_LABEL}
             onPress={onPartnersHeaderPress}
           />
-          <RichPartnerStrip partners={stats.partnersLifetime} onPress={onPartnerPress} onViewAll={onPartnersHeaderPress} />
+          <RichPartnerStrip partners={stats.partnerStats} onPress={onPartnerPress} onViewAll={onPartnersHeaderPress} />
         </>
       )}
 

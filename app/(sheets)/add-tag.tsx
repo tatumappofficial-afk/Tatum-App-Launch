@@ -1,15 +1,25 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useRouter } from 'expo-router'
 import { generateId as uuid } from '@/src/utils/uuid'
 import { AddTagModal } from '@/lib/screens/AddTagModal'
+import { SuccessOverlay } from '@/lib/components/SuccessOverlay'
 import { activityTags } from '@/src/db'
 import { TAG_EMOJIS } from '@/lib/data/tagEmojis'
+import { useSheetDismiss } from '@/app/(sheets)/_layout'
 
 export default function AddTagRoute() {
   const router = useRouter()
+  const dismissSheet = useSheetDismiss()
   const [userPickedEmoji, setUserPickedEmoji] = useState<string | null>(null)
   const [tagName, setTagName] = useState('')
+  const [showSuccess, setShowSuccess] = useState(false)
+  const [successLabel, setSuccessLabel] = useState('')
+  const dismissTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => () => {
+    if (dismissTimer.current) clearTimeout(dismissTimer.current)
+  }, [])
 
   const { data: allTags = [] } = useLiveQuery((q) =>
     q.from({ activityTags }).select(({ activityTags }) => ({ ...activityTags }))
@@ -37,31 +47,37 @@ export default function AddTagRoute() {
     const isDuplicate = activeTags.some(t => t.label.toLowerCase() === label.toLowerCase())
     if (isDuplicate) return
 
-    const maxOrder = activeTags.reduce((max, t) => Math.max(max, t.sortOrder), -1)
+    // New tags insert at the top of the list (sortOrder less than existing min).
+    const minOrder = activeTags.reduce((min, t) => Math.min(min, t.sortOrder), 0)
 
     activityTags.insert({
       id: uuid(),
       emoji: selectedEmoji,
       label,
-      sortOrder: maxOrder + 1,
+      sortOrder: minOrder - 1,
       isDefault: false,
       isActive: true,
     })
 
-    router.back()
+    setSuccessLabel(`${selectedEmoji}  ${label} added`)
+    setShowSuccess(true)
+    dismissTimer.current = setTimeout(dismissSheet, 900)
   }
 
   return (
-    <AddTagModal
-      existingTags={existingTags}
-      usedEmojis={usedEmojis}
-      selectedEmoji={selectedEmoji}
-      tagName={tagName}
-      onClose={() => router.dismiss()}
-      onCancel={() => router.back()}
-      onAddTag={handleAddTag}
-      onEmojiSelect={setUserPickedEmoji}
-      onTagNameChange={setTagName}
-    />
+    <>
+      <AddTagModal
+        existingTags={existingTags}
+        usedEmojis={usedEmojis}
+        selectedEmoji={selectedEmoji}
+        tagName={tagName}
+        onClose={dismissSheet}
+        onCancel={dismissSheet}
+        onAddTag={handleAddTag}
+        onEmojiSelect={setUserPickedEmoji}
+        onTagNameChange={setTagName}
+      />
+      <SuccessOverlay visible={showSuccess} label={successLabel} />
+    </>
   )
 }
