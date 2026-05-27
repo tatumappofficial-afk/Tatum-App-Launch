@@ -73,6 +73,13 @@ const DayCell: React.FC<{
       accessibilityLabel={`Day ${day}${isToday ? ', today' : ''}${isSelected ? ', selected' : ''}`}
       accessibilityState={{ selected: isSelected, disabled: muted }}
       style={{
+        // Explicit transparent backgroundColor prevents Android (Fabric) view
+        // flattening from stripping this Pressable when no other "visible
+        // effect" styles are present. Without it, unselected logged cells lose
+        // their Text content in the native render pass — confirmed via
+        // diagnostic logs showing 52×52 measurements but no visible paint.
+        // Overridden by the isSelected branch below, which already has a bg.
+        backgroundColor: 'transparent',
         aspectRatio: 1,
         borderRadius: 9999,
         alignItems: 'center',
