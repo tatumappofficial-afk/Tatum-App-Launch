@@ -47,11 +47,9 @@ export default function EditPartnerSheet() {
     existing?.avatarGradient || partnerGradients[0].gradient,
   )
   const currentMain = allPartners.find(p => p.isMain && p.id !== existing?.id)
-  // Create mode + no current main → default to ON so the user doesn't have to think
-  // about it. Edit mode honors whatever the partner already has.
+  // Default the new-partner toggle to ON when no current main exists.
   const [isMain, setIsMain] = useState(existing?.isMain ?? !currentMain)
-  // If this is the very first partner ever, the toggle is meaningless — they'll be
-  // main regardless. Hide it to avoid clutter.
+  // Hide the toggle when this is the first partner ever — they'll be main regardless.
   const hideToggle = !isEdit && allPartners.length === 0
   const [showSuccess, setShowSuccess] = useState(false)
   const [successLabel, setSuccessLabel] = useState('')
@@ -81,16 +79,12 @@ export default function EditPartnerSheet() {
   }, [])
 
   function handleBack() {
-    // Use the chrome's animated dismiss on Android (slides + fades the backdrop).
-    // On iOS this falls back to native router.dismiss.
     dismissSheet()
   }
 
-  // After deleting a partner, the screen we came from (e.g. partner-profile)
-  // would render a stale "Unknown" view, so pop it too. Uses raw router calls
-  // here (skipping the dismiss animation) because we need to synchronously
-  // pop two screens — chaining the chrome's async animation with a follow-up
-  // router.back() would race the unmounted view.
+  // Pops the sheet AND the underlying partner-profile screen (which would
+  // otherwise render a stale "Unknown" view). Uses raw router calls because
+  // chaining the chrome's async animation with a second router.back races.
   function handleBackAfterDelete() {
     if (router.canGoBack()) router.back()
     else router.dismiss()
@@ -211,11 +205,10 @@ export default function EditPartnerSheet() {
   }
 
   const insets = useSafeAreaInsets()
-  // Android: link the partners horizontal scroller to the sheet's pan gesture.
   const sheetPanRef = useSheetPanGesture()
   const scrollProps = sheetPanRef ? { simultaneousHandlers: sheetPanRef as React.RefObject<any> } : {}
 
-  // Hide the footer while the keyboard is up — see AddTagModal for the rationale.
+  // Hide the footer while the keyboard is up.
   const [keyboardVisible, setKeyboardVisible] = useState(false)
   useEffect(() => {
     const show = Keyboard.addListener('keyboardWillShow', () => setKeyboardVisible(true))

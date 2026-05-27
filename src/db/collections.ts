@@ -69,13 +69,9 @@ function createSqliteCollection<T extends { id: string }>(config: {
         const values = columns.map((c) => row[c])
         const sql = `INSERT OR REPLACE INTO ${table} (${columns.join(', ')}) VALUES (${placeholders})`
         try {
-          console.log(`[db ${table}] INSERT`, { columns, values })
           await database.runAsync(sql, values as (string | number | null)[])
-          console.log(`[db ${table}] INSERT ok`)
         } catch (err) {
-          console.error(`[db ${table}] INSERT failed:`, err)
-          console.error(`[db ${table}] sql=`, sql)
-          console.error(`[db ${table}] values=`, values)
+          console.error(`INSERT into ${table} failed:`, err, { sql, values })
           throw err
         }
       }

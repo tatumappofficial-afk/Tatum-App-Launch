@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Keyboard, Platform, StyleSheet, View, Text, Pressable, TextInput } from 'react-native'
-// ScrollView from RNGH (not RN) so the nested horizontal activities strip
-// coordinates with the Android sheet's parent pan gesture.
+// RNGH ScrollView so the activities strip coordinates with the Android sheet's pan.
 import { ScrollView } from 'react-native-gesture-handler'
 import { KeyboardAvoidingView, KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -103,11 +102,10 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
 }) => {
   const canSave = selectedActivityIds.length > 0
   const insets = useSafeAreaInsets()
-  // Android: link the activities horizontal scroller to the sheet's pan gesture.
   const sheetPanRef = useSheetPanGesture()
   const scrollProps = sheetPanRef ? { simultaneousHandlers: sheetPanRef as React.RefObject<any> } : {}
 
-  // Hide the footer while the keyboard is up — see AddTagModal for the rationale.
+  // Hide the footer while the keyboard is up.
   const [keyboardVisible, setKeyboardVisible] = useState(false)
   useEffect(() => {
     const show = Keyboard.addListener('keyboardWillShow', () => setKeyboardVisible(true))

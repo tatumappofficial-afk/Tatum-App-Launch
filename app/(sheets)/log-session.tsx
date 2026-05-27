@@ -141,7 +141,6 @@ export default function LogSessionRoute() {
 
     try {
       if (isEditing && existingEncounter) {
-        console.log('[log-session] update', { id, dateStr, selectedPartnerIds, selectedActivities, rating })
         encounters.update(id, (draft) => {
           draft.date = dateStr
           draft.activities = selectedActivities
@@ -151,7 +150,7 @@ export default function LogSessionRoute() {
           draft.updatedAt = nowStr
         })
       } else {
-        const payload = {
+        encounters.insert({
           id: uuid(),
           date: dateStr,
           activities: selectedActivities,
@@ -160,14 +159,12 @@ export default function LogSessionRoute() {
           notes: notes || null,
           createdAt: nowStr,
           updatedAt: nowStr,
-        }
-        console.log('[log-session] insert payload', payload)
-        encounters.insert(payload)
+        })
       }
       setShowSuccess(true)
       setTimeout(dismissSheet, 900)
     } catch (err) {
-      console.error('[log-session] save threw:', err)
+      console.error('Failed to save encounter:', err)
       dismissSheet()
     }
   }

@@ -87,9 +87,7 @@ const ScreenHeader: React.FC<{
         <Polyline points="15 18 9 12 15 6" />
       </Svg>
     </Pressable>
-    {/* Absolutely-positioned page title so it sits dead-center without
-        shifting the back/edit buttons. Disambiguates this screen from
-        PartnerProfile, which uses the same layout pattern. */}
+    {/* Absolute-positioned so the back/edit buttons don't shift around it. */}
     <Text style={{
       position: 'absolute',
       left: 0,
@@ -130,10 +128,8 @@ const Hero: React.FC<{
   partnerNames: string
   date: string
 }> = ({ partners, partnerNames, date }) => (
-  // Hero hierarchy inverted from the old layout: the date is now the headline
-  // (it's *what* this screen is about — a moment in time), with partners as a
-  // smaller inline "with X" annotation underneath. This visually separates
-  // SessionDetail from PartnerProfile, where the avatar + name dominate.
+  // Date is the headline; partners shrink to an inline "with X" annotation —
+  // distinguishes this from PartnerProfile, where the avatar + name dominate.
   <View style={{
     flexShrink: 0,
     flexDirection: 'column',

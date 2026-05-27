@@ -63,8 +63,6 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
   onSessionPress,
   onShowMoreSessions,
 }) => {
-  // Tap-to-toggle info bubble explaining what "main" means. State lives in the
-  // hero so closing the bubble doesn't unmount the screen.
   const [mainInfoVisible, setMainInfoVisible] = useState(false)
 
   return (
@@ -313,8 +311,7 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
       </ScrollView>
     </View>
 
-    {/* MAIN-tag info popup. Rendered last in the parent so it z-stacks above
-        all other screen content. Tap the backdrop or the X to dismiss. */}
+    {/* MAIN-tag info popup. */}
     {isMain && mainInfoVisible && (
       <Pressable
         onPress={() => setMainInfoVisible(false)}
@@ -330,8 +327,7 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
           zIndex: 100,
         }}
       >
-        {/* Inner Pressable absorbs taps so they don't bubble to the backdrop
-            and dismiss while the user is reading. */}
+        {/* Absorbs taps so reading the popup doesn't bubble to the dismissing backdrop. */}
         <Pressable
           onPress={() => {}}
           style={{

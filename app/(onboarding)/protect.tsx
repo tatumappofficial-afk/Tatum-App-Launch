@@ -44,12 +44,12 @@ export default function ProtectScreen() {
     })
   }, [])
 
+  // Stays busy through router.push so a second tap can't re-trigger the
+  // biometric prompt while the next screen is animating in.
   async function handlePrimary() {
     if (busy) return
     setBusy(true)
     if (!enableLock) {
-      // Skip path: stay busy through the nav so a second tap can't fire
-      // while the next screen is animating in.
       updateSettings({ biometricLock: false })
       router.push('/(onboarding)/partner')
       return
@@ -61,14 +61,9 @@ export default function ProtectScreen() {
       console.error('Biometric auth failed:', err)
     }
     if (!ok) {
-      // User cancelled or auth failed — re-enable so they can retry or
-      // untoggle the lock and proceed without it.
       setBusy(false)
       return
     }
-    // Success: keep busy=true through the update + router.push so the
-    // protect screen, which is still mounted during the ~200ms nav animation,
-    // doesn't accept a second tap and trigger the biometric prompt again.
     updateSettings({ biometricLock: true })
     router.push('/(onboarding)/partner')
   }

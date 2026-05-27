@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Keyboard, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
-// ScrollView from RNGH (not RN) so nested horizontal scrollers coordinate with
-// the Android sheet's parent pan gesture. RN's stock ScrollView loses the
-// activation race even with `failOffsetX` set on the parent.
+// RNGH ScrollView so nested horizontal scrollers coordinate with the Android sheet's pan.
 import { ScrollView } from 'react-native-gesture-handler'
 import { KeyboardAvoidingView, KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -68,19 +66,15 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
     && existingTags.some(t => t.name.toLowerCase() === trimmedName.toLowerCase())
   const addTagDisabled = trimmedName.length === 0 || isDuplicate
   const insets = useSafeAreaInsets()
-  // On Android, link nested horizontal scrollers to the sheet's drag-to-dismiss
-  // pan so they can run simultaneously. On iOS this is null (no parent gesture).
   const sheetPanRef = useSheetPanGesture()
   const scrollProps = sheetPanRef ? { simultaneousHandlers: sheetPanRef as React.RefObject<any> } : {}
 
-  // Hide the footer while the keyboard is up. Avoids the iOS formSheet keyboard
-  // dance entirely — the user dismisses the keyboard (tap outside / Return)
-  // to bring the Cancel + Add Tag buttons back, then taps Save.
+  // Hide the footer while the keyboard is up; iOS formSheet keyboard handling is unreliable otherwise.
   const [keyboardVisible, setKeyboardVisible] = useState(false)
   useEffect(() => {
     const show = Keyboard.addListener('keyboardWillShow', () => setKeyboardVisible(true))
     const hide = Keyboard.addListener('keyboardWillHide', () => setKeyboardVisible(false))
-    // Android only fires the Did events, so listen to both pairs.
+    // Android only fires the Did events; listen to both pairs.
     const showAndroid = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true))
     const hideAndroid = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false))
     return () => {
@@ -262,9 +256,7 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
           gap: 8,
           paddingTop: 14,
           paddingHorizontal: 20,
-          // Add breathing room above the Android system nav bar (insets.bottom
-          // includes the nav bar's own space; without the extra bump the buttons
-          // sit flush against it).
+          // Extra Android padding: the system-nav inset is the nav bar's size, not a margin above it.
           paddingBottom: Math.max(insets.bottom, 10) + (Platform.OS === 'android' ? 12 : 0),
           backgroundColor: colors.surface,
           borderTopWidth: 1,

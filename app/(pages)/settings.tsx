@@ -33,15 +33,12 @@ export default function SettingsRoute() {
     if (successTimer.current) clearTimeout(successTimer.current)
   }, [])
 
+  // Require biometric auth in both directions: prevents enabling without
+  // enrollment (and locking the user out), and prevents a bystander with
+  // momentary access from quietly disabling the lock.
   async function handleToggleBiometrics() {
     if (busy) return
     setBusy(true)
-    // Verify in BOTH directions so the toggle can't drift out of sync with what
-    // the user can actually authenticate. Mirrors the onboarding protect screen:
-    // - Enabling: prove the user can authenticate before locking themselves out
-    //   on the next foreground (no biometric enrolled → can't unlock).
-    // - Disabling: prove ownership so anyone with momentary access to the
-    //   unlocked app can't quietly turn the lock off.
     const willEnable = !settings.biometricLock
     const promptMessage = willEnable ? 'Confirm to enable lock' : 'Confirm to disable lock'
     let ok = false
@@ -51,8 +48,6 @@ export default function SettingsRoute() {
       console.error('Biometric auth failed:', err)
     }
     if (!ok) {
-      // Auth cancelled or failed — toggle visually reverts because
-      // settings.biometricLock didn't change.
       setBusy(false)
       return
     }
