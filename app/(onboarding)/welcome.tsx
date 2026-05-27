@@ -121,12 +121,12 @@ export default function WelcomeScreen() {
           <PromiseItem
             emoji="🔒"
             title="Yours, not ours"
-            desc="Everything you log stays in your hands. Our servers never see your data. You can export a copy whenever you want."
+            desc="What you log stays in your hands. Tatum's servers never see your sessions, notes, or tags. Export a copy whenever you want."
           />
           <PromiseItem
             emoji="🗑️"
-            title="Delete the app, delete everything"
-            desc="Uninstalling Tatum removes all of your activity data. No traces left behind."
+            title="Delete any time"
+            desc="Delete all your data from the app at any time from the settings page."
           />
           <PromiseItem
             emoji="📱"
