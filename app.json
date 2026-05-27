@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "Tatum",
+    "slug": "tatum",
+    "version": "1.0.0",
+    "scheme": "tatum",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.tatumapp.tatum"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#7C4A5A"
+      },
+      "package": "com.tatumapp.tatum",
+      "predictiveBackGestureEnabled": false,
+      "allowBackup": true,
+      "permissions": [
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      "expo-font",
+      "expo-image",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 260,
+          "resizeMode": "contain",
+          "backgroundColor": "#F5EFE8"
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Tatum uses Face ID so only you can open your logs."
+        }
+      ],
+      "./plugins/withAndroidWindowBackground",
+      "expo-sharing"
+    ]
+  }
+}
