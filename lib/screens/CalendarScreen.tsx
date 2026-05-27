@@ -228,7 +228,12 @@ const DraggableQuickLogChip: React.FC<DraggableQuickLogChipProps> = ({
 }
 
 const QuickLogWidget: React.FC<QuickLogWidgetProps> = ({ onQuickLog, emojis = [], onDragStart, onDragEnd, isDragging = false }) => (
-  <View style={{ paddingHorizontal: 22, paddingTop: 10, paddingBottom: 8 }}>
+  // zIndex: 2 sits this section above the calendar block (zIndex: 1) so the
+  // chip's upward drag transform paints over the calendar grid instead of
+  // slipping behind it. The widget is rendered OUTSIDE the body ScrollView
+  // (see main layout) so no overflow clipping interferes. flexShrink: 0
+  // keeps the row from collapsing when the body ScrollView fills.
+  <View style={{ paddingHorizontal: 22, paddingTop: 10, paddingBottom: 8, zIndex: 2, flexShrink: 0 }}>
     {/* Inline header: "QUICK LOG · Drag to a date · Tap to log today" on a
         single line. The terra-uppercase title carries the visual weight; the
         muted italic tail explains the affordance. */}
@@ -375,19 +380,24 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
 
     <View style={{ height: 1, backgroundColor: 'rgba(160,100,80,0.12)', marginHorizontal: 22, marginTop: 6, flexShrink: 0 }} />
 
+    {/* QuickLog lives OUTSIDE the body ScrollView so its draggable chip can
+        transform upward into the calendar's screen area without being clipped
+        by the ScrollView's bounds. flexShrink: 0 keeps its height stable
+        regardless of body content. The body ScrollView below holds only the
+        selected-day sessions list, which gets all remaining vertical space. */}
+    <QuickLogWidget
+      onQuickLog={onQuickLog}
+      emojis={quickLogEmojis}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      isDragging={isDragging}
+    />
+
     <ScrollView
       style={{ flex: 1 }}
       contentContainerStyle={{ paddingBottom: 16 }}
       scrollEnabled={!isDragging}
     >
-      <QuickLogWidget
-        onQuickLog={onQuickLog}
-        emojis={quickLogEmojis}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        isDragging={isDragging}
-      />
-
       {selectedDay != null && (
         <>
           <SectionLabel label={selectedDayLabel || `Day ${selectedDay}`} style={{ marginHorizontal: 16, marginTop: 14 }} />
