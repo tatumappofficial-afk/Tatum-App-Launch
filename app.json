@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "tatum",
+    "name": "Tatum",
     "slug": "tatum",
     "version": "1.0.0",
     "scheme": "tatum",
@@ -10,15 +10,14 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.buildwithtori.tatumdev",
-      "appleTeamId": "6HZZ225PB5"
+      "bundleIdentifier": "com.tatumapp.tatum"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#7C4A5A"
       },
-      "package": "com.buildwithtori.tatumdev",
+      "package": "com.tatumapp.tatum",
       "predictiveBackGestureEnabled": false,
       "allowBackup": true,
       "permissions": [
