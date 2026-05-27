@@ -57,13 +57,16 @@ export const EmptyPeriod: React.FC<EmptyPeriodProps> = ({ period, scenario, onLo
         <Pressable
           onPress={onCta}
           accessibilityRole="button"
-          style={{
+          style={({ pressed }) => ({
             marginTop: 4,
             paddingVertical: 8,
             paddingHorizontal: 18,
             borderRadius: 9999,
-            backgroundColor: colors.surface2,
-          }}
+            // Visual press feedback: tint the background terra and dim slightly
+            // so the user sees the button respond before the jump animates.
+            backgroundColor: pressed ? 'rgba(160,100,80,0.18)' : colors.surface2,
+            opacity: pressed ? 0.9 : 1,
+          })}
         >
           <Text style={{
             fontSize: 14,

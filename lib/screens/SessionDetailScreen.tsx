@@ -87,6 +87,22 @@ const ScreenHeader: React.FC<{
         <Polyline points="15 18 9 12 15 6" />
       </Svg>
     </Pressable>
+    {/* Absolutely-positioned page title so it sits dead-center without
+        shifting the back/edit buttons. Disambiguates this screen from
+        PartnerProfile, which uses the same layout pattern. */}
+    <Text style={{
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      top: 11,
+      textAlign: 'center',
+      fontFamily: font('dmSans', '500'),
+      fontSize: 14,
+      letterSpacing: 1.6,
+      textTransform: 'uppercase',
+      color: colors.stone,
+      pointerEvents: 'none',
+    }}>Session</Text>
     <Pressable
       onPress={onEdit}
       style={({ pressed }) => ({
@@ -109,43 +125,47 @@ const ScreenHeader: React.FC<{
   </View>
 )
 
-const HeroAvatars: React.FC<{ partners: SessionPartner[] }> = ({ partners }) => (
-  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
-    <AvatarStack partners={partners} size={68} borderWidth={3} max={3} />
-  </View>
-)
-
 const Hero: React.FC<{
   partners: SessionPartner[]
   partnerNames: string
   date: string
 }> = ({ partners, partnerNames, date }) => (
+  // Hero hierarchy inverted from the old layout: the date is now the headline
+  // (it's *what* this screen is about — a moment in time), with partners as a
+  // smaller inline "with X" annotation underneath. This visually separates
+  // SessionDetail from PartnerProfile, where the avatar + name dominate.
   <View style={{
     flexShrink: 0,
     flexDirection: 'column',
     alignItems: 'center',
-    paddingTop: 14,
+    paddingTop: 18,
     paddingHorizontal: 24,
     position: 'relative',
     zIndex: 1,
   }}>
-    <HeroAvatars partners={partners} />
     <Text style={{
       fontFamily: font('playfair', '700'),
-      fontSize: 22,
+      fontSize: 24,
+      lineHeight: 30,
       color: colors.ink,
-      marginBottom: 3,
-    }}>
-      {partnerNames}
-    </Text>
-    <Text style={{
-      fontSize: 14,
-      fontFamily: font('dmSans', '300'),
-      color: colors.stone,
-      letterSpacing: 0.3,
+      textAlign: 'center',
+      marginBottom: partners.length > 0 ? 10 : 0,
     }}>
       {date}
     </Text>
+    {partners.length > 0 && (
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <AvatarStack partners={partners} size={28} borderWidth={2} max={3} />
+        <Text style={{
+          fontSize: 14,
+          fontFamily: font('dmSans', '400'),
+          color: colors.stone,
+          letterSpacing: 0.2,
+        }}>
+          with <Text style={{ color: colors.ink, fontFamily: font('dmSans', '500') }}>{partnerNames}</Text>
+        </Text>
+      </View>
+    )}
   </View>
 )
 

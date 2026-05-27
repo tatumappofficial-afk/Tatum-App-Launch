@@ -8,17 +8,36 @@ import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { colors, fontFamily, gradientPoints, gradients } from '@/lib/theme'
 
-const TAB_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
-  home: 'home-outline',
-  calendar: 'calendar-outline',
-  journal: 'book-outline',
-  profile: 'person-outline',
+const TAB_ICONS: Record<string, { outline: keyof typeof Ionicons.glyphMap; filled: keyof typeof Ionicons.glyphMap }> = {
+  home: { outline: 'home-outline', filled: 'home' },
+  calendar: { outline: 'calendar-outline', filled: 'calendar' },
+  journal: { outline: 'book-outline', filled: 'book' },
+  profile: { outline: 'person-outline', filled: 'person' },
 }
 
-function TabIcon({ name, color, size = 22 }: { name: string; color: ColorValue; size?: number }) {
-  const iconName = TAB_ICONS[name]
-  if (!iconName) return null
-  return <Ionicons name={iconName} size={size} color={color} />
+function TabIcon({ name, color, size = 22, focused = false }: { name: string; color: ColorValue; size?: number; focused?: boolean }) {
+  const variants = TAB_ICONS[name]
+  if (!variants) return null
+  return <Ionicons name={focused ? variants.filled : variants.outline} size={size} color={color} />
+}
+
+// Custom tab button — replaces React Navigation's PlatformPressable so we can
+// drop the Android Material ripple and use a simple opacity dim instead.
+// Applies to every tab except the FAB, which overrides `tabBarButton` itself.
+function TabButton({ children, onPress, onLongPress, style, accessibilityState, accessibilityLabel, testID }: any) {
+  return (
+    <Pressable
+      onPress={onPress}
+      onLongPress={onLongPress}
+      accessibilityRole="tab"
+      accessibilityState={accessibilityState}
+      accessibilityLabel={accessibilityLabel}
+      testID={testID}
+      style={({ pressed }) => [style, { opacity: pressed ? 0.6 : 1 }]}
+    >
+      {children}
+    </Pressable>
+  )
 }
 
 function FAB(props: any) {
@@ -32,7 +51,11 @@ function FAB(props: any) {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
         router.push('/(sheets)/log-session')
       }}
-      style={[props.style, { alignItems: 'center', justifyContent: 'center' }]}
+      android_ripple={null}
+      style={({ pressed }) => [
+        props.style,
+        { alignItems: 'center', justifyContent: 'center', opacity: pressed ? 0.85 : 1 },
+      ]}
     >
       <View
         style={{
@@ -99,20 +122,21 @@ export default function TabLayout() {
           letterSpacing: 1,
           textTransform: 'uppercase',
         },
+        tabBarButton: (props) => <TabButton {...props} />,
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => <TabIcon name="home" color={color} />,
+          tabBarIcon: ({ color, focused }) => <TabIcon name="home" color={color} focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="calendar"
         options={{
           title: 'Calendar',
-          tabBarIcon: ({ color }) => <TabIcon name="calendar" color={color} />,
+          tabBarIcon: ({ color, focused }) => <TabIcon name="calendar" color={color} focused={focused} />,
         }}
       />
       <Tabs.Screen
@@ -126,14 +150,14 @@ export default function TabLayout() {
         name="journal"
         options={{
           title: 'Sessions',
-          tabBarIcon: ({ color }) => <TabIcon name="journal" color={color} />,
+          tabBarIcon: ({ color, focused }) => <TabIcon name="journal" color={color} focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color }) => <TabIcon name="profile" color={color} />,
+          tabBarIcon: ({ color, focused }) => <TabIcon name="profile" color={color} focused={focused} />,
         }}
       />
     </Tabs>

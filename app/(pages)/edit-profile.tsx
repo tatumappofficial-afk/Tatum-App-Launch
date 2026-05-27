@@ -248,7 +248,7 @@ export default function EditProfilePage() {
                 accessibilityRole="button"
                 accessibilityLabel={`Delete tag ${tag.label}`}
                 hitSlop={10}
-                style={styles.removeButton}
+                style={({ pressed }) => [styles.removeButton, pressed && styles.removeButtonPressed]}
               >
                 <Ionicons name="remove-circle" size={26} color={colors.terra} />
               </Pressable>
@@ -257,7 +257,7 @@ export default function EditProfilePage() {
           <Pressable
             onPress={() => router.push('/(sheets)/add-tag')}
             accessibilityRole="button"
-            style={styles.addRow}
+            style={({ pressed }) => [styles.addRow, pressed && styles.rowPressed]}
           >
             <Ionicons name="add-circle-outline" size={22} color={colors.terra} />
             <Text style={styles.addRowLabel}>Add a tag</Text>
@@ -293,7 +293,7 @@ export default function EditProfilePage() {
           <Pressable
             onPress={() => router.push('/(sheets)/edit-partner')}
             accessibilityRole="button"
-            style={styles.addRow}
+            style={({ pressed }) => [styles.addRow, pressed && styles.rowPressed]}
           >
             <Ionicons name="add-circle-outline" size={22} color={colors.terra} />
             <Text style={styles.addRowLabel}>Add a partner</Text>
@@ -461,6 +461,11 @@ const styles = StyleSheet.create({
   },
   removeButton: {
     padding: 2,
+    borderRadius: 9999,
+  },
+  removeButtonPressed: {
+    backgroundColor: 'rgba(160,100,80,0.18)',
+    opacity: 0.9,
   },
   editAffordance: {
     flexDirection: 'row',
