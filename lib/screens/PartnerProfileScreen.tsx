@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Polyline } from 'react-native-svg'
@@ -62,7 +62,12 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
   onEdit,
   onSessionPress,
   onShowMoreSessions,
-}) => (
+}) => {
+  // Tap-to-toggle info bubble explaining what "main" means. State lives in the
+  // hero so closing the bubble doesn't unmount the screen.
+  const [mainInfoVisible, setMainInfoVisible] = useState(false)
+
+  return (
   <View style={{
     flex: 1,
     backgroundColor: colors.warmSand,
@@ -127,14 +132,22 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
         borderWidth={3}
       />
       {isMain ? (
-        <View style={{
-          marginTop: 8,
-          marginBottom: 4,
-          paddingHorizontal: 10,
-          paddingVertical: 3,
-          borderRadius: 9999,
-          overflow: 'hidden',
-        }}>
+        <Pressable
+          onPress={() => setMainInfoVisible(v => !v)}
+          accessibilityRole="button"
+          accessibilityLabel="What does main mean?"
+          accessibilityState={{ expanded: mainInfoVisible }}
+          hitSlop={8}
+          style={({ pressed }) => ({
+            marginTop: 8,
+            marginBottom: 4,
+            paddingHorizontal: 10,
+            paddingVertical: 3,
+            borderRadius: 9999,
+            overflow: 'hidden',
+            opacity: pressed ? 0.85 : 1,
+          })}
+        >
           <LinearGradient
             colors={[colors.terra, colors.mauve]}
             start={gradientPoints.diagonal.start}
@@ -147,9 +160,45 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
             letterSpacing: 1.5,
             color: colors.white,
           }}>MAIN</Text>
-        </View>
+        </Pressable>
       ) : (
         <View style={{ marginBottom: 10 }} />
+      )}
+      {/* Inline info popover. Sits between the MAIN tag and the partner's
+          name when expanded; tap the bubble (or the MAIN tag again) to close. */}
+      {isMain && mainInfoVisible && (
+        <Pressable
+          onPress={() => setMainInfoVisible(false)}
+          accessibilityRole="button"
+          accessibilityLabel="Dismiss info"
+          style={{
+            marginTop: 4,
+            marginBottom: 6,
+            marginHorizontal: 16,
+            backgroundColor: colors.surface,
+            borderWidth: 1,
+            borderColor: 'rgba(160,100,80,0.18)',
+            borderRadius: 12,
+            paddingVertical: 10,
+            paddingHorizontal: 14,
+            maxWidth: 320,
+            shadowColor: '#3D2B25',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.08,
+            shadowRadius: 8,
+            elevation: 2,
+          }}
+        >
+          <Text style={{
+            fontFamily: font('dmSans', '400'),
+            fontSize: 13,
+            color: colors.ink,
+            lineHeight: 18,
+            textAlign: 'center',
+          }}>
+            Your <Text style={{ fontFamily: font('dmSans', '600'), color: colors.terra }}>main</Text> partner is auto-tagged when you quick-log a session from the calendar. Edit any partner to change who's main.
+          </Text>
+        </Pressable>
       )}
       <Text style={{
         fontFamily: font('playfair', '700'),
@@ -301,4 +350,5 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
     </View>
 
   </View>
-)
+  )
+}
