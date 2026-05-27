@@ -20,6 +20,7 @@ export interface SettingsScreenProps {
   onSubmitFeedback?: () => void
   onPrivacyPolicy?: () => void
   onTerms?: () => void
+  onExportData?: () => void
   onEraseEverything?: () => void
 }
 
@@ -60,6 +61,15 @@ const TrashIcon: React.FC = () => (
   </Svg>
 )
 
+/** Outward-arrow / "share out" icon used for the Export Data row. */
+const ExportIcon: React.FC = () => (
+  <Svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2v-7" />
+    <Polyline points="16 6 12 2 8 6" />
+    <Line x1="12" y1="2" x2="12" y2="15" />
+  </Svg>
+)
+
 const DocumentIcon: React.FC<{ stroke?: string }> = ({ stroke = colors.terra }) => (
   <Svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
@@ -88,6 +98,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   onSubmitFeedback,
   onPrivacyPolicy,
   onTerms,
+  onExportData,
   onEraseEverything,
 }) => {
   return (
@@ -262,14 +273,14 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           fontSize: 14,
           color: colors.ink,
           marginBottom: 5,
-        }}>Your data stays on your device.</Text>
+        }}>Yours, not ours.</Text>
         <Text style={{
           fontSize: 14,
           fontWeight: '300',
           color: colors.stone,
           lineHeight: 19,
         }}>
-          Tatum never uploads your personal logs, notes, or session data to any server. Everything is stored locally and encrypted. You can export or permanently delete your data at any time.
+          Everything you log stays in your hands — on your phone and in your iCloud or Google backup if you've turned it on. Our servers never see your data. You can export a copy or permanently delete it whenever you want.
         </Text>
       </View>
 
@@ -286,6 +297,14 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           marginHorizontal: 20,
           overflow: 'hidden',
         }}>
+          <SettingsRow
+            icon={<ExportIcon />}
+            iconBg="rgba(192,120,88,0.1)"
+            title="Export Data"
+            subtitle="Save a copy to email, iCloud, Google Drive, or Files"
+            trailing={<ChevronForwardIcon />}
+            onPress={onExportData}
+          />
           <SettingsRow
             icon={<TrashIcon />}
             iconBg="rgba(176,112,128,0.1)"

@@ -1,6 +1,6 @@
 import { getDatabase } from './sqlite'
 import { initCollections, activityTags, encounters, partners, desireEntries, whisperMessages, affirmations, userProfiles } from './collections'
-import { DEFAULT_ACTIVITY_TAGS, DEFAULT_SETTINGS, type UserSettings } from './schema'
+import { DEFAULT_ACTIVITY_TAGS } from './schema'
 import { generateId as uuid } from '@/src/utils/uuid'
 import { deriveInitials } from '@/src/utils/initials'
 
@@ -60,16 +60,8 @@ export async function initDatabase() {
     )
   }
 
-  // Ensure default settings exist
-  const settings = await db.getAllAsync<{ key: string }>('SELECT key FROM user_settings LIMIT 1')
-  if (settings.length === 0) {
-    for (const [key, value] of Object.entries(DEFAULT_SETTINGS)) {
-      await db.runAsync(
-        'INSERT OR IGNORE INTO user_settings (key, value) VALUES (?, ?)',
-        [key, JSON.stringify(value)],
-      )
-    }
-  }
+  // user_settings singleton is seeded by SQL in sqlite.ts (INSERT OR IGNORE),
+  // so no JS-side seeding is needed here.
 
   // Backfill: every user with at least one active partner should have a main
   // partner. If none is set, promote the oldest active partner so quick-log
@@ -127,28 +119,6 @@ export async function initDatabase() {
   initialized = true
 }
 
-// ── Settings helpers (using expo-sqlite directly, not TanStack DB) ──
-
-export async function getSettings(): Promise<UserSettings> {
-  const db = await getDatabase()
-  const rows = await db.getAllAsync<{ key: string; value: string }>('SELECT * FROM user_settings')
-  const settings = { ...DEFAULT_SETTINGS }
-  for (const row of rows) {
-    try {
-      ;(settings as Record<string, unknown>)[row.key] = JSON.parse(row.value)
-    } catch { /* ignore parse errors */ }
-  }
-  return settings
-}
-
-export async function updateSetting(key: keyof UserSettings, value: unknown) {
-  const db = await getDatabase()
-  await db.runAsync(
-    'INSERT OR REPLACE INTO user_settings (key, value) VALUES (?, ?)',
-    [key, JSON.stringify(value)],
-  )
-}
-
 // ── Reset helper for dev tools / testing ──
 
 export async function resetAllData() {
@@ -176,12 +146,11 @@ export async function resetAllData() {
       [uuid(), tag.emoji, tag.label, i],
     )
   }
-  for (const [key, value] of Object.entries(DEFAULT_SETTINGS)) {
-    await db.runAsync(
-      'INSERT INTO user_settings (key, value) VALUES (?, ?)',
-      [key, JSON.stringify(value)],
-    )
-  }
+  await db.runAsync(
+    `INSERT INTO user_settings
+      (id, notifications, whisperDeliveryDefault, calendarStartDay, biometricLock, hasOnboarded, theme)
+     VALUES ('singleton', 1, 'copy', 'sunday', 0, 0, 'warm')`,
+  )
 }
 
 export async function getDbStats() {

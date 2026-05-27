@@ -30,12 +30,24 @@ export interface SuccessOverlayProps {
 export const SuccessOverlay: React.FC<SuccessOverlayProps> = ({ visible, label, details }) => {
   // Keep the component mounted across the exit so the fade/scale animates out.
   const [mounted, setMounted] = useState(visible)
+  // Hold the displayed content steady through the exit animation. If we read
+  // `label` / `details` directly from props, the parent typically clears them
+  // at the same moment it flips `visible` to false — the card would lose its
+  // details for the ~150ms the exit is animating, visually flickering from
+  // "rich" to "label only" before fading out.
+  const [displayedLabel, setDisplayedLabel] = useState(label)
+  const [displayedDetails, setDisplayedDetails] = useState(details)
   const backdropOpacity = useSharedValue(0)
   const cardOpacity = useSharedValue(0)
   const cardScale = useSharedValue(0.85)
 
   useEffect(() => {
     if (visible) {
+      // Refresh content only when becoming visible (or when it changes while
+      // already visible). Never refresh while exiting — that's where the flicker
+      // came from.
+      setDisplayedLabel(label)
+      setDisplayedDetails(details)
       setMounted(true)
       backdropOpacity.value = withTiming(1, { duration: 180, easing: Easing.out(Easing.quad) })
       cardOpacity.value = withTiming(1, { duration: 180, easing: Easing.out(Easing.quad) })
@@ -47,7 +59,7 @@ export const SuccessOverlay: React.FC<SuccessOverlayProps> = ({ visible, label, 
         if (finished) runOnJS(setMounted)(false)
       })
     }
-  }, [visible, backdropOpacity, cardOpacity, cardScale])
+  }, [visible, label, details, backdropOpacity, cardOpacity, cardScale])
 
   const backdropStyle = useAnimatedStyle(() => ({ opacity: backdropOpacity.value }))
   const cardStyle = useAnimatedStyle(() => ({
@@ -113,23 +125,23 @@ export const SuccessOverlay: React.FC<SuccessOverlayProps> = ({ visible, label, 
           fontFamily: font('playfair', '600'),
           fontSize: 16,
           color: colors.ink,
-        }}>{label}</Text>
-        {details && (
+        }}>{displayedLabel}</Text>
+        {displayedDetails && (
           <View style={{ alignItems: 'center', gap: 8, marginTop: 4 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
               <AvatarCircle
-                initials={details.partnerInitials}
-                gradient={details.partnerGradient}
+                initials={displayedDetails.partnerInitials}
+                gradient={displayedDetails.partnerGradient}
                 size={40}
                 borderWidth={2}
               />
-              <Text style={{ fontSize: 28 }}>{details.emoji}</Text>
+              <Text style={{ fontSize: 28 }}>{displayedDetails.emoji}</Text>
             </View>
             <Text style={{
               fontFamily: font('dmSans', '400'),
               fontSize: 13,
               color: colors.stone,
-            }}>{details.dateLabel}</Text>
+            }}>{displayedDetails.dateLabel}</Text>
           </View>
         )}
       </Animated.View>

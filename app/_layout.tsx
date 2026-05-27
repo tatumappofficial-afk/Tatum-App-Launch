@@ -11,31 +11,38 @@ import { DropProvider } from 'react-native-reanimated-dnd'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
 import { PlayfairDisplay_400Regular, PlayfairDisplay_400Regular_Italic, PlayfairDisplay_600SemiBold, PlayfairDisplay_700Bold } from '@expo-google-fonts/playfair-display'
 import { DMSans_300Light, DMSans_400Regular, DMSans_500Medium } from '@expo-google-fonts/dm-sans'
-import { initDatabase, getSettings } from '@/src/db'
+import { initDatabase } from '@/src/db'
+import { SettingsProvider, useSettings, useSettingsReady } from '@/src/hooks/useSettings'
 import { LockGate } from '@/lib/components/LockGate'
 
+SplashScreen.preventAutoHideAsync()
+
+// Boot-timing anchor for diagnosing the splash → black-flash → app sequence
+// we hit on Android. Every [boot] log includes ms-since-module-load so we can
+// see exactly where time goes between splash hiding and first paint.
 const __bootT0 = Date.now()
 console.log(`[boot] _layout.tsx module evaluated (t=0ms)`)
-
-SplashScreen.preventAutoHideAsync()
 
 // Cap accessibility font scaling app-wide so layouts don't break at extreme sizes.
 // See "Tori's Vault/Expo Best Practices/Typography.md".
 ;(Text as any).defaultProps = (Text as any).defaultProps || {}
 ;(Text as any).defaultProps.maxFontSizeMultiplier = 1.5
 
+/**
+ * Outer shell. Owns fonts + DB init. Once both resolve, mounts SettingsProvider
+ * which loads the settings row from SQLite. The actual routed tree (AuthedTree)
+ * only mounts after the settings provider is ready.
+ */
 export default function RootLayout() {
   useKeepAwake()
-  const [ready, setReady] = useState(false)
-  const [hasOnboarded, setHasOnboarded] = useState(false)
-  const [biometricLock, setBiometricLock] = useState(false)
+  const [initReady, setInitReady] = useState(false)
 
-  console.log(`[boot] RootLayout render (t=${Date.now() - __bootT0}ms, ready=${ready}, hasOnboarded=${hasOnboarded}, biometricLock=${biometricLock})`)
+  console.log(`[boot] RootLayout render (t=${Date.now() - __bootT0}ms, initReady=${initReady})`)
 
   useEffect(() => {
     async function init() {
+      console.log(`[boot] init effect start (t=${Date.now() - __bootT0}ms)`)
       try {
-        // Load fonts explicitly with Font.loadAsync
         await Font.loadAsync({
           'PlayfairDisplay_400Regular': PlayfairDisplay_400Regular,
           'PlayfairDisplay_400Regular_Italic': PlayfairDisplay_400Regular_Italic,
@@ -45,73 +52,105 @@ export default function RootLayout() {
           'DMSans_400Regular': DMSans_400Regular,
           'DMSans_500Medium': DMSans_500Medium,
         })
-        console.log('Fonts loaded. Testing: PlayfairDisplay_700Bold loaded =', Font.isLoaded('PlayfairDisplay_700Bold'))
-
+        console.log(`[boot] fonts loaded (t=${Date.now() - __bootT0}ms)`)
         await initDatabase()
-        const settings = await getSettings()
-        console.log('[layout] init read settings:', { hasOnboarded: settings.hasOnboarded, biometricLock: settings.biometricLock })
-        setHasOnboarded(settings.hasOnboarded)
-        setBiometricLock(settings.biometricLock)
+        console.log(`[boot] db initialized (t=${Date.now() - __bootT0}ms)`)
       } catch (e) {
         console.error('Init failed:', e)
       }
-      setReady(true)
+      console.log(`[boot] setInitReady(true) (t=${Date.now() - __bootT0}ms)`)
+      setInitReady(true)
     }
     init()
   }, [])
 
-  const onLayoutRootView = useCallback(() => {
-    if (ready) {
-      console.log(`[boot] hiding splash (t=${Date.now() - __bootT0}ms)`)
-      SplashScreen.hideAsync()
-    }
-  }, [ready])
-
-  if (!ready) return null
+  if (!initReady) return null
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={{ flex: 1, backgroundColor: '#F5EFE8' }} onLayout={onLayoutRootView}>
+      <View style={{ flex: 1, backgroundColor: '#F5EFE8' }}>
         <SafeAreaProvider>
           <KeyboardProvider>
             <DropProvider>
-            <LockGate initialLocked={biometricLock}>
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Protected guard={!hasOnboarded}>
-                <Stack.Screen name="(onboarding)" />
-              </Stack.Protected>
-              <Stack.Protected guard={hasOnboarded}>
-                <Stack.Screen name="(tabs)" />
-                <Stack.Screen name="(pages)" />
-              </Stack.Protected>
-              {/* Sheets stay accessible in any state so onboarding can open
-                  add-tag and friends without flipping hasOnboarded. */}
-              <Stack.Screen
-                name="(sheets)"
-                options={Platform.select({
-                  ios: {
-                    presentation: 'formSheet' as const,
-                    sheetAllowedDetents: [0.85],
-                    sheetInitialDetentIndex: 0,
-                    sheetGrabberVisible: true,
-                    sheetCornerRadius: 24,
-                    sheetExpandsWhenScrolledToEdge: false,
-                  },
-                  default: {
-                    presentation: 'transparentModal' as const,
-                    // 'none' so the screen-level transition doesn't slide the
-                    // backdrop. AndroidSheetChrome drives the sheet's slide +
-                    // backdrop fade itself, matching iOS's stationary-backdrop feel.
-                    animation: 'none' as const,
-                  },
-                })}
-              />
-            </Stack>
-            </LockGate>
+              <SettingsProvider>
+                <AuthedTree />
+              </SettingsProvider>
             </DropProvider>
           </KeyboardProvider>
         </SafeAreaProvider>
       </View>
     </GestureHandlerRootView>
+  )
+}
+
+/**
+ * Mounted under SettingsProvider. Waits for the initial settings load before
+ * rendering the routed stack, then drives Stack.Protected guards off the
+ * synchronously-readable settings object.
+ */
+function AuthedTree() {
+  const settingsReady = useSettingsReady()
+  const settings = useSettings()
+
+  console.log(`[boot] AuthedTree render (t=${Date.now() - __bootT0}ms, settingsReady=${settingsReady})`)
+
+  const onLayoutRootView = useCallback(() => {
+    console.log(`[boot] AuthedTree onLayout fired (t=${Date.now() - __bootT0}ms, settingsReady=${settingsReady})`)
+    if (settingsReady) {
+      console.log(`[boot] hiding splash (t=${Date.now() - __bootT0}ms)`)
+      SplashScreen.hideAsync()
+    }
+  }, [settingsReady])
+
+  if (!settingsReady) return null
+
+  const { hasOnboarded, biometricLock } = settings
+
+  return (
+    // backgroundColor here matches the native splash + activity windowBackground
+    // so the View paints the same color the moment React first lays it out —
+    // closes any black flash gap between splash hide and Stack content paint.
+    <View style={{ flex: 1, backgroundColor: '#F5EFE8' }} onLayout={onLayoutRootView}>
+      <LockGate initialLocked={biometricLock}>
+        <Stack screenOptions={{
+          headerShown: false,
+          // Defensive: expo-router's native-stack content area defaults to a
+          // system color on Android that can render black. Pinning it to our
+          // splash color eliminates any flash if the routed screen takes a
+          // frame to paint its own background.
+          contentStyle: { backgroundColor: '#F5EFE8' },
+        }}>
+          <Stack.Protected guard={!hasOnboarded}>
+            <Stack.Screen name="(onboarding)" />
+          </Stack.Protected>
+          <Stack.Protected guard={hasOnboarded}>
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="(pages)" />
+          </Stack.Protected>
+          {/* Sheets stay accessible in any state so onboarding can open
+              add-tag and friends without flipping hasOnboarded. */}
+          <Stack.Screen
+            name="(sheets)"
+            options={Platform.select({
+              ios: {
+                presentation: 'formSheet' as const,
+                sheetAllowedDetents: [0.85],
+                sheetInitialDetentIndex: 0,
+                sheetGrabberVisible: true,
+                sheetCornerRadius: 24,
+                sheetExpandsWhenScrolledToEdge: false,
+              },
+              default: {
+                presentation: 'transparentModal' as const,
+                // 'none' so the screen-level transition doesn't slide the
+                // backdrop. AndroidSheetChrome drives the sheet's slide +
+                // backdrop fade itself, matching iOS's stationary-backdrop feel.
+                animation: 'none' as const,
+              },
+            })}
+          />
+        </Stack>
+      </LockGate>
+    </View>
   )
 }

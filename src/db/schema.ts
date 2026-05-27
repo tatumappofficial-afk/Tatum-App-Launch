@@ -114,7 +114,13 @@ export type Affirmation = z.infer<typeof AffirmationSchema>
 
 // ── User Profile ──
 
+// Singleton row — there's only ever one user_settings row, with id='singleton'.
+// Modeled as a TanStack collection so subscribers (useLiveQuery / useSettings)
+// pick up changes reactively instead of having to re-fetch.
+export const SETTINGS_ID = 'singleton' as const
+
 export const UserSettingsSchema = z.object({
+  id: z.literal(SETTINGS_ID),
   notifications: z.boolean(),
   whisperDeliveryDefault: z.enum(['sms', 'in-app', 'copy']),
   calendarStartDay: z.enum(['sunday', 'monday']),
@@ -138,6 +144,7 @@ export const UserProfileSchema = z.object({
 export type UserProfile = z.infer<typeof UserProfileSchema>
 
 export const DEFAULT_SETTINGS: UserSettings = {
+  id: SETTINGS_ID,
   notifications: true,
   whisperDeliveryDefault: 'copy',
   calendarStartDay: 'sunday',

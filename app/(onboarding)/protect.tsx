@@ -11,7 +11,7 @@ import { StepDots } from '@/lib/components/StepDots'
 import { DecorativeGlow } from '@/lib/screens/shared/DecorativeGlow'
 import { StatusBarSpacer } from '@/lib/screens/shared/StatusBarSpacer'
 import { authenticate, getBiometricCapabilities, type BiometricCapabilities } from '@/src/utils/biometrics'
-import { updateSetting } from '@/src/db'
+import { useUpdateSettings } from '@/src/hooks/useSettings'
 
 const LockIcon: React.FC = () => (
   <Svg width={28} height={28} viewBox="0 0 24 24" fill="none" stroke={colors.white} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
@@ -30,6 +30,7 @@ const CheckCircle: React.FC = () => (
 export default function ProtectScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const updateSettings = useUpdateSettings()
   useBlockBack()
 
   const [caps, setCaps] = useState<BiometricCapabilities | null>(null)
@@ -47,9 +48,9 @@ export default function ProtectScreen() {
     if (busy) return
     setBusy(true)
     if (!enableLock) {
-      // Skip path: stay disabled through the nav so a second tap can't fire
+      // Skip path: stay busy through the nav so a second tap can't fire
       // while the next screen is animating in.
-      await updateSetting('biometricLock', false)
+      updateSettings({ biometricLock: false })
       router.push('/(onboarding)/partner')
       return
     }
@@ -65,10 +66,10 @@ export default function ProtectScreen() {
       setBusy(false)
       return
     }
-    // Success: keep busy=true through updateSetting + router.push so the
+    // Success: keep busy=true through the update + router.push so the
     // protect screen, which is still mounted during the ~200ms nav animation,
     // doesn't accept a second tap and trigger the biometric prompt again.
-    await updateSetting('biometricLock', true)
+    updateSettings({ biometricLock: true })
     router.push('/(onboarding)/partner')
   }
 

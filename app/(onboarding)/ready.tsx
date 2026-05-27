@@ -15,7 +15,7 @@ import { colors, font, gradientPoints, gradients } from '@/lib/theme'
 import { GradientButton } from '@/lib/components/GradientButton'
 import { RadialGlow } from '@/lib/screens/shared/DecorativeGlow'
 import { StatusBarSpacer } from '@/lib/screens/shared/StatusBarSpacer'
-import { updateSetting } from '@/src/db'
+import { useUpdateSettings } from '@/src/hooks/useSettings'
 
 const CalendarIcon: React.FC = () => (
   <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
@@ -62,6 +62,7 @@ const FeaturePill: React.FC<{ icon: React.ReactNode; text: React.ReactNode }> = 
 export default function ReadyScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const updateSettings = useUpdateSettings()
   useBlockBack()
 
   const logoRotation = useSharedValue(0)
@@ -75,23 +76,12 @@ export default function ReadyScreen() {
     transform: [{ rotate: `${logoRotation.value}deg` }],
   }))
 
-  async function handleStart() {
-    console.log('[ready] handleStart pressed')
-    try {
-      console.log('[ready] writing hasOnboarded=true to settings')
-      await updateSetting('hasOnboarded', true)
-      console.log('[ready] updateSetting resolved')
-    } catch (err) {
-      console.error('[ready] updateSetting failed:', err)
-      return
-    }
-    try {
-      console.log('[ready] calling router.replace("/(tabs)")')
-      router.replace('/(tabs)')
-      console.log('[ready] router.replace returned')
-    } catch (err) {
-      console.error('[ready] router.replace failed:', err)
-    }
+  function handleStart() {
+    // Context update is synchronous — Stack.Protected guards in _layout.tsx
+    // re-evaluate on the next render, so (tabs) is mounted by the time
+    // router.replace fires.
+    updateSettings({ hasOnboarded: true })
+    router.replace('/(tabs)')
   }
 
   return (

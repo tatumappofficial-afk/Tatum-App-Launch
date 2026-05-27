@@ -120,8 +120,8 @@ export default function WelcomeScreen() {
         <View style={{ flexDirection: 'column', gap: 14, marginBottom: 16 }}>
           <PromiseItem
             emoji="🔒"
-            title="Stored on your phone"
-            desc="Your activity stays on your phone."
+            title="Yours, not ours"
+            desc="Everything you log stays in your hands — on your phone and in your iCloud or Google backup if you've turned it on. Our servers never see your data. You can export a copy whenever you want."
           />
           <PromiseItem
             emoji="🗑️"
