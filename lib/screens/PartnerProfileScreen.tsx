@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
-import Svg, { Polyline } from 'react-native-svg'
+import Svg, { Line, Polyline } from 'react-native-svg'
 import { colors, font, gradientPoints } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { StatusBarSpacer } from './shared/StatusBarSpacer'
@@ -164,42 +164,6 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
       ) : (
         <View style={{ marginBottom: 10 }} />
       )}
-      {/* Inline info popover. Sits between the MAIN tag and the partner's
-          name when expanded; tap the bubble (or the MAIN tag again) to close. */}
-      {isMain && mainInfoVisible && (
-        <Pressable
-          onPress={() => setMainInfoVisible(false)}
-          accessibilityRole="button"
-          accessibilityLabel="Dismiss info"
-          style={{
-            marginTop: 4,
-            marginBottom: 6,
-            marginHorizontal: 16,
-            backgroundColor: colors.surface,
-            borderWidth: 1,
-            borderColor: 'rgba(160,100,80,0.18)',
-            borderRadius: 12,
-            paddingVertical: 10,
-            paddingHorizontal: 14,
-            maxWidth: 320,
-            shadowColor: '#3D2B25',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.08,
-            shadowRadius: 8,
-            elevation: 2,
-          }}
-        >
-          <Text style={{
-            fontFamily: font('dmSans', '400'),
-            fontSize: 13,
-            color: colors.ink,
-            lineHeight: 18,
-            textAlign: 'center',
-          }}>
-            Your <Text style={{ fontFamily: font('dmSans', '600'), color: colors.terra }}>main</Text> partner is auto-tagged when you quick-log a session from the calendar. Edit any partner to change who's main.
-          </Text>
-        </Pressable>
-      )}
       <Text style={{
         fontFamily: font('playfair', '700'),
         fontSize: 26, color: colors.ink, marginBottom: 2,
@@ -348,6 +312,83 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
         )}
       </ScrollView>
     </View>
+
+    {/* MAIN-tag info popup. Rendered last in the parent so it z-stacks above
+        all other screen content. Tap the backdrop or the X to dismiss. */}
+    {isMain && mainInfoVisible && (
+      <Pressable
+        onPress={() => setMainInfoVisible(false)}
+        accessibilityRole="button"
+        accessibilityLabel="Dismiss"
+        style={{
+          position: 'absolute',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(30,18,12,0.45)',
+          alignItems: 'center',
+          justifyContent: 'center',
+          paddingHorizontal: 28,
+          zIndex: 100,
+        }}
+      >
+        {/* Inner Pressable absorbs taps so they don't bubble to the backdrop
+            and dismiss while the user is reading. */}
+        <Pressable
+          onPress={() => {}}
+          style={{
+            backgroundColor: colors.surface,
+            borderRadius: 18,
+            paddingTop: 22,
+            paddingHorizontal: 22,
+            paddingBottom: 20,
+            maxWidth: 340,
+            width: '100%',
+            shadowColor: '#3D2B25',
+            shadowOffset: { width: 0, height: 6 },
+            shadowOpacity: 0.22,
+            shadowRadius: 18,
+            elevation: 10,
+          }}
+        >
+          {/* Close X */}
+          <Pressable
+            onPress={() => setMainInfoVisible(false)}
+            accessibilityRole="button"
+            accessibilityLabel="Close"
+            hitSlop={10}
+            style={({ pressed }) => ({
+              position: 'absolute',
+              top: 12, right: 12,
+              width: 28, height: 28,
+              borderRadius: 14,
+              backgroundColor: pressed ? 'rgba(160,100,80,0.18)' : colors.surface2,
+              alignItems: 'center', justifyContent: 'center',
+            })}
+          >
+            <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={colors.stone} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+              <Line x1={18} y1={6} x2={6} y2={18} />
+              <Line x1={6} y1={6} x2={18} y2={18} />
+            </Svg>
+          </Pressable>
+
+          <Text style={{
+            fontFamily: font('playfair', '700'),
+            fontSize: 20,
+            color: colors.ink,
+            marginBottom: 10,
+            paddingRight: 32, // leave room for the X
+          }}>What does main mean?</Text>
+
+          <Text style={{
+            fontFamily: font('dmSans', '400'),
+            fontSize: 14,
+            color: colors.stone,
+            lineHeight: 21,
+          }}>
+            When you log a session in a hurry — like dragging an activity onto the calendar — Tatum picks this person for you so you don't have to. To make someone else your main partner, open their edit screen and turn on "Set as main partner."
+          </Text>
+        </Pressable>
+      </Pressable>
+    )}
 
   </View>
   )
