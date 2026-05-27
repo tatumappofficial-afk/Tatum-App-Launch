@@ -12,6 +12,8 @@ export interface EmojiChipProps {
   borderRadius?: number
   selected?: boolean
   disabled?: boolean
+  /** Override the default (non-selected) chip background. Defaults to `colors.surface2`. */
+  backgroundColor?: string
   onPress?: () => void
 }
 
@@ -24,6 +26,7 @@ export const EmojiChip: React.FC<EmojiChipProps> = ({
   borderRadius = 12,
   selected = false,
   disabled = false,
+  backgroundColor,
   onPress,
 }) => {
   const flex = flexBasis !== undefined
@@ -39,7 +42,7 @@ export const EmojiChip: React.FC<EmojiChipProps> = ({
           : { width: size, height: size }),
         borderRadius,
         overflow: 'hidden',
-        backgroundColor: selected ? undefined : colors.surface2,
+        backgroundColor: selected ? undefined : (backgroundColor ?? colors.surface2),
         borderWidth: 1.5,
         borderColor: selected ? colors.terra : 'transparent',
         alignItems: 'center',

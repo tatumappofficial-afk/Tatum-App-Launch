@@ -178,6 +178,7 @@ interface DraggableQuickLogChipProps {
 // default for a hit is to spring the draggable to the slot and leave it there).
 // Also scales the chip up while dragging so it pokes out from under the thumb.
 const DRAG_SCALE = 1.8
+const QUICK_LOG_CHIP_SIZE = 38
 
 const DraggableQuickLogChip: React.FC<DraggableQuickLogChipProps> = ({
   emoji, onTap, onDragStart, onDragEnd,
@@ -214,40 +215,43 @@ const DraggableQuickLogChip: React.FC<DraggableQuickLogChipProps> = ({
         shadowOffset: { width: 0, height: 4 },
         shadowRadius: 8,
       }, animatedChipStyle]}>
-        <EmojiChip emoji={emoji} size={46} borderRadius={12} onPress={() => onTap?.(emoji)} />
+        <EmojiChip
+          emoji={emoji}
+          size={QUICK_LOG_CHIP_SIZE}
+          borderRadius={QUICK_LOG_CHIP_SIZE / 2}
+          backgroundColor={colors.surface}
+          onPress={() => onTap?.(emoji)}
+        />
       </Animated.View>
     </Draggable>
   )
 }
 
 const QuickLogWidget: React.FC<QuickLogWidgetProps> = ({ onQuickLog, emojis = [], onDragStart, onDragEnd, isDragging = false }) => (
-  <View style={{
-    backgroundColor: colors.surface,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: 'rgba(160,100,80,0.16)',
-    marginHorizontal: 16,
-    marginTop: 6,
-    paddingHorizontal: 14,
-    paddingTop: 14,
-    paddingBottom: 12,
-  }}>
-    <View style={{ marginBottom: 10 }}>
+  <View style={{ paddingHorizontal: 22, paddingTop: 10, paddingBottom: 8 }}>
+    {/* Inline header: "QUICK LOG · Drag to a date · Tap to log today" on a
+        single line. The terra-uppercase title carries the visual weight; the
+        muted italic tail explains the affordance. */}
+    <Text style={{ marginBottom: 8 }}>
       <Text style={{
         fontFamily: font('dmSans', '500'),
         fontSize: 12,
         letterSpacing: 2.5,
         textTransform: 'uppercase',
         color: colors.terra,
-        marginBottom: 2,
       }}>Quick Log</Text>
+      <Text style={{
+        fontFamily: font('dmSans', '300'),
+        fontSize: 12,
+        color: colors.muted,
+      }}>{'  ·  '}</Text>
       <Text style={{
         fontFamily: font('dmSans', '300'),
         fontSize: 12,
         color: colors.muted,
         fontStyle: 'italic',
       }}>Drag to a date · Tap to log today</Text>
-    </View>
+    </Text>
     {/* overflow: clip horizontally scrolled chips when idle; open up while
         dragging so the chip can travel up to the calendar grid. */}
     <ScrollView
@@ -256,7 +260,7 @@ const QuickLogWidget: React.FC<QuickLogWidgetProps> = ({ onQuickLog, emojis = []
       style={{ overflow: isDragging ? 'visible' : 'hidden' }}
       contentContainerStyle={{ overflow: isDragging ? 'visible' : 'hidden' }}
     >
-      <View style={{ flexDirection: 'row', gap: 7 }}>
+      <View style={{ flexDirection: 'row', gap: 8 }}>
         {emojis.map((emoji) => (
           <DraggableQuickLogChip
             key={emoji}
