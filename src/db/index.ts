@@ -71,6 +71,24 @@ export async function initDatabase() {
     }
   }
 
+  // Backfill: every user with at least one active partner should have a main
+  // partner. If none is set, promote the oldest active partner so quick-log
+  // has a deterministic target and the profile badge is always visible.
+  const mainCheck = await db.getAllAsync<{ id: string }>(
+    'SELECT id FROM partners WHERE isMain = 1 AND isActive = 1 LIMIT 1',
+  )
+  if (mainCheck.length === 0) {
+    const oldest = await db.getAllAsync<{ id: string }>(
+      'SELECT id FROM partners WHERE isActive = 1 ORDER BY createdAt ASC LIMIT 1',
+    )
+    if (oldest.length > 0) {
+      await db.runAsync(
+        'UPDATE partners SET isMain = 1, updatedAt = ? WHERE id = ?',
+        [new Date().toISOString(), oldest[0].id],
+      )
+    }
+  }
+
   // Backfill 1-character partner initials written by the legacy
   // first-letter-of-each-word derivation. Skip rows where re-deriving
   // can't produce 2+ chars (e.g. a 1-letter displayName). Restrict to

@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as Haptics from 'expo-haptics'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useRouter } from 'expo-router'
 import { generateId as uuid } from '@/src/utils/uuid'
 import { CalendarScreen } from '@/lib/screens/CalendarScreen'
+import type { SuccessOverlayDetails } from '@/lib/components/SuccessOverlay'
 import { activityTags, encounters, partners } from '@/src/db'
 import { useActivityTagMap } from '@/src/hooks/useActivityTagMap'
 import { useLoggedDaysForMonth } from '@/src/hooks/useLoggedDaysForMonth'
@@ -83,21 +84,38 @@ export default function CalendarRoute() {
     setSelectedDay(1)
   }
 
+  const [loggedOverlay, setLoggedOverlay] = useState<SuccessOverlayDetails | null>(null)
+  const overlayTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => () => {
+    if (overlayTimer.current) clearTimeout(overlayTimer.current)
+  }, [])
+
   function insertQuickEncounter(emoji: string, dateStr: string) {
     if (allPartners.length === 0) return // can't log without a partner
     const nowStr = new Date().toISOString()
-    // Quick-log defaults to the first partner; user can edit the session
-    // afterwards to reassign or add others.
+    // Quick-log uses the main partner if set, else falls back to the first.
+    const target = allPartners.find(p => p.isMain && p.isActive) ?? allPartners[0]
     encounters.insert({
       id: uuid(),
       date: dateStr,
       activities: [emoji],
-      partnerIds: [allPartners[0].id],
+      partnerIds: [target.id],
       stars: null,
       notes: null,
       createdAt: nowStr,
       updatedAt: nowStr,
     })
+    const d = new Date(dateStr + 'T00:00:00')
+    const dateLabel = `${DAY_NAMES[d.getDay()].slice(0, 3)}, ${MONTH_NAMES[d.getMonth()]} ${d.getDate()}`
+    setLoggedOverlay({
+      partnerInitials: target.avatarValue,
+      partnerGradient: target.avatarGradient,
+      partnerName: target.displayName,
+      emoji,
+      dateLabel,
+    })
+    if (overlayTimer.current) clearTimeout(overlayTimer.current)
+    overlayTimer.current = setTimeout(() => setLoggedOverlay(null), 1400)
   }
 
   function handleQuickLog(emoji: string) {
@@ -110,6 +128,7 @@ export default function CalendarRoute() {
   function handleDayDrop(day: number, emoji: string) {
     const dateStr = formatDateString(new Date(year, month - 1, day))
     insertQuickEncounter(emoji, dateStr)
+    setSelectedDay(day)
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
   }
 
@@ -130,6 +149,7 @@ export default function CalendarRoute() {
       onDayDrop={handleDayDrop}
       onSessionPress={(id) => router.push(`/(pages)/session-detail?id=${id}`)}
       quickLogEmojis={quickLogEmojis}
+      loggedOverlay={loggedOverlay}
     />
   )
 }

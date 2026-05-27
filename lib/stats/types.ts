@@ -5,7 +5,7 @@ export interface WeekStats {
   sessionsCount: number
   weekdayList: string[]
   topActivities: ActivityCount[]
-  partnersLifetime: PartnerLifetimeStats[]
+  partnerStats: PartnerLifetimeStats[]
   averageRating: number | null
   recentSessions: Encounter[]
 }
@@ -17,7 +17,7 @@ export interface MonthStats {
   mostEnjoyedActivity: MostEnjoyedActivity | null
   emojiInventory: ActivityCount[]
   partners: Partner[]
-  partnersLifetime: PartnerLifetimeStats[]
+  partnerStats: PartnerLifetimeStats[]
   recentSessions: Encounter[]
   standoutSessions: Encounter[]
   recentNotes: Encounter[]

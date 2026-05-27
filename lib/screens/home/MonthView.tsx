@@ -86,10 +86,10 @@ export const MonthView: React.FC<MonthViewProps> = ({
         </>
       )}
 
-      {stats.partnersLifetime.length > 0 && (
+      {stats.partnerStats.length > 0 && (
         <>
           <SectionLabel label="Partners" style={INLINE_LABEL} />
-          <RichPartnerStrip partners={stats.partnersLifetime} onPress={onPartnerPress} onViewAll={onViewAllPartners} />
+          <RichPartnerStrip partners={stats.partnerStats} onPress={onPartnerPress} onViewAll={onViewAllPartners} />
         </>
       )}
 

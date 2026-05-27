@@ -1,7 +1,8 @@
 import React from 'react'
 import { View, Text, Pressable, ScrollView } from 'react-native'
 import Svg, { Circle, Path, Line } from 'react-native-svg'
-import { colors, font, fontFamily, typography } from '../theme'
+import { LinearGradient } from 'expo-linear-gradient'
+import { colors, font, fontFamily, gradientPoints, typography } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { StatusBarSpacer } from './shared/StatusBarSpacer'
 import { SectionLabel } from './shared/SectionLabel'
@@ -17,6 +18,7 @@ export interface Partner {
   initials: string
   gradient: string
   since: string
+  isMain?: boolean
 }
 
 export interface ActivityTag {
@@ -250,12 +252,40 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 opacity: pressed ? 0.85 : 1,
               })}
             >
-              <AvatarCircle
-                initials={p.initials}
-                gradient={p.gradient}
-                size={44}
-                borderWidth={2}
-              />
+              <View style={{ position: 'relative' }}>
+                <AvatarCircle
+                  initials={p.initials}
+                  gradient={p.gradient}
+                  size={44}
+                  borderWidth={2}
+                />
+                {p.isMain && (
+                  <View style={{
+                    position: 'absolute',
+                    top: -6,
+                    right: -14,
+                    paddingHorizontal: 6,
+                    paddingVertical: 1,
+                    borderRadius: 9999,
+                    overflow: 'hidden',
+                    borderWidth: 1.5,
+                    borderColor: colors.warmSand,
+                  }}>
+                    <LinearGradient
+                      colors={[colors.terra, colors.mauve]}
+                      start={gradientPoints.diagonal.start}
+                      end={gradientPoints.diagonal.end}
+                      style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+                    />
+                    <Text style={{
+                      fontFamily: font('dmSans', '600'),
+                      fontSize: 8,
+                      letterSpacing: 1,
+                      color: colors.white,
+                    }}>MAIN</Text>
+                  </View>
+                )}
+              </View>
               <Text style={{
                 fontSize: 12,
                 color: colors.stone,

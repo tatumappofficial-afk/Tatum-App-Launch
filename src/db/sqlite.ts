@@ -47,6 +47,7 @@ async function initializeTables(database: SQLite.SQLiteDatabase) {
       avatarValue TEXT NOT NULL DEFAULT '',
       avatarGradient TEXT NOT NULL DEFAULT '',
       isActive INTEGER NOT NULL DEFAULT 1,
+      isMain INTEGER NOT NULL DEFAULT 0,
       createdAt TEXT NOT NULL,
       updatedAt TEXT NOT NULL
     );
@@ -129,6 +130,7 @@ async function initializeTables(database: SQLite.SQLiteDatabase) {
   // error and continue.
   await addColumnIfMissing(database, 'user_profile', 'avatarValue', 'TEXT')
   await addColumnIfMissing(database, 'user_profile', 'avatarGradient', 'TEXT')
+  await addColumnIfMissing(database, 'partners', 'isMain', 'INTEGER NOT NULL DEFAULT 0')
 }
 
 async function addColumnIfMissing(

@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router/tabs'
-import { Platform, Pressable, StyleSheet, View } from 'react-native'
+import { Platform, Pressable, StyleSheet, View, type ColorValue } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import * as Haptics from 'expo-haptics'
 import Svg, { Line } from 'react-native-svg'
@@ -15,7 +15,7 @@ const TAB_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   profile: 'person-outline',
 }
 
-function TabIcon({ name, color, size = 22 }: { name: string; color: string; size?: number }) {
+function TabIcon({ name, color, size = 22 }: { name: string; color: ColorValue; size?: number }) {
   const iconName = TAB_ICONS[name]
   if (!iconName) return null
   return <Ionicons name={iconName} size={size} color={color} />

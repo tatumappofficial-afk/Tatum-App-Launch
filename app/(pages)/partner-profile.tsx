@@ -78,14 +78,16 @@ export default function PartnerProfileRoute() {
       }
     })
 
-  // Recent sessions
-  const recentSessions = partnerEncounters.slice(0, 5).map(enc => ({
+  // Recent sessions — up to 10 inline; "Show more" routes to the full list.
+  const RECENT_LIMIT = 10
+  const recentSessions = partnerEncounters.slice(0, RECENT_LIMIT).map(enc => ({
     id: enc.id,
     date: new Date(enc.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     rating: enc.stars || 0,
     tags: enc.activities,
     note: enc.notes ?? undefined,
   }))
+  const hasMoreSessions = partnerEncounters.length > RECENT_LIMIT
 
   return (
     <PartnerProfileScreen
@@ -96,11 +98,17 @@ export default function PartnerProfileRoute() {
       sessions={sessionsCount}
       avgRating={avgRating}
       topDay={topDay}
+      isMain={partner.isMain}
       activities={activities}
       recentSessions={recentSessions}
       onBack={() => router.back()}
-      onEdit={() => router.push(`/(sheets)/edit-partner?id=${id}`)}
+      onEdit={() => router.push(`/(sheets)/edit-partner?id=${id}&from=partner-profile`)}
       onSessionPress={(sessionId) => router.push(`/(pages)/session-detail?id=${sessionId}`)}
+      onShowMoreSessions={
+        hasMoreSessions
+          ? () => router.push(`/(pages)/partner-sessions?id=${id}`)
+          : undefined
+      }
     />
   )
 }

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Text, View } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
-import { colors, font, fontFamily, gradientPoints, gradients } from '../../../theme'
+import { colors, font, gradientPoints, gradients } from '../../../theme'
 import type { ActivityCount } from '../../../stats'
 
 export interface TopActivitiesListProps {
@@ -28,13 +28,6 @@ export const TopActivitiesList: React.FC<TopActivitiesListProps> = ({ activities
           marginBottom: i < activities.length - 1 ? 7 : 0,
         }}>
           <Text style={{ fontSize: 16, width: 24, textAlign: 'center', flexShrink: 0 }}>{a.emoji}</Text>
-          <Text style={{
-            fontSize: 12,
-            color: colors.stone,
-            width: 80,
-            flexShrink: 0,
-            fontFamily: fontFamily.dmSans,
-          }} numberOfLines={1}>{a.label}</Text>
           <View style={{
             flex: 1,
             height: 5,

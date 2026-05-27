@@ -103,16 +103,6 @@ const RichPartnerCard: React.FC<{ stats: PartnerLifetimeStats; onPress?: () => v
         size={52}
         borderWidth={2.5}
       />
-      <Text
-        numberOfLines={1}
-        style={{
-          fontSize: 14,
-          color: colors.ink,
-          fontFamily: font('dmSans', '500'),
-        }}
-      >
-        {partner.displayName}
-      </Text>
       <View style={{ flexDirection: 'row', gap: 8, width: '100%' }}>
         <View style={{ flex: 1, alignItems: 'center' }}>
           <Text style={{

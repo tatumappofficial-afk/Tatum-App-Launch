@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import { useLiveQuery } from '@tanstack/react-db'
-import { Alert, StyleSheet, View, Text, TextInput, Pressable, ScrollView } from 'react-native'
+import { Alert, Keyboard, Platform, StyleSheet, View, Text, TextInput, Pressable } from 'react-native'
+// ScrollView from RNGH (not RN) so the nested horizontal partners strip
+// coordinates with the Android sheet's parent pan gesture.
+import { ScrollView } from 'react-native-gesture-handler'
 import { KeyboardAvoidingView, KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Svg, { Line } from 'react-native-svg'
@@ -12,11 +15,14 @@ import { colors, font, fontFamily, gradientPoints, partnerGradients } from '@/li
 import { GradientButton } from '@/lib/components/GradientButton'
 import { SuccessOverlay } from '@/lib/components/SuccessOverlay'
 import { AvatarCircle } from '@/lib/components/AvatarCircle'
+import { ToggleSwitch } from '@/lib/components/ToggleSwitch'
+import { useSheetPanGesture, useSheetDismiss } from '@/app/(sheets)/_layout'
 import { encounters, partners } from '@/src/db'
 
 export default function EditPartnerSheet() {
   const router = useRouter()
-  const { id } = useLocalSearchParams<{ id?: string }>()
+  const dismissSheet = useSheetDismiss()
+  const { id, from } = useLocalSearchParams<{ id?: string; from?: string }>()
   const { data: allPartners = [] } = useLiveQuery((q) =>
     q.from({ partners }).select(({ partners }) => ({ ...partners }))
   )
@@ -40,8 +46,34 @@ export default function EditPartnerSheet() {
   const [selectedGradient, setSelectedGradient] = useState(
     existing?.avatarGradient || partnerGradients[0].gradient,
   )
+  const currentMain = allPartners.find(p => p.isMain && p.id !== existing?.id)
+  // Create mode + no current main → default to ON so the user doesn't have to think
+  // about it. Edit mode honors whatever the partner already has.
+  const [isMain, setIsMain] = useState(existing?.isMain ?? !currentMain)
+  // If this is the very first partner ever, the toggle is meaningless — they'll be
+  // main regardless. Hide it to avoid clutter.
+  const hideToggle = !isEdit && allPartners.length === 0
   const [showSuccess, setShowSuccess] = useState(false)
   const [successLabel, setSuccessLabel] = useState('')
+
+  function handleToggleMain() {
+    if (isMain) {
+      setIsMain(false)
+      return
+    }
+    if (!currentMain) {
+      setIsMain(true)
+      return
+    }
+    Alert.alert(
+      'Change main partner?',
+      `Setting ${displayName.trim() || 'this partner'} as main means that ${currentMain.displayName} will no longer be your main partner.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Set as Main', onPress: () => setIsMain(true) },
+      ],
+    )
+  }
 
   const dismissTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => () => {
@@ -49,8 +81,22 @@ export default function EditPartnerSheet() {
   }, [])
 
   function handleBack() {
+    // Use the chrome's animated dismiss on Android (slides + fades the backdrop).
+    // On iOS this falls back to native router.dismiss.
+    dismissSheet()
+  }
+
+  // After deleting a partner, the screen we came from (e.g. partner-profile)
+  // would render a stale "Unknown" view, so pop it too. Uses raw router calls
+  // here (skipping the dismiss animation) because we need to synchronously
+  // pop two screens — chaining the chrome's async animation with a follow-up
+  // router.back() would race the unmounted view.
+  function handleBackAfterDelete() {
     if (router.canGoBack()) router.back()
     else router.dismiss()
+    if (from === 'partner-profile' && router.canGoBack()) {
+      router.back()
+    }
   }
 
   function handleNameChange(text: string) {
@@ -87,11 +133,19 @@ export default function EditPartnerSheet() {
     }
 
     try {
+      // If this partner is being set as main, unset any other current main first.
+      if (isMain && currentMain) {
+        partners.update(currentMain.id, (draft) => {
+          draft.isMain = false
+          draft.updatedAt = now
+        })
+      }
       if (isEdit && existing) {
         partners.update(existing.id, (draft) => {
           draft.displayName = name
           draft.avatarValue = finalInitials
           draft.avatarGradient = selectedGradient
+          draft.isMain = isMain
           draft.updatedAt = now
         })
       } else {
@@ -102,6 +156,7 @@ export default function EditPartnerSheet() {
           avatarValue: finalInitials,
           avatarGradient: selectedGradient,
           isActive: true,
+          isMain,
           createdAt: now,
           updatedAt: now,
         })
@@ -121,17 +176,9 @@ export default function EditPartnerSheet() {
     // get deleted entirely; those with multiple partners just lose this id.
     const soleEncounters = partnerEncounters.filter(e => e.partnerIds.length === 1)
     const sharedEncounters = partnerEncounters.filter(e => e.partnerIds.length > 1)
-    const noteParts: string[] = []
-    if (sharedEncounters.length > 0) {
-      noteParts.push(`${sharedEncounters.length} ${sharedEncounters.length === 1 ? 'session' : 'sessions'} will keep their other partners`)
-    }
-    if (soleEncounters.length > 0) {
-      noteParts.push(`${soleEncounters.length} ${soleEncounters.length === 1 ? 'session' : 'sessions'} where they were the only partner will be permanently deleted`)
-    }
-    const sessionNote = noteParts.length > 0 ? ` ${noteParts.join(' and ')}.` : ''
     Alert.alert(
       'Delete Partner',
-      `Are you sure you want to delete ${existing.displayName}?${sessionNote} This can’t be undone.`,
+      `Are you sure you want to delete ${existing.displayName}? This will delete everything you've logged with them.`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -156,7 +203,7 @@ export default function EditPartnerSheet() {
             }
             setSuccessLabel('Partner deleted')
             setShowSuccess(true)
-            dismissTimer.current = setTimeout(handleBack, 900)
+            dismissTimer.current = setTimeout(handleBackAfterDelete, 900)
           },
         },
       ],
@@ -164,6 +211,24 @@ export default function EditPartnerSheet() {
   }
 
   const insets = useSafeAreaInsets()
+  // Android: link the partners horizontal scroller to the sheet's pan gesture.
+  const sheetPanRef = useSheetPanGesture()
+  const scrollProps = sheetPanRef ? { simultaneousHandlers: sheetPanRef as React.RefObject<any> } : {}
+
+  // Hide the footer while the keyboard is up — see AddTagModal for the rationale.
+  const [keyboardVisible, setKeyboardVisible] = useState(false)
+  useEffect(() => {
+    const show = Keyboard.addListener('keyboardWillShow', () => setKeyboardVisible(true))
+    const hide = Keyboard.addListener('keyboardWillHide', () => setKeyboardVisible(false))
+    const showAndroid = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true))
+    const hideAndroid = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false))
+    return () => {
+      show.remove()
+      hide.remove()
+      showAndroid.remove()
+      hideAndroid.remove()
+    }
+  }, [])
 
   const sectionLabelStyle = {
     fontSize: 12,
@@ -203,7 +268,7 @@ export default function EditPartnerSheet() {
             color: colors.ink,
           }}>{isEdit ? 'Edit Partner' : 'New Partner'}</Text>
           <Pressable
-            onPress={() => router.dismiss()}
+            onPress={dismissSheet}
             accessibilityRole="button"
             accessibilityLabel="Close"
             hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
@@ -228,6 +293,7 @@ export default function EditPartnerSheet() {
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={{ gap: 6, paddingRight: 4 }}
+              {...scrollProps}
             >
               {allPartners.map((p) => (
                 <View key={p.id} style={{
@@ -271,7 +337,7 @@ export default function EditPartnerSheet() {
           placeholderTextColor={colors.muted}
           autoCapitalize="words"
           autoCorrect={false}
-          returnKeyType="next"
+          returnKeyType="done"
           style={{
             fontFamily: font('dmSans', '400'),
             fontSize: 15,
@@ -368,40 +434,73 @@ export default function EditPartnerSheet() {
             )
           })}
         </View>
+
+        {/* Main partner toggle — hidden when there are no other partners */}
+        {!hideToggle && (
+          <View style={{
+            marginTop: 22,
+            backgroundColor: colors.surface,
+            borderRadius: 14,
+            borderWidth: 1.5,
+            borderColor: colors.border,
+            paddingVertical: 14,
+            paddingHorizontal: 14,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 12,
+          }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{
+                fontFamily: font('dmSans', '500'),
+                fontSize: 15,
+                color: colors.ink,
+              }}>Set as main partner</Text>
+              <Text style={{
+                fontSize: 12,
+                fontWeight: '300',
+                color: colors.stone,
+                marginTop: 2,
+              }}>Quick-log will default to this partner</Text>
+            </View>
+            <ToggleSwitch enabled={isMain} onToggle={handleToggleMain} />
+          </View>
+        )}
       </KeyboardAwareScrollView>
 
-      <View style={{
-        flexShrink: 0,
-        paddingTop: 10,
-        paddingHorizontal: 20,
-        paddingBottom: Math.max(insets.bottom, 10),
-        borderTopWidth: 1,
-        borderTopColor: 'rgba(160,100,80,0.1)',
-        backgroundColor: colors.warmSand,
-      }}>
-        <GradientButton
-          label={isEdit ? 'Save Changes' : 'Save Partner'}
-          onPress={handleSave}
-          height={50}
-          disabled={!displayName.trim()}
-        />
-        {isEdit && (
-          <Pressable
-            onPress={handleDelete}
-            style={{
-              alignItems: 'center',
-              paddingTop: 14,
-            }}
-          >
-            <Text style={{
-              fontSize: 14,
-              fontFamily: font('dmSans', '500'),
-              color: '#B04040',
-              letterSpacing: 0.3,
-            }}>Delete Partner</Text>
-          </Pressable>
-        )}
-      </View>
+      {!keyboardVisible && (
+        <View style={{
+          flexShrink: 0,
+          paddingTop: 10,
+          paddingHorizontal: 20,
+          paddingBottom: Math.max(insets.bottom, 10) + (Platform.OS === 'android' ? 12 : 0),
+          borderTopWidth: 1,
+          borderTopColor: 'rgba(160,100,80,0.1)',
+          backgroundColor: colors.warmSand,
+        }}>
+          <GradientButton
+            label={isEdit ? 'Save Changes' : 'Save Partner'}
+            onPress={handleSave}
+            height={50}
+            disabled={!displayName.trim()}
+          />
+          {isEdit && (
+            <Pressable
+              onPress={handleDelete}
+              style={{
+                alignItems: 'center',
+                paddingTop: 14,
+              }}
+            >
+              <Text style={{
+                fontSize: 14,
+                fontFamily: font('dmSans', '500'),
+                color: '#B04040',
+                letterSpacing: 0.3,
+              }}>Delete Partner</Text>
+            </Pressable>
+          )}
+        </View>
+      )}
 
       <SuccessOverlay visible={showSuccess} label={successLabel} />
     </KeyboardAvoidingView>

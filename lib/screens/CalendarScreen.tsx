@@ -1,10 +1,12 @@
 import React, { useCallback, useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
 import { LinearGradient } from 'expo-linear-gradient'
 import * as Haptics from 'expo-haptics'
 import Svg, { Polyline } from 'react-native-svg'
-import { Draggable } from 'react-native-reanimated-dnd'
+import { Draggable, DraggableState } from 'react-native-reanimated-dnd'
 import { colors, font, fontFamily, gradientPoints, gradients, typography } from '../theme'
+import { SuccessOverlay, type SuccessOverlayDetails } from '../components/SuccessOverlay'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { StatusBarSpacer } from './shared/StatusBarSpacer'
 import { SectionLabel } from './shared/SectionLabel'
@@ -57,6 +59,8 @@ export interface CalendarScreenProps {
   onDayDrop?: (day: number, emoji: string) => void
   onSessionPress?: (id: string) => void
   quickLogEmojis?: string[]
+  /** When non-null, shows the green-check overlay confirming a quick-log. */
+  loggedOverlay?: SuccessOverlayDetails | null
 }
 
 /* ── Helpers ── */
@@ -72,7 +76,7 @@ const MONTH_NAMES = [
 const NavHeader: React.FC = () => (
   <View style={{
     paddingHorizontal: 24,
-    paddingTop: 6,
+    paddingTop: 2,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -104,8 +108,8 @@ const CalendarHeader: React.FC<{
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 22,
-    paddingTop: 10,
-    paddingBottom: 8,
+    paddingTop: 6,
+    paddingBottom: 4,
   }}>
     <Text style={{
       fontFamily: font('playfair', '600'),
@@ -153,45 +157,77 @@ const CalendarHeader: React.FC<{
   </View>
 )
 
-const Legend: React.FC = () => (
-  <View style={{ flexDirection: 'row', gap: 14, paddingHorizontal: 22, paddingTop: 7 }}>
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-      <View style={{ width: 10, height: 10, borderRadius: 5, overflow: 'hidden' }}>
-        <LinearGradient
-          colors={gradients.primaryCta}
-          start={gradientPoints.diagonal.start}
-          end={gradientPoints.diagonal.end}
-          style={[StyleSheet.absoluteFill, { borderRadius: 5 }]}
-        />
-      </View>
-      <Text style={{ fontFamily: fontFamily.dmSans, fontSize: 12, color: colors.stone }}>Today</Text>
-    </View>
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-      <Text style={{ fontSize: 12 }}>{'\uD83C\uDF46'}</Text>
-      <Text style={{ fontFamily: fontFamily.dmSans, fontSize: 12, color: colors.stone }}>Logged</Text>
-    </View>
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-      <Text style={{ fontSize: 12, color: colors.terra, fontWeight: '600' }}>{'\uD83C\uDF46'}+</Text>
-      <Text style={{ fontFamily: fontFamily.dmSans, fontSize: 12, color: colors.stone }}>Multiple</Text>
-    </View>
-  </View>
-)
 
 interface QuickLogWidgetProps {
   onQuickLog?: (emoji: string) => void
   emojis?: string[]
   onDragStart?: () => void
   onDragEnd?: () => void
+  isDragging?: boolean
 }
 
-const QuickLogWidget: React.FC<QuickLogWidgetProps> = ({ onQuickLog, emojis = [], onDragStart, onDragEnd }) => (
+interface DraggableQuickLogChipProps {
+  emoji: string
+  onTap?: (emoji: string) => void
+  onDragStart?: () => void
+  onDragEnd?: () => void
+}
+
+// Wraps Draggable with a key-bump on successful drop so the chip snaps back
+// to its origin instead of being absorbed into the drop target (the library's
+// default for a hit is to spring the draggable to the slot and leave it there).
+// Also scales the chip up while dragging so it pokes out from under the thumb.
+const DRAG_SCALE = 1.8
+
+const DraggableQuickLogChip: React.FC<DraggableQuickLogChipProps> = ({
+  emoji, onTap, onDragStart, onDragEnd,
+}) => {
+  const [resetKey, setResetKey] = useState(0)
+  const scale = useSharedValue(1)
+  const animatedChipStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+    shadowOpacity: (scale.value - 1) / (DRAG_SCALE - 1) * 0.25,
+  }))
+  return (
+    <Draggable<string>
+      key={resetKey}
+      data={emoji}
+      preDragDelay={250}
+      onDragStart={() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+        onDragStart?.()
+      }}
+      onDragEnd={() => onDragEnd?.()}
+      onStateChange={(state) => {
+        if (state === DraggableState.DRAGGING) {
+          scale.value = withSpring(DRAG_SCALE, { damping: 14, stiffness: 180 })
+        } else if (state === DraggableState.IDLE) {
+          scale.value = withSpring(1, { damping: 16, stiffness: 200 })
+        } else if (state === DraggableState.DROPPED) {
+          // Remount resets scale to 1 alongside the position snap-back.
+          setResetKey(k => k + 1)
+        }
+      }}
+    >
+      <Animated.View style={[{
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowRadius: 8,
+      }, animatedChipStyle]}>
+        <EmojiChip emoji={emoji} size={46} borderRadius={12} onPress={() => onTap?.(emoji)} />
+      </Animated.View>
+    </Draggable>
+  )
+}
+
+const QuickLogWidget: React.FC<QuickLogWidgetProps> = ({ onQuickLog, emojis = [], onDragStart, onDragEnd, isDragging = false }) => (
   <View style={{
     backgroundColor: colors.surface,
     borderRadius: 18,
     borderWidth: 1,
     borderColor: 'rgba(160,100,80,0.16)',
     marginHorizontal: 16,
-    marginTop: 10,
+    marginTop: 6,
     paddingHorizontal: 14,
     paddingTop: 14,
     paddingBottom: 12,
@@ -212,21 +248,23 @@ const QuickLogWidget: React.FC<QuickLogWidgetProps> = ({ onQuickLog, emojis = []
         fontStyle: 'italic',
       }}>Drag to a date · Tap to log today</Text>
     </View>
-    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+    {/* overflow: clip horizontally scrolled chips when idle; open up while
+        dragging so the chip can travel up to the calendar grid. */}
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={{ overflow: isDragging ? 'visible' : 'hidden' }}
+      contentContainerStyle={{ overflow: isDragging ? 'visible' : 'hidden' }}
+    >
       <View style={{ flexDirection: 'row', gap: 7 }}>
-        {emojis.map((emoji, i) => (
-          <Draggable<string>
-            key={i}
-            data={emoji}
-            preDragDelay={250}
-            onDragStart={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-              onDragStart?.()
-            }}
-            onDragEnd={() => onDragEnd?.()}
-          >
-            <EmojiChip emoji={emoji} size={46} borderRadius={12} onPress={() => onQuickLog?.(emoji)} />
-          </Draggable>
+        {emojis.map((emoji) => (
+          <DraggableQuickLogChip
+            key={emoji}
+            emoji={emoji}
+            onTap={onQuickLog}
+            onDragStart={onDragStart}
+            onDragEnd={onDragEnd}
+          />
         ))}
       </View>
     </ScrollView>
@@ -296,6 +334,7 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
   onDayDrop,
   onSessionPress,
   quickLogEmojis = [],
+  loggedOverlay = null,
 }) => {
   const [isDragging, setIsDragging] = useState(false)
   const handleDragStart = useCallback(() => setIsDragging(true), [])
@@ -328,17 +367,21 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
           isDragging={isDragging}
         />
       </View>
-      <Legend />
     </View>
 
-    <View style={{ height: 1, backgroundColor: 'rgba(160,100,80,0.12)', marginHorizontal: 22, marginTop: 10, flexShrink: 0 }} />
+    <View style={{ height: 1, backgroundColor: 'rgba(160,100,80,0.12)', marginHorizontal: 22, marginTop: 6, flexShrink: 0 }} />
 
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 16 }}>
+    <ScrollView
+      style={{ flex: 1 }}
+      contentContainerStyle={{ paddingBottom: 16 }}
+      scrollEnabled={!isDragging}
+    >
       <QuickLogWidget
         onQuickLog={onQuickLog}
         emojis={quickLogEmojis}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
+        isDragging={isDragging}
       />
 
       {selectedDay != null && (
@@ -361,6 +404,11 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
       )}
     </ScrollView>
 
+    <SuccessOverlay
+      visible={loggedOverlay != null}
+      label="Session logged"
+      details={loggedOverlay ?? undefined}
+    />
   </View>
   )
 }

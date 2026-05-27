@@ -35,11 +35,14 @@ export interface PartnerProfileScreenProps {
   sessions: number
   avgRating: string
   topDay: string
+  isMain?: boolean
   activities: Activity[]
   recentSessions: Session[]
   onBack?: () => void
   onEdit?: () => void
   onSessionPress?: (id: string) => void
+  /** When provided, renders a "Show more" tile at the end of the scroller. */
+  onShowMoreSessions?: () => void
 }
 
 /* ── main component ── */
@@ -52,11 +55,13 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
   sessions,
   avgRating,
   topDay,
+  isMain,
   activities,
   recentSessions,
   onBack,
   onEdit,
   onSessionPress,
+  onShowMoreSessions,
 }) => (
   <View style={{
     flex: 1,
@@ -121,7 +126,31 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
         size={72}
         borderWidth={3}
       />
-      <View style={{ marginBottom: 10 }} />
+      {isMain ? (
+        <View style={{
+          marginTop: 8,
+          marginBottom: 4,
+          paddingHorizontal: 10,
+          paddingVertical: 3,
+          borderRadius: 9999,
+          overflow: 'hidden',
+        }}>
+          <LinearGradient
+            colors={[colors.terra, colors.mauve]}
+            start={gradientPoints.diagonal.start}
+            end={gradientPoints.diagonal.end}
+            style={[{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }]}
+          />
+          <Text style={{
+            fontFamily: font('dmSans', '600'),
+            fontSize: 10,
+            letterSpacing: 1.5,
+            color: colors.white,
+          }}>MAIN</Text>
+        </View>
+      ) : (
+        <View style={{ marginBottom: 10 }} />
+      )}
       <Text style={{
         fontFamily: font('playfair', '700'),
         fontSize: 26, color: colors.ink, marginBottom: 2,
@@ -236,6 +265,38 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
             >{s.note}</Text>
           </Pressable>
         ))}
+        {onShowMoreSessions && (
+          <Pressable
+            onPress={onShowMoreSessions}
+            accessibilityRole="button"
+            accessibilityLabel="Show all sessions"
+            style={({ pressed }) => ({
+              flexShrink: 0,
+              width: 155,
+              backgroundColor: pressed ? colors.surface2 : colors.surface,
+              borderWidth: 1,
+              borderColor: 'rgba(160,100,80,0.15)',
+              borderStyle: 'dashed',
+              borderRadius: 14,
+              padding: 12,
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity: pressed ? 0.85 : 1,
+              gap: 6,
+            })}
+          >
+            <Svg width={28} height={28} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" opacity={0.7}>
+              <Polyline points="9 18 15 12 9 6" />
+            </Svg>
+            <Text style={{
+              fontFamily: font('dmSans', '500'),
+              fontSize: 13,
+              color: colors.terra,
+              letterSpacing: 0.4,
+              textAlign: 'center',
+            }}>Show more</Text>
+          </Pressable>
+        )}
       </ScrollView>
     </View>
 

@@ -102,17 +102,6 @@ const PartnerChip: React.FC<{ partner: Partner; onPress?: () => void }> = ({ par
       size={40}
       borderWidth={2}
     />
-    <Text
-      numberOfLines={1}
-      style={{
-        fontSize: 12,
-        color: colors.ink,
-        fontFamily: font('dmSans', '500'),
-        textAlign: 'center',
-      }}
-    >
-      {partner.displayName}
-    </Text>
     {!partner.isActive && (
       <Text style={{
         fontSize: 12,

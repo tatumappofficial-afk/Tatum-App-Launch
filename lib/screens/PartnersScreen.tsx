@@ -22,8 +22,11 @@ export interface PartnerData {
 
 export interface PartnersScreenProps {
   partners: PartnerData[]
+  /** Optional heading shown in the header row (defaults to "Partners"). */
+  title?: string
   onBack?: () => void
   onPartnerTap?: (index: number) => void
+  /** When provided, renders an "Add partner" row beneath the list. */
   onAddPartner?: () => void
 }
 
@@ -35,19 +38,11 @@ const ChevronForwardIcon: React.FC<{ color?: string; opacity?: number }> = ({ co
   </Svg>
 )
 
-const PersonAddIcon: React.FC = () => (
-  <Svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" opacity={0.7}>
-    <Path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-    <Circle cx={8.5} cy={7} r={4} />
-    <Line x1={20} y1={8} x2={20} y2={14} />
-    <Line x1={17} y1={11} x2={23} y2={11} />
-  </Svg>
-)
-
 /* ── Main component ── */
 
 export const PartnersScreen: React.FC<PartnersScreenProps> = ({
   partners,
+  title = 'Partners',
   onBack,
   onPartnerTap,
   onAddPartner,
@@ -96,7 +91,7 @@ export const PartnersScreen: React.FC<PartnersScreenProps> = ({
           position: 'absolute',
           left: '50%',
           transform: [{ translateX: '-50%' }],
-        }}>Partners</Text>
+        }}>{title}</Text>
         <View style={{ width: 34 }} />
       </View>
 
@@ -243,47 +238,48 @@ export const PartnersScreen: React.FC<PartnersScreenProps> = ({
           </Pressable>
         ))}
 
-        {/* ── Add partner card ── */}
-        <Pressable
-          onPress={onAddPartner}
-          style={{
-            backgroundColor: 'transparent',
-            borderWidth: 1.5,
-            borderStyle: 'dashed',
-            borderColor: 'rgba(192,120,88,0.3)',
-            borderRadius: 20,
-            padding: 18,
-            marginBottom: 10,
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 14,
-          }}
-        >
-          <View style={{
-            width: 52,
-            height: 52,
-            borderRadius: 26,
-            backgroundColor: 'rgba(192,120,88,0.08)',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-          }}>
-            <PersonAddIcon />
-          </View>
-          <View>
+        {onAddPartner && (
+          <Pressable
+            onPress={onAddPartner}
+            accessibilityRole="button"
+            accessibilityLabel="Add partner"
+            style={({ pressed }) => ({
+              borderWidth: 1.5,
+              borderStyle: 'dashed',
+              borderColor: 'rgba(192,120,88,0.3)',
+              borderRadius: 20,
+              paddingVertical: 16,
+              paddingHorizontal: 18,
+              marginBottom: 10,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 12,
+              backgroundColor: pressed ? 'rgba(192,120,88,0.06)' : 'transparent',
+              opacity: pressed ? 0.9 : 1,
+            })}
+          >
+            <View style={{
+              width: 52,
+              height: 52,
+              borderRadius: 26,
+              backgroundColor: 'rgba(192,120,88,0.08)',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" opacity={0.75}>
+                <Path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                <Circle cx={8.5} cy={7} r={4} />
+                <Line x1={20} y1={8} x2={20} y2={14} />
+                <Line x1={23} y1={11} x2={17} y2={11} />
+              </Svg>
+            </View>
             <Text style={{
               fontSize: 16,
-              fontWeight: '400',
               color: colors.terra,
-            }}>Add a partner</Text>
-            <Text style={{
-              fontSize: 14,
-              fontWeight: '300',
-              color: colors.muted,
-              marginTop: 1,
-            }}>Give them a name and a color</Text>
-          </View>
-        </Pressable>
+              fontFamily: font('dmSans', '500'),
+            }}>Add partner</Text>
+          </Pressable>
+        )}
 
         <View style={{ height: 12, flexShrink: 0 }} />
       </ScrollView>

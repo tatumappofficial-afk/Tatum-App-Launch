@@ -1,76 +1,32 @@
-import React, { useRef, useState, useCallback } from 'react'
-import { View, Text, PanResponder, type LayoutChangeEvent } from 'react-native'
-import { LinearGradient } from 'expo-linear-gradient'
+import React, { useRef } from 'react'
+import { View, Text, Pressable } from 'react-native'
+import Slider from '@expo/ui/community/slider'
 import * as Haptics from 'expo-haptics'
-import { colors, font, gradientPoints, gradients, shadows } from '../theme'
+import { colors, font } from '../theme'
 
 interface RatingSliderProps {
   value: number       // 0-10 (0 = no rating)
   onChange?: (value: number) => void
 }
 
-const THUMB_SIZE = 22
-const TRACK_HEIGHT = 5
 const STEPS = 10
 
 export const RatingSlider: React.FC<RatingSliderProps> = ({
   value,
   onChange,
 }) => {
-  const trackLayout = useRef({ x: 0, width: 0 })
-  const [dragging, setDragging] = useState(false)
-  const [dragValue, setDragValue] = useState(value)
-
-  const displayValue = dragging ? dragValue : value
-  const pct = (displayValue / STEPS) * 100
-
-  function clampToStep(pageX: number): number {
-    const { x, width } = trackLayout.current
-    if (width <= 0) return value
-    const localX = pageX - x
-    const ratio = Math.max(0, Math.min(1, localX / width))
-    return Math.round(ratio * STEPS)
-  }
-
   const lastSteppedRef = useRef(value)
 
-  const emitStep = (next: number) => {
-    setDragValue(next)
-    if (next !== lastSteppedRef.current) {
+  function emitStep(next: number) {
+    const clamped = Math.max(0, Math.min(STEPS, Math.round(next)))
+    if (clamped !== lastSteppedRef.current) {
       Haptics.selectionAsync()
-      lastSteppedRef.current = next
+      lastSteppedRef.current = clamped
+      onChange?.(clamped)
     }
-    onChange?.(next)
   }
 
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: (evt) => {
-        setDragging(true)
-        emitStep(clampToStep(evt.nativeEvent.pageX))
-      },
-      onPanResponderMove: (evt) => {
-        emitStep(clampToStep(evt.nativeEvent.pageX))
-      },
-      onPanResponderRelease: () => {
-        setDragging(false)
-      },
-      onPanResponderTerminate: () => {
-        setDragging(false)
-      },
-    }),
-  ).current
-
-  const trackRef = useRef<View>(null)
-  const handleLayout = useCallback((_e: LayoutChangeEvent) => {
-    trackRef.current?.measureInWindow((x, _y, width) => {
-      trackLayout.current = { x, width }
-    })
-  }, [])
-
-  const isNone = displayValue === 0
+  const isNone = value === 0
 
   return (
     <View>
@@ -89,78 +45,44 @@ export const RatingSlider: React.FC<RatingSliderProps> = ({
               fontFamily: font('playfair', '700'),
               fontSize: 22,
               color: colors.terra,
-            }}>{displayValue}</Text>
+            }}>{value}</Text>
             <Text style={{ fontSize: 14, fontWeight: '300', color: colors.stone }}> / 10</Text>
           </>
         )}
       </View>
 
-      {/* Track + thumb */}
-      <View
-        ref={trackRef}
-        onLayout={handleLayout}
-        {...panResponder.panHandlers}
-        style={{
-          height: THUMB_SIZE,
-          justifyContent: 'center',
-          marginBottom: 4,
-        }}
-      >
-        {/* Background track */}
-        <View style={{
-          height: TRACK_HEIGHT,
-          backgroundColor: colors.surface2,
-          borderRadius: TRACK_HEIGHT / 2,
-        }}>
-          {/* Filled track */}
-          {pct > 0 && (
-            <LinearGradient
-              colors={gradients.activityBar}
-              start={gradientPoints.horizontal.start}
-              end={gradientPoints.horizontal.end}
-              style={{
-                position: 'absolute',
-                left: 0,
-                top: 0,
-                bottom: 0,
-                width: `${pct}%`,
-                borderRadius: TRACK_HEIGHT / 2,
-              }}
-            />
-          )}
-        </View>
-
-        {/* Thumb — always visible */}
-        <View style={{
-          position: 'absolute',
-          top: 0,
-          left: `${pct}%`,
-          marginLeft: -(THUMB_SIZE / 2),
-          width: THUMB_SIZE,
-          height: THUMB_SIZE,
-          borderRadius: THUMB_SIZE / 2,
-          backgroundColor: colors.white,
-          borderWidth: 2.5,
-          borderColor: isNone ? colors.stone : colors.terra,
-          ...shadows.activeTag,
-        }} />
+      {/* Native slider — owns its own gesture so parent scroll can't steal it */}
+      <View style={{ marginBottom: 4 }}>
+        <Slider
+          value={value}
+          minimumValue={0}
+          maximumValue={STEPS}
+          step={1}
+          minimumTrackTintColor={colors.terra}
+          onValueChange={emitStep}
+        />
       </View>
 
-      {/* Step labels */}
+      {/* Step labels — tap to jump */}
       <View style={{
         flexDirection: 'row',
         justifyContent: 'space-between',
       }}>
         {['None', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'].map((label, i) => (
-          <Text
+          <Pressable
             key={label}
-            onPress={() => onChange?.(i)}
-            style={{
-              fontSize: 12,
-              fontWeight: displayValue === i ? '600' : '300',
-              color: displayValue === i ? colors.terra : '#C4B0A0',
+            onPress={() => {
+              lastSteppedRef.current = i
+              onChange?.(i)
             }}
-          >{label}</Text>
+            hitSlop={6}
+          >
+            <Text style={{
+              fontSize: 12,
+              fontWeight: value === i ? '600' : '300',
+              color: value === i ? colors.terra : '#C4B0A0',
+            }}>{label}</Text>
+          </Pressable>
         ))}
       </View>
     </View>

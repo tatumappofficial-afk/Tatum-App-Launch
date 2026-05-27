@@ -61,6 +61,7 @@ export const PartnerSchema = z.object({
   avatarValue: z.string(),
   avatarGradient: z.string(), // CSS gradient string
   isActive: z.boolean(),
+  isMain: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),
 })
@@ -118,6 +119,7 @@ export const UserSettingsSchema = z.object({
   whisperDeliveryDefault: z.enum(['sms', 'in-app', 'copy']),
   calendarStartDay: z.enum(['sunday', 'monday']),
   biometricLock: z.boolean(),
+  hasOnboarded: z.boolean(),
   theme: z.literal('warm'),
 })
 
@@ -140,5 +142,6 @@ export const DEFAULT_SETTINGS: UserSettings = {
   whisperDeliveryDefault: 'copy',
   calendarStartDay: 'sunday',
   biometricLock: false,
+  hasOnboarded: false,
   theme: 'warm',
 }
