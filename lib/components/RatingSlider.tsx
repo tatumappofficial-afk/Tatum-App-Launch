@@ -51,7 +51,10 @@ export const RatingSlider: React.FC<RatingSliderProps> = ({
         )}
       </View>
 
-      {/* Native slider — owns its own gesture so parent scroll can't steal it */}
+      {/* Native slider — owns its own gesture so parent scroll can't steal it.
+          Same component on both platforms: SwiftUI thumb (circle) on iOS,
+          Material 3 thumb (vertical pill) on Android. We accept the per-platform
+          look as the cost of a single import. */}
       <View style={{ marginBottom: 4 }}>
         <Slider
           value={value}
