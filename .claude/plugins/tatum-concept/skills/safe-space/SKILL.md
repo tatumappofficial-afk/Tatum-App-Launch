@@ -97,6 +97,6 @@ The Safe Space can naturally flow into Tatum Whisper. If she logged a desire ent
 
 - Free tier: basic desire logging (timestamp + intensity + partner)
 - Premium: pattern recognition insights, freeform text, cycle correlation
-- Desire entries are private and encrypted with the same strategy as Private Notes
+- Desire entries are private — stored locally on the device, same as Private Notes. (Encryption-at-rest is aspirational and not yet implemented; see `private-notes/SKILL.md`.)
 - No notifications or reminders to log desire — this is purely self-initiated
 - The "I'm feeling it" button must be accessible from the home screen, not buried in navigation

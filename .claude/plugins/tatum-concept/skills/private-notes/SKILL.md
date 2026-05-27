@@ -5,7 +5,9 @@ description: Private journal notes attached to sessions
 
 # Private Notes
 
-Encrypted, freeform journal entries linked to encounters or standalone. Her private diary — nobody else ever sees it. This is the most intimate part of the Tracker pillar.
+Private, freeform journal entries linked to encounters or standalone. Her private diary — nobody else ever sees it. This is the most intimate part of the Tracker pillar.
+
+> **Reality check (May 2026):** notes are *not* encrypted at rest right now — they're stored as plain text in the local SQLite database. Privacy comes from the fact that data never leaves the device + optional biometric lock on app open. The "Encryption" section below describes the *aspirational* design for a future encryption layer; do not claim "encrypted" in any user-facing copy.
 
 **Depends on:** `data-model` (PrivateNote, Encounter, Partner), `design-system` (card patterns, typography)
 
@@ -51,11 +53,11 @@ In the calendar view, a logged day with a note shows a small pencil icon or note
 
 ---
 
-## Encryption
+## Encryption — *aspirational, not yet implemented*
 
-Private notes are the most sensitive data in the app. They are encrypted at rest.
+Private notes are the most sensitive data in the app. The eventual goal is to encrypt them at rest. Until that ships, they're stored as plain text in the local SQLite database and the user is never told otherwise.
 
-### v1 Implementation
+### Future v1 Implementation (TODO — not built)
 
 - Encrypt the `body` field of PrivateNote before writing to SQLite
 - Use a device-derived key (via `expo-crypto` or `expo-secure-store`)

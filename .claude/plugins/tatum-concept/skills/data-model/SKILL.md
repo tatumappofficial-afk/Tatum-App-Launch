@@ -77,14 +77,14 @@ Partner {
 
 ### PrivateNote
 
-An encrypted, freeform journal entry linked to an encounter or standalone.
+A private, freeform journal entry linked to an encounter or standalone. Stored locally on the device; *not* encrypted at rest in v1 (see `private-notes/SKILL.md` for the aspirational encryption design).
 
 ```
 PrivateNote {
   id: uuid
   encounterId: uuid | null      — linked encounter, or standalone
   partnerId: uuid | null        — linked partner for context
-  body: string                  — encrypted at rest
+  body: string                  — plain text in v1; encryption-at-rest TODO
   emojiTags: string[]           — emoji tags attached to the note
   createdAt: ISO datetime
   updatedAt: ISO datetime
@@ -191,7 +191,7 @@ All data is **local-first**. v1 has no server — everything lives on-device.
 - **expo-sqlite** for ALL data: Encounters, Partners, Notes, DesireEntries, WhisperMessages, UserProfile, UserSettings, Affirmations
 - **expo-sqlite/localStorage** polyfill for simple key-value settings (replaces MMKV — MMKV does not work in Expo Go)
 - **TanStack DB** with custom expo-sqlite collection adapter for reactive queries
-- **Encryption**: Private notes encrypted at rest using expo-crypto or a lightweight encryption layer. The key is derived from the device and optional biometric lock.
+- **Encryption (aspirational, not built):** the plan is to encrypt Private Notes at rest using expo-crypto + a device-derived key (and the biometric-lock setting feeding into the key when enabled). Until that lands, *nothing* in SQLite is encrypted — privacy comes from "stays on device" + biometric lock on app open. Do not claim "encrypted" in any user-facing copy.
 
 No cloud sync in v1. Data export (premium) writes to a local file the user can save.
 

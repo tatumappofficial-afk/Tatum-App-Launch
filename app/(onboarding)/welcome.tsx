@@ -121,7 +121,7 @@ export default function WelcomeScreen() {
           <PromiseItem
             emoji="🔒"
             title="Yours, not ours"
-            desc="Everything you log stays in your hands — on your phone and in your iCloud or Google backup if you've turned it on. Our servers never see your data. You can export a copy whenever you want."
+            desc="Everything you log stays in your hands. Our servers never see your data. You can export a copy whenever you want."
           />
           <PromiseItem
             emoji="🗑️"
