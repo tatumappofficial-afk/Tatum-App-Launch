@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated'
 import { LinearGradient } from 'expo-linear-gradient'
 import * as Haptics from 'expo-haptics'
 import Svg, { Polyline } from 'react-native-svg'
@@ -203,9 +203,17 @@ const DraggableQuickLogChip: React.FC<DraggableQuickLogChipProps> = ({
         if (state === DraggableState.DRAGGING) {
           scale.value = withSpring(DRAG_SCALE, { damping: 14, stiffness: 180 })
         } else if (state === DraggableState.IDLE) {
-          scale.value = withSpring(1, { damping: 16, stiffness: 200 })
+          // Timing (not spring) so the chip eases back to its resting size
+          // without the underdamped overshoot that read as a "bounce" when
+          // the chip returned to the quick-log row after a drag-cancel.
+          scale.value = withTiming(1, { duration: 180, easing: Easing.out(Easing.quad) })
         } else if (state === DraggableState.DROPPED) {
-          // Remount resets scale to 1 alongside the position snap-back.
+          // Collapse the chip instantly so the library's snap-toward-slot
+          // animation isn't visible — without this we'd see a brief "up-and-down"
+          // as the chip springs toward the calendar before resetKey remounts it
+          // back at origin. Setting scale to 0 (no spring) hides both the chip
+          // and its shadow (shadowOpacity derives from scale).
+          scale.value = 0
           setResetKey(k => k + 1)
         }
       }}

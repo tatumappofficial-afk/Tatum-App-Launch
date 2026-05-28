@@ -72,13 +72,19 @@ const DayCell: React.FC<{
       accessibilityRole="button"
       accessibilityLabel={`Day ${day}${isToday ? ', today' : ''}${isSelected ? ', selected' : ''}`}
       accessibilityState={{ selected: isSelected, disabled: muted }}
+      // `collapsable={false}` is the canonical Android Fabric escape hatch:
+      // unconditionally keep this Pressable as a real native view, never
+      // flatten it. The transparent backgroundColor below was the previous
+      // fix and works for the single-emoji case, but once `hasMultiple` flips
+      // true a second Text node appears in the inner row and Fabric's
+      // flattening heuristics start dropping the day number Text from the
+      // render pass. `collapsable={false}` blocks all such optimizations on
+      // this view. No-op on iOS, where the prop is ignored.
+      collapsable={false}
       style={{
-        // Explicit transparent backgroundColor prevents Android (Fabric) view
-        // flattening from stripping this Pressable when no other "visible
-        // effect" styles are present. Without it, unselected logged cells lose
-        // their Text content in the native render pass — confirmed via
-        // diagnostic logs showing 52×52 measurements but no visible paint.
-        // Overridden by the isSelected branch below, which already has a bg.
+        // Belt-and-suspenders with `collapsable={false}` above. Keeping this
+        // for the same reason it was originally added — a visible-effect
+        // style helps Fabric keep the view "real" on Android.
         backgroundColor: 'transparent',
         aspectRatio: 1,
         borderRadius: 9999,
