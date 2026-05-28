@@ -108,6 +108,10 @@ function AuthedTree() {
                 presentation: 'transparentModal' as const,
                 // AndroidSheetChrome runs the slide + backdrop fade; the screen transition stays out of the way.
                 animation: 'none' as const,
+                // Override the parent Stack's opaque #F5EFE8 — otherwise the sheet container
+                // covers the underlying tab/page, and the AndroidSheetChrome backdrop fade
+                // reveals warm sand instead of the actual app on dismiss.
+                contentStyle: { backgroundColor: 'transparent' },
               },
             })}
           />
