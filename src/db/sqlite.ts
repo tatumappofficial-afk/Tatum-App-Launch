@@ -129,6 +129,13 @@ const MIGRATIONS: Migration[] = [
       CREATE INDEX idx_encounters_date ON encounters(date);
     `,
   },
+  {
+    version: 2,
+    up: `
+      ALTER TABLE user_profile ADD COLUMN email TEXT;
+      ALTER TABLE user_profile ADD COLUMN authProvider TEXT;
+    `,
+  },
 ]
 
 const TARGET_VERSION = MIGRATIONS[MIGRATIONS.length - 1].version

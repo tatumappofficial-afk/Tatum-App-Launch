@@ -10,7 +10,11 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.tatumapp.tatum"
+      "bundleIdentifier": "com.tatumapp.tatum",
+      "usesAppleSignIn": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -49,7 +53,15 @@
         }
       ],
       "./plugins/withAndroidWindowBackground",
-      "expo-sharing"
-    ]
+      "expo-sharing",
+      "@react-native-google-signin/google-signin"
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "0f07d45e-b9fe-46f0-b58e-5f89f85f7b20"
+      }
+    },
+    "owner": "tatum-app"
   }
 }

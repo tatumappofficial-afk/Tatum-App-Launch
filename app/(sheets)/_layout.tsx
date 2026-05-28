@@ -12,7 +12,7 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import { colors } from '@/lib/theme'
 
 // Dismiss after the sheet has been pulled down past this fraction of its own height.
-const DISMISS_DISTANCE_RATIO = 1 / 3
+const DISMISS_DISTANCE_RATIO = 1 / 4
 const SNAP_BACK_DURATION_MS = 100
 const MAX_BACKDROP_OPACITY = 0.4
 const OPEN_DURATION_MS = 250

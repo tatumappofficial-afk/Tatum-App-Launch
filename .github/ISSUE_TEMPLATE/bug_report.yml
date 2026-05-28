@@ -1,0 +1,66 @@
+name: Bug report
+description: Something broke, looked wrong, or didn't behave the way you expected.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: device
+    attributes:
+      label: Which device?
+      options:
+        - iPhone
+        - Android phone
+        - Both
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where in the app did this happen?
+      options:
+        - Onboarding (the welcome / setup screens)
+        - Home / Calendar
+        - Adding or editing a session
+        - Partners screen
+        - Insights / Stats
+        - Settings
+        - Other / not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A short description of what you saw.
+      placeholder: "I tapped the calendar for May 15th and it crashed back to the home screen."
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+      description: Optional — skip if it's obvious.
+      placeholder: "I expected the day to open so I could log a session."
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshot
+      description: Drag any screenshots or screen recordings into this box. The more the better.
+      placeholder: "Drop your screenshot here."
+    validations:
+      required: false
+
+  - type: input
+    id: when
+    attributes:
+      label: Roughly when did this happen?
+      description: Optional — helps us check logs.
+      placeholder: "Tuesday afternoon"
+    validations:
+      required: false

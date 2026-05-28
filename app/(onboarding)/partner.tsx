@@ -62,6 +62,17 @@ export default function PartnerScreen() {
     }
 
     try {
+      // First real partner added in onboarding always becomes main. The seeded
+      // Solo row was auto-promoted to main by the initDatabase backfill (so the
+      // profile badge isn't empty on first launch), but a user-created partner
+      // should supersede that placeholder.
+      const previousMain = allPartners.find(p => p.isMain)
+      if (previousMain) {
+        partners.update(previousMain.id, (draft) => {
+          draft.isMain = false
+          draft.updatedAt = now
+        })
+      }
       partners.insert({
         id: generateId(),
         displayName: name,
@@ -69,8 +80,7 @@ export default function PartnerScreen() {
         avatarValue: finalInitials,
         avatarGradient: selectedGradient,
         isActive: true,
-        // Auto-promote to main when no other main exists.
-        isMain: !allPartners.some(p => p.isMain),
+        isMain: true,
         createdAt: now,
         updatedAt: now,
       })

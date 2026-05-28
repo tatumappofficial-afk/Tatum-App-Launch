@@ -139,6 +139,8 @@ export const UserProfileSchema = z.object({
   createdAt: z.string(),
   tier: z.enum(['free', 'premium']),
   premiumExpiresAt: z.string().nullable(),
+  email: z.string().nullable(),
+  authProvider: z.enum(['apple', 'google']).nullable(),
 })
 
 export type UserProfile = z.infer<typeof UserProfileSchema>

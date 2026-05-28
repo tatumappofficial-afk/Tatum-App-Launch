@@ -1,6 +1,8 @@
 # Tatum — Ship Plan
 
-A step-by-step runbook from "code is clean" to "in Alanna's hands via Google Play Internal Testing + (later) TestFlight." Check off items as you go. Toggle a checkbox by changing `- [ ]` → `- [x]`.
+A step-by-step runbook from "code is clean" to "in Alanna's hands via Google Play Internal Testing + TestFlight." Check off items as you go. Toggle a checkbox by changing `- [ ]` → `- [x]`.
+
+> **Strategy update (2026-05-27):** auth is deferred to v1.1 so we can get builds into Alanna's hands by EOD. A parallel Claude session is building the OAuth UI shells (no wiring). After she's played with the app and finishes the Google Cloud Console setup on her end (instructions sent via email), we ship v1.1 with real auth wired through. Current build ships with the existing pre-auth onboarding flow.
 
 ## Context
 
@@ -27,17 +29,17 @@ So for the store-side metadata Alanna prepared (descriptions, etc.): you don't n
 
 Foundational changes that affect everything downstream. Do these first because they cascade.
 
-- [ ] **🧑 Transfer GitHub repo to Alanna's account.** GitHub → Repo Settings → Danger Zone → "Transfer ownership." Preserves history, issues, PRs. New URL: `https://github.com/<alanna's-handle>/tatum-app` (or whatever name she wants).
-- [ ] **🧑 Add yourself back as admin** on the transferred repo.
-- [ ] **🧑 Update local remote:** `git remote set-url origin <new-url>`, then `git fetch && git pull` to confirm.
-- [ ] **🤖 Update `app.json`:**
+- [x] **🧑 Transfer GitHub repo to Alanna's account.** _Done via orphan-commit push to her new repo `tatumappofficial-afk/Tatum-App-Launch` (not GitHub's Transfer feature) so she got a clean single-commit history with no AI/Claude mentions._
+- [x] **🧑 Add yourself back as admin** on the transferred repo.
+- [x] **🧑 Update local remote:** `origin` → Alanna's repo, `personal` → Tori's archive (`torij2294/tatum-app`). Local `main` tracks `personal/main`.
+- [x] **🤖 Update `app.json`:**
   - `expo.ios.bundleIdentifier` → `com.tatumapp.tatum`
   - `expo.android.package` → `com.tatumapp.tatum`
   - `expo.name` → `Tatum` (capitalized — for icon label and store listings)
   - `expo.slug` stays `tatum` (internal Expo identifier, lowercase by convention)
-- [ ] **🤖 Regenerate native projects:** `npx expo prebuild --clean`. This wipes and recreates `ios/` and `android/` from `app.json` + plugins.
-- [ ] **🤖 Rebuild both platforms:** `npx expo run:ios` and `npx expo run:android` to confirm the new bundle ID installs cleanly side-by-side with the old `com.buildwithtori.tatumdev` build.
-- [ ] **🧑 Delete the old `com.buildwithtori.tatumdev` app from your dev phones** once the new bundle is verified working.
+- [x] **🤖 Regenerate native projects:** `npx expo prebuild --clean`. Verified `com.tatumapp.tatum` in `ios/*.xcodeproj/project.pbxproj` and `android/app/build.gradle`; no `buildwithtori` references remain.
+- [x] **🤖 Rebuild both platforms:** `npx expo run:ios` and `npx expo run:android` confirmed the new bundle installs and launches. Required clearing stale DerivedData from the pre-rename folder path (in `node_modules/expo-modules-jsi/apple/.DerivedData` and `~/Library/Developer/Xcode/DerivedData/tatum-*`) — flag if seen again on another machine.
+- [ ] **🧑 Delete the old `com.buildwithtori.tatumdev` app from your dev phones** once you've confirmed the new bundle works as expected.
 
 ---
 
@@ -54,23 +56,136 @@ EAS is Expo's cloud build + submit service. This is how we'll produce signed `.a
 
 ---
 
-## Phase 2 — Google OAuth setup (Android-first)
+## Phase 2 — OAuth dashboard setup (Tori's browser work) — **DEFERRED to v1.1**
 
-Pre-work in Google Cloud Console before any code goes in.
+> Skipped for the EOD beta ship. Alanna will do this on her end after she gets the app — instructions sent via email. When her three Google client IDs land in `.env.local` + the Apple App ID has Sign In with Apple enabled, we wire OAuth into the UI shells the parallel Claude is building and ship v1.1.
 
-- [ ] **🧑 In Alanna's Google Cloud Console**, create a new project for Tatum (or use an existing one).
-- [ ] **🧑 Configure the OAuth Consent Screen:**
-  - App name: Tatum
-  - User support email: (Alanna's)
-  - App logo: 1024×1024 from `assets/icon.png` (resized)
-  - Privacy Policy URL: `https://www.tatumapp.com/privacy` (must be live first — see Phase 3)
-  - Terms of Service URL: `https://www.tatumapp.com/terms`
-  - Authorized domains: `tatumapp.com`
-- [ ] **🧑 Create three OAuth client IDs:**
-  - **Android** — package name `com.tatumapp.tatum`, SHA-1 fingerprint (EAS gives you this after the first Android production build; until then use the debug fingerprint via `keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android`)
-  - **iOS** — bundle identifier `com.tatumapp.tatum`
-  - **Web** — needed by the Google Sign In library for token exchange. No redirect URI required for native flows, but you can add `https://www.tatumapp.com` for safety.
-- [ ] **🧑 Save all three Client IDs somewhere safe** (1Password / vault). Document which is which.
+
+Two systems, do them in order. Total time estimate: 30–45 min if nothing weird happens.
+
+- **2A** — Apple Developer Portal (enable Sign In with Apple capability) — ~5 min
+- **2B** — Google Cloud Console (consent screen + 3 OAuth client IDs) — ~30–40 min
+
+Run these in parallel with Phase 4 code work. When you finish 2B, paste the three client IDs into `.env.local` (I'll create the template) and I'll do the final wiring.
+
+---
+
+### 2A — Apple Developer Portal: enable Sign In with Apple
+
+1. Go to [developer.apple.com/account](https://developer.apple.com/account) and sign in as Alanna.
+2. Left nav → **Certificates, IDs & Profiles** → **Identifiers**.
+3. Look for an App ID with bundle ID `com.tatumapp.tatum`.
+   - **If it exists:** click into it.
+   - **If it doesn't exist:** click the blue **+** at the top → select **App IDs** → **Continue** → select **App** → **Continue**. Description: `Tatum`. Bundle ID: **Explicit**, value `com.tatumapp.tatum`.
+4. In the **Capabilities** list, find **Sign In with Apple**. Check the box on the left.
+5. **Don't** click the "Configure" button next to it — the default settings are fine for a primary App ID.
+6. Click **Save** (top right). Confirm the dialog if it asks "modifying this App ID may affect provisioning profiles."
+
+- [ ] **🧑 Success check:** the App ID's detail page shows "Sign In with Apple" with a green checkmark. Tell me when this is done — I'll add the entitlement on the code side via the `expo-apple-authentication` plugin.
+
+---
+
+### 2B — Google Cloud Console: consent screen + 3 client IDs
+
+You'll do these in order. The prerequisite step gets a string you'll need in step (iv).
+
+#### Prerequisite — get your Android debug SHA-1 fingerprint
+
+You'll need this when creating the Android OAuth client. Run in any terminal:
+
+```bash
+keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android | grep SHA1
+```
+
+You should see a line like:
+
+```
+SHA1: A1:B2:C3:D4:E5:F6:...:99:00
+```
+
+Copy the whole `A1:B2:...:99:00` string (without the `SHA1:` prefix or leading space). Save it somewhere — you'll paste it in step (iv).
+
+> If `keytool` isn't found, install the JDK: `brew install openjdk` and retry. If `~/.android/debug.keystore` doesn't exist yet, just run `npx expo run:android` once and it'll be auto-created.
+
+#### (i) Create the Google Cloud project
+
+1. Go to [console.cloud.google.com](https://console.cloud.google.com) and sign in as Alanna.
+2. Top bar, project dropdown (left of the search bar) → **New Project**.
+3. Project name: `Tatum`. Location: leave default. Click **Create**.
+4. Wait ~30s, then make sure the top bar dropdown now shows **Tatum** as the active project before continuing.
+
+#### (ii) Set up the OAuth Consent Screen
+
+1. Left nav (☰ hamburger) → **APIs & Services** → **OAuth consent screen**. (Newer Cloud Console UI may label this **Branding** under "Google Auth Platform" — same thing.)
+2. User Type: select **External**. Click **Create**.
+3. Fill in the form:
+   - App name: `Tatum`
+   - User support email: Alanna's email
+   - App logo: upload `assets/icon.png` from the repo (must be 1024×1024 PNG, ≤1MB — if it errors on size, downsize first)
+   - App domain → Application home page: `https://www.tatumapp.com`
+   - Application privacy policy link: `https://www.tatumapp.com/privacy.html`
+   - Application terms of service link: `https://www.tatumapp.com/terms.html`
+   - Authorized domains: `tatumapp.com` (just the bare domain — no `www`, no `https://`, no trailing slash)
+   - Developer contact information: Alanna's email
+4. **Save and continue**.
+5. **Scopes** screen: click **Add or remove scopes**. Check **only these two**:
+   - `.../auth/userinfo.email`
+   - `.../auth/userinfo.profile`
+   - Do **not** add anything else. Any other scope is "sensitive" and triggers Google's verification process (multi-week ordeal we don't need).
+   - Click **Update** → **Save and continue**.
+6. **Test users** screen: click **Add users** and add Alanna's Gmail + your Gmail. While the app is in "Testing" mode (default for External apps), only listed test users can sign in. Up to 100 testers allowed. Click **Save and continue**.
+7. **Summary** screen: review, then **Back to Dashboard**.
+
+You can leave the app in "Testing" mode for now. We'll publish it (one click, no review needed since we only use non-sensitive scopes) before the Play Store / App Store goes live.
+
+#### (iii) Create the **iOS** OAuth client ID
+
+1. Left nav → **APIs & Services** → **Credentials**.
+2. Top → **+ Create Credentials** → **OAuth client ID**.
+3. Application type: **iOS**.
+4. Name: `Tatum iOS`.
+5. Bundle ID: `com.tatumapp.tatum`. (App Store ID and Team ID are optional, skip them.)
+6. Click **Create**.
+7. A dialog shows the **Client ID** (looks like `123456789-abcdef.apps.googleusercontent.com`). **Copy it** to a temporary doc. You can also download the `.plist` if offered; we don't strictly need it but no harm.
+
+#### (iv) Create the **Android** OAuth client ID
+
+1. Same page → **+ Create Credentials** → **OAuth client ID**.
+2. Application type: **Android**.
+3. Name: `Tatum Android (debug)`.
+4. Package name: `com.tatumapp.tatum`.
+5. SHA-1 certificate fingerprint: paste the `A1:B2:...:99:00` string from the prerequisite step above.
+6. Click **Create** and copy the resulting **Client ID** to your temp doc.
+
+> **Note:** this client is tied to your *debug* signing key, which works for `npx expo run:android` on your machine. Production EAS Android builds use a different signing key with a different SHA-1 — we'll create a second Android client ID for the EAS key during Phase 6. For now, debug is enough to test the flow.
+
+#### (v) Create the **Web** OAuth client ID
+
+Counterintuitive but **required** — the `@react-native-google-signin` library uses a Web client ID to exchange tokens, even though our app isn't a website.
+
+1. Same page → **+ Create Credentials** → **OAuth client ID**.
+2. Application type: **Web application**.
+3. Name: `Tatum Web (token exchange)`.
+4. Authorized JavaScript origins: leave empty.
+5. Authorized redirect URIs: leave empty.
+6. Click **Create** and copy the resulting **Client ID** to your temp doc.
+
+#### (vi) Hand off the three client IDs
+
+Open the repo's `.env.local` file (I'll create the template — it'll have empty value slots waiting for you). Paste each ID into its slot:
+
+```
+EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=
+EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID=
+EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=
+```
+
+Save the file. **Tell me when done** and I'll do the final wiring + test on simulator/emulator.
+
+> **Important:** `.env.local` is gitignored — your client IDs stay on your machine and never get committed. Do **not** paste them into `.env` (which would commit them).
+
+- [ ] **🧑 Phase 2A done** (Sign In with Apple capability enabled)
+- [ ] **🧑 Phase 2B done** (3 Google client IDs in `.env.local`)
 
 ---
 
@@ -85,9 +200,10 @@ Both stores require these as live URLs before they'll accept submissions. Both O
 
 ---
 
-## Phase 4 — Implement Google OAuth + Identity screen
+## Phase 4 — Implement Google OAuth + Identity screen — **DEFERRED to v1.1**
 
-Code work, after Phases 0–3 are done. This is the "cherry on top" feature you mentioned.
+UI shells built in parallel by a separate Claude session. Wiring (this list) happens after Phase 2 completes on Alanna's end.
+
 
 - [ ] **🤖 Install native libs:**
   ```bash
@@ -108,9 +224,10 @@ Code work, after Phases 0–3 are done. This is the "cherry on top" feature you 
 
 ---
 
-## Phase 5 — Signup data destination
+## Phase 5 — Signup data destination — **DEFERRED to v1.1**
 
-Where does the captured email/name go after Phase 4 captures it?
+Blocked on Phase 4. Tackle when auth lands.
+
 
 - [ ] **🧑 Decision: Mailchimp connected directly from Vercel proxy, or just Google Sheet for v1?** Currently leaning Sheet-only.
 - [ ] **🧑 Create a Google Sheet** in Alanna's Workspace: columns = timestamp, name, email, platform, app_version.
@@ -130,7 +247,7 @@ The Android version goes out first since Alanna's on Android.
   - App or game: App
   - Free or paid: (decide — currently planned as one-time payment per memory note)
 - [ ] **🧑 Fill out the Play Store listing fields:** short description, full description, screenshots (2–8 phone), feature graphic (1024×500), category (Health & Fitness / Lifestyle?), content rating questionnaire.
-- [ ] **🧑 Complete the Data Safety questionnaire:** name + email collected, partner/activity data stored only on device.
+- [ ] **🧑 Complete the Data Safety questionnaire:** for v1.0 (no auth) — **"No data collected."** All wellness data is local-only SQLite. Update to "Name + Email collected, used for account / developer communications" when v1.1 ships with auth.
 - [ ] **🤖 Production EAS Android build:** `eas build --platform android --profile production`.
 - [ ] **🤖 Submit to Internal Testing:** `eas submit --platform android --latest` (handles upload to Play Console).
 - [ ] **🧑 Add Alanna + you as Internal Testers** in Play Console.
@@ -146,8 +263,8 @@ Mirrors Phase 6 for iOS. Can happen in parallel once Phase 4 is done, but Androi
   - Bundle ID: `com.tatumapp.tatum`
   - Default language, SKU, category
 - [ ] **🧑 Fill out App Store listing fields:** name, subtitle, description, keywords, screenshots (6.5" + 6.7" device classes minimum).
-- [ ] **🧑 Complete App Privacy disclosure:** "Data Collected" — Name + Email, linked to user identity, used for "Developer Communications."
-- [ ] **🧑 Enable "Sign in with Apple" capability** on the App ID in Apple Developer Console.
+- [ ] **🧑 Complete App Privacy disclosure:** for v1.0 (no auth) — **"Data Not Collected."** Update to "Name + Email, linked to user identity, for Developer Communications" when v1.1 ships with auth.
+- [ ] **🧑 Enable "Sign in with Apple" capability** on the App ID in Apple Developer Console — **DEFERRED to v1.1** (only required when the app actually offers third-party sign-in).
 - [ ] **🤖 Production EAS iOS build:** `eas build --platform ios --profile production`.
 - [ ] **🤖 Submit to TestFlight:** `eas submit --platform ios --latest`.
 - [ ] **🧑 Wait for processing** (~5-15 min after upload), then add internal testers.
