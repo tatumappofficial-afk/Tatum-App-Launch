@@ -123,7 +123,7 @@ Copy the whole `A1:B2:...:99:00` string (without the `SHA1:` prefix or leading s
 2. User Type: select **External**. Click **Create**.
 3. Fill in the form:
    - App name: `Tatum`
-   - User support email: Alanna's email
+   - User support email: Tori's email for now — the dropdown only shows the currently logged-in user. Alanna will swap it to hers post-launch (see "Handoff to Alanna" section below).
    - App logo: upload `assets/icon.png` from the repo (must be 1024×1024 PNG, ≤1MB — if it errors on size, downsize first)
    - App domain → Application home page: `https://www.tatumapp.com`
    - Application privacy policy link: `https://www.tatumapp.com/privacy.html`
@@ -301,6 +301,12 @@ The very last feature before public launch. Out of scope for the initial beta; t
 
 - **Welcome screen "No traces left behind" copy** — needs softening once server-side email exists. Suggested wording: "Uninstalling Tatum removes all of your activity. You can also delete your account in Settings to remove your name and email." (Update this when Phase 4 lands.)
 - **Account deletion in Settings** — App Store requires apps that create server-side accounts to offer in-app account deletion. Need to wire a "Delete my account" entry that hits a Vercel endpoint to remove the user's row from the Sheet. Track this with the Phase 4 work.
+
+## Handoff to Alanna (post-launch)
+
+Small things only Alanna can do herself because the dashboards filter by logged-in user. Walk her through each one over a call or via Loom.
+
+- [ ] **OAuth Consent Screen — swap "User support email" to her email.** Set to Tori's during initial setup because the dropdown only shows the currently-signed-in user. Path: console.cloud.google.com (signed in as Alanna) → APIs & Services → OAuth consent screen → Edit App → pick her email → Save. ~30 sec.
 
 ---
 
