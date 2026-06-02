@@ -9,10 +9,12 @@ import { GradientButton } from '@/lib/components/GradientButton'
 import { DecorativeGlow } from '@/lib/screens/shared/DecorativeGlow'
 import { StatusBarSpacer } from '@/lib/screens/shared/StatusBarSpacer'
 import { userProfiles } from '@/src/db'
+import { useSettings } from '@/src/hooks/useSettings'
 
 export default function IdentityScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const { hasOnboarded } = useSettings()
   useBlockBack()
 
   const params = useLocalSearchParams<{
@@ -48,7 +50,15 @@ export default function IdentityScreen() {
         draft.authProvider = provider
         draft.providerUserId = providerUserId
       })
-      router.push('/(onboarding)/protect')
+      // Existing user (v1.0 → v1.1 migration, or a sign-back-in after an
+      // erase) skips the rest of onboarding — they already have settings,
+      // partners, encounters etc., and showing them /protect/partner/tags
+      // would be confusing. Fresh users continue through the full flow.
+      if (hasOnboarded) {
+        router.replace('/(tabs)')
+      } else {
+        router.push('/(onboarding)/protect')
+      }
     } finally {
       setBusy(false)
     }

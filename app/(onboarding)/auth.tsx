@@ -13,7 +13,7 @@ import { colors, font } from '@/lib/theme'
 import { DecorativeGlow } from '@/lib/screens/shared/DecorativeGlow'
 import { StatusBarSpacer } from '@/lib/screens/shared/StatusBarSpacer'
 import { userProfiles, eraseAllUserData } from '@/src/db'
-import { useUpdateSettings } from '@/src/hooks/useSettings'
+import { useSettings, useUpdateSettings } from '@/src/hooks/useSettings'
 import { DEFAULT_SETTINGS } from '@/src/db/schema'
 
 const GOOGLE_IOS_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID
@@ -32,6 +32,7 @@ export default function AuthScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
   const updateSettings = useUpdateSettings()
+  const { hasOnboarded } = useSettings()
   useBlockBack()
 
   const { data: profiles = [] } = useLiveQuery((q) =>
@@ -54,18 +55,37 @@ export default function AuthScreen() {
     provider: 'apple' | 'google'
     providerUserId: string
   }) => {
-    // Three branches based on existing profile state:
-    //   1. No existing displayName  → fresh user, route to /identity
-    //   2. Existing displayName + matching providerUserId → returning user,
-    //      refresh email + authProvider, drop into the app
-    //   3. Existing displayName + DIFFERENT providerUserId (or one set on a
-    //      legacy v1.1.0 profile from before this column existed) → identity
-    //      mismatch, force the user to either back out or erase the device's
-    //      data before this account can take ownership
+    // The signal for "this is an existing user (fresh install or v1.0
+    // migration)" is hasOnboarded — NOT displayName. v1.0 had no identity
+    // capture, so a v1.0 user updating to v1.1 has hasOnboarded=true but
+    // displayName=null unless they used the legacy Edit Profile flow.
+    // Classifying by displayName would route Alanna (and any other v1.0
+    // user with no edited name) through fresh onboarding again, including
+    // setup screens for things she already has — wrong.
+    const profile = profiles[0]
+    const isFreshUser = !hasOnboarded
 
-    const existing = profiles.find((p) => p.displayName && p.displayName.trim().length > 0)
-    if (!existing) {
-      // Fresh user — capture identity on /identity step
+    if (isFreshUser) {
+      // Fresh user — full onboarding flow continues. /identity collects the
+      // name they want, then routes through /protect → /partner → /tags.
+      router.push({
+        pathname: '/(onboarding)/identity',
+        params: {
+          email: params.email,
+          fullName: params.fullName ?? '',
+          provider: params.provider,
+          providerUserId: params.providerUserId,
+        },
+      })
+      return
+    }
+
+    // Existing user (migration or sign-back-in). Their data is intact,
+    // their settings are theirs, their onboarding is done. We just need
+    // to capture the auth identity.
+    if (!profile) {
+      // Defensive: hasOnboarded=true with no profile shouldn't happen
+      // (initDatabase guarantees one). Fall through to fresh path.
       router.push({
         pathname: '/(onboarding)/identity',
         params: {
@@ -79,13 +99,32 @@ export default function AuthScreen() {
     }
 
     // Existing profile. Was there already an identity stamped on it?
-    const storedId = existing.providerUserId
+    const storedId = profile.providerUserId
     const incomingId = params.providerUserId
+    const hasName = profile.displayName != null && profile.displayName.trim().length > 0
 
     if (storedId === null) {
-      // Legacy profile (pre-providerUserId, or never signed in before). Treat
-      // this sign-in as the canonical identity for the device's data.
-      userProfiles.update(existing.id, (draft) => {
+      // No prior auth identity on this profile. Two sub-cases:
+      //   (a) v1.0 user updating to v1.1 — has data, no name set yet
+      //   (b) v1.1 user who signed out, signing back in for the first time
+      //       after sign-out cleared the identity fields
+      // Either way, this sign-in is now the canonical identity for the
+      // device's data. If they don't have a name yet, capture it on
+      // /identity (which will route home, not into more onboarding).
+      if (!hasName) {
+        router.push({
+          pathname: '/(onboarding)/identity',
+          params: {
+            email: params.email,
+            fullName: params.fullName ?? '',
+            provider: params.provider,
+            providerUserId: params.providerUserId,
+          },
+        })
+        return
+      }
+      // Has name — stamp and go straight to the app.
+      userProfiles.update(profile.id, (draft) => {
         draft.email = params.email || null
         draft.authProvider = params.provider
         draft.providerUserId = incomingId
@@ -95,11 +134,12 @@ export default function AuthScreen() {
     }
 
     if (storedId === incomingId) {
-      // Same user returning. Refresh email + authProvider in case they switched
-      // providers (e.g. previously Apple, now Google with the same identifier)
-      // — actually no, the IDs are per-provider, so a switch shows up as a
-      // mismatch and falls into the next branch. Here just refresh email.
-      userProfiles.update(existing.id, (draft) => {
+      // Same user returning. Refresh email + authProvider — the provider
+      // can change (Apple this time, Google last time, with different
+      // identifiers per provider so this branch wouldn't actually trigger
+      // for a provider switch; but we still want to keep authProvider in
+      // sync with which method they just used to get back in).
+      userProfiles.update(profile.id, (draft) => {
         draft.email = params.email || null
         draft.authProvider = params.provider
       })
