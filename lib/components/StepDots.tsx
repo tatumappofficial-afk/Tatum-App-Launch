@@ -19,11 +19,7 @@ export const StepDots: React.FC<StepDotsProps> = ({ current, total = 4 }) => (
             width: isActive ? 20 : 7,
             height: 7,
             borderRadius: isActive ? 4 : 3.5,
-            backgroundColor: isActive
-              ? colors.terra
-              : isDone
-                ? 'rgba(192,120,88,0.4)'
-                : 'rgba(160,100,80,0.2)',
+            backgroundColor: isActive ? colors.terra : isDone ? 'rgba(192,120,88,0.4)' : 'rgba(160,100,80,0.2)',
           }}
         />
       )

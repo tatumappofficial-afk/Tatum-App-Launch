@@ -34,7 +34,16 @@ export interface SessionsListScreenProps {
 }
 
 const BackChevron: React.FC = () => (
-  <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={colors.stone} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+  <Svg
+    width={18}
+    height={18}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={colors.stone}
+    strokeWidth={2.5}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <Polyline points="15 18 9 12 15 6" />
   </Svg>
 )
@@ -47,25 +56,29 @@ export const SessionsListScreen: React.FC<SessionsListScreenProps> = ({
   onEntryPress,
 }) => {
   return (
-    <View style={{
-      flex: 1,
-      backgroundColor: colors.warmSand,
-      position: 'relative',
-      overflow: 'hidden',
-    }}>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: colors.warmSand,
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
       <DecorativeGlow position="top-right" size={220} opacity={0.09} />
       <StatusBarSpacer />
 
       {/* Header */}
-      <View style={{
-        paddingTop: 4,
-        paddingHorizontal: 20,
-        flexDirection: 'row',
-        alignItems: 'center',
-        flexShrink: 0,
-        position: 'relative',
-        zIndex: 2,
-      }}>
+      <View
+        style={{
+          paddingTop: 4,
+          paddingHorizontal: 20,
+          flexDirection: 'row',
+          alignItems: 'center',
+          flexShrink: 0,
+          position: 'relative',
+          zIndex: 2,
+        }}
+      >
         <Pressable
           onPress={onBack}
           accessibilityRole="button"
@@ -86,20 +99,28 @@ export const SessionsListScreen: React.FC<SessionsListScreenProps> = ({
 
       {/* Title block */}
       <View style={{ paddingHorizontal: 24, paddingTop: 14, paddingBottom: 6 }}>
-        <Text style={{
-          fontFamily: font('playfair', '700'),
-          fontSize: 26,
-          color: colors.ink,
-          lineHeight: 30,
-        }}>{title}</Text>
+        <Text
+          style={{
+            fontFamily: font('playfair', '700'),
+            fontSize: 26,
+            color: colors.ink,
+            lineHeight: 30,
+          }}
+        >
+          {title}
+        </Text>
         {subtitle && (
-          <Text style={{
-            fontFamily: fontFamily.dmSans,
-            fontSize: 13,
-            color: colors.stone,
-            letterSpacing: 0.4,
-            marginTop: 4,
-          }}>{subtitle}</Text>
+          <Text
+            style={{
+              fontFamily: fontFamily.dmSans,
+              fontSize: 13,
+              color: colors.stone,
+              letterSpacing: 0.4,
+              marginTop: 4,
+            }}
+          >
+            {subtitle}
+          </Text>
         )}
       </View>
 
@@ -107,12 +128,16 @@ export const SessionsListScreen: React.FC<SessionsListScreenProps> = ({
           regardless of how many sessions there are. */}
       {entries.length === 0 ? (
         <View style={{ paddingHorizontal: 24, paddingTop: 24 }}>
-          <Text style={{
-            fontFamily: font('dmSans', '300'),
-            fontSize: 14,
-            color: colors.muted,
-            fontStyle: 'italic',
-          }}>No sessions in this period.</Text>
+          <Text
+            style={{
+              fontFamily: font('dmSans', '300'),
+              fontSize: 14,
+              color: colors.muted,
+              fontStyle: 'italic',
+            }}
+          >
+            No sessions in this period.
+          </Text>
         </View>
       ) : (
         <FlashList
@@ -139,49 +164,63 @@ export const SessionsListScreen: React.FC<SessionsListScreenProps> = ({
                 <AvatarStack partners={entry.partners} size={36} borderWidth={2} />
                 <View style={{ flex: 1 }}>
                   {entry.partnerName && (
-                    <Text style={{
-                      fontFamily: font('playfair', '600'),
-                      fontSize: 16,
-                      color: colors.ink,
-                      lineHeight: 18,
-                    }}>{entry.partnerName}</Text>
+                    <Text
+                      style={{
+                        fontFamily: font('playfair', '600'),
+                        fontSize: 16,
+                        color: colors.ink,
+                        lineHeight: 18,
+                      }}
+                    >
+                      {entry.partnerName}
+                    </Text>
                   )}
-                  <Text style={{
-                    fontSize: 12,
-                    color: colors.stone,
-                    fontFamily: font('dmSans', '300'),
-                    marginTop: entry.partnerName ? 2 : 0,
-                  }}>{entry.date}</Text>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: colors.stone,
+                      fontFamily: font('dmSans', '300'),
+                      marginTop: entry.partnerName ? 2 : 0,
+                    }}
+                  >
+                    {entry.date}
+                  </Text>
                 </View>
-                {entry.rating !== null && entry.rating > 0 && (
-                  <StarRating rating={entry.rating} size={13} />
-                )}
+                {entry.rating !== null && entry.rating > 0 && <StarRating rating={entry.rating} size={13} />}
               </View>
               {entry.tags.length > 0 && (
                 <View style={{ flexDirection: 'row', gap: 4, flexWrap: 'wrap' }}>
                   {entry.tags.map((emoji, i) => (
-                    <View key={i} style={{
-                      backgroundColor: colors.surface2,
-                      borderRadius: 6,
-                      paddingVertical: 2,
-                      paddingHorizontal: 6,
-                    }}>
+                    <View
+                      key={i}
+                      style={{
+                        backgroundColor: colors.surface2,
+                        borderRadius: 6,
+                        paddingVertical: 2,
+                        paddingHorizontal: 6,
+                      }}
+                    >
                       <Text style={{ fontSize: 14 }}>{emoji}</Text>
                     </View>
                   ))}
                 </View>
               )}
               {entry.note && (
-                <Text numberOfLines={2} style={{
-                  fontSize: 13,
-                  color: colors.stone,
-                  fontStyle: 'italic',
-                  lineHeight: 17,
-                  fontFamily: font('dmSans', '300'),
-                  borderTopWidth: 1,
-                  borderTopColor: 'rgba(160,100,80,0.1)',
-                  paddingTop: 8,
-                }}>{entry.note}</Text>
+                <Text
+                  numberOfLines={2}
+                  style={{
+                    fontSize: 13,
+                    color: colors.stone,
+                    fontStyle: 'italic',
+                    lineHeight: 17,
+                    fontFamily: font('dmSans', '300'),
+                    borderTopWidth: 1,
+                    borderTopColor: 'rgba(160,100,80,0.1)',
+                    paddingTop: 8,
+                  }}
+                >
+                  {entry.note}
+                </Text>
               )}
             </Pressable>
           )}

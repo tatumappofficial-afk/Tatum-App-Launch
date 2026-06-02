@@ -29,19 +29,19 @@ export const gradients = {
 // `gradient` (CSS string) is the value persisted on partner.avatarGradient — keep stable.
 // `colors` is the LinearGradient-ready tuple; consumers should prefer this.
 export const partnerGradients = [
-  { key: 'terra',  gradient: 'linear-gradient(135deg, #C07858, #7C4A5A)', colors: ['#C07858', '#7C4A5A'] as const },
-  { key: 'mauve',  gradient: 'linear-gradient(135deg, #B07080, #7C4A5A)', colors: ['#B07080', '#7C4A5A'] as const },
-  { key: 'sage',   gradient: 'linear-gradient(135deg, #8BA888, #5A8060)', colors: ['#8BA888', '#5A8060'] as const },
-  { key: 'gold',   gradient: 'linear-gradient(135deg, #C4993A, #8A6A20)', colors: ['#C4993A', '#8A6A20'] as const },
-  { key: 'fig',    gradient: 'linear-gradient(135deg, #7C4A5A, #3D2B25)', colors: ['#7C4A5A', '#3D2B25'] as const },
-  { key: 'blush',  gradient: 'linear-gradient(135deg, #E8C4B0, #C07858)', colors: ['#E8C4B0', '#C07858'] as const },
-  { key: 'stone',  gradient: 'linear-gradient(135deg, #9A8878, #6A5A4A)', colors: ['#9A8878', '#6A5A4A'] as const },
-  { key: 'rust',   gradient: 'linear-gradient(135deg, #A85230, #6E2E18)', colors: ['#A85230', '#6E2E18'] as const },
-  { key: 'blue',   gradient: 'linear-gradient(135deg, #5A7A98, #3D5470)', colors: ['#5A7A98', '#3D5470'] as const },
-  { key: 'ink',    gradient: 'linear-gradient(135deg, #3D2B25, #6A4A40)', colors: ['#3D2B25', '#6A4A40'] as const },
+  { key: 'terra', gradient: 'linear-gradient(135deg, #C07858, #7C4A5A)', colors: ['#C07858', '#7C4A5A'] as const },
+  { key: 'mauve', gradient: 'linear-gradient(135deg, #B07080, #7C4A5A)', colors: ['#B07080', '#7C4A5A'] as const },
+  { key: 'sage', gradient: 'linear-gradient(135deg, #8BA888, #5A8060)', colors: ['#8BA888', '#5A8060'] as const },
+  { key: 'gold', gradient: 'linear-gradient(135deg, #C4993A, #8A6A20)', colors: ['#C4993A', '#8A6A20'] as const },
+  { key: 'fig', gradient: 'linear-gradient(135deg, #7C4A5A, #3D2B25)', colors: ['#7C4A5A', '#3D2B25'] as const },
+  { key: 'blush', gradient: 'linear-gradient(135deg, #E8C4B0, #C07858)', colors: ['#E8C4B0', '#C07858'] as const },
+  { key: 'stone', gradient: 'linear-gradient(135deg, #9A8878, #6A5A4A)', colors: ['#9A8878', '#6A5A4A'] as const },
+  { key: 'rust', gradient: 'linear-gradient(135deg, #A85230, #6E2E18)', colors: ['#A85230', '#6E2E18'] as const },
+  { key: 'blue', gradient: 'linear-gradient(135deg, #5A7A98, #3D5470)', colors: ['#5A7A98', '#3D5470'] as const },
+  { key: 'ink', gradient: 'linear-gradient(135deg, #3D2B25, #6A4A40)', colors: ['#3D2B25', '#6A4A40'] as const },
 ] as const
 
-export type PartnerGradientKey = typeof partnerGradients[number]['key']
+export type PartnerGradientKey = (typeof partnerGradients)[number]['key']
 
 // Parse a persisted CSS gradient string back into a LinearGradient-ready colors tuple.
 // Used at render boundaries (mostly when `partner.avatarGradient` came from the DB).
@@ -51,16 +51,20 @@ export function parseGradientColors(g: string): readonly [string, string, ...str
   // Drop leading direction token like "135deg" or "to right"
   const stops = parts[0].includes('deg') || parts[0].startsWith('to ') ? parts.slice(1) : parts
   const cols = stops.map((s) => s.split(/\s+/)[0])
-  return (cols.length >= 2 ? cols : [cols[0] ?? '#000', cols[0] ?? '#000']) as unknown as readonly [string, string, ...string[]]
+  return (cols.length >= 2 ? cols : [cols[0] ?? '#000', cols[0] ?? '#000']) as unknown as readonly [
+    string,
+    string,
+    ...string[],
+  ]
 }
 
 // Start/end point presets for <LinearGradient>. Numbers are CSS-angle equivalents.
 export const gradientPoints = {
-  diagonal:      { start: { x: 0, y: 0 },    end: { x: 1, y: 1 } },         // ~135deg
-  steepDiagonal: { start: { x: 0.18, y: 0 }, end: { x: 0.82, y: 1 } },     // ~145deg
-  vertical:      { start: { x: 0, y: 0 },    end: { x: 0, y: 1 } },         // 180deg
-  almostVertical:{ start: { x: 0.13, y: 0 }, end: { x: 0.87, y: 1 } },     // ~165deg
-  horizontal:    { start: { x: 0, y: 0.5 },  end: { x: 1, y: 0.5 } },       // 90deg / "to right"
+  diagonal: { start: { x: 0, y: 0 }, end: { x: 1, y: 1 } }, // ~135deg
+  steepDiagonal: { start: { x: 0.18, y: 0 }, end: { x: 0.82, y: 1 } }, // ~145deg
+  vertical: { start: { x: 0, y: 0 }, end: { x: 0, y: 1 } }, // 180deg
+  almostVertical: { start: { x: 0.13, y: 0 }, end: { x: 0.87, y: 1 } }, // ~165deg
+  horizontal: { start: { x: 0, y: 0.5 }, end: { x: 1, y: 0.5 } }, // 90deg / "to right"
 } as const
 
 // ── Fonts ──

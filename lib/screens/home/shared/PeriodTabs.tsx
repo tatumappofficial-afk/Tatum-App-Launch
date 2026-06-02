@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { colors, font, gradientPoints, gradients, shadows } from '../../../theme'
 import type { Period } from '../../../stats'
 
-const TABS: Array<{ id: Period; label: string }> = [
+const TABS: { id: Period; label: string }[] = [
   { id: 'week', label: 'Week' },
   { id: 'month', label: 'Month' },
   { id: 'year', label: 'Year' },
@@ -19,17 +19,19 @@ export interface PeriodTabsProps {
 }
 
 export const PeriodTabs: React.FC<PeriodTabsProps> = ({ active, onChange, inert }) => (
-  <View style={{
-    paddingHorizontal: 24,
-    paddingTop: 10,
-    paddingBottom: 10,
-    flexDirection: 'row',
-    gap: 6,
-    flexShrink: 0,
-    position: 'relative',
-    zIndex: 2,
-  }}>
-    {TABS.map(tab => {
+  <View
+    style={{
+      paddingHorizontal: 24,
+      paddingTop: 10,
+      paddingBottom: 10,
+      flexDirection: 'row',
+      gap: 6,
+      flexShrink: 0,
+      position: 'relative',
+      zIndex: 2,
+    }}
+  >
+    {TABS.map((tab) => {
       const isActive = !inert && active === tab.id
       return (
         <Pressable
@@ -57,13 +59,17 @@ export const PeriodTabs: React.FC<PeriodTabsProps> = ({ active, onChange, inert 
               style={[StyleSheet.absoluteFill, { borderRadius: 9999 }]}
             />
           )}
-          <Text style={{
-            fontFamily: font('dmSans', '500'),
-            fontSize: 14,
-            letterSpacing: 0.5,
-            lineHeight: 13.2,
-            color: isActive ? colors.white : colors.stone,
-          }}>{tab.label}</Text>
+          <Text
+            style={{
+              fontFamily: font('dmSans', '500'),
+              fontSize: 14,
+              letterSpacing: 0.5,
+              lineHeight: 13.2,
+              color: isActive ? colors.white : colors.stone,
+            }}
+          >
+            {tab.label}
+          </Text>
         </Pressable>
       )
     })}

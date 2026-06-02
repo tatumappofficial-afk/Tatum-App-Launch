@@ -34,19 +34,21 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ enabled, onToggle })
         style={[StyleSheet.absoluteFill, { borderRadius: 13 }]}
       />
     )}
-    <View style={{
-      width: 20,
-      height: 20,
-      borderRadius: 10,
-      backgroundColor: colors.white,
-      position: 'absolute',
-      top: 3,
-      ...(enabled ? { right: 3 } : { left: 3 }),
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.15,
-      shadowRadius: 4,
-      elevation: 2,
-    }} />
+    <View
+      style={{
+        width: 20,
+        height: 20,
+        borderRadius: 10,
+        backgroundColor: colors.white,
+        position: 'absolute',
+        top: 3,
+        ...(enabled ? { right: 3 } : { left: 3 }),
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.15,
+        shadowRadius: 4,
+        elevation: 2,
+      }}
+    />
   </Pressable>
 )

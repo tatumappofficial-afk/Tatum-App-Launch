@@ -5,8 +5,19 @@ import { encounters, partners } from '@/src/db'
 import { formatPartnerLabel } from '@/src/utils/partnerLabel'
 
 const MONTH_NAMES = [
-  '', 'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  '',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ]
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -20,10 +31,10 @@ export default function CalendarDayRoute() {
   const dayNum = parseInt(day, 10)
 
   const { data: allEncounters = [] } = useLiveQuery((q) =>
-    q.from({ encounters }).select(({ encounters }) => ({ ...encounters }))
+    q.from({ encounters }).select(({ encounters }) => ({ ...encounters })),
   )
   const { data: allPartners = [] } = useLiveQuery((q) =>
-    q.from({ partners }).select(({ partners }) => ({ ...partners }))
+    q.from({ partners }).select(({ partners }) => ({ ...partners })),
   )
   // Build date string for this day
   const dateStr = `${yearNum}-${String(monthNum).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`
@@ -32,17 +43,17 @@ export default function CalendarDayRoute() {
   const dayLabel = `${dayOfWeek}, ${MONTH_NAMES[monthNum]} ${dayNum}`
 
   // Filter encounters for this specific day
-  const dayEncounters = allEncounters.filter(e => e.date === dateStr)
+  const dayEncounters = allEncounters.filter((e) => e.date === dateStr)
 
   // Build sessions list
-  const sessions = dayEncounters.map(enc => {
+  const sessions = dayEncounters.map((enc) => {
     const sessionPartners = enc.partnerIds
-      .map(pid => allPartners.find(p => p.id === pid))
+      .map((pid) => allPartners.find((p) => p.id === pid))
       .filter((p): p is NonNullable<typeof p> => Boolean(p))
     return {
       id: enc.id,
-      partnerName: formatPartnerLabel(sessionPartners.map(p => p.displayName)),
-      partners: sessionPartners.map(p => ({
+      partnerName: formatPartnerLabel(sessionPartners.map((p) => p.displayName)),
+      partners: sessionPartners.map((p) => ({
         initials: p.avatarValue,
         gradient: p.avatarGradient,
       })),
@@ -54,7 +65,7 @@ export default function CalendarDayRoute() {
 
   // Build logged days for the month (for the calendar grid in the modal)
   const monthStr = `${yearNum}-${String(monthNum).padStart(2, '0')}`
-  const monthEncounters = allEncounters.filter(e => e.date.startsWith(monthStr))
+  const monthEncounters = allEncounters.filter((e) => e.date.startsWith(monthStr))
   const loggedDaysMap = new Map<number, { emojis: string[]; count: number }>()
   for (const enc of monthEncounters) {
     const d = parseInt(enc.date.split('-')[2], 10)

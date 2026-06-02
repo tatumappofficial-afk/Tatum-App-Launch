@@ -3,13 +3,7 @@ import { useLiveQuery } from '@tanstack/react-db'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { SessionsListScreen, type SessionsListEntry } from '@/lib/screens/SessionsListScreen'
 import { encounters, partners } from '@/src/db'
-import {
-  filterByWindow,
-  formatPeriodCaption,
-  getWindow,
-  parseDateString,
-  type Period,
-} from '@/lib/stats'
+import { filterByWindow, formatPeriodCaption, getWindow, parseDateString, type Period } from '@/lib/stats'
 import { formatPartnerLabel } from '@/src/utils/partnerLabel'
 
 const CALENDAR_START_DAY = 'sunday' as const
@@ -52,18 +46,23 @@ export default function SessionsListRoute() {
   const period: Period = isValidPeriod(params.period) ? params.period : 'week'
   const anchor = useMemo(() => {
     if (params.anchor) {
-      try { return parseDateString(params.anchor) } catch { /* fall through */ }
+      try {
+        return parseDateString(params.anchor)
+      } catch {
+        /* fall through */
+      }
     }
     return new Date()
   }, [params.anchor])
 
   const now = useMemo(() => new Date(), [])
   const window = useMemo(
-    () => getWindow(period, anchor, {
-      calendarStartDay: CALENDAR_START_DAY,
-      encounters: allEncounters,
-      now,
-    }),
+    () =>
+      getWindow(period, anchor, {
+        calendarStartDay: CALENDAR_START_DAY,
+        encounters: allEncounters,
+        now,
+      }),
     [period, anchor, allEncounters, now],
   )
 
@@ -73,21 +72,21 @@ export default function SessionsListRoute() {
   )
 
   const entries: SessionsListEntry[] = useMemo(() => {
-    const partnerById = new Map(allPartners.map(p => [p.id, p]))
+    const partnerById = new Map(allPartners.map((p) => [p.id, p]))
     return filteredEncounters
       .slice()
       .sort((a, b) => b.date.localeCompare(a.date))
-      .map(enc => {
+      .map((enc) => {
         const sessionPartners = enc.partnerIds
-          .map(pid => partnerById.get(pid))
+          .map((pid) => partnerById.get(pid))
           .filter((p): p is NonNullable<typeof p> => Boolean(p))
         return {
           id: enc.id,
-          partners: sessionPartners.map(p => ({
+          partners: sessionPartners.map((p) => ({
             initials: p.avatarValue,
             gradient: p.avatarGradient,
           })),
-          partnerName: formatPartnerLabel(sessionPartners.map(p => p.displayName)),
+          partnerName: formatPartnerLabel(sessionPartners.map((p) => p.displayName)),
           date: new Date(enc.date + 'T00:00:00').toLocaleDateString('en-US', {
             weekday: 'short',
             month: 'short',

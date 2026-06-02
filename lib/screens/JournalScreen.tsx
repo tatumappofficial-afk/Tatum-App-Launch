@@ -7,7 +7,6 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { colors, font, fontFamily, gradientPoints, gradients, shadows, typography } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { StatusBarSpacer } from './shared/StatusBarSpacer'
-import { AvatarCircle } from '../components/AvatarCircle'
 import { AvatarStack } from '../components/AvatarStack'
 import { GradientButton } from '../components/GradientButton'
 import { DatePickerDropdown } from '../components/DatePickerDropdown'
@@ -46,8 +45,18 @@ export interface JournalScreenProps {
 }
 
 const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ]
 
 function isoToParts(iso: string): { year: number; month: number; day: number } {
@@ -63,31 +72,45 @@ function monthLabelFromIso(iso: string): string {
 /* ── Sub-components ── */
 
 const ChevronDown: React.FC<{ color?: string; size?: number }> = ({ color = 'rgba(255,255,255,0.75)', size = 14 }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+  <Svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth={2.5}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <Polyline points="6 9 12 15 18 9" />
   </Svg>
 )
 
 const ChevronUp: React.FC<{ color?: string; size?: number }> = ({ color = 'rgba(255,255,255,0.75)', size = 14 }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+  <Svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth={2.5}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <Polyline points="6 15 12 9 18 15" />
   </Svg>
 )
 
-const ChevronBack: React.FC<{ color?: string; size?: number }> = ({ color = colors.stone, size = 16 }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-    <Polyline points="15 18 9 12 15 6" />
-  </Svg>
-)
-
-const ChevronForward: React.FC<{ color?: string; size?: number }> = ({ color = colors.stone, size = 16 }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-    <Polyline points="9 6 15 12 9 18" />
-  </Svg>
-)
-
 const PlusIcon: React.FC<{ color?: string; size?: number }> = ({ color = 'white', size = 16 }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.5} strokeLinecap="round">
+  <Svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth={2.5}
+    strokeLinecap="round"
+  >
     <Line x1={12} y1={5} x2={12} y2={19} />
     <Line x1={5} y1={12} x2={19} y2={12} />
   </Svg>
@@ -97,9 +120,7 @@ const PlusIcon: React.FC<{ color?: string; size?: number }> = ({ color = 'white'
 
 const MonthSeparator: React.FC<{ label: string }> = ({ label }) => (
   <View style={styles.monthSeparator}>
-    <Text style={styles.monthSeparatorLabel}>
-      {label}
-    </Text>
+    <Text style={styles.monthSeparatorLabel}>{label}</Text>
     <View style={styles.monthSeparatorRule} />
   </View>
 )
@@ -120,10 +141,7 @@ const EntryCard: React.FC<{ entry: JournalEntry; onPress?: () => void }> = ({ en
         accessibilityRole="button"
         accessibilityLabel={`${entry.partnerName} session on ${entry.date}`}
         android_ripple={{ color: 'rgba(192,120,88,0.12)' }}
-        style={({ pressed }) => [
-          styles.entryPaper,
-          pressed && onPress ? { opacity: 0.85 } : null,
-        ]}
+        style={({ pressed }) => [styles.entryPaper, pressed && onPress ? { opacity: 0.85 } : null]}
       >
         {/* Margin line */}
         <View style={styles.entryMarginLine} />
@@ -134,12 +152,8 @@ const EntryCard: React.FC<{ entry: JournalEntry; onPress?: () => void }> = ({ en
           <View style={styles.entryHeaderLeft}>
             <AvatarStack partners={entry.partners} size={32} borderWidth={2} />
             <View>
-              <Text style={styles.entryPartnerName}>
-                {entry.partnerName}
-              </Text>
-              <Text style={styles.entryDate}>
-                {entry.date}
-              </Text>
+              <Text style={styles.entryPartnerName}>{entry.partnerName}</Text>
+              <Text style={styles.entryDate}>{entry.date}</Text>
             </View>
           </View>
 
@@ -147,13 +161,9 @@ const EntryCard: React.FC<{ entry: JournalEntry; onPress?: () => void }> = ({ en
           <View style={styles.entryHeaderRight}>
             {entry.score && entry.score > 0 ? (
               <View style={styles.entryScoreRow}>
-                <Text style={styles.entryScore}>
-                  {entry.score}
-                </Text>
+                <Text style={styles.entryScore}>{entry.score}</Text>
                 <Text style={styles.entryScoreSlash}>/</Text>
-                <Text style={styles.entryMaxScore}>
-                  {entry.maxScore ?? 10}
-                </Text>
+                <Text style={styles.entryMaxScore}>{entry.maxScore ?? 10}</Text>
               </View>
             ) : (
               <Text style={styles.entryUnrated}>Not rated</Text>
@@ -178,21 +188,16 @@ const EntryCard: React.FC<{ entry: JournalEntry; onPress?: () => void }> = ({ en
         {/* Note body */}
         {!isCompact && (
           <View style={styles.entryNoteBody}>
-            <Text style={styles.entryNote}>
-              {entry.note}
-            </Text>
+            <Text style={styles.entryNote}>{entry.note}</Text>
           </View>
         )}
 
         {/* Compact cards: smaller bottom padding area */}
-        {isCompact && (
-          <View style={styles.entryCompactBottom} />
-        )}
+        {isCompact && <View style={styles.entryCompactBottom} />}
       </Pressable>
     </View>
   )
 }
-
 
 /* ── Empty State ── */
 
@@ -215,17 +220,13 @@ const EmptyState: React.FC<{ onLogSession?: () => void }> = ({ onLogSession }) =
       </View>
     </View>
 
-    <Text style={styles.emptyHeading}>
-      Your story starts here.
-    </Text>
+    <Text style={styles.emptyHeading}>Your story starts here.</Text>
 
     <Text style={styles.emptyBody}>
       As you log sessions, they'll appear here as private journal entries — yours to read, remember, and return to.
     </Text>
 
-    <Text style={styles.emptyQuote}>
-      "Feel seen, validated, and completely empowered."
-    </Text>
+    <Text style={styles.emptyQuote}>"Feel seen, validated, and completely empowered."</Text>
 
     <GradientButton
       label="Log your first session"
@@ -295,8 +296,13 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({
   function changeCalMonth(delta: number) {
     let m = calMonth + delta
     let y = calYear
-    if (m < 0) { m = 11; y-- }
-    else if (m > 11) { m = 0; y++ }
+    if (m < 0) {
+      m = 11
+      y--
+    } else if (m > 11) {
+      m = 0
+      y++
+    }
     setCalMonth(m)
     setCalYear(y)
   }
@@ -334,9 +340,7 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({
         {isEmpty ? (
           /* Ghost pill for empty state */
           <View style={styles.ghostPill}>
-            <Text style={styles.ghostPillText}>
-              No entries yet
-            </Text>
+            <Text style={styles.ghostPillText}>No entries yet</Text>
             <ChevronDown color="#C4B0A0" size={13} />
           </View>
         ) : (
@@ -353,12 +357,8 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({
               end={gradientPoints.diagonal.end}
               style={[StyleSheet.absoluteFill, { borderRadius: 9999 }]}
             />
-            <Text style={styles.monthPillLabel}>
-              {visibleMonthLabel}
-            </Text>
-            <Text style={styles.monthPillBadge}>
-              {visibleMonthCount}
-            </Text>
+            <Text style={styles.monthPillLabel}>{visibleMonthLabel}</Text>
+            <Text style={styles.monthPillBadge}>{visibleMonthCount}</Text>
             {calendarOpen ? <ChevronUp /> : <ChevronDown />}
           </Pressable>
         )}
@@ -381,12 +381,7 @@ export const JournalScreen: React.FC<JournalScreenProps> = ({
       </View>
 
       {/* Dim overlay */}
-      {calendarOpen && (
-        <Pressable
-          onPress={() => setCalendarOpen(false)}
-          style={styles.dimOverlay}
-        />
-      )}
+      {calendarOpen && <Pressable onPress={() => setCalendarOpen(false)} style={styles.dimOverlay} />}
 
       {/* Content */}
       {isEmpty ? (

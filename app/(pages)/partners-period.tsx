@@ -1,7 +1,7 @@
 import { useLiveQuery } from '@tanstack/react-db'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { PartnersScreen } from '@/lib/screens/PartnersScreen'
-import { activityTags, encounters, partners } from '@/src/db'
+import { encounters, partners } from '@/src/db'
 import {
   filterByWindow,
   formatPeriodCaption,
@@ -25,13 +25,10 @@ export default function PartnersPeriodRoute() {
   const anchor = params.anchor ? parseDateString(params.anchor) : new Date()
 
   const { data: allPartners = [] } = useLiveQuery((q) =>
-    q.from({ partners }).select(({ partners }) => ({ ...partners }))
+    q.from({ partners }).select(({ partners }) => ({ ...partners })),
   )
   const { data: allEncounters = [] } = useLiveQuery((q) =>
-    q.from({ encounters }).select(({ encounters }) => ({ ...encounters }))
-  )
-  const { data: allTags = [] } = useLiveQuery((q) =>
-    q.from({ activityTags }).select(({ activityTags }) => ({ ...activityTags }))
+    q.from({ encounters }).select(({ encounters }) => ({ ...encounters })),
   )
 
   const window = getWindow(period, anchor, {
@@ -41,8 +38,8 @@ export default function PartnersPeriodRoute() {
   const inWindow = window ? filterByWindow(allEncounters, window) : []
   const stats = partnerPeriodStats(inWindow, allPartners)
 
-  const partnerList = stats.map(s => {
-    const pEncounters = inWindow.filter(e => e.partnerIds.includes(s.partner.id))
+  const partnerList = stats.map((s) => {
+    const pEncounters = inWindow.filter((e) => e.partnerIds.includes(s.partner.id))
     return {
       name: s.partner.displayName,
       initials: s.partner.avatarValue,
@@ -50,7 +47,7 @@ export default function PartnersPeriodRoute() {
       since: new Date(s.partner.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
       sessions: s.sessionCount,
       avgSat: s.averageStars === null ? '—' : Math.round(s.averageStars * 10) / 10,
-      tags: [...new Set(pEncounters.flatMap(e => e.activities))].slice(0, 4),
+      tags: [...new Set(pEncounters.flatMap((e) => e.activities))].slice(0, 4),
     }
   })
 

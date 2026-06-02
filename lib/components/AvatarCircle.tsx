@@ -1,5 +1,5 @@
 import React from 'react'
-import { Text, View } from 'react-native'
+import { Text } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { colors, font, gradientPoints, parseGradientColors, shadows } from '../theme'
 
@@ -36,12 +36,14 @@ export const AvatarCircle: React.FC<AvatarCircleProps> = ({
         ...(showShadow ? shadows.cardSubtle : null),
       }}
     >
-      <Text style={{
-        fontFamily: font('playfair', '700'),
-        fontSize,
-        color: colors.white,
-        textAlign: 'center',
-      }}>
+      <Text
+        style={{
+          fontFamily: font('playfair', '700'),
+          fontSize,
+          color: colors.white,
+          textAlign: 'center',
+        }}
+      >
         {initials}
       </Text>
     </LinearGradient>

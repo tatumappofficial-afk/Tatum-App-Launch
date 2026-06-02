@@ -22,10 +22,7 @@ export async function getBiometricCapabilities(): Promise<BiometricCapabilities>
   return { hasHardware, isEnrolled, label }
 }
 
-function resolveLabel(
-  supported: LocalAuthentication.AuthenticationType[],
-  biometricUsable: boolean,
-): string {
+function resolveLabel(supported: LocalAuthentication.AuthenticationType[], biometricUsable: boolean): string {
   if (!biometricUsable) return 'Use device passcode'
 
   const hasFace = supported.includes(AuthenticationType.FACIAL_RECOGNITION)

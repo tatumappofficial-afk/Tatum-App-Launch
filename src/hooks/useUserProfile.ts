@@ -25,9 +25,9 @@ export interface UseUserProfileResult {
  */
 export function useUserProfile(): UseUserProfileResult {
   const { data: profiles = [] } = useLiveQuery((q) =>
-    q.from({ userProfiles }).select(({ userProfiles }) => ({ ...userProfiles }))
+    q.from({ userProfiles }).select(({ userProfiles }) => ({ ...userProfiles })),
   )
-  const profile = profiles.find(p => p.id === 'default') ?? null
+  const profile = profiles.find((p) => p.id === 'default') ?? null
   const displayName = profile?.displayName ?? DEFAULT_NAME
   const initials = profile?.avatarValue ?? deriveInitials(displayName) ?? DEFAULT_INITIAL
   const gradient = profile?.avatarGradient ?? DEFAULT_GRADIENT

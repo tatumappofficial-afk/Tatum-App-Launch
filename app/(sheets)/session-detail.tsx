@@ -8,22 +8,32 @@ import { formatPartnerLabel } from '@/src/utils/partnerLabel'
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ]
 
 export default function SheetSessionDetailRoute() {
   const router = useRouter()
   const { id } = useLocalSearchParams<{ id: string }>()
   const { data: allEncounters = [], isReady: encReady } = useLiveQuery((q) =>
-    q.from({ encounters }).select(({ encounters }) => ({ ...encounters }))
+    q.from({ encounters }).select(({ encounters }) => ({ ...encounters })),
   )
   const { data: allPartners = [] } = useLiveQuery((q) =>
-    q.from({ partners }).select(({ partners }) => ({ ...partners }))
+    q.from({ partners }).select(({ partners }) => ({ ...partners })),
   )
   const tagMap = useActivityTagMap()
 
-  const encounter = allEncounters.find(e => e.id === id)
+  const encounter = allEncounters.find((e) => e.id === id)
 
   useEffect(() => {
     if (encReady && !encounter && router.canGoBack()) {
@@ -50,7 +60,7 @@ export default function SheetSessionDetailRoute() {
   }
 
   const sessionPartners = encounter.partnerIds
-    .map(pid => allPartners.find(p => p.id === pid))
+    .map((pid) => allPartners.find((p) => p.id === pid))
     .filter((p): p is NonNullable<typeof p> => Boolean(p))
 
   const dateObj = new Date(encounter.date + 'T00:00:00')
@@ -61,7 +71,7 @@ export default function SheetSessionDetailRoute() {
   const backLabel = `${monthName} ${dayNum}`
   const dateLabel = `${dayOfWeek}, ${monthName} ${dayNum}, ${dateObj.getFullYear()}`
 
-  const activities = encounter.activities.map(emoji => ({
+  const activities = encounter.activities.map((emoji) => ({
     emoji,
     label: tagMap.get(emoji) || emoji,
   }))
@@ -72,8 +82,12 @@ export default function SheetSessionDetailRoute() {
       year={dateObj.getFullYear()}
       selectedDay={dayNum}
       backLabel={backLabel}
-      partnerName={formatPartnerLabel(sessionPartners.map(p => p.displayName))}
-      partners={sessionPartners.map(p => ({ initials: p.avatarValue, gradient: p.avatarGradient, name: p.displayName }))}
+      partnerName={formatPartnerLabel(sessionPartners.map((p) => p.displayName))}
+      partners={sessionPartners.map((p) => ({
+        initials: p.avatarValue,
+        gradient: p.avatarGradient,
+        name: p.displayName,
+      }))}
       dateLabel={dateLabel}
       rating={encounter.stars || 0}
       dayOfWeek={dayOfWeek.slice(0, 3)}

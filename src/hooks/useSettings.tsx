@@ -20,7 +20,7 @@ interface SettingsContextValue {
 
 const SettingsContext = createContext<SettingsContextValue | null>(null)
 
-function rowFromSettings(s: UserSettings): Array<string | number> {
+function rowFromSettings(s: UserSettings): (string | number)[] {
   return [
     s.id,
     s.notifications ? 1 : 0,
@@ -32,8 +32,7 @@ function rowFromSettings(s: UserSettings): Array<string | number> {
   ]
 }
 
-const UPSERT_SQL =
-  `INSERT OR REPLACE INTO user_settings
+const UPSERT_SQL = `INSERT OR REPLACE INTO user_settings
     (id, notifications, whisperDeliveryDefault, calendarStartDay, biometricLock, hasOnboarded, theme)
    VALUES (?, ?, ?, ?, ?, ?, ?)`
 
@@ -76,13 +75,17 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         if (!cancelled) setReady(true)
       }
     })()
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   // Keep the latest settings in a ref so updateSettings doesn't need to be
   // recreated on every change (which would invalidate downstream memos).
   const settingsRef = useRef(settings)
-  useEffect(() => { settingsRef.current = settings }, [settings])
+  useEffect(() => {
+    settingsRef.current = settings
+  }, [settings])
 
   const updateSettings = useCallback((changes: Partial<Omit<UserSettings, 'id'>>) => {
     const next: UserSettings = { ...settingsRef.current, ...changes }

@@ -35,10 +35,7 @@ export const LockOverlay: React.FC<LockOverlayProps> = ({ showRetry, onUnlock })
         elevation: 12,
       }}
     >
-      <Image
-        source={require('@/assets/icon.png')}
-        style={{ width: 120, height: 120 }}
-      />
+      <Image source={require('@/assets/icon.png')} style={{ width: 120, height: 120 }} />
     </View>
     {showRetry && onUnlock && (
       <Pressable

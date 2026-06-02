@@ -43,13 +43,13 @@ export function computeYearStats(
 function computeDesireToAction(desires: DesireEntry[], window: DateWindow): DesireToAction | null {
   // DesireEntry.timestamp is an ISO string; compare against window's date strings
   // by slicing the YYYY-MM-DD prefix. Both windows and desires use local-day semantics.
-  const inWindow = desires.filter(d => {
+  const inWindow = desires.filter((d) => {
     const dateOnly = d.timestamp.slice(0, 10)
     return dateOnly >= window.startStr && dateOnly < window.endStr
   })
   if (inWindow.length === 0) return null
   return {
     logged: inWindow.length,
-    acted: inWindow.filter(d => d.actedOn).length,
+    acted: inWindow.filter((d) => d.actedOn).length,
   }
 }

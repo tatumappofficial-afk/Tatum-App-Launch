@@ -7,24 +7,24 @@ import { formatPartnerLabel } from '@/src/utils/partnerLabel'
 export default function JournalRoute() {
   const router = useRouter()
   const { data: allEncounters = [] } = useLiveQuery((q) =>
-    q.from({ encounters }).select(({ encounters }) => ({ ...encounters }))
+    q.from({ encounters }).select(({ encounters }) => ({ ...encounters })),
   )
   const { data: allPartners = [] } = useLiveQuery((q) =>
-    q.from({ partners }).select(({ partners }) => ({ ...partners }))
+    q.from({ partners }).select(({ partners }) => ({ ...partners })),
   )
   const entries = allEncounters
     .sort((a, b) => b.date.localeCompare(a.date))
-    .map(enc => {
+    .map((enc) => {
       const sessionPartners = enc.partnerIds
-        .map(pid => allPartners.find(p => p.id === pid))
+        .map((pid) => allPartners.find((p) => p.id === pid))
         .filter((p): p is NonNullable<typeof p> => Boolean(p))
       return {
         id: enc.id,
-        partners: sessionPartners.map(p => ({
+        partners: sessionPartners.map((p) => ({
           initials: p.avatarValue,
           gradient: p.avatarGradient,
         })),
-        partnerName: formatPartnerLabel(sessionPartners.map(p => p.displayName)),
+        partnerName: formatPartnerLabel(sessionPartners.map((p) => p.displayName)),
         date: new Date(enc.date + 'T00:00:00').toLocaleDateString('en-US', {
           weekday: 'short',
           month: 'short',

@@ -1,6 +1,6 @@
 import React from 'react'
 import { Pressable, Text, View } from 'react-native'
-import { colors, font, fontFamily } from '../theme'
+import { colors, font } from '../theme'
 import { StarRating } from './StarRating'
 import { AvatarCircle } from './AvatarCircle'
 
@@ -40,27 +40,29 @@ export const SessionCard: React.FC<SessionCardProps> = ({
     }}
   >
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
-      <AvatarCircle
-        initials={partnerInitials}
-        gradient={partnerGradient}
-        size={36}
-        borderWidth={2}
-      />
-      <Text style={{
-        fontSize: 12,
-        color: colors.stone,
-        fontFamily: font('dmSans', '300'),
-      }}>{date}</Text>
+      <AvatarCircle initials={partnerInitials} gradient={partnerGradient} size={36} borderWidth={2} />
+      <Text
+        style={{
+          fontSize: 12,
+          color: colors.stone,
+          fontFamily: font('dmSans', '300'),
+        }}
+      >
+        {date}
+      </Text>
     </View>
     <StarRating rating={rating} size={13} />
     <View style={{ flexDirection: 'row', gap: 5, flexWrap: 'wrap' }}>
       {activityEmojis.map((e, i) => (
-        <View key={i} style={{
-          backgroundColor: colors.surface2,
-          borderRadius: 6,
-          paddingVertical: 3,
-          paddingHorizontal: 6,
-        }}>
+        <View
+          key={i}
+          style={{
+            backgroundColor: colors.surface2,
+            borderRadius: 6,
+            paddingVertical: 3,
+            paddingHorizontal: 6,
+          }}
+        >
           <Text style={{ fontSize: 16 }}>{e}</Text>
         </View>
       ))}
@@ -79,7 +81,9 @@ export const SessionCard: React.FC<SessionCardProps> = ({
           marginTop: 2,
           fontFamily: font('dmSans', '300'),
         }}
-      >{note}</Text>
+      >
+        {note}
+      </Text>
     )}
   </Pressable>
 )

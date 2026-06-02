@@ -12,14 +12,14 @@ export default function SessionDetailRoute() {
   const router = useRouter()
   const { id } = useLocalSearchParams<{ id: string }>()
   const { data: allEncounters = [], isReady: encReady } = useLiveQuery((q) =>
-    q.from({ encounters }).select(({ encounters }) => ({ ...encounters }))
+    q.from({ encounters }).select(({ encounters }) => ({ ...encounters })),
   )
   const { data: allPartners = [] } = useLiveQuery((q) =>
-    q.from({ partners }).select(({ partners }) => ({ ...partners }))
+    q.from({ partners }).select(({ partners }) => ({ ...partners })),
   )
   const tagMap = useActivityTagMap()
 
-  const encounter = allEncounters.find(e => e.id === id)
+  const encounter = allEncounters.find((e) => e.id === id)
 
   // If the encounter is gone (e.g. the user deleted it via the edit sheet),
   // pop this page so the user lands on whatever they were viewing before —
@@ -54,14 +54,13 @@ export default function SessionDetailRoute() {
   })
 
   const sessionPartners = encounter.partnerIds
-    .map(pid => allPartners.find(p => p.id === pid))
+    .map((pid) => allPartners.find((p) => p.id === pid))
     .filter((p): p is NonNullable<typeof p> => Boolean(p))
-    .map(p => {
-      const pEncs = allEncounters.filter(e => e.partnerIds.includes(p.id))
-      const rated = pEncs.filter(e => e.stars && e.stars > 0)
-      const avg = rated.length > 0
-        ? Math.round(rated.reduce((s, e) => s + (e.stars || 0), 0) / rated.length * 10) / 10
-        : 0
+    .map((p) => {
+      const pEncs = allEncounters.filter((e) => e.partnerIds.includes(p.id))
+      const rated = pEncs.filter((e) => e.stars && e.stars > 0)
+      const avg =
+        rated.length > 0 ? Math.round((rated.reduce((s, e) => s + (e.stars || 0), 0) / rated.length) * 10) / 10 : 0
       return {
         id: p.id,
         initials: p.avatarValue,
@@ -72,14 +71,14 @@ export default function SessionDetailRoute() {
       }
     })
 
-  const activities = encounter.activities.map(emoji => {
+  const activities = encounter.activities.map((emoji) => {
     return { emoji, label: tagMap.get(emoji) || emoji }
   })
 
   return (
     <SessionDetailScreen
       partners={sessionPartners}
-      partnerNames={formatPartnerLabel(sessionPartners.map(p => p.name))}
+      partnerNames={formatPartnerLabel(sessionPartners.map((p) => p.name))}
       date={dateStr}
       rating={encounter.stars || 0}
       dayOfWeek={dayOfWeek.slice(0, 3)}

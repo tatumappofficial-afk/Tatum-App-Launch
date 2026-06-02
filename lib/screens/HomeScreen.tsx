@@ -57,7 +57,8 @@ const HeroEmpty: React.FC<{ userName: string; onLogSession?: () => void }> = ({ 
     <Image source={require('@/assets/tatum-logo.png')} style={styles.heroLogo} />
     <Text style={styles.heroTitle}>Welcome to Tatum, {userName}.</Text>
     <Text style={styles.heroSubtitle}>
-      This is your private space. As you start logging, your stats, patterns, and sessions will show up here — all yours, all on your device.
+      This is your private space. As you start logging, your stats, patterns, and sessions will show up here — all
+      yours, all on your device.
     </Text>
     <Pressable
       onPress={onLogSession}
@@ -71,7 +72,15 @@ const HeroEmpty: React.FC<{ userName: string; onLogSession?: () => void }> = ({ 
         end={gradientPoints.diagonal.end}
         style={[StyleSheet.absoluteFill, { borderRadius: 9999 }]}
       />
-      <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round">
+      <Svg
+        width={16}
+        height={16}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="white"
+        strokeWidth={2.5}
+        strokeLinecap="round"
+      >
         <Line x1={12} y1={5} x2={12} y2={19} />
         <Line x1={5} y1={12} x2={19} y2={12} />
       </Svg>
@@ -85,10 +94,7 @@ const EmptyStatsStrip: React.FC = () => {
   return (
     <View style={styles.statsStrip}>
       {labels.map((label, i) => (
-        <View
-          key={label}
-          style={[styles.statsCell, { borderRightWidth: i < 2 ? 1 : 0 }]}
-        >
+        <View key={label} style={[styles.statsCell, { borderRightWidth: i < 2 ? 1 : 0 }]}>
           <View style={styles.statsPlaceholder} />
           <Text style={styles.statsLabel}>{label}</Text>
         </View>
@@ -99,23 +105,25 @@ const EmptyStatsStrip: React.FC = () => {
 
 const EmptyPartnerCard: React.FC<{ partner: EmptyPartner; onPress?: () => void }> = ({ partner, onPress }) => (
   <Pressable onPress={onPress} style={styles.emptyPartnerCard}>
-    <AvatarCircle
-      initials={partner.initials}
-      gradient={partner.gradient}
-      size={44}
-      borderWidth={2}
-    />
+    <AvatarCircle initials={partner.initials} gradient={partner.gradient} size={44} borderWidth={2} />
     <Text style={styles.emptyPartnerLabel}>No sessions yet</Text>
   </Pressable>
 )
 
 const AddPartnerChip: React.FC<{ onPress?: () => void }> = ({ onPress }) => (
-  <Pressable
-    onPress={onPress}
-    style={styles.addPartnerChip}
-  >
+  <Pressable onPress={onPress} style={styles.addPartnerChip}>
     <View style={styles.addPartnerIconCircle}>
-      <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" opacity={0.7}>
+      <Svg
+        width={20}
+        height={20}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke={colors.terra}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity={0.7}
+      >
         <Path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
         <Circle cx={8.5} cy={7} r={4} />
         <Line x1={20} y1={8} x2={20} y2={14} />
@@ -161,10 +169,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         <Wordmark />
         <PeriodTabs active={period} onChange={onPeriodChange} inert />
 
-        <ScrollView
-          style={styles.emptyScroll}
-          contentContainerStyle={styles.scrollContent}
-        >
+        <ScrollView style={styles.emptyScroll} contentContainerStyle={styles.scrollContent}>
           <HeroEmpty userName={userName} onLogSession={onLogFirstSession} />
 
           <View style={styles.sectionLabelWrap}>
@@ -206,16 +211,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         onPickerPress={onPickerPress}
       />
 
-      {pickerOpen && pickerContent && (
-        <View style={styles.pickerWrap}>
-          {pickerContent}
-        </View>
-      )}
+      {pickerOpen && pickerContent && <View style={styles.pickerWrap}>{pickerContent}</View>}
 
-      <ScrollView
-        style={styles.mainScroll}
-        contentContainerStyle={styles.scrollContent}
-      >
+      <ScrollView style={styles.mainScroll} contentContainerStyle={styles.scrollContent}>
         {children}
       </ScrollView>
     </View>

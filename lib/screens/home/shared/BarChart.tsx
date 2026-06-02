@@ -43,24 +43,30 @@ export const BarChart: React.FC<BarChartProps> = ({
   const rawMax = Math.max(...data, 0)
   const { max, ticks } = buildAxis(rawMax)
   return (
-    <View style={{
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 14,
-      paddingVertical: 14,
-      paddingHorizontal: 14,
-      flexShrink: 0,
-    }}>
+    <View
+      style={{
+        backgroundColor: colors.surface,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 14,
+        paddingVertical: 14,
+        paddingHorizontal: 14,
+        flexShrink: 0,
+      }}
+    >
       {yAxisLabel && (
-        <Text style={{
-          fontSize: 10,
-          letterSpacing: 1,
-          textTransform: 'uppercase',
-          color: colors.muted,
-          fontFamily: font('dmSans', '500'),
-          marginBottom: 6,
-        }}>{yAxisLabel}</Text>
+        <Text
+          style={{
+            fontSize: 10,
+            letterSpacing: 1,
+            textTransform: 'uppercase',
+            color: colors.muted,
+            fontFamily: font('dmSans', '500'),
+            marginBottom: 6,
+          }}
+        >
+          {yAxisLabel}
+        </Text>
       )}
       <View style={{ flexDirection: 'row', height }}>
         {/* Y-axis ticks */}
@@ -85,13 +91,15 @@ export const BarChart: React.FC<BarChartProps> = ({
           })}
         </View>
         {/* Bars */}
-        <View style={{
-          flex: 1,
-          flexDirection: 'row',
-          alignItems: 'flex-end',
-          height,
-          gap: 4,
-        }}>
+        <View
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'flex-end',
+            height,
+            gap: 4,
+          }}
+        >
           {data.map((value, i) => {
             const isMuted = mutedFromIndex !== undefined && i > mutedFromIndex
             const fillPct = max === 0 ? 0 : value / max
@@ -99,21 +107,25 @@ export const BarChart: React.FC<BarChartProps> = ({
             return (
               <View key={i} style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-end', height }}>
                 {value === 0 ? (
-                  <View style={{
-                    height: 2,
-                    width: '100%',
-                    borderRadius: 2,
-                    backgroundColor: colors.surface2,
-                    opacity: isMuted ? 0.5 : 1,
-                  }} />
+                  <View
+                    style={{
+                      height: 2,
+                      width: '100%',
+                      borderRadius: 2,
+                      backgroundColor: colors.surface2,
+                      opacity: isMuted ? 0.5 : 1,
+                    }}
+                  />
                 ) : (
-                  <View style={{
-                    height: barHeight,
-                    width: '100%',
-                    borderRadius: 3,
-                    overflow: 'hidden',
-                    opacity: isMuted ? 0.4 : 1,
-                  }}>
+                  <View
+                    style={{
+                      height: barHeight,
+                      width: '100%',
+                      borderRadius: 3,
+                      overflow: 'hidden',
+                      opacity: isMuted ? 0.4 : 1,
+                    }}
+                  >
                     <LinearGradient
                       colors={gradients.activityBar}
                       start={gradientPoints.vertical.start}
@@ -127,12 +139,14 @@ export const BarChart: React.FC<BarChartProps> = ({
           })}
         </View>
       </View>
-      <View style={{
-        flexDirection: 'row',
-        marginTop: 6,
-        gap: 4,
-        paddingLeft: Y_AXIS_WIDTH,
-      }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          marginTop: 6,
+          gap: 4,
+          paddingLeft: Y_AXIS_WIDTH,
+        }}
+      >
         {labels.map((label, i) => {
           const isMuted = mutedFromIndex !== undefined && i > mutedFromIndex
           return (

@@ -14,7 +14,16 @@ import { authenticate, getBiometricCapabilities, type BiometricCapabilities } fr
 import { useUpdateSettings } from '@/src/hooks/useSettings'
 
 const LockIcon: React.FC = () => (
-  <Svg width={28} height={28} viewBox="0 0 24 24" fill="none" stroke={colors.white} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+  <Svg
+    width={28}
+    height={28}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={colors.white}
+    strokeWidth={1.8}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <Rect x={3} y={11} width={18} height={11} rx={2} ry={2} />
     <Path d="M7 11V7a5 5 0 0110 0v4" />
     <Circle cx={12} cy={16} r={1} />
@@ -22,7 +31,16 @@ const LockIcon: React.FC = () => (
 )
 
 const CheckCircle: React.FC = () => (
-  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+  <Svg
+    width={20}
+    height={20}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={colors.terra}
+    strokeWidth={2.5}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <Polyline points="20 6 9 17 4 12" />
   </Svg>
 )
@@ -38,10 +56,12 @@ export default function ProtectScreen() {
   const [enableLock, setEnableLock] = useState(true)
 
   useEffect(() => {
-    getBiometricCapabilities().then(setCaps).catch((err) => {
-      console.error('Failed to load biometric capabilities:', err)
-      setCaps({ hasHardware: false, isEnrolled: false, label: 'Use device passcode' })
-    })
+    getBiometricCapabilities()
+      .then(setCaps)
+      .catch((err) => {
+        console.error('Failed to load biometric capabilities:', err)
+        setCaps({ hasHardware: false, isEnrolled: false, label: 'Use device passcode' })
+      })
   }, [])
 
   // Stays busy through router.push so a second tap can't re-trigger the
@@ -106,7 +126,7 @@ export default function ProtectScreen() {
 
         {/* Lock card — tap to toggle whether the user wants to enable biometrics. */}
         <Pressable
-          onPress={() => setEnableLock(prev => !prev)}
+          onPress={() => setEnableLock((prev) => !prev)}
           accessibilityRole="checkbox"
           accessibilityState={{ checked: enableLock }}
           accessibilityLabel="Enable biometric lock"

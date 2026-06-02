@@ -37,9 +37,7 @@ export const EmojiChip: React.FC<EmojiChipProps> = ({
       accessibilityRole="button"
       accessibilityState={{ selected, disabled }}
       style={{
-        ...(flex
-          ? { flexBasis: flexBasis as number, aspectRatio: 1 }
-          : { width: size, height: size }),
+        ...(flex ? { flexBasis: flexBasis as number, aspectRatio: 1 } : { width: size, height: size }),
         borderRadius,
         overflow: 'hidden',
         backgroundColor: selected ? undefined : (backgroundColor ?? colors.surface2),

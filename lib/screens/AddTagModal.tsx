@@ -42,7 +42,16 @@ const EMOJI_ROWS = 5
 /* ── Inline icon helpers ── */
 
 const CloseIcon: React.FC = () => (
-  <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.stone} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+  <Svg
+    width={16}
+    height={16}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={colors.stone}
+    strokeWidth={2.5}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <Line x1={18} y1={6} x2={6} y2={18} />
     <Line x1={6} y1={6} x2={18} y2={18} />
   </Svg>
@@ -62,8 +71,8 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
   onTagNameChange,
 }) => {
   const trimmedName = tagName.trim()
-  const isDuplicate = trimmedName.length > 0
-    && existingTags.some(t => t.name.toLowerCase() === trimmedName.toLowerCase())
+  const isDuplicate =
+    trimmedName.length > 0 && existingTags.some((t) => t.name.toLowerCase() === trimmedName.toLowerCase())
   const addTagDisabled = trimmedName.length === 0 || isDuplicate
   const insets = useSafeAreaInsets()
   const sheetPanRef = useSheetPanGesture()
@@ -87,39 +96,41 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
 
   return (
     <KeyboardAvoidingView behavior="padding" style={{ flex: 1, backgroundColor: colors.surface }}>
-        <KeyboardAwareScrollView
-          style={{ flex: 1 }}
-          contentContainerStyle={{ paddingBottom: 16 }}
-          keyboardShouldPersistTaps="handled"
-          bottomOffset={20}
-          bounces={false}
-        >
-          {/* Header — scrolls with content */}
-          <View style={{
+      <KeyboardAwareScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: 16 }}
+        keyboardShouldPersistTaps="handled"
+        bottomOffset={20}
+        bounces={false}
+      >
+        {/* Header — scrolls with content */}
+        <View
+          style={{
             paddingTop: 20,
             paddingHorizontal: 20,
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'space-between',
-          }}>
-            <Text style={typography.screenTitle}>Add a tag</Text>
-            <Pressable
-              onPress={onClose}
-              accessibilityRole="button"
-              accessibilityLabel="Close"
-              hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
-              style={{
-                width: 30,
-                height: 30,
-                borderRadius: 15,
-                backgroundColor: colors.surface2,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <CloseIcon />
-            </Pressable>
-          </View>
+          }}
+        >
+          <Text style={typography.screenTitle}>Add a tag</Text>
+          <Pressable
+            onPress={onClose}
+            accessibilityRole="button"
+            accessibilityLabel="Close"
+            hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
+            style={{
+              width: 30,
+              height: 30,
+              borderRadius: 15,
+              backgroundColor: colors.surface2,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <CloseIcon />
+          </Pressable>
+        </View>
 
         {/* ── Existing tags strip ── */}
         {existingTags.length > 0 && (
@@ -140,11 +151,13 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
         )}
 
         {/* Divider */}
-        <View style={{
-          height: 1,
-          backgroundColor: colors.border,
-          marginTop: 12,
-        }} />
+        <View
+          style={{
+            height: 1,
+            backgroundColor: colors.border,
+            marginTop: 12,
+          }}
+        />
 
         {/* ── Emoji picker ── */}
         <View style={{ paddingTop: 12 }}>
@@ -185,22 +198,26 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
         {/* ── Tag name input ── */}
         <View style={{ paddingTop: 10, paddingHorizontal: 20 }}>
           <Text style={[typography.sectionLabel, { marginBottom: 8 }]}>Tag name</Text>
-          <View style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 10,
-          }}>
-            {/* Emoji square */}
-            <View style={{
-              width: 52,
-              height: 52,
-              borderRadius: 14,
-              borderWidth: 1.5,
-              borderColor: 'rgba(192,120,88,0.3)',
+          <View
+            style={{
+              flexDirection: 'row',
               alignItems: 'center',
-              justifyContent: 'center',
-              overflow: 'hidden',
-            }}>
+              gap: 10,
+            }}
+          >
+            {/* Emoji square */}
+            <View
+              style={{
+                width: 52,
+                height: 52,
+                borderRadius: 14,
+                borderWidth: 1.5,
+                borderColor: 'rgba(192,120,88,0.3)',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden',
+              }}
+            >
               <LinearGradient
                 colors={['rgba(192,120,88,0.15)', 'rgba(124,74,90,0.1)']}
                 start={gradientPoints.diagonal.start}
@@ -236,32 +253,36 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
             />
           </View>
           {isDuplicate && (
-            <Text style={{
-              ...typography.hint,
-              color: colors.fig,
-              marginTop: 6,
-              fontStyle: 'normal',
-            }}>
+            <Text
+              style={{
+                ...typography.hint,
+                color: colors.fig,
+                marginTop: 6,
+                fontStyle: 'normal',
+              }}
+            >
               A tag with this name already exists.
             </Text>
           )}
         </View>
-        </KeyboardAwareScrollView>
+      </KeyboardAwareScrollView>
 
-        {/* ── Footer — hidden while keyboard is up ── */}
-        {!keyboardVisible && (
-        <View style={{
-          flexShrink: 0,
-          flexDirection: 'row',
-          gap: 8,
-          paddingTop: 14,
-          paddingHorizontal: 20,
-          // Extra Android padding: the system-nav inset is the nav bar's size, not a margin above it.
-          paddingBottom: Math.max(insets.bottom, 10) + (Platform.OS === 'android' ? 12 : 0),
-          backgroundColor: colors.surface,
-          borderTopWidth: 1,
-          borderTopColor: 'rgba(160,100,80,0.1)',
-        }}>
+      {/* ── Footer — hidden while keyboard is up ── */}
+      {!keyboardVisible && (
+        <View
+          style={{
+            flexShrink: 0,
+            flexDirection: 'row',
+            gap: 8,
+            paddingTop: 14,
+            paddingHorizontal: 20,
+            // Extra Android padding: the system-nav inset is the nav bar's size, not a margin above it.
+            paddingBottom: Math.max(insets.bottom, 10) + (Platform.OS === 'android' ? 12 : 0),
+            backgroundColor: colors.surface,
+            borderTopWidth: 1,
+            borderTopColor: 'rgba(160,100,80,0.1)',
+          }}
+        >
           <Pressable
             onPress={onCancel}
             style={{
@@ -274,12 +295,16 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
               justifyContent: 'center',
             }}
           >
-            <Text style={{
-              ...typography.tagLabel,
-              fontSize: 14,
-              letterSpacing: 1,
-              color: colors.stone,
-            }}>Cancel</Text>
+            <Text
+              style={{
+                ...typography.tagLabel,
+                fontSize: 14,
+                letterSpacing: 1,
+                color: colors.stone,
+              }}
+            >
+              Cancel
+            </Text>
           </Pressable>
           <View style={{ flex: 2 }}>
             <GradientButton
@@ -292,7 +317,7 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
             />
           </View>
         </View>
-        )}
+      )}
     </KeyboardAvoidingView>
   )
 }

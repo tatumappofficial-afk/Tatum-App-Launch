@@ -33,24 +33,28 @@ export const EmptyPeriod: React.FC<EmptyPeriodProps> = ({ period, scenario, onLo
   const copy = COPY[scenario][period]
   const onCta = scenario === 'current' ? onLookBack : onJumpToNearest
   return (
-    <View style={{
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: 'rgba(160,100,80,0.13)',
-      borderRadius: 16,
-      paddingVertical: 28,
-      paddingHorizontal: 24,
-      alignItems: 'center',
-      gap: 10,
-    }}>
+    <View
+      style={{
+        backgroundColor: colors.surface,
+        borderWidth: 1,
+        borderColor: 'rgba(160,100,80,0.13)',
+        borderRadius: 16,
+        paddingVertical: 28,
+        paddingHorizontal: 24,
+        alignItems: 'center',
+        gap: 10,
+      }}
+    >
       <Text style={{ fontSize: 28, opacity: 0.4 }}>🌙</Text>
-      <Text style={{
-        fontSize: 14,
-        color: colors.stone,
-        lineHeight: 19,
-        fontFamily: font('dmSans', '300'),
-        textAlign: 'center',
-      }}>
+      <Text
+        style={{
+          fontSize: 14,
+          color: colors.stone,
+          lineHeight: 19,
+          fontFamily: font('dmSans', '300'),
+          textAlign: 'center',
+        }}
+      >
         {copy.title}
       </Text>
       {copy.cta && onCta && (
@@ -66,12 +70,16 @@ export const EmptyPeriod: React.FC<EmptyPeriodProps> = ({ period, scenario, onLo
             opacity: pressed ? 0.9 : 1,
           })}
         >
-          <Text style={{
-            fontSize: 14,
-            letterSpacing: 0.5,
-            color: colors.terra,
-            fontFamily: font('dmSans', '500'),
-          }}>{copy.cta}</Text>
+          <Text
+            style={{
+              fontSize: 14,
+              letterSpacing: 0.5,
+              color: colors.terra,
+              fontFamily: font('dmSans', '500'),
+            }}
+          >
+            {copy.cta}
+          </Text>
         </Pressable>
       )}
     </View>
