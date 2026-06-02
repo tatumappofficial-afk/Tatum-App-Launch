@@ -1,12 +1,11 @@
 import { useState } from 'react'
-import { StyleSheet, View, Text, TextInput, Pressable } from 'react-native'
+import { StyleSheet, View, Text, TextInput, Pressable, Alert } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 import { useRouter } from 'expo-router'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useBlockBack } from '@/src/hooks/useBlockBack'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Alert } from 'react-native'
 import { colors, font, gradientPoints, partnerGradients } from '@/lib/theme'
 import { GradientButton } from '@/lib/components/GradientButton'
 import { StepDots } from '@/lib/components/StepDots'
@@ -23,7 +22,7 @@ export default function PartnerScreen() {
   useBlockBack()
 
   const { data: allPartners = [] } = useLiveQuery((q) =>
-    q.from({ partners }).select(({ partners }) => ({ ...partners }))
+    q.from({ partners }).select(({ partners }) => ({ ...partners })),
   )
 
   const [displayName, setDisplayName] = useState('')
@@ -50,9 +49,7 @@ export default function PartnerScreen() {
     const finalInitials = initials.trim() || deriveInitials(name)
     const now = new Date().toISOString()
 
-    const collision = allPartners.find(
-      (p) => p.avatarValue === finalInitials && p.avatarGradient === selectedGradient,
-    )
+    const collision = allPartners.find((p) => p.avatarValue === finalInitials && p.avatarGradient === selectedGradient)
     if (collision) {
       Alert.alert(
         'Already taken',
@@ -66,7 +63,7 @@ export default function PartnerScreen() {
       // Solo row was auto-promoted to main by the initDatabase backfill (so the
       // profile badge isn't empty on first launch), but a user-created partner
       // should supersede that placeholder.
-      const previousMain = allPartners.find(p => p.isMain)
+      const previousMain = allPartners.find((p) => p.isMain)
       if (previousMain) {
         partners.update(previousMain.id, (draft) => {
           draft.isMain = false
@@ -174,12 +171,7 @@ export default function PartnerScreen() {
         {/* Initials with hero-sized live preview */}
         <Text style={sectionLabelStyle}>Initials</Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 24 }}>
-          <AvatarCircle
-            initials={initials || '—'}
-            gradient={selectedGradient}
-            size={80}
-            borderWidth={3}
-          />
+          <AvatarCircle initials={initials || '—'} gradient={selectedGradient} size={80} borderWidth={3} />
           <TextInput
             value={initials}
             onChangeText={handleInitialsChange}
@@ -317,11 +309,7 @@ export default function PartnerScreen() {
       {/* Bottom area */}
       <View style={{ paddingHorizontal: 28, paddingBottom: Math.max(insets.bottom + 8, 32), paddingTop: 8 }}>
         <View style={{ marginBottom: 8 }}>
-          <GradientButton
-            label="Add Partner"
-            onPress={handleAdd}
-            disabled={!displayName.trim()}
-          />
+          <GradientButton label="Add Partner" onPress={handleAdd} disabled={!displayName.trim()} />
         </View>
         <Pressable onPress={handleSkip} style={{ alignItems: 'center', paddingVertical: 8, marginBottom: 8 }}>
           <Text

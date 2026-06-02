@@ -25,12 +25,10 @@ export const RichPartnerStrip: React.FC<RichPartnerStripProps> = ({
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginRight: -24 }}>
       <View style={{ flexDirection: 'row', gap: 8, paddingRight: 40 }}>
-        {visible.map(p => (
+        {visible.map((p) => (
           <RichPartnerCard key={p.partner.id} stats={p} onPress={() => onPress?.(p.partner.id)} />
         ))}
-        {overflow > 0 && onViewAll && (
-          <ViewMoreCard count={overflow} onPress={onViewAll} />
-        )}
+        {overflow > 0 && onViewAll && <ViewMoreCard count={overflow} onPress={onViewAll} />}
       </View>
     </ScrollView>
   )
@@ -57,12 +55,16 @@ const ViewMoreCard: React.FC<{ count: number; onPress: () => void }> = ({ count,
       opacity: pressed ? 0.85 : 1,
     })}
   >
-    <Text style={{
-      fontFamily: font('playfair', '600'),
-      fontSize: 28,
-      color: colors.terra,
-      lineHeight: 30,
-    }}>+{count}</Text>
+    <Text
+      style={{
+        fontFamily: font('playfair', '600'),
+        fontSize: 28,
+        color: colors.terra,
+        lineHeight: 30,
+      }}
+    >
+      +{count}
+    </Text>
     <Text
       numberOfLines={1}
       style={{
@@ -71,7 +73,9 @@ const ViewMoreCard: React.FC<{ count: number; onPress: () => void }> = ({ count,
         fontFamily: font('dmSans', '500'),
         letterSpacing: 0.5,
       }}
-    >View all partners</Text>
+    >
+      View all partners
+    </Text>
   </Pressable>
 )
 
@@ -97,20 +101,19 @@ const RichPartnerCard: React.FC<{ stats: PartnerLifetimeStats; onPress?: () => v
         opacity: pressed ? 0.85 : 1,
       })}
     >
-      <AvatarCircle
-        initials={partner.avatarValue}
-        gradient={partner.avatarGradient}
-        size={52}
-        borderWidth={2.5}
-      />
+      <AvatarCircle initials={partner.avatarValue} gradient={partner.avatarGradient} size={52} borderWidth={2.5} />
       <View style={{ flexDirection: 'row', gap: 8, width: '100%' }}>
         <View style={{ flex: 1, alignItems: 'center' }}>
-          <Text style={{
-            fontFamily: font('playfair', '600'),
-            fontSize: 17,
-            color: colors.terra,
-            lineHeight: 17,
-          }}>{sessionCount}</Text>
+          <Text
+            style={{
+              fontFamily: font('playfair', '600'),
+              fontSize: 17,
+              color: colors.terra,
+              lineHeight: 17,
+            }}
+          >
+            {sessionCount}
+          </Text>
           <Text
             numberOfLines={1}
             style={{
@@ -121,15 +124,21 @@ const RichPartnerCard: React.FC<{ stats: PartnerLifetimeStats; onPress?: () => v
               marginTop: 2,
               fontFamily: fontFamily.dmSans,
             }}
-          >Sessions</Text>
+          >
+            Sessions
+          </Text>
         </View>
         <View style={{ flex: 1, alignItems: 'center' }}>
-          <Text style={{
-            fontFamily: font('playfair', '600'),
-            fontSize: 17,
-            color: colors.terra,
-            lineHeight: 17,
-          }}>{averageStars === null ? '—' : averageStars.toFixed(1)}</Text>
+          <Text
+            style={{
+              fontFamily: font('playfair', '600'),
+              fontSize: 17,
+              color: colors.terra,
+              lineHeight: 17,
+            }}
+          >
+            {averageStars === null ? '—' : averageStars.toFixed(1)}
+          </Text>
           <Text
             numberOfLines={1}
             style={{
@@ -140,15 +149,21 @@ const RichPartnerCard: React.FC<{ stats: PartnerLifetimeStats; onPress?: () => v
               marginTop: 2,
               fontFamily: fontFamily.dmSans,
             }}
-          >Avg Rating</Text>
+          >
+            Avg Rating
+          </Text>
         </View>
       </View>
       {topActivityEmoji && (
-        <Text style={{
-          fontSize: 12,
-          color: colors.muted,
-          fontFamily: font('dmSans', '300'),
-        }}>{topActivityEmoji} Most common</Text>
+        <Text
+          style={{
+            fontSize: 12,
+            color: colors.muted,
+            fontFamily: font('dmSans', '300'),
+          }}
+        >
+          {topActivityEmoji} Most common
+        </Text>
       )}
     </Pressable>
   )

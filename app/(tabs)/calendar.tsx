@@ -12,8 +12,18 @@ import { formatDateString } from '@/lib/stats/windows'
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ]
 
 export default function CalendarRoute() {
@@ -24,21 +34,21 @@ export default function CalendarRoute() {
   const [selectedDay, setSelectedDay] = useState<number>(now.getDate())
 
   const { data: allEncounters = [] } = useLiveQuery((q) =>
-    q.from({ encounters }).select(({ encounters }) => ({ ...encounters }))
+    q.from({ encounters }).select(({ encounters }) => ({ ...encounters })),
   )
   const { data: allPartners = [] } = useLiveQuery((q) =>
-    q.from({ partners }).select(({ partners }) => ({ ...partners }))
+    q.from({ partners }).select(({ partners }) => ({ ...partners })),
   )
   const { data: allTags = [] } = useLiveQuery((q) =>
-    q.from({ activityTags }).select(({ activityTags }) => ({ ...activityTags }))
+    q.from({ activityTags }).select(({ activityTags }) => ({ ...activityTags })),
   )
 
   const tagMap = useActivityTagMap()
 
   const quickLogEmojis = allTags
-    .filter(t => t.isActive)
+    .filter((t) => t.isActive)
     .sort((a, b) => a.sortOrder - b.sortOrder)
-    .map(t => t.emoji)
+    .map((t) => t.emoji)
 
   // useLoggedDaysForMonth uses 0-indexed month; this screen tracks 1-indexed.
   const loggedDays = useLoggedDaysForMonth(month - 1, year, allEncounters)
@@ -51,20 +61,20 @@ export default function CalendarRoute() {
   const dayOfWeek = DAY_NAMES[selectedDateObj.getDay()]
   const selectedDayLabel = `${dayOfWeek}, ${MONTH_NAMES[month - 1]} ${selectedDay}`
 
-  const dayEncounters = allEncounters.filter(e => e.date === selectedDateStr)
-  const daySessions = dayEncounters.map(enc => {
+  const dayEncounters = allEncounters.filter((e) => e.date === selectedDateStr)
+  const daySessions = dayEncounters.map((enc) => {
     const sessionPartners = enc.partnerIds
-      .map(pid => allPartners.find(p => p.id === pid))
+      .map((pid) => allPartners.find((p) => p.id === pid))
       .filter((p): p is NonNullable<typeof p> => Boolean(p))
     return {
       id: enc.id,
-      partners: sessionPartners.map(p => ({
+      partners: sessionPartners.map((p) => ({
         initials: p.avatarValue,
         gradient: p.avatarGradient,
         name: p.displayName,
       })),
       rating: enc.stars || 0,
-      tags: enc.activities.map(emoji => ({
+      tags: enc.activities.map((emoji) => ({
         emoji,
         label: tagMap.get(emoji) || emoji,
       })),
@@ -73,28 +83,35 @@ export default function CalendarRoute() {
   })
 
   function handlePrevMonth() {
-    if (month === 1) { setMonth(12); setYear(y => y - 1) }
-    else setMonth(m => m - 1)
+    if (month === 1) {
+      setMonth(12)
+      setYear((y) => y - 1)
+    } else setMonth((m) => m - 1)
     setSelectedDay(1)
   }
 
   function handleNextMonth() {
-    if (month === 12) { setMonth(1); setYear(y => y + 1) }
-    else setMonth(m => m + 1)
+    if (month === 12) {
+      setMonth(1)
+      setYear((y) => y + 1)
+    } else setMonth((m) => m + 1)
     setSelectedDay(1)
   }
 
   const [loggedOverlay, setLoggedOverlay] = useState<SuccessOverlayDetails | null>(null)
   const overlayTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  useEffect(() => () => {
-    if (overlayTimer.current) clearTimeout(overlayTimer.current)
-  }, [])
+  useEffect(
+    () => () => {
+      if (overlayTimer.current) clearTimeout(overlayTimer.current)
+    },
+    [],
+  )
 
   function insertQuickEncounter(emoji: string, dateStr: string) {
     if (allPartners.length === 0) return // can't log without a partner
     const nowStr = new Date().toISOString()
     // Quick-log uses the main partner if set, else falls back to the first.
-    const target = allPartners.find(p => p.isMain && p.isActive) ?? allPartners[0]
+    const target = allPartners.find((p) => p.isMain && p.isActive) ?? allPartners[0]
     encounters.insert({
       id: uuid(),
       date: dateStr,

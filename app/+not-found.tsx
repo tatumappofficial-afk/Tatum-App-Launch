@@ -7,9 +7,7 @@ export default function NotFoundScreen() {
     <>
       <Stack.Screen options={{ title: 'Oops!' }} />
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.warmSand }}>
-        <Text style={{ fontFamily: fontFamily.playfair, fontSize: 24, color: colors.ink }}>
-          Page not found
-        </Text>
+        <Text style={{ fontFamily: fontFamily.playfair, fontSize: 24, color: colors.ink }}>Page not found</Text>
         <Link href="/" style={{ marginTop: 16, color: colors.terra }}>
           Go home
         </Link>

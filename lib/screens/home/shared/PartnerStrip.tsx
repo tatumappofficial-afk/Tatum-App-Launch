@@ -25,12 +25,10 @@ export const PartnerStrip: React.FC<PartnerStripProps> = ({
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginRight: -24 }}>
       <View style={{ flexDirection: 'row', gap: 8, paddingRight: 40 }}>
-        {visible.map(p => (
+        {visible.map((p) => (
           <PartnerChip key={p.id} partner={p} onPress={() => onPress?.(p)} />
         ))}
-        {overflow > 0 && onViewAll && (
-          <ViewMoreChip count={overflow} onPress={onViewAll} />
-        )}
+        {overflow > 0 && onViewAll && <ViewMoreChip count={overflow} onPress={onViewAll} />}
       </View>
     </ScrollView>
   )
@@ -57,11 +55,15 @@ const ViewMoreChip: React.FC<{ count: number; onPress: () => void }> = ({ count,
       opacity: pressed ? 0.85 : 1,
     })}
   >
-    <Text style={{
-      fontFamily: font('playfair', '600'),
-      fontSize: 16,
-      color: colors.terra,
-    }}>+{count}</Text>
+    <Text
+      style={{
+        fontFamily: font('playfair', '600'),
+        fontSize: 16,
+        color: colors.terra,
+      }}
+    >
+      +{count}
+    </Text>
     <Text
       numberOfLines={1}
       style={{
@@ -70,7 +72,9 @@ const ViewMoreChip: React.FC<{ count: number; onPress: () => void }> = ({ count,
         fontFamily: font('dmSans', '500'),
         letterSpacing: 0.5,
       }}
-    >View all</Text>
+    >
+      View all
+    </Text>
   </Pressable>
 )
 
@@ -96,19 +100,18 @@ const PartnerChip: React.FC<{ partner: Partner; onPress?: () => void }> = ({ par
       }
     }}
   >
-    <AvatarCircle
-      initials={partner.avatarValue}
-      gradient={partner.avatarGradient}
-      size={40}
-      borderWidth={2}
-    />
+    <AvatarCircle initials={partner.avatarValue} gradient={partner.avatarGradient} size={40} borderWidth={2} />
     {!partner.isActive && (
-      <Text style={{
-        fontSize: 12,
-        color: colors.muted,
-        fontFamily: font('dmSans', '300'),
-        fontStyle: 'italic',
-      }}>past</Text>
+      <Text
+        style={{
+          fontSize: 12,
+          color: colors.muted,
+          fontFamily: font('dmSans', '300'),
+          fontStyle: 'italic',
+        }}
+      >
+        past
+      </Text>
     )}
   </Pressable>
 )

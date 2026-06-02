@@ -13,9 +13,8 @@ export const DecorativeGlow: React.FC<DecorativeGlowProps> = ({
   size = 280,
   opacity = 0.1,
 }) => {
-  const posStyle: ViewStyle = position === 'top-right'
-    ? { top: -40, right: -60 }
-    : { top: -20, left: '50%', marginLeft: -size / 2 }
+  const posStyle: ViewStyle =
+    position === 'top-right' ? { top: -40, right: -60 } : { top: -20, left: '50%', marginLeft: -size / 2 }
 
   return (
     <View

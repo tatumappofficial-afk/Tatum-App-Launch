@@ -29,16 +29,18 @@ export const PeriodCaptionRow: React.FC<PeriodCaptionRowProps> = ({
 }) => {
   const isAllTime = period === 'all'
   return (
-    <View style={{
-      paddingHorizontal: 24,
-      paddingBottom: 12,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      flexShrink: 0,
-      position: 'relative',
-      zIndex: 2,
-    }}>
+    <View
+      style={{
+        paddingHorizontal: 24,
+        paddingBottom: 12,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexShrink: 0,
+        position: 'relative',
+        zIndex: 2,
+      }}
+    >
       <Text
         style={{
           fontFamily: font('dmSans', '400'),
@@ -65,12 +67,14 @@ export const PeriodCaptionRow: React.FC<PeriodCaptionRowProps> = ({
             marginLeft: 12,
           }}
         >
-          <Text style={{
-            fontFamily: font('dmSans', '400'),
-            fontSize: 12,
-            letterSpacing: 0.3,
-            color: colors.stone,
-          }}>
+          <Text
+            style={{
+              fontFamily: font('dmSans', '400'),
+              fontSize: 12,
+              letterSpacing: 0.3,
+              color: colors.stone,
+            }}
+          >
             {staticPillCaption ?? caption}
           </Text>
         </View>
@@ -93,15 +97,26 @@ export const PeriodCaptionRow: React.FC<PeriodCaptionRowProps> = ({
             marginLeft: 12,
           }}
         >
-          <Text style={{
-            fontFamily: font('dmSans', '500'),
-            fontSize: 12,
-            letterSpacing: 0.5,
-            color: colors.terra,
-          }}>
+          <Text
+            style={{
+              fontFamily: font('dmSans', '500'),
+              fontSize: 12,
+              letterSpacing: 0.5,
+              color: colors.terra,
+            }}
+          >
             {PICKER_LABELS[period]}
           </Text>
-          <Svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+          <Svg
+            width={10}
+            height={10}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke={colors.terra}
+            strokeWidth={2.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <Polyline points="6 9 12 15 18 9" />
           </Svg>
         </Pressable>

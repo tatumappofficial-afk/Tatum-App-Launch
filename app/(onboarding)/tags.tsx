@@ -125,18 +125,14 @@ export default function TagsScreen() {
   useBlockBack()
 
   const { data: allTags = [] } = useLiveQuery((q) =>
-    q.from({ activityTags }).select(({ activityTags }) => ({ ...activityTags }))
+    q.from({ activityTags }).select(({ activityTags }) => ({ ...activityTags })),
   )
 
-  const activeTags = allTags
-    .filter((t) => t.isActive)
-    .sort((a, b) => a.sortOrder - b.sortOrder)
+  const activeTags = allTags.filter((t) => t.isActive).sort((a, b) => a.sortOrder - b.sortOrder)
 
   // Add tile leads; live tags follow (newly added ones appear right after the add tile
   // because their sortOrder is less than the defaults).
-  type GridItem =
-    | { kind: 'add' }
-    | { kind: 'tag'; id: string; emoji: string; label: string }
+  type GridItem = { kind: 'add' } | { kind: 'tag'; id: string; emoji: string; label: string }
   const items: GridItem[] = [
     { kind: 'add' },
     ...activeTags.map((t) => ({ kind: 'tag' as const, id: t.id, emoji: t.emoji, label: t.label })),
@@ -212,9 +208,11 @@ export default function TagsScreen() {
           }}
         >
           <Text style={{ fontSize: 18, flexShrink: 0, marginTop: 1 }}>🏷️</Text>
-          <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: '#7A5A50', lineHeight: 18.6, flex: 1 }}>
-            <Text style={{ fontWeight: '500', color: colors.ink }}>Activity tags</Text> are the emoji labels you tap when
-            logging a session. They're completely private — tap "Add yours" to create your own.
+          <Text
+            style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: '#7A5A50', lineHeight: 18.6, flex: 1 }}
+          >
+            <Text style={{ fontWeight: '500', color: colors.ink }}>Activity tags</Text> are the emoji labels you tap
+            when logging a session. They're completely private — tap "Add yours" to create your own.
           </Text>
         </View>
 
@@ -232,7 +230,7 @@ export default function TagsScreen() {
                   <AddChip key={`add-${ri}`} onPress={() => router.push('/(sheets)/add-tag')} />
                 ) : (
                   <TagChip key={item.id} emoji={item.emoji} label={item.label} />
-                )
+                ),
               )}
             </View>
           ))}
@@ -257,10 +255,7 @@ export default function TagsScreen() {
       {/* Bottom area */}
       <View style={{ flexShrink: 0, paddingHorizontal: 28, paddingBottom: Math.max(insets.bottom + 8, 32) }}>
         <View style={{ marginBottom: 12 }}>
-          <GradientButton
-            label="These Look Good"
-            onPress={() => router.push('/(onboarding)/ready')}
-          />
+          <GradientButton label="These Look Good" onPress={() => router.push('/(onboarding)/ready')} />
         </View>
         <StepDots current={3} />
       </View>

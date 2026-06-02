@@ -5,16 +5,13 @@ import * as Haptics from 'expo-haptics'
 import { colors, font } from '../theme'
 
 interface RatingSliderProps {
-  value: number       // 0-10 (0 = no rating)
+  value: number // 0-10 (0 = no rating)
   onChange?: (value: number) => void
 }
 
 const STEPS = 10
 
-export const RatingSlider: React.FC<RatingSliderProps> = ({
-  value,
-  onChange,
-}) => {
+export const RatingSlider: React.FC<RatingSliderProps> = ({ value, onChange }) => {
   const lastSteppedRef = useRef(value)
 
   function emitStep(next: number) {
@@ -33,19 +30,27 @@ export const RatingSlider: React.FC<RatingSliderProps> = ({
       {/* Value display */}
       <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4, marginBottom: 8 }}>
         {isNone ? (
-          <Text style={{
-            fontFamily: font('dmSans', '400'),
-            fontSize: 16,
-            color: colors.stone,
-            fontStyle: 'italic',
-          }}>No rating</Text>
+          <Text
+            style={{
+              fontFamily: font('dmSans', '400'),
+              fontSize: 16,
+              color: colors.stone,
+              fontStyle: 'italic',
+            }}
+          >
+            No rating
+          </Text>
         ) : (
           <>
-            <Text style={{
-              fontFamily: font('playfair', '700'),
-              fontSize: 22,
-              color: colors.terra,
-            }}>{value}</Text>
+            <Text
+              style={{
+                fontFamily: font('playfair', '700'),
+                fontSize: 22,
+                color: colors.terra,
+              }}
+            >
+              {value}
+            </Text>
             <Text style={{ fontSize: 14, fontWeight: '300', color: colors.stone }}> / 10</Text>
           </>
         )}
@@ -64,10 +69,12 @@ export const RatingSlider: React.FC<RatingSliderProps> = ({
       </View>
 
       {/* Step labels — tap to jump */}
-      <View style={{
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-      }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+        }}
+      >
         {['None', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'].map((label, i) => (
           <Pressable
             key={label}
@@ -77,11 +84,15 @@ export const RatingSlider: React.FC<RatingSliderProps> = ({
             }}
             hitSlop={6}
           >
-            <Text style={{
-              fontSize: 12,
-              fontWeight: value === i ? '600' : '300',
-              color: value === i ? colors.terra : '#C4B0A0',
-            }}>{label}</Text>
+            <Text
+              style={{
+                fontSize: 12,
+                fontWeight: value === i ? '600' : '300',
+                color: value === i ? colors.terra : '#C4B0A0',
+              }}
+            >
+              {label}
+            </Text>
           </Pressable>
         ))}
       </View>

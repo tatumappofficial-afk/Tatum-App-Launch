@@ -22,10 +22,10 @@ export default function EditProfilePage() {
 
   const { raw: profile } = useUserProfile()
   const { data: allTags = [] } = useLiveQuery((q) =>
-    q.from({ activityTags }).select(({ activityTags }) => ({ ...activityTags }))
+    q.from({ activityTags }).select(({ activityTags }) => ({ ...activityTags })),
   )
   const { data: allPartners = [] } = useLiveQuery((q) =>
-    q.from({ partners }).select(({ partners }) => ({ ...partners }))
+    q.from({ partners }).select(({ partners }) => ({ ...partners })),
   )
 
   // Local form state — initialized from profile, kept in sync via useEffect
@@ -49,11 +49,9 @@ export default function EditProfilePage() {
     hydratedRef.current = true
   }, [profile])
 
-  const activeTags = allTags
-    .filter(t => t.isActive)
-    .sort((a, b) => a.sortOrder - b.sortOrder)
+  const activeTags = allTags.filter((t) => t.isActive).sort((a, b) => a.sortOrder - b.sortOrder)
   const activePartners = allPartners
-    .filter(p => p.isActive)
+    .filter((p) => p.isActive)
     .sort((a, b) => a.displayName.localeCompare(b.displayName))
 
   function commitProfile(patch: Partial<{ displayName: string | null; avatarValue: string; avatarGradient: string }>) {
@@ -107,22 +105,18 @@ export default function EditProfilePage() {
   }
 
   function handleDeleteTag(tagId: string, label: string, emoji: string) {
-    Alert.alert(
-      'Delete tag',
-      `Delete "${emoji} ${label}"? Past sessions will keep this tag in their record.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => {
-            activityTags.update(tagId, (draft) => {
-              draft.isActive = false
-            })
-          },
+    Alert.alert('Delete tag', `Delete "${emoji} ${label}"? Past sessions will keep this tag in their record.`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => {
+          activityTags.update(tagId, (draft) => {
+            draft.isActive = false
+          })
         },
-      ],
-    )
+      },
+    ])
   }
 
   return (
@@ -138,11 +132,22 @@ export default function EditProfilePage() {
           hitSlop={8}
           style={styles.backButton}
         >
-          <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={colors.stone} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+          <Svg
+            width={18}
+            height={18}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke={colors.stone}
+            strokeWidth={2.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <Polyline points="15 18 9 12 15 6" />
           </Svg>
         </Pressable>
-        <Text style={styles.headerTitle} pointerEvents="none">Edit Profile</Text>
+        <Text style={styles.headerTitle} pointerEvents="none">
+          Edit Profile
+        </Text>
         <Pressable
           onPress={handleSavePress}
           accessibilityRole="button"
@@ -161,12 +166,7 @@ export default function EditProfilePage() {
       >
         {/* Avatar preview */}
         <View style={styles.avatarPreview}>
-          <AvatarCircle
-            initials={initials || 'A'}
-            gradient={selectedGradient}
-            size={84}
-            borderWidth={3}
-          />
+          <AvatarCircle initials={initials || 'A'} gradient={selectedGradient} size={84} borderWidth={3} />
         </View>
 
         {/* Display Name */}
@@ -186,12 +186,7 @@ export default function EditProfilePage() {
         {/* Initials */}
         <Text style={styles.sectionLabel}>Initials</Text>
         <View style={styles.initialsRow}>
-          <AvatarCircle
-            initials={initials || 'A'}
-            gradient={selectedGradient}
-            size={56}
-            borderWidth={2.5}
-          />
+          <AvatarCircle initials={initials || 'A'} gradient={selectedGradient} size={56} borderWidth={2.5} />
           <TextInput
             value={initials}
             onChangeText={handleInitialsChange}
@@ -208,7 +203,7 @@ export default function EditProfilePage() {
         {/* Avatar Color */}
         <Text style={styles.sectionLabel}>Avatar Color</Text>
         <View style={styles.colorGrid}>
-          {partnerGradients.map(opt => {
+          {partnerGradients.map((opt) => {
             const isSelected = selectedGradient === opt.gradient
             return (
               <Pressable
@@ -217,10 +212,7 @@ export default function EditProfilePage() {
                 accessibilityRole="button"
                 accessibilityLabel={`Color ${opt.key}`}
                 accessibilityState={{ selected: isSelected }}
-                style={[
-                  styles.colorSwatch,
-                  isSelected && styles.colorSwatchSelected,
-                ]}
+                style={[styles.colorSwatch, isSelected && styles.colorSwatchSelected]}
               >
                 <LinearGradient
                   colors={opt.colors}
@@ -237,7 +229,7 @@ export default function EditProfilePage() {
         {/* Tags */}
         <Text style={styles.sectionLabel}>Your Tags</Text>
         <View style={styles.list}>
-          {activeTags.map(tag => (
+          {activeTags.map((tag) => (
             <View key={tag.id} style={styles.row}>
               <View style={styles.rowLeft}>
                 <Text style={styles.tagEmoji}>{tag.emoji}</Text>
@@ -267,7 +259,7 @@ export default function EditProfilePage() {
         {/* Partners */}
         <Text style={styles.sectionLabel}>Your Partners</Text>
         <View style={styles.list}>
-          {activePartners.map(p => (
+          {activePartners.map((p) => (
             <Pressable
               key={p.id}
               onPress={() => router.push(`/(sheets)/edit-partner?id=${p.id}`)}
@@ -276,12 +268,7 @@ export default function EditProfilePage() {
               style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
             >
               <View style={styles.rowLeft}>
-                <AvatarCircle
-                  initials={p.avatarValue}
-                  gradient={p.avatarGradient}
-                  size={36}
-                  borderWidth={2}
-                />
+                <AvatarCircle initials={p.avatarValue} gradient={p.avatarGradient} size={36} borderWidth={2} />
                 <Text style={styles.rowLabel}>{p.displayName}</Text>
               </View>
               <View style={styles.editAffordance}>

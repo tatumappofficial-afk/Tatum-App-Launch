@@ -7,12 +7,7 @@ import { MonthView } from '@/lib/screens/home/MonthView'
 import { YearView } from '@/lib/screens/home/YearView'
 import { AllTimeView } from '@/lib/screens/home/AllTimeView'
 import { PlaceholderView } from '@/lib/screens/home/PlaceholderView'
-import {
-  activityTags,
-  desireEntries,
-  encounters,
-  partners,
-} from '@/src/db'
+import { activityTags, desireEntries, encounters, partners } from '@/src/db'
 import { useUserProfile } from '@/src/hooks/useUserProfile'
 import {
   computeAllTimeStats,
@@ -34,16 +29,16 @@ export default function HomeRoute() {
   const router = useRouter()
 
   const { data: allEncounters = [], isReady: encReady } = useLiveQuery((q) =>
-    q.from({ encounters }).select(({ encounters }) => ({ ...encounters }))
+    q.from({ encounters }).select(({ encounters }) => ({ ...encounters })),
   )
   const { data: allPartners = [], isReady: partReady } = useLiveQuery((q) =>
-    q.from({ partners }).select(({ partners }) => ({ ...partners }))
+    q.from({ partners }).select(({ partners }) => ({ ...partners })),
   )
   const { data: allTags = [] } = useLiveQuery((q) =>
-    q.from({ activityTags }).select(({ activityTags }) => ({ ...activityTags }))
+    q.from({ activityTags }).select(({ activityTags }) => ({ ...activityTags })),
   )
   const { data: allDesires = [] } = useLiveQuery((q) =>
-    q.from({ desireEntries }).select(({ desireEntries }) => ({ ...desireEntries }))
+    q.from({ desireEntries }).select(({ desireEntries }) => ({ ...desireEntries })),
   )
   const { displayName: userName } = useUserProfile()
 
@@ -68,8 +63,12 @@ export default function HomeRoute() {
 
   const isEmpty = ready && readyEncounters.length === 0
 
-  const { window, caption, emptyScenario, firstEncounterDate, minYear, maxYear, now } =
-    usePeriodWindow(period, anchor, readyEncounters, CALENDAR_START_DAY)
+  const { window, caption, emptyScenario, firstEncounterDate, minYear, maxYear, now } = usePeriodWindow(
+    period,
+    anchor,
+    readyEncounters,
+    CALENDAR_START_DAY,
+  )
 
   const pickerContent = useMemo(() => {
     if (period === 'all') return null
@@ -88,7 +87,7 @@ export default function HomeRoute() {
   }, [period, anchor, minYear, maxYear, now, readyEncounters, handleAnchorChange])
 
   const handleLookBack = useCallback(() => {
-    setAnchor(prev => {
+    setAnchor((prev) => {
       const next = new Date(prev)
       if (period === 'week') next.setDate(next.getDate() - 7)
       else if (period === 'month') next.setMonth(next.getMonth() - 1)
@@ -102,14 +101,8 @@ export default function HomeRoute() {
     if (nearest) setAnchor(parseDateString(nearest))
   }, [readyEncounters, anchor])
 
-  const handlePartnerPress = useCallback(
-    (id: string) => router.push(`/(pages)/partner-profile?id=${id}`),
-    [router],
-  )
-  const handleSessionPress = useCallback(
-    (id: string) => router.push(`/(pages)/session-detail?id=${id}`),
-    [router],
-  )
+  const handlePartnerPress = useCallback((id: string) => router.push(`/(pages)/partner-profile?id=${id}`), [router])
+  const handleSessionPress = useCallback((id: string) => router.push(`/(pages)/session-detail?id=${id}`), [router])
   const handleSessionsHeaderPress = useCallback(() => {
     if (period === 'all') return
     const anchorIso = anchor.toISOString().split('T')[0]
@@ -124,8 +117,7 @@ export default function HomeRoute() {
       return <PlaceholderView label="Nothing logged yet — and that's okay." />
     }
     const anchorIso = anchor.toISOString().split('T')[0]
-    const goToPartnersPeriod = () =>
-      router.push(`/(pages)/partners-period?period=${period}&anchor=${anchorIso}`)
+    const goToPartnersPeriod = () => router.push(`/(pages)/partners-period?period=${period}&anchor=${anchorIso}`)
     if (period === 'week') {
       const stats = computeWeekStats(readyEncounters, readyPartners, allTags, window, CALENDAR_START_DAY)
       return (

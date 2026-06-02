@@ -1,6 +1,6 @@
 import React from 'react'
-import { Pressable, Text, View } from 'react-native'
-import { colors, font, fontFamily } from '../theme'
+import { Pressable, Text } from 'react-native'
+import { colors, font } from '../theme'
 
 export interface TagPillProps {
   emoji: string
@@ -10,13 +10,7 @@ export interface TagPillProps {
   variant?: 'display' | 'selectable'
 }
 
-export const TagPill: React.FC<TagPillProps> = ({
-  emoji,
-  label,
-  selected = false,
-  onPress,
-  variant = 'display',
-}) => {
+export const TagPill: React.FC<TagPillProps> = ({ emoji, label, selected = false, onPress, variant = 'display' }) => {
   const isSelectable = variant === 'selectable'
   const isActive = isSelectable && selected
 
@@ -38,11 +32,15 @@ export const TagPill: React.FC<TagPillProps> = ({
       }}
     >
       <Text style={{ fontSize: 16, lineHeight: 18 }}>{emoji}</Text>
-      <Text style={{
-        fontFamily: font('dmSans', isActive ? '500' : '400'),
-        fontSize: 14,
-        color: isActive ? colors.terra : '#6A4A40',
-      }}>{label}</Text>
+      <Text
+        style={{
+          fontFamily: font('dmSans', isActive ? '500' : '400'),
+          fontSize: 14,
+          color: isActive ? colors.terra : '#6A4A40',
+        }}
+      >
+        {label}
+      </Text>
     </Pressable>
   )
 }

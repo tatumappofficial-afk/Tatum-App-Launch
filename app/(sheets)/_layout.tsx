@@ -2,12 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useRef } from 'react
 import { Stack } from 'expo-router/stack'
 import { Platform, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native'
 import { useRouter } from 'expo-router'
-import Animated, {
-  runOnJS,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated'
+import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import { colors } from '@/lib/theme'
 
@@ -72,13 +67,9 @@ function AndroidSheetChrome({ children }: { children: React.ReactNode }) {
   const dismissWithAnimation = useCallback(() => {
     if (dismissing.value) return
     dismissing.value = true
-    translateY.value = withTiming(
-      sheetHeight,
-      { duration: DISMISS_DURATION_MS },
-      (finished) => {
-        if (finished) runOnJS(callRouterDismiss)()
-      },
-    )
+    translateY.value = withTiming(sheetHeight, { duration: DISMISS_DURATION_MS }, (finished) => {
+      if (finished) runOnJS(callRouterDismiss)()
+    })
   }, [callRouterDismiss, dismissing, sheetHeight, translateY])
 
   // Manual activation lets us inspect dx vs dy directly and decide per-touch
@@ -138,13 +129,9 @@ function AndroidSheetChrome({ children }: { children: React.ReactNode }) {
       const shouldDismiss = !movingUp && delta > dismissDistance
       if (shouldDismiss) {
         dismissing.value = true
-        translateY.value = withTiming(
-          sheetHeight,
-          { duration: DISMISS_DURATION_MS },
-          (finished) => {
-            if (finished) runOnJS(callRouterDismiss)()
-          },
-        )
+        translateY.value = withTiming(sheetHeight, { duration: DISMISS_DURATION_MS }, (finished) => {
+          if (finished) runOnJS(callRouterDismiss)()
+        })
       } else {
         translateY.value = withTiming(0, { duration: SNAP_BACK_DURATION_MS })
       }
@@ -166,11 +153,7 @@ function AndroidSheetChrome({ children }: { children: React.ReactNode }) {
         <View style={{ flex: 1 }}>
           <AnimatedPressable
             onPress={dismissWithAnimation}
-            style={[
-              StyleSheet.absoluteFill,
-              { backgroundColor: 'rgba(30,18,12,1)' },
-              backdropStyle,
-            ]}
+            style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(30,18,12,1)' }, backdropStyle]}
           />
           <View style={{ flex: 1, justifyContent: 'flex-end' }} pointerEvents="box-none">
             <GestureDetector gesture={panGesture}>
@@ -221,10 +204,12 @@ export default function SheetsLayout() {
 
   return (
     <AndroidSheetChrome>
-      <Stack screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: 'transparent' },
-      }} />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: 'transparent' },
+        }}
+      />
     </AndroidSheetChrome>
   )
 }

@@ -12,7 +12,7 @@ export interface LoggedDay {
 }
 
 export interface CalendarGridProps {
-  month: number       // 0-11 (JS Date convention)
+  month: number // 0-11 (JS Date convention)
   year: number
   today?: number
   selectedDay?: number
@@ -105,24 +105,30 @@ const DayCell: React.FC<{
           style={[StyleSheet.absoluteFill, { borderRadius: 9999 }]}
         />
       )}
-      <Text style={{
-        fontFamily: font('dmSans', isToday ? '700' : isLoggedDay ? '500' : '400'),
-        fontSize,
-        lineHeight: fontSize * 1.2,
-        color: isToday ? colors.white : isLoggedDay ? colors.terra : colors.ink,
-      }}>
+      <Text
+        style={{
+          fontFamily: font('dmSans', isToday ? '700' : isLoggedDay ? '500' : '400'),
+          fontSize,
+          lineHeight: fontSize * 1.2,
+          color: isToday ? colors.white : isLoggedDay ? colors.terra : colors.ink,
+        }}
+      >
         {day}
       </Text>
       {isLoggedDay && (
         <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 1 }}>
           <Text style={{ fontSize: emojiFontSize }}>{logged!.emoji}</Text>
           {logged!.hasMultiple && (
-            <Text style={{
-              fontSize: plusFontSize,
-              fontWeight: '600',
-              color: isToday ? 'rgba(255,255,255,0.8)' : colors.mauve,
-              marginLeft: 1,
-            }}>+</Text>
+            <Text
+              style={{
+                fontSize: plusFontSize,
+                fontWeight: '600',
+                color: isToday ? 'rgba(255,255,255,0.8)' : colors.mauve,
+                marginLeft: 1,
+              }}
+            >
+              +
+            </Text>
           )}
         </View>
       )}
@@ -156,9 +162,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
 
   const cells: React.ReactNode[] = []
   for (let i = 0; i < firstDow; i++) {
-    cells.push(
-      <View key={`empty-${i}`} style={{ aspectRatio: 1 }} />
-    )
+    cells.push(<View key={`empty-${i}`} style={{ aspectRatio: 1 }} />)
   }
   for (let d = 1; d <= daysInMonth; d++) {
     const day = d
@@ -184,33 +188,37 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
           key={day}
           onDrop={(emoji) => onDayDrop(day, emoji)}
           dropDisabled={isFuture}
-          onActiveChange={(active) => { if (active && !isFuture) Haptics.selectionAsync() }}
+          onActiveChange={(active) => {
+            if (active && !isFuture) Haptics.selectionAsync()
+          }}
           activeStyle={isFuture ? undefined : { backgroundColor: 'rgba(192,120,88,0.22)', borderRadius: 9999 }}
           style={{ opacity: isDragging && isFuture ? 0.3 : 1 }}
         >
           {cell}
         </Droppable>
-      ) : cell
+      ) : (
+        cell
+      ),
     )
   }
 
   const selectedRowIndex =
-    mode === 'week' && selectedDay !== undefined
-      ? Math.floor((firstDow + selectedDay - 1) / 7)
-      : undefined
+    mode === 'week' && selectedDay !== undefined ? Math.floor((firstDow + selectedDay - 1) / 7) : undefined
 
   // Render as rows of 7 (flex-based grid)
   const headerRow = (
     <View style={{ flexDirection: 'row', marginBottom: compact ? 2 : 4 }}>
       {DAY_LABELS.map((label) => (
         <View key={label} style={{ flex: 1, alignItems: 'center', paddingVertical: 3 }}>
-          <Text style={{
-            fontFamily: font('dmSans', '500'),
-            fontSize: headerFontSize,
-            letterSpacing: compact ? 0.8 : 0.5,
-            color: colors.stone,
-            textTransform: 'uppercase',
-          }}>
+          <Text
+            style={{
+              fontFamily: font('dmSans', '500'),
+              fontSize: headerFontSize,
+              letterSpacing: compact ? 0.8 : 0.5,
+              color: colors.stone,
+              textTransform: 'uppercase',
+            }}
+          >
             {label}
           </Text>
         </View>
@@ -245,18 +253,18 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
         }}
       >
         {rowCells.map((cell, j) => (
-          <View key={j} style={{ flex: 1 }}>{cell}</View>
+          <View key={j} style={{ flex: 1 }}>
+            {cell}
+          </View>
         ))}
-      </View>
+      </View>,
     )
   }
 
   return (
     <View>
       {headerRow}
-      <View style={{ gap: compact ? 0 : 2 }}>
-        {rows}
-      </View>
+      <View style={{ gap: compact ? 0 : 2 }}>{rows}</View>
     </View>
   )
 }

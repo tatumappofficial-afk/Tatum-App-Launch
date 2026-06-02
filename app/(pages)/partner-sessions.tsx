@@ -15,22 +15,22 @@ export default function PartnerSessionsRoute() {
     q.from({ partners }).select(({ partners }) => ({ ...partners })),
   )
 
-  const partner = allPartners.find(p => p.id === id)
+  const partner = allPartners.find((p) => p.id === id)
 
   const entries: SessionsListEntry[] = useMemo(() => {
     if (!id) return []
-    const partnerById = new Map(allPartners.map(p => [p.id, p]))
+    const partnerById = new Map(allPartners.map((p) => [p.id, p]))
     return allEncounters
-      .filter(e => e.partnerIds.includes(id))
+      .filter((e) => e.partnerIds.includes(id))
       .slice()
       .sort((a, b) => b.date.localeCompare(a.date))
-      .map(enc => {
+      .map((enc) => {
         const sessionPartners = enc.partnerIds
-          .map(pid => partnerById.get(pid))
+          .map((pid) => partnerById.get(pid))
           .filter((p): p is NonNullable<typeof p> => Boolean(p))
         return {
           id: enc.id,
-          partners: sessionPartners.map(p => ({
+          partners: sessionPartners.map((p) => ({
             initials: p.avatarValue,
             gradient: p.avatarGradient,
           })),
@@ -48,9 +48,7 @@ export default function PartnerSessionsRoute() {
   }, [id, allEncounters, allPartners])
 
   const title = 'All sessions'
-  const subtitle = partner
-    ? `${entries.length} ${entries.length === 1 ? 'session' : 'sessions'} · all time`
-    : undefined
+  const subtitle = partner ? `${entries.length} ${entries.length === 1 ? 'session' : 'sessions'} · all time` : undefined
 
   return (
     <SessionsListScreen

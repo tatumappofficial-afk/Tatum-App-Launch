@@ -67,10 +67,7 @@ export default function WelcomeScreen() {
               elevation: 10,
             }}
           >
-            <Image
-              source={require('@/assets/icon.png')}
-              style={{ width: 96, height: 96 }}
-            />
+            <Image source={require('@/assets/icon.png')} style={{ width: 96, height: 96 }} />
           </View>
         </View>
 
@@ -114,7 +111,15 @@ export default function WelcomeScreen() {
           </Text>
         </View>
 
-        <View style={{ width: 40, height: 1, backgroundColor: 'rgba(192,120,88,0.3)', alignSelf: 'center', marginVertical: 16 }} />
+        <View
+          style={{
+            width: 40,
+            height: 1,
+            backgroundColor: 'rgba(192,120,88,0.3)',
+            alignSelf: 'center',
+            marginVertical: 16,
+          }}
+        />
 
         {/* Promise list */}
         <View style={{ flexDirection: 'column', gap: 14, marginBottom: 16 }}>
@@ -137,7 +142,9 @@ export default function WelcomeScreen() {
 
         {/* Signature */}
         <View style={{ alignItems: 'center', marginBottom: 28 }}>
-          <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: colors.stone, marginBottom: 3 }}>with love,</Text>
+          <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: colors.stone, marginBottom: 3 }}>
+            with love,
+          </Text>
           <Text
             style={{
               fontFamily: font('playfair', '600'),
@@ -153,10 +160,7 @@ export default function WelcomeScreen() {
 
       <View style={{ flexShrink: 0, paddingHorizontal: 28, paddingBottom: Math.max(insets.bottom + 8, 32) }}>
         <View style={{ marginBottom: 14 }}>
-          <GradientButton
-            label="I Understand, Let's Begin"
-            onPress={() => router.push('/(onboarding)/protect')}
-          />
+          <GradientButton label="I Understand, Let's Begin" onPress={() => router.push('/(onboarding)/protect')} />
         </View>
         <StepDots current={0} />
       </View>

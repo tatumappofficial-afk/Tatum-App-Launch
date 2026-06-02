@@ -51,65 +51,93 @@ export const PartnerCard: React.FC<PartnerCardProps> = ({
       />
 
       {name && (
-        <Text style={{
-          fontSize: 14,
-          color: colors.ink,
-          fontFamily: font('dmSans', '500'),
-        }}>{name}</Text>
+        <Text
+          style={{
+            fontSize: 14,
+            color: colors.ink,
+            fontFamily: font('dmSans', '500'),
+          }}
+        >
+          {name}
+        </Text>
       )}
 
       {hasStats && (
         <View style={{ flexDirection: 'row', gap: 8, width: '100%' }}>
           <View style={{ flex: 1, alignItems: 'center' }}>
-            <Text style={{
-              fontFamily: font('playfair', '600'),
-              fontSize: 17,
-              color: colors.terra,
-              lineHeight: 17,
-            }}>{sessions}</Text>
-            <Text style={{
-              fontSize: 12,
-              letterSpacing: 0.5,
-              textTransform: 'uppercase',
-              color: colors.stone,
-              marginTop: 2,
-              fontFamily: fontFamily.dmSans,
-            }}>Sessions</Text>
+            <Text
+              style={{
+                fontFamily: font('playfair', '600'),
+                fontSize: 17,
+                color: colors.terra,
+                lineHeight: 17,
+              }}
+            >
+              {sessions}
+            </Text>
+            <Text
+              style={{
+                fontSize: 12,
+                letterSpacing: 0.5,
+                textTransform: 'uppercase',
+                color: colors.stone,
+                marginTop: 2,
+                fontFamily: fontFamily.dmSans,
+              }}
+            >
+              Sessions
+            </Text>
           </View>
           <View style={{ flex: 1, alignItems: 'center' }}>
-            <Text style={{
-              fontFamily: font('playfair', '600'),
-              fontSize: 17,
-              color: colors.terra,
-              lineHeight: 17,
-            }}>{avgSatisfaction!.toFixed(1)}</Text>
-            <Text style={{
-              fontSize: 12,
-              letterSpacing: 0.5,
-              textTransform: 'uppercase',
-              color: colors.stone,
-              marginTop: 2,
-              fontFamily: fontFamily.dmSans,
-            }}>Avg Sat.</Text>
+            <Text
+              style={{
+                fontFamily: font('playfair', '600'),
+                fontSize: 17,
+                color: colors.terra,
+                lineHeight: 17,
+              }}
+            >
+              {avgSatisfaction!.toFixed(1)}
+            </Text>
+            <Text
+              style={{
+                fontSize: 12,
+                letterSpacing: 0.5,
+                textTransform: 'uppercase',
+                color: colors.stone,
+                marginTop: 2,
+                fontFamily: fontFamily.dmSans,
+              }}
+            >
+              Avg Sat.
+            </Text>
           </View>
         </View>
       )}
 
       {topActivityEmoji && (
-        <Text style={{
-          fontSize: 12,
-          color: colors.muted,
-          fontFamily: font('dmSans', '300'),
-        }}>{topActivityEmoji} Most common</Text>
+        <Text
+          style={{
+            fontSize: 12,
+            color: colors.muted,
+            fontFamily: font('dmSans', '300'),
+          }}
+        >
+          {topActivityEmoji} Most common
+        </Text>
       )}
 
       {emptyText && (
-        <Text style={{
-          fontSize: 12,
-          color: '#C4B0A0',
-          fontStyle: 'italic',
-          fontFamily: font('dmSans', '300'),
-        }}>{emptyText}</Text>
+        <Text
+          style={{
+            fontSize: 12,
+            color: '#C4B0A0',
+            fontStyle: 'italic',
+            fontFamily: font('dmSans', '300'),
+          }}
+        >
+          {emptyText}
+        </Text>
       )}
     </Pressable>
   )

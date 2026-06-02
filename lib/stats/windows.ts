@@ -21,7 +21,9 @@ export interface DateWindow {
   endStr: string
 }
 
-export interface EncounterDate { date: string }
+export interface EncounterDate {
+  date: string
+}
 
 // ── String / Date helpers ──
 
@@ -58,7 +60,7 @@ function makeWindow(start: Date, end: Date): DateWindow {
 export function getWeekWindow(anchor: Date, calendarStartDay: CalendarStartDay): DateWindow {
   const start = startOfDay(anchor)
   const dow = start.getDay() // 0=Sun .. 6=Sat
-  const offset = calendarStartDay === 'sunday' ? dow : (dow === 0 ? 6 : dow - 1)
+  const offset = calendarStartDay === 'sunday' ? dow : dow === 0 ? 6 : dow - 1
   start.setDate(start.getDate() - offset)
   return makeWindow(start, addDays(start, 7))
 }
@@ -97,10 +99,14 @@ export interface GetWindowOptions {
 export function getWindow(period: Period, anchor: Date, options: GetWindowOptions): DateWindow | null {
   const now = options.now ?? new Date()
   switch (period) {
-    case 'week': return getWeekWindow(anchor, options.calendarStartDay)
-    case 'month': return getMonthWindow(anchor)
-    case 'year': return getYearWindow(anchor, now)
-    case 'all': return getAllTimeWindow(options.encounters ?? [], now)
+    case 'week':
+      return getWeekWindow(anchor, options.calendarStartDay)
+    case 'month':
+      return getMonthWindow(anchor)
+    case 'year':
+      return getYearWindow(anchor, now)
+    case 'all':
+      return getAllTimeWindow(options.encounters ?? [], now)
   }
 }
 
@@ -120,8 +126,10 @@ export function canStepForward(
     return anchorWeek.startStr < nowWeek.startStr
   }
   if (period === 'month') {
-    return anchor.getFullYear() < now.getFullYear() ||
+    return (
+      anchor.getFullYear() < now.getFullYear() ||
       (anchor.getFullYear() === now.getFullYear() && anchor.getMonth() < now.getMonth())
+    )
   }
   return anchor.getFullYear() < now.getFullYear()
 }
@@ -136,14 +144,21 @@ export function firstEncounterYear(encounters: EncounterDate[], now: Date = new 
 // ── Captions ──
 
 const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ]
 
-const MONTH_SHORT = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-]
+const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 export interface CaptionOptions {
   calendarStartDay?: CalendarStartDay

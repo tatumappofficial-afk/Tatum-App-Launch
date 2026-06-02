@@ -7,13 +7,15 @@ import { RadialGlow } from './shared/DecorativeGlow'
 const GLOW_SIZE = 280
 
 export const LaunchScreen: React.FC = () => (
-  <View style={{
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-    backgroundColor: colors.warmSand,
-  }}>
+  <View
+    style={{
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      overflow: 'hidden',
+      backgroundColor: colors.warmSand,
+    }}
+  >
     {/* Ambient glow behind icon */}
     <View
       pointerEvents="none"
@@ -31,30 +33,36 @@ export const LaunchScreen: React.FC = () => (
     </View>
 
     {/* App icon */}
-    <View style={{
-      width: 100,
-      height: 100,
-      borderRadius: 24,
-      alignItems: 'center',
-      justifyContent: 'center',
-      overflow: 'hidden',
-      shadowColor: '#7C4A5A',
-      shadowOffset: { width: 0, height: 12 },
-      shadowOpacity: 0.3,
-      shadowRadius: 36,
-      elevation: 12,
-    }}>
+    <View
+      style={{
+        width: 100,
+        height: 100,
+        borderRadius: 24,
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+        shadowColor: '#7C4A5A',
+        shadowOffset: { width: 0, height: 12 },
+        shadowOpacity: 0.3,
+        shadowRadius: 36,
+        elevation: 12,
+      }}
+    >
       <LinearGradient
         colors={gradients.primaryCta}
         start={gradientPoints.diagonal.start}
         end={gradientPoints.diagonal.end}
         style={[StyleSheet.absoluteFill, { borderRadius: 24 }]}
       />
-      <Text style={{
-        fontSize: 24,
-        color: colors.white,
-        lineHeight: 24,
-      }}>&#10022;</Text>
+      <Text
+        style={{
+          fontSize: 24,
+          color: colors.white,
+          lineHeight: 24,
+        }}
+      >
+        &#10022;
+      </Text>
     </View>
   </View>
 )

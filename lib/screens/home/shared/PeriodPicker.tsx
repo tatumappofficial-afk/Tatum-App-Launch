@@ -38,14 +38,7 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = (props) => {
 
 // ── Per-period pickers ──
 
-const WeekPicker: React.FC<PeriodPickerProps> = ({
-  anchor,
-  minYear,
-  maxYear,
-  now,
-  encounters,
-  onAnchorChange,
-}) => {
+const WeekPicker: React.FC<PeriodPickerProps> = ({ anchor, minYear, maxYear, now, encounters, onAnchorChange }) => {
   const [view, setView] = React.useState({
     month: anchor.getMonth(),
     year: anchor.getFullYear(),
@@ -58,11 +51,17 @@ const WeekPicker: React.FC<PeriodPickerProps> = ({
 
   const stepMonth = React.useCallback(
     (delta: number) => {
-      setView(prev => {
+      setView((prev) => {
         let m = prev.month + delta
         let y = prev.year
-        while (m < 0) { m += 12; y -= 1 }
-        while (m > 11) { m -= 12; y += 1 }
+        while (m < 0) {
+          m += 12
+          y -= 1
+        }
+        while (m > 11) {
+          m -= 12
+          y += 1
+        }
         if (y < minYear) return prev
         if (y > maxYear) return prev
         if (y === maxYear && m > now.getMonth()) return prev
@@ -91,13 +90,7 @@ const WeekPicker: React.FC<PeriodPickerProps> = ({
   )
 }
 
-const MonthPicker: React.FC<PeriodPickerProps> = ({
-  anchor,
-  minYear,
-  maxYear,
-  now,
-  onAnchorChange,
-}) => (
+const MonthPicker: React.FC<PeriodPickerProps> = ({ anchor, minYear, maxYear, now, onAnchorChange }) => (
   <MonthYearDropdown
     year={anchor.getFullYear()}
     selectedMonth={anchor.getMonth()}
@@ -108,21 +101,14 @@ const MonthPicker: React.FC<PeriodPickerProps> = ({
       const nextYear = anchor.getFullYear() + delta
       if (nextYear < minYear || nextYear > maxYear) return
       const cappedMonth =
-        nextYear === maxYear && anchor.getMonth() > now.getMonth()
-          ? now.getMonth()
-          : anchor.getMonth()
+        nextYear === maxYear && anchor.getMonth() > now.getMonth() ? now.getMonth() : anchor.getMonth()
       onAnchorChange(new Date(nextYear, cappedMonth, 1))
     }}
     onSelect={(month, year) => onAnchorChange(new Date(year, month, 1))}
   />
 )
 
-const YearPicker: React.FC<PeriodPickerProps> = ({
-  anchor,
-  minYear,
-  maxYear,
-  onAnchorChange,
-}) => (
+const YearPicker: React.FC<PeriodPickerProps> = ({ anchor, minYear, maxYear, onAnchorChange }) => (
   <YearDropdown
     selectedYear={anchor.getFullYear()}
     minYear={minYear}

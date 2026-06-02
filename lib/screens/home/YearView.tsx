@@ -48,12 +48,7 @@ export const YearView: React.FC<YearViewProps> = ({
 }) => {
   if (stats.sessionsCount === 0) {
     return (
-      <EmptyPeriod
-        period="year"
-        scenario={emptyScenario}
-        onLookBack={onLookBack}
-        onJumpToNearest={onJumpToNearest}
-      />
+      <EmptyPeriod period="year" scenario={emptyScenario} onLookBack={onLookBack} onJumpToNearest={onJumpToNearest} />
     )
   }
 
@@ -107,28 +102,15 @@ export const YearView: React.FC<YearViewProps> = ({
 
       {stats.recentSessions.length > 0 && (
         <>
-          <SectionLabel
-            label="Sessions"
-            showChevron
-            style={INLINE_LABEL}
-            onPress={onSessionsHeaderPress}
-          />
-          <RecentSessionsScroller
-            sessions={stats.recentSessions}
-            partners={partners}
-            onPress={onSessionPress}
-          />
+          <SectionLabel label="Sessions" showChevron style={INLINE_LABEL} onPress={onSessionsHeaderPress} />
+          <RecentSessionsScroller sessions={stats.recentSessions} partners={partners} onPress={onSessionPress} />
         </>
       )}
 
       {stats.standoutSessions.length > 0 && (
         <>
           <SectionLabel label="What stood out" style={INLINE_LABEL} />
-          <StandoutSessions
-            sessions={stats.standoutSessions}
-            partners={stats.partners}
-            onPress={onSessionPress}
-          />
+          <StandoutSessions sessions={stats.standoutSessions} partners={stats.partners} onPress={onSessionPress} />
         </>
       )}
 
@@ -143,29 +125,35 @@ export const YearView: React.FC<YearViewProps> = ({
 }
 
 const DesireActionCard: React.FC<{ data: DesireToAction }> = ({ data }) => (
-  <View style={{
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 14,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-  }}>
-    <Text style={{
-      fontFamily: font('playfair', '600'),
-      fontSize: 18,
-      color: colors.terra,
-      lineHeight: 22,
-    }}>
+  <View
+    style={{
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 14,
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+    }}
+  >
+    <Text
+      style={{
+        fontFamily: font('playfair', '600'),
+        fontSize: 18,
+        color: colors.terra,
+        lineHeight: 22,
+      }}
+    >
       {data.acted} of {data.logged}
     </Text>
-    <Text style={{
-      fontSize: 14,
-      color: colors.stone,
-      lineHeight: 16,
-      marginTop: 4,
-      fontFamily: font('dmSans', '300'),
-    }}>
+    <Text
+      style={{
+        fontSize: 14,
+        color: colors.stone,
+        lineHeight: 16,
+        marginTop: 4,
+        fontFamily: font('dmSans', '300'),
+      }}
+    >
       {data.acted === 1 ? 'desire' : 'desires'} you logged in Safe Space showed up in your encounters this year.
     </Text>
   </View>

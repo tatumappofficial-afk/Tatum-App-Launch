@@ -11,7 +11,7 @@ import Svg, { Line } from 'react-native-svg'
 import { generateId } from '@/src/utils/uuid'
 import { deriveInitials } from '@/src/utils/initials'
 import { LinearGradient } from 'expo-linear-gradient'
-import { colors, font, fontFamily, gradientPoints, partnerGradients } from '@/lib/theme'
+import { colors, font, gradientPoints, partnerGradients } from '@/lib/theme'
 import { GradientButton } from '@/lib/components/GradientButton'
 import { SuccessOverlay } from '@/lib/components/SuccessOverlay'
 import { AvatarCircle } from '@/lib/components/AvatarCircle'
@@ -24,29 +24,25 @@ export default function EditPartnerSheet() {
   const dismissSheet = useSheetDismiss()
   const { id, from } = useLocalSearchParams<{ id?: string; from?: string }>()
   const { data: allPartners = [] } = useLiveQuery((q) =>
-    q.from({ partners }).select(({ partners }) => ({ ...partners }))
+    q.from({ partners }).select(({ partners }) => ({ ...partners })),
   )
   const { data: allEncounters = [] } = useLiveQuery((q) =>
-    q.from({ encounters }).select(({ encounters }) => ({ ...encounters }))
+    q.from({ encounters }).select(({ encounters }) => ({ ...encounters })),
   )
 
-  const existing = id ? allPartners.find(p => p.id === id) : undefined
+  const existing = id ? allPartners.find((p) => p.id === id) : undefined
   const isEdit = Boolean(existing)
-  const partnerEncounters = id ? allEncounters.filter(e => e.partnerIds.includes(id)) : []
+  const partnerEncounters = id ? allEncounters.filter((e) => e.partnerIds.includes(id)) : []
 
   const [displayName, setDisplayName] = useState(existing?.displayName ?? '')
-  const [initials, setInitials] = useState(
-    existing?.avatarValue ?? deriveInitials(existing?.displayName ?? '')
-  )
+  const [initials, setInitials] = useState(existing?.avatarValue ?? deriveInitials(existing?.displayName ?? ''))
   // If the saved initials don't match what we'd derive from the name, treat as
   // user-customized so we don't clobber them when the name is edited.
   const [manuallyEdited, setManuallyEdited] = useState(() =>
     existing ? existing.avatarValue !== deriveInitials(existing.displayName) : false,
   )
-  const [selectedGradient, setSelectedGradient] = useState(
-    existing?.avatarGradient || partnerGradients[0].gradient,
-  )
-  const currentMain = allPartners.find(p => p.isMain && p.id !== existing?.id)
+  const [selectedGradient, setSelectedGradient] = useState(existing?.avatarGradient || partnerGradients[0].gradient)
+  const currentMain = allPartners.find((p) => p.isMain && p.id !== existing?.id)
   // Default the new-partner toggle to ON when no current main exists.
   const [isMain, setIsMain] = useState(existing?.isMain ?? !currentMain)
   // Hide the toggle when this is the first partner ever — they'll be main regardless.
@@ -74,9 +70,12 @@ export default function EditPartnerSheet() {
   }
 
   const dismissTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  useEffect(() => () => {
-    if (dismissTimer.current) clearTimeout(dismissTimer.current)
-  }, [])
+  useEffect(
+    () => () => {
+      if (dismissTimer.current) clearTimeout(dismissTimer.current)
+    },
+    [],
+  )
 
   function handleBack() {
     dismissSheet()
@@ -113,10 +112,8 @@ export default function EditPartnerSheet() {
     const finalInitials = initials.trim() || deriveInitials(name)
     const now = new Date().toISOString()
 
-    const collision = allPartners.find(p =>
-      p.id !== existing?.id &&
-      p.avatarValue === finalInitials &&
-      p.avatarGradient === selectedGradient
+    const collision = allPartners.find(
+      (p) => p.id !== existing?.id && p.avatarValue === finalInitials && p.avatarGradient === selectedGradient,
     )
     if (collision) {
       Alert.alert(
@@ -168,8 +165,8 @@ export default function EditPartnerSheet() {
     if (!existing) return
     // Split affected sessions: those where this partner is the sole entry
     // get deleted entirely; those with multiple partners just lose this id.
-    const soleEncounters = partnerEncounters.filter(e => e.partnerIds.length === 1)
-    const sharedEncounters = partnerEncounters.filter(e => e.partnerIds.length > 1)
+    const soleEncounters = partnerEncounters.filter((e) => e.partnerIds.length === 1)
+    const sharedEncounters = partnerEncounters.filter((e) => e.partnerIds.length > 1)
     Alert.alert(
       'Delete Partner',
       `Are you sure you want to delete ${existing.displayName}? This will delete everything you've logged with them.`,
@@ -185,7 +182,7 @@ export default function EditPartnerSheet() {
               }
               for (const enc of sharedEncounters) {
                 encounters.update(enc.id, (draft) => {
-                  draft.partnerIds = draft.partnerIds.filter(pid => pid !== existing.id)
+                  draft.partnerIds = draft.partnerIds.filter((pid) => pid !== existing.id)
                   draft.updatedAt = new Date().toISOString()
                 })
               }
@@ -246,32 +243,50 @@ export default function EditPartnerSheet() {
         bounces={false}
       >
         {/* Header — scrolls with content */}
-        <View style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingTop: 12,
-          marginBottom: 18,
-        }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingTop: 12,
+            marginBottom: 18,
+          }}
+        >
           <View style={{ width: 30 }} />
-          <Text style={{
-            flex: 1,
-            textAlign: 'center',
-            fontFamily: font('playfair', '700'),
-            fontSize: 20,
-            color: colors.ink,
-          }}>{isEdit ? 'Edit Partner' : 'New Partner'}</Text>
+          <Text
+            style={{
+              flex: 1,
+              textAlign: 'center',
+              fontFamily: font('playfair', '700'),
+              fontSize: 20,
+              color: colors.ink,
+            }}
+          >
+            {isEdit ? 'Edit Partner' : 'New Partner'}
+          </Text>
           <Pressable
             onPress={dismissSheet}
             accessibilityRole="button"
             accessibilityLabel="Close"
             hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
             style={{
-              width: 30, height: 30, borderRadius: 15,
+              width: 30,
+              height: 30,
+              borderRadius: 15,
               backgroundColor: colors.surface2,
-              alignItems: 'center', justifyContent: 'center',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
-            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.stone} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+            <Svg
+              width={16}
+              height={16}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke={colors.stone}
+              strokeWidth={2.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <Line x1={18} y1={6} x2={6} y2={18} />
               <Line x1={6} y1={6} x2={18} y2={18} />
             </Svg>
@@ -289,19 +304,22 @@ export default function EditPartnerSheet() {
               {...scrollProps}
             >
               {allPartners.map((p) => (
-                <View key={p.id} style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 8,
-                  flexShrink: 0,
-                  backgroundColor: colors.surface2,
-                  borderRadius: 9999,
-                  paddingVertical: 4,
-                  paddingRight: 12,
-                  paddingLeft: 4,
-                  borderWidth: 1,
-                  borderColor: 'rgba(160,100,80,0.18)',
-                }}>
+                <View
+                  key={p.id}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 8,
+                    flexShrink: 0,
+                    backgroundColor: colors.surface2,
+                    borderRadius: 9999,
+                    paddingVertical: 4,
+                    paddingRight: 12,
+                    paddingLeft: 4,
+                    borderWidth: 1,
+                    borderColor: 'rgba(160,100,80,0.18)',
+                  }}
+                >
                   <AvatarCircle
                     initials={p.avatarValue}
                     gradient={p.avatarGradient}
@@ -309,11 +327,15 @@ export default function EditPartnerSheet() {
                     borderWidth={1.5}
                     showShadow={false}
                   />
-                  <Text style={{
-                    fontFamily: font('dmSans', '400'),
-                    fontSize: 14,
-                    color: colors.ink,
-                  }}>{p.displayName}</Text>
+                  <Text
+                    style={{
+                      fontFamily: font('dmSans', '400'),
+                      fontSize: 14,
+                      color: colors.ink,
+                    }}
+                  >
+                    {p.displayName}
+                  </Text>
                 </View>
               ))}
             </ScrollView>
@@ -347,18 +369,15 @@ export default function EditPartnerSheet() {
 
         {/* Initials with live preview */}
         <Text style={sectionLabelStyle}>Initials</Text>
-        <View style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 12,
-          marginBottom: 20,
-        }}>
-          <AvatarCircle
-            initials={initials}
-            gradient={selectedGradient}
-            size={56}
-            borderWidth={2.5}
-          />
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 12,
+            marginBottom: 20,
+          }}
+        >
+          <AvatarCircle initials={initials} gradient={selectedGradient} size={56} borderWidth={2.5} />
           <TextInput
             value={initials}
             onChangeText={handleInitialsChange}
@@ -387,14 +406,16 @@ export default function EditPartnerSheet() {
         {/* Avatar Color */}
         <Text style={sectionLabelStyle}>Avatar Color</Text>
 
-        <View style={{
-          flexDirection: 'row',
-          flexWrap: 'wrap',
-          columnGap: 14,
-          rowGap: 12,
-          marginBottom: 8,
-        }}>
-          {partnerGradients.map(opt => {
+        <View
+          style={{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            columnGap: 14,
+            rowGap: 12,
+            marginBottom: 8,
+          }}
+        >
+          {partnerGradients.map((opt) => {
             const isSelected = selectedGradient === opt.gradient
             return (
               <Pressable
@@ -420,9 +441,7 @@ export default function EditPartnerSheet() {
                   end={gradientPoints.diagonal.end}
                   style={[StyleSheet.absoluteFill, { borderRadius: 26 }]}
                 />
-                {isSelected && (
-                  <Text style={{ color: colors.white, fontSize: 18 }}>{'✓'}</Text>
-                )}
+                {isSelected && <Text style={{ color: colors.white, fontSize: 18 }}>{'✓'}</Text>}
               </Pressable>
             )
           })}
@@ -430,30 +449,40 @@ export default function EditPartnerSheet() {
 
         {/* Main partner toggle — hidden when there are no other partners */}
         {!hideToggle && (
-          <View style={{
-            marginTop: 22,
-            backgroundColor: colors.surface,
-            borderRadius: 14,
-            borderWidth: 1.5,
-            borderColor: colors.border,
-            paddingVertical: 14,
-            paddingHorizontal: 14,
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 12,
-          }}>
+          <View
+            style={{
+              marginTop: 22,
+              backgroundColor: colors.surface,
+              borderRadius: 14,
+              borderWidth: 1.5,
+              borderColor: colors.border,
+              paddingVertical: 14,
+              paddingHorizontal: 14,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 12,
+            }}
+          >
             <View style={{ flex: 1 }}>
-              <Text style={{
-                fontFamily: font('dmSans', '500'),
-                fontSize: 15,
-                color: colors.ink,
-              }}>Set as main partner</Text>
-              <Text style={{
-                fontSize: 12,
-                fontWeight: '300',
-                color: colors.stone,
-                marginTop: 2,
-              }}>Quick-log will default to this partner</Text>
+              <Text
+                style={{
+                  fontFamily: font('dmSans', '500'),
+                  fontSize: 15,
+                  color: colors.ink,
+                }}
+              >
+                Set as main partner
+              </Text>
+              <Text
+                style={{
+                  fontSize: 12,
+                  fontWeight: '300',
+                  color: colors.stone,
+                  marginTop: 2,
+                }}
+              >
+                Quick-log will default to this partner
+              </Text>
             </View>
             <ToggleSwitch enabled={isMain} onToggle={handleToggleMain} />
           </View>
@@ -461,15 +490,17 @@ export default function EditPartnerSheet() {
       </KeyboardAwareScrollView>
 
       {!keyboardVisible && (
-        <View style={{
-          flexShrink: 0,
-          paddingTop: 10,
-          paddingHorizontal: 20,
-          paddingBottom: Math.max(insets.bottom, 10) + (Platform.OS === 'android' ? 12 : 0),
-          borderTopWidth: 1,
-          borderTopColor: 'rgba(160,100,80,0.1)',
-          backgroundColor: colors.warmSand,
-        }}>
+        <View
+          style={{
+            flexShrink: 0,
+            paddingTop: 10,
+            paddingHorizontal: 20,
+            paddingBottom: Math.max(insets.bottom, 10) + (Platform.OS === 'android' ? 12 : 0),
+            borderTopWidth: 1,
+            borderTopColor: 'rgba(160,100,80,0.1)',
+            backgroundColor: colors.warmSand,
+          }}
+        >
           <GradientButton
             label={isEdit ? 'Save Changes' : 'Save Partner'}
             onPress={handleSave}
@@ -484,12 +515,16 @@ export default function EditPartnerSheet() {
                 paddingTop: 14,
               }}
             >
-              <Text style={{
-                fontSize: 14,
-                fontFamily: font('dmSans', '500'),
-                color: '#B04040',
-                letterSpacing: 0.3,
-              }}>Delete Partner</Text>
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontFamily: font('dmSans', '500'),
+                  color: '#B04040',
+                  letterSpacing: 0.3,
+                }}
+              >
+                Delete Partner
+              </Text>
             </Pressable>
           )}
         </View>

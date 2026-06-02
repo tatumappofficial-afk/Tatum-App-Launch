@@ -49,11 +49,7 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
         overflow: 'hidden',
         borderWidth: isPrimary ? 0 : 1.5,
         borderColor: isPrimary ? undefined : colors.terra,
-        backgroundColor: isPrimary
-          ? undefined
-          : pressed && !disabled
-            ? 'rgba(160,100,80,0.08)'
-            : 'transparent',
+        backgroundColor: isPrimary ? undefined : pressed && !disabled ? 'rgba(160,100,80,0.08)' : 'transparent',
         opacity: disabled ? 0.4 : pressed ? 0.8 : 1,
         ...(isPrimary && !disabled ? shadows.primaryButtonStrong : null),
       })}
@@ -66,22 +62,26 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
           style={[StyleSheet.absoluteFill, { borderRadius: 9999 }]}
         />
       )}
-      <View style={{
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: icon ? 7 : 0,
-        paddingHorizontal: fullWidth ? undefined : height * 0.54,
-      }}>
+      <View
+        style={{
+          flex: 1,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: icon ? 7 : 0,
+          paddingHorizontal: fullWidth ? undefined : height * 0.54,
+        }}
+      >
         {icon}
-        <Text style={{
-          fontFamily: font('dmSans', '500'),
-          fontSize,
-          letterSpacing,
-          textTransform: 'uppercase',
-          color: isPrimary ? colors.white : colors.terra,
-        }}>
+        <Text
+          style={{
+            fontFamily: font('dmSans', '500'),
+            fontSize,
+            letterSpacing,
+            textTransform: 'uppercase',
+            color: isPrimary ? colors.white : colors.terra,
+          }}
+        >
           {label}
         </Text>
       </View>

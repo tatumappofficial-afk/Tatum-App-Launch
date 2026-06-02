@@ -1,24 +1,28 @@
 import React, { useEffect } from 'react'
-import { Image, StyleSheet, View, Text } from 'react-native'
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated'
+import { StyleSheet, View, Text } from 'react-native'
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Rect, Line, Path, Polyline } from 'react-native-svg'
 import { useRouter } from 'expo-router'
 import { useBlockBack } from '@/src/hooks/useBlockBack'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { colors, font, gradientPoints, gradients } from '@/lib/theme'
+import { colors, font, gradientPoints } from '@/lib/theme'
 import { GradientButton } from '@/lib/components/GradientButton'
 import { RadialGlow } from '@/lib/screens/shared/DecorativeGlow'
 import { StatusBarSpacer } from '@/lib/screens/shared/StatusBarSpacer'
 import { useUpdateSettings } from '@/src/hooks/useSettings'
 
 const CalendarIcon: React.FC = () => (
-  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+  <Svg
+    width={20}
+    height={20}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={colors.terra}
+    strokeWidth={1.5}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <Rect x={3} y={4} width={18} height={18} rx={2} ry={2} />
     <Line x1={16} y1={2} x2={16} y2={6} />
     <Line x1={8} y1={2} x2={8} y2={6} />
@@ -27,14 +31,32 @@ const CalendarIcon: React.FC = () => (
 )
 
 const HomeIcon: React.FC = () => (
-  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+  <Svg
+    width={20}
+    height={20}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={colors.terra}
+    strokeWidth={1.5}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <Path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
     <Polyline points="9 22 9 12 15 12 15 22" />
   </Svg>
 )
 
 const BookIcon: React.FC = () => (
-  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+  <Svg
+    width={20}
+    height={20}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={colors.terra}
+    strokeWidth={1.5}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <Path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
     <Path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
   </Svg>
@@ -55,7 +77,9 @@ const FeaturePill: React.FC<{ icon: React.ReactNode; text: React.ReactNode }> = 
     }}
   >
     <View style={{ alignItems: 'center', justifyContent: 'center' }}>{icon}</View>
-    <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: '#6A4A40', lineHeight: 17.5, flex: 1 }}>{text}</Text>
+    <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: '#6A4A40', lineHeight: 17.5, flex: 1 }}>
+      {text}
+    </Text>
   </View>
 )
 
@@ -94,7 +118,10 @@ export default function ReadyScreen() {
         style={StyleSheet.absoluteFill}
       />
 
-      <View pointerEvents="none" style={{ position: 'absolute', top: '42%', alignSelf: 'center', width: 400, height: 400 }}>
+      <View
+        pointerEvents="none"
+        style={{ position: 'absolute', top: '42%', alignSelf: 'center', width: 400, height: 400 }}
+      >
         <RadialGlow size={400} color="rgb(192,120,88)" opacity={0.18} falloff={65} />
       </View>
 
@@ -139,7 +166,6 @@ export default function ReadyScreen() {
           source={require('@/assets/tatum-logo.png')}
           style={[{ width: 160, height: 160, marginBottom: 28 }, logoStyle]}
         />
-
 
         <Text
           style={{

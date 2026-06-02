@@ -9,7 +9,12 @@ import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { DropProvider } from 'react-native-reanimated-dnd'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
-import { PlayfairDisplay_400Regular, PlayfairDisplay_400Regular_Italic, PlayfairDisplay_600SemiBold, PlayfairDisplay_700Bold } from '@expo-google-fonts/playfair-display'
+import {
+  PlayfairDisplay_400Regular,
+  PlayfairDisplay_400Regular_Italic,
+  PlayfairDisplay_600SemiBold,
+  PlayfairDisplay_700Bold,
+} from '@expo-google-fonts/playfair-display'
 import { DMSans_300Light, DMSans_400Regular, DMSans_500Medium } from '@expo-google-fonts/dm-sans'
 import { initDatabase } from '@/src/db'
 import { SettingsProvider, useSettings, useSettingsReady } from '@/src/hooks/useSettings'
@@ -29,13 +34,13 @@ export default function RootLayout() {
     async function init() {
       try {
         await Font.loadAsync({
-          'PlayfairDisplay_400Regular': PlayfairDisplay_400Regular,
-          'PlayfairDisplay_400Regular_Italic': PlayfairDisplay_400Regular_Italic,
-          'PlayfairDisplay_600SemiBold': PlayfairDisplay_600SemiBold,
-          'PlayfairDisplay_700Bold': PlayfairDisplay_700Bold,
-          'DMSans_300Light': DMSans_300Light,
-          'DMSans_400Regular': DMSans_400Regular,
-          'DMSans_500Medium': DMSans_500Medium,
+          PlayfairDisplay_400Regular: PlayfairDisplay_400Regular,
+          PlayfairDisplay_400Regular_Italic: PlayfairDisplay_400Regular_Italic,
+          PlayfairDisplay_600SemiBold: PlayfairDisplay_600SemiBold,
+          PlayfairDisplay_700Bold: PlayfairDisplay_700Bold,
+          DMSans_300Light: DMSans_300Light,
+          DMSans_400Regular: DMSans_400Regular,
+          DMSans_500Medium: DMSans_500Medium,
         })
         await initDatabase()
       } catch (e) {
@@ -80,11 +85,13 @@ function AuthedTree() {
   return (
     <View style={{ flex: 1, backgroundColor: '#F5EFE8' }} onLayout={onLayoutRootView}>
       <LockGate initialLocked={biometricLock}>
-        <Stack screenOptions={{
-          headerShown: false,
-          // Pin to the splash color so a routed screen mid-mount can't flash black on Android.
-          contentStyle: { backgroundColor: '#F5EFE8' },
-        }}>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            // Pin to the splash color so a routed screen mid-mount can't flash black on Android.
+            contentStyle: { backgroundColor: '#F5EFE8' },
+          }}
+        >
           <Stack.Protected guard={!hasOnboarded}>
             <Stack.Screen name="(onboarding)" />
           </Stack.Protected>

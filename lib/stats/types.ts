@@ -1,4 +1,4 @@
-import type { DesireEntry, Encounter, Partner } from '@/src/db/schema'
+import type { Encounter, Partner } from '@/src/db/schema'
 import type { ActivityCount, MostEnjoyedActivity, PartnerLifetimeStats } from './shared'
 
 export interface WeekStats {

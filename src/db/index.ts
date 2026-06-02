@@ -1,10 +1,18 @@
 import { getDatabase } from './sqlite'
-import { initCollections, activityTags, encounters, partners, desireEntries, whisperMessages, affirmations, userProfiles } from './collections'
+import { initCollections } from './collections'
 import { DEFAULT_ACTIVITY_TAGS } from './schema'
 import { generateId as uuid } from '@/src/utils/uuid'
 import { deriveInitials } from '@/src/utils/initials'
 
-export { activityTags, encounters, partners, desireEntries, whisperMessages, affirmations, userProfiles } from './collections'
+export {
+  activityTags,
+  encounters,
+  partners,
+  desireEntries,
+  whisperMessages,
+  affirmations,
+  userProfiles,
+} from './collections'
 export * from './schema'
 
 let initialized = false
@@ -74,10 +82,10 @@ export async function initDatabase() {
       'SELECT id FROM partners WHERE isActive = 1 ORDER BY createdAt ASC LIMIT 1',
     )
     if (oldest.length > 0) {
-      await db.runAsync(
-        'UPDATE partners SET isMain = 1, updatedAt = ? WHERE id = ?',
-        [new Date().toISOString(), oldest[0].id],
-      )
+      await db.runAsync('UPDATE partners SET isMain = 1, updatedAt = ? WHERE id = ?', [
+        new Date().toISOString(),
+        oldest[0].id,
+      ])
     }
   }
 
@@ -92,10 +100,11 @@ export async function initDatabase() {
   for (const row of stalePartners) {
     const fresh = deriveInitials(row.displayName)
     if (fresh.length >= 2) {
-      await db.runAsync(
-        'UPDATE partners SET avatarValue = ?, updatedAt = ? WHERE id = ?',
-        [fresh, new Date().toISOString(), row.id],
-      )
+      await db.runAsync('UPDATE partners SET avatarValue = ?, updatedAt = ? WHERE id = ?', [
+        fresh,
+        new Date().toISOString(),
+        row.id,
+      ])
     }
   }
 

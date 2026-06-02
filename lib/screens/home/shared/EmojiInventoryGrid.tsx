@@ -8,18 +8,20 @@ export interface EmojiInventoryGridProps {
 }
 
 export const EmojiInventoryGrid: React.FC<EmojiInventoryGridProps> = ({ inventory }) => (
-  <View style={{
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 14,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  }}>
-    {inventory.map(a => (
+  <View
+    style={{
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 14,
+      paddingVertical: 12,
+      paddingHorizontal: 14,
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+    }}
+  >
+    {inventory.map((a) => (
       <View
         key={a.emoji}
         accessible

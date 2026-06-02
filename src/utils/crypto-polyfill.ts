@@ -2,7 +2,7 @@
 // TanStack DB uses crypto.randomUUID() internally for mutation/transaction IDs
 
 if (typeof globalThis.crypto === 'undefined') {
-  (globalThis as any).crypto = {}
+  ;(globalThis as any).crypto = {}
 }
 
 if (typeof globalThis.crypto.randomUUID !== 'function') {

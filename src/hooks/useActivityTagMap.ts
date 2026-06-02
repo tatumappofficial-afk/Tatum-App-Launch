@@ -4,7 +4,7 @@ import { activityTags } from '@/src/db'
 
 export function useActivityTagMap(): Map<string, string> {
   const { data: tags = [] } = useLiveQuery((q) =>
-    q.from({ activityTags }).select(({ activityTags }) => ({ ...activityTags }))
+    q.from({ activityTags }).select(({ activityTags }) => ({ ...activityTags })),
   )
-  return useMemo(() => new Map(tags.map(t => [t.emoji, t.label])), [tags])
+  return useMemo(() => new Map(tags.map((t) => [t.emoji, t.label])), [tags])
 }

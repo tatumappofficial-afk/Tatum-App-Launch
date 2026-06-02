@@ -43,10 +43,7 @@ function decodeBools<T extends Record<string, unknown>>(row: T, fields: string[]
   return out as T
 }
 
-function decodeJson<T extends Record<string, unknown>>(
-  row: T,
-  fields: { field: string; fallback: unknown }[],
-): T {
+function decodeJson<T extends Record<string, unknown>>(row: T, fields: { field: string; fallback: unknown }[]): T {
   const out = { ...row } as Record<string, unknown>
   for (const { field, fallback } of fields) {
     if (field in out) {
@@ -59,35 +56,37 @@ function decodeJson<T extends Record<string, unknown>>(
 export async function buildExportPayload(): Promise<ExportPayload> {
   const db = await getDatabase()
 
-  const partners = (await db.getAllAsync<Record<string, unknown>>('SELECT * FROM partners'))
-    .map((r) => decodeBools(r, ['isActive', 'isMain']))
+  const partners = (await db.getAllAsync<Record<string, unknown>>('SELECT * FROM partners')).map((r) =>
+    decodeBools(r, ['isActive', 'isMain']),
+  )
 
-  const encounters = (await db.getAllAsync<Record<string, unknown>>('SELECT * FROM encounters'))
-    .map((r) => decodeJson(r, [
+  const encounters = (await db.getAllAsync<Record<string, unknown>>('SELECT * FROM encounters')).map((r) =>
+    decodeJson(r, [
       { field: 'activities', fallback: [] },
       { field: 'partnerIds', fallback: [] },
-    ]))
+    ]),
+  )
 
-  const activityTags = (await db.getAllAsync<Record<string, unknown>>('SELECT * FROM activity_tags'))
-    .map((r) => decodeBools(r, ['isDefault', 'isActive']))
+  const activityTags = (await db.getAllAsync<Record<string, unknown>>('SELECT * FROM activity_tags')).map((r) =>
+    decodeBools(r, ['isDefault', 'isActive']),
+  )
 
-  const desireEntries = (await db.getAllAsync<Record<string, unknown>>('SELECT * FROM desire_entries'))
-    .map((r) => decodeBools(r, ['actedOn']))
+  const desireEntries = (await db.getAllAsync<Record<string, unknown>>('SELECT * FROM desire_entries')).map((r) =>
+    decodeBools(r, ['actedOn']),
+  )
 
   const whisperMessages = await db.getAllAsync<Record<string, unknown>>('SELECT * FROM whisper_messages')
 
-  const affirmations = (await db.getAllAsync<Record<string, unknown>>('SELECT * FROM affirmations'))
-    .map((r) => decodeBools(r, ['isFavorite', 'isActive']))
-
-  const userProfileRows = await db.getAllAsync<Record<string, unknown>>(
-    'SELECT * FROM user_profile LIMIT 1',
+  const affirmations = (await db.getAllAsync<Record<string, unknown>>('SELECT * FROM affirmations')).map((r) =>
+    decodeBools(r, ['isFavorite', 'isActive']),
   )
+
+  const userProfileRows = await db.getAllAsync<Record<string, unknown>>('SELECT * FROM user_profile LIMIT 1')
   const userProfile = userProfileRows[0] ?? null
 
-  const userSettingsRows = await db.getAllAsync<Record<string, unknown>>(
-    'SELECT * FROM user_settings WHERE id = ?',
-    ['singleton'],
-  )
+  const userSettingsRows = await db.getAllAsync<Record<string, unknown>>('SELECT * FROM user_settings WHERE id = ?', [
+    'singleton',
+  ])
   const userSettings = userSettingsRows[0]
     ? decodeBools(userSettingsRows[0], ['notifications', 'biometricLock', 'hasOnboarded'])
     : null

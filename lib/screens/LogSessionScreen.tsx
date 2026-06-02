@@ -122,161 +122,156 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
 
   return (
     <KeyboardAvoidingView behavior="padding" style={styles.container}>
-        <KeyboardAwareScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-          bottomOffset={20}
-          bounces={false}
-        >
-          {/* Header — scrolls with content */}
-          <View style={styles.header}>
-            <Text style={styles.title}>{title}</Text>
-            <View style={styles.headerActions}>
-              <Pressable
-                onPress={onDatePress}
-                accessibilityRole="button"
-                accessibilityLabel={`Date: ${date}`}
-                style={styles.dateButton}
-              >
-                <LinearGradient
-                  colors={gradients.primaryCta}
-                  start={gradientPoints.diagonal.start}
-                  end={gradientPoints.diagonal.end}
-                  style={[StyleSheet.absoluteFill, { borderRadius: 9999 }]}
-                />
-                <Text style={styles.dateText}>{date}</Text>
-                <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
-                  <Polyline points={calendarOpen ? "6 15 12 9 18 15" : "6 9 12 15 18 9"} stroke="rgba(255,255,255,0.75)" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
-                </Svg>
-              </Pressable>
-              <Pressable
-                onPress={onClose}
-                accessibilityRole="button"
-                accessibilityLabel="Close"
-                hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
-                style={styles.closeButton}
-              >
-                <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.stone} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-                  <Line x1={18} y1={6} x2={6} y2={18} />
-                  <Line x1={6} y1={6} x2={18} y2={18} />
-                </Svg>
-              </Pressable>
-            </View>
-          </View>
-
-
-          {/* ── Date picker dropdown ── */}
-          {calendarOpen && calendarContent && (
-            <View style={styles.calendarDropdown}>
-              {calendarContent}
-            </View>
-          )}
-
-          {/* ── WITH (partners) ── */}
-          <FormLabel>With</FormLabel>
-          <View style={styles.partnersRow}>
-            {partners.map((p) => {
-              const selected = selectedPartnerIds.includes(p.id)
-              return (
-                <Pressable
-                  key={p.id}
-                  style={styles.partnerItem}
-                  onPress={() => onPartnerToggle?.(p.id)}
-                >
-                  <View style={styles.partnerAvatarWrapper}>
-                    <View
-                      style={[
-                        styles.partnerAvatar,
-                        { borderColor: selected ? colors.terra : 'transparent' },
-                      ]}
-                    >
-                      <LinearGradient
-                        colors={parseGradientColors(p.gradient)}
-                        start={gradientPoints.diagonal.start}
-                        end={gradientPoints.diagonal.end}
-                        style={[StyleSheet.absoluteFill, { borderRadius: 23 }]}
-                      />
-                      <Text style={styles.partnerInitials}>{p.initials}</Text>
-                    </View>
-                    {selected && (
-                      <View style={styles.selectedBadge}>
-                        <Text style={styles.selectedCheck}>{'✓'}</Text>
-                      </View>
-                    )}
-                  </View>
-                </Pressable>
-              )
-            })}
-          </View>
-
-          {/* ── WHAT HAPPENED (activity tags) ── */}
-          <FormLabel>What happened</FormLabel>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.activitiesScroll}
-            contentContainerStyle={styles.activitiesContent}
-            {...scrollProps}
-          >
-            {activities.map((tag) => (
-              <TagPill
-                key={tag.id}
-                emoji={tag.emoji}
-                label={tag.label}
-                variant="selectable"
-                selected={selectedActivityIds.includes(tag.id)}
-                onPress={() => onActivityToggle?.(tag.id)}
+      <KeyboardAwareScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        bottomOffset={20}
+        bounces={false}
+      >
+        {/* Header — scrolls with content */}
+        <View style={styles.header}>
+          <Text style={styles.title}>{title}</Text>
+          <View style={styles.headerActions}>
+            <Pressable
+              onPress={onDatePress}
+              accessibilityRole="button"
+              accessibilityLabel={`Date: ${date}`}
+              style={styles.dateButton}
+            >
+              <LinearGradient
+                colors={gradients.primaryCta}
+                start={gradientPoints.diagonal.start}
+                end={gradientPoints.diagonal.end}
+                style={[StyleSheet.absoluteFill, { borderRadius: 9999 }]}
               />
-            ))}
-          </ScrollView>
-
-          {/* ── RATING ── */}
-          <FormLabel>Rating</FormLabel>
-          <View style={styles.ratingWrapper}>
-            <RatingSlider value={rating} onChange={onRatingChange} />
+              <Text style={styles.dateText}>{date}</Text>
+              <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
+                <Polyline
+                  points={calendarOpen ? '6 15 12 9 18 15' : '6 9 12 15 18 9'}
+                  stroke="rgba(255,255,255,0.75)"
+                  strokeWidth={2.5}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+            </Pressable>
+            <Pressable
+              onPress={onClose}
+              accessibilityRole="button"
+              accessibilityLabel="Close"
+              hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
+              style={styles.closeButton}
+            >
+              <Svg
+                width={16}
+                height={16}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke={colors.stone}
+                strokeWidth={2.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <Line x1={18} y1={6} x2={6} y2={18} />
+                <Line x1={6} y1={6} x2={18} y2={18} />
+              </Svg>
+            </Pressable>
           </View>
+        </View>
 
-          {/* ── NOTES ── */}
-          <FormLabel>Notes</FormLabel>
-          <TextInput
-            value={notes}
-            onChangeText={(text) => onNotesChange?.(text)}
-            placeholder={"How did it feel? What made this moment special…"}
-            placeholderTextColor={colors.muted}
-            multiline
-            scrollEnabled={false}
-            numberOfLines={3}
-            maxLength={3000}
-            autoCapitalize="sentences"
-            autoCorrect
-            style={styles.notesInput}
-          />
-          <Text
-            style={[
-              styles.charCount,
-              { color: (notes?.length || 0) > 2800 ? colors.terra : colors.muted },
-            ]}
-          >{notes?.length || 0} / 3,000</Text>
-        </KeyboardAwareScrollView>
+        {/* ── Date picker dropdown ── */}
+        {calendarOpen && calendarContent && <View style={styles.calendarDropdown}>{calendarContent}</View>}
 
-        {!keyboardVisible && (
-          <View
-            style={[
-              styles.footer,
-              { paddingBottom: Math.max(insets.bottom, 10) + (Platform.OS === 'android' ? 12 : 0) },
-            ]}
-          >
-            <GradientButton label={saveLabel} onPress={onSave} height={50} disabled={!canSave} />
-            {onDelete && (
-              <Pressable onPress={onDelete} style={styles.deleteButton}>
-                <Text style={styles.deleteText}>Delete Session</Text>
+        {/* ── WITH (partners) ── */}
+        <FormLabel>With</FormLabel>
+        <View style={styles.partnersRow}>
+          {partners.map((p) => {
+            const selected = selectedPartnerIds.includes(p.id)
+            return (
+              <Pressable key={p.id} style={styles.partnerItem} onPress={() => onPartnerToggle?.(p.id)}>
+                <View style={styles.partnerAvatarWrapper}>
+                  <View style={[styles.partnerAvatar, { borderColor: selected ? colors.terra : 'transparent' }]}>
+                    <LinearGradient
+                      colors={parseGradientColors(p.gradient)}
+                      start={gradientPoints.diagonal.start}
+                      end={gradientPoints.diagonal.end}
+                      style={[StyleSheet.absoluteFill, { borderRadius: 23 }]}
+                    />
+                    <Text style={styles.partnerInitials}>{p.initials}</Text>
+                  </View>
+                  {selected && (
+                    <View style={styles.selectedBadge}>
+                      <Text style={styles.selectedCheck}>{'✓'}</Text>
+                    </View>
+                  )}
+                </View>
               </Pressable>
-            )}
-          </View>
-        )}
+            )
+          })}
+        </View>
 
-        <SuccessOverlay visible={showSuccess} label={successLabel} />
+        {/* ── WHAT HAPPENED (activity tags) ── */}
+        <FormLabel>What happened</FormLabel>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.activitiesScroll}
+          contentContainerStyle={styles.activitiesContent}
+          {...scrollProps}
+        >
+          {activities.map((tag) => (
+            <TagPill
+              key={tag.id}
+              emoji={tag.emoji}
+              label={tag.label}
+              variant="selectable"
+              selected={selectedActivityIds.includes(tag.id)}
+              onPress={() => onActivityToggle?.(tag.id)}
+            />
+          ))}
+        </ScrollView>
+
+        {/* ── RATING ── */}
+        <FormLabel>Rating</FormLabel>
+        <View style={styles.ratingWrapper}>
+          <RatingSlider value={rating} onChange={onRatingChange} />
+        </View>
+
+        {/* ── NOTES ── */}
+        <FormLabel>Notes</FormLabel>
+        <TextInput
+          value={notes}
+          onChangeText={(text) => onNotesChange?.(text)}
+          placeholder={'How did it feel? What made this moment special…'}
+          placeholderTextColor={colors.muted}
+          multiline
+          scrollEnabled={false}
+          numberOfLines={3}
+          maxLength={3000}
+          autoCapitalize="sentences"
+          autoCorrect
+          style={styles.notesInput}
+        />
+        <Text style={[styles.charCount, { color: (notes?.length || 0) > 2800 ? colors.terra : colors.muted }]}>
+          {notes?.length || 0} / 3,000
+        </Text>
+      </KeyboardAwareScrollView>
+
+      {!keyboardVisible && (
+        <View
+          style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 10) + (Platform.OS === 'android' ? 12 : 0) }]}
+        >
+          <GradientButton label={saveLabel} onPress={onSave} height={50} disabled={!canSave} />
+          {onDelete && (
+            <Pressable onPress={onDelete} style={styles.deleteButton}>
+              <Text style={styles.deleteText}>Delete Session</Text>
+            </Pressable>
+          )}
+        </View>
+      )}
+
+      <SuccessOverlay visible={showSuccess} label={successLabel} />
     </KeyboardAvoidingView>
   )
 }

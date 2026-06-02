@@ -29,9 +29,12 @@ export default function SettingsRoute() {
   const [successLabel, setSuccessLabel] = useState('')
   const successTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  useEffect(() => () => {
-    if (successTimer.current) clearTimeout(successTimer.current)
-  }, [])
+  useEffect(
+    () => () => {
+      if (successTimer.current) clearTimeout(successTimer.current)
+    },
+    [],
+  )
 
   // Require biometric auth in both directions: prevents enabling without
   // enrollment (and locking the user out), and prevents a bystander with
@@ -64,10 +67,7 @@ export default function SettingsRoute() {
       await exportData()
     } catch (err) {
       console.error('Export failed:', err)
-      Alert.alert(
-        'Export failed',
-        err instanceof Error ? err.message : 'Something went wrong. Please try again.',
-      )
+      Alert.alert('Export failed', err instanceof Error ? err.message : 'Something went wrong. Please try again.')
     }
   }
 
@@ -81,14 +81,10 @@ export default function SettingsRoute() {
         onTerms={() => openExternal(TERMS_URL)}
         onExportData={handleExportData}
         onEraseEverything={() => {
-          Alert.alert(
-            'Erase Everything',
-            'This will permanently delete all your data. This action cannot be undone.',
-            [
-              { text: 'Cancel', style: 'cancel' },
-              { text: 'Erase', style: 'destructive', onPress: () => console.log('Erase confirmed') },
-            ],
-          )
+          Alert.alert('Erase Everything', 'This will permanently delete all your data. This action cannot be undone.', [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Erase', style: 'destructive', onPress: () => console.log('Erase confirmed') },
+          ])
         }}
       />
       <SuccessOverlay visible={showSuccess} label={successLabel} />

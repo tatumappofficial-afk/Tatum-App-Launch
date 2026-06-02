@@ -170,8 +170,8 @@ async function runMigrations(database: SQLite.SQLiteDatabase): Promise<void> {
       // dev. The migration runner can't help here; the dev needs to wipe.
       console.warn(
         `[db] DB version (${currentVersion}) is ahead of code's target (${TARGET_VERSION}). ` +
-        `If you're a developer transitioning from the old destructive migration system, ` +
-        `you need to fully uninstall the app to wipe the SQLite file.`,
+          `If you're a developer transitioning from the old destructive migration system, ` +
+          `you need to fully uninstall the app to wipe the SQLite file.`,
       )
     }
     return
@@ -205,5 +205,9 @@ export function serializeJsonColumn(value: unknown): string {
 
 export function parseJsonColumn<T>(value: string | null, fallback: T): T {
   if (!value) return fallback
-  try { return JSON.parse(value) } catch { return fallback }
+  try {
+    return JSON.parse(value)
+  } catch {
+    return fallback
+  }
 }
