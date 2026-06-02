@@ -1,5 +1,6 @@
 import { Image, View, Text, ScrollView } from 'react-native'
-import { useRouter } from 'expo-router'
+import { Redirect, useRouter } from 'expo-router'
+import { useLiveQuery } from '@tanstack/react-db'
 import { useBlockBack } from '@/src/hooks/useBlockBack'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { colors, font, fontFamily } from '@/lib/theme'
@@ -7,6 +8,8 @@ import { GradientButton } from '@/lib/components/GradientButton'
 import { StepDots } from '@/lib/components/StepDots'
 import { DecorativeGlow } from '@/lib/screens/shared/DecorativeGlow'
 import { StatusBarSpacer } from '@/lib/screens/shared/StatusBarSpacer'
+import { useSettings } from '@/src/hooks/useSettings'
+import { userProfiles } from '@/src/db'
 
 const PromiseItem: React.FC<{ emoji: string; title: string; desc: string }> = ({ emoji, title, desc }) => (
   <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 12 }}>
@@ -25,7 +28,19 @@ const PromiseItem: React.FC<{ emoji: string; title: string; desc: string }> = ({
 export default function WelcomeScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const { hasOnboarded } = useSettings()
+  const { data: profiles = [] } = useLiveQuery((q) =>
+    q.from({ userProfiles }).select(({ userProfiles }) => ({ ...userProfiles })),
+  )
   useBlockBack()
+
+  // v1.0 user updating to v1.1: they already completed onboarding but never
+  // had auth. Skip the welcome introduction and drop them on /auth so they
+  // sign in once and return to their existing data.
+  const needsAuthMigration = hasOnboarded && profiles.length > 0 && !profiles.some((p) => p.authProvider !== null)
+  if (needsAuthMigration) {
+    return <Redirect href="/(onboarding)/auth" />
+  }
 
   return (
     <View

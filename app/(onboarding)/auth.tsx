@@ -6,11 +6,13 @@ import Svg, { Path } from 'react-native-svg'
 import * as AppleAuthentication from 'expo-apple-authentication'
 import { GoogleSignin } from '@react-native-google-signin/google-signin'
 import * as Haptics from 'expo-haptics'
+import { useLiveQuery } from '@tanstack/react-db'
 import { useBlockBack } from '@/src/hooks/useBlockBack'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { colors, font } from '@/lib/theme'
 import { DecorativeGlow } from '@/lib/screens/shared/DecorativeGlow'
 import { StatusBarSpacer } from '@/lib/screens/shared/StatusBarSpacer'
+import { userProfiles } from '@/src/db'
 
 const GOOGLE_IOS_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID
 const GOOGLE_WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID
@@ -29,6 +31,10 @@ export default function AuthScreen() {
   const insets = useSafeAreaInsets()
   useBlockBack()
 
+  const { data: profiles = [] } = useLiveQuery((q) =>
+    q.from({ userProfiles }).select(({ userProfiles }) => ({ ...userProfiles })),
+  )
+
   useEffect(() => {
     if (GOOGLE_WEB_CLIENT_ID) {
       GoogleSignin.configure({
@@ -39,7 +45,25 @@ export default function AuthScreen() {
     }
   }, [])
 
-  const goToIdentity = (params: { email: string; fullName: string | null; provider: 'apple' | 'google' }) => {
+  const handleSignedIn = (params: {
+    email: string
+    fullName: string | null
+    provider: 'apple' | 'google'
+  }) => {
+    // Migration path: an existing profile with a displayName means this is a
+    // v1.0 user updating to v1.1 — their data is intact, just stamp the auth
+    // fields and drop into the app. Skip /identity (no need to re-ask for the
+    // name they already entered).
+    const existing = profiles.find((p) => p.displayName && p.displayName.trim().length > 0)
+    if (existing) {
+      userProfiles.update(existing.id, (draft) => {
+        draft.email = params.email || null
+        draft.authProvider = params.provider
+      })
+      router.replace('/(tabs)')
+      return
+    }
+
     router.push({
       pathname: '/(onboarding)/identity',
       params: {
@@ -64,7 +88,7 @@ export default function AuthScreen() {
       // be null — we accept null name and let the user fill it on /identity.
       const fullName = credential.fullName?.givenName ?? null
       const email = credential.email ?? ''
-      goToIdentity({ email, fullName, provider: 'apple' })
+      handleSignedIn({ email, fullName, provider: 'apple' })
     } catch (err: unknown) {
       if ((err as { code?: string }).code === 'ERR_REQUEST_CANCELED') return
       console.error('Apple sign-in failed:', err)
@@ -89,7 +113,7 @@ export default function AuthScreen() {
       if (response.type === 'cancelled') return
       const user = response.data.user
       if (!user?.email) throw new Error('Google sign-in returned no email')
-      goToIdentity({
+      handleSignedIn({
         email: user.email,
         fullName: user.givenName ?? null,
         provider: 'google',

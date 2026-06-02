@@ -16,7 +16,8 @@ import {
   PlayfairDisplay_700Bold,
 } from '@expo-google-fonts/playfair-display'
 import { DMSans_300Light, DMSans_400Regular, DMSans_500Medium } from '@expo-google-fonts/dm-sans'
-import { initDatabase } from '@/src/db'
+import { useLiveQuery } from '@tanstack/react-db'
+import { initDatabase, userProfiles } from '@/src/db'
 import { SettingsProvider, useSettings, useSettingsReady } from '@/src/hooks/useSettings'
 import { LockGate } from '@/lib/components/LockGate'
 
@@ -73,6 +74,9 @@ export default function RootLayout() {
 function AuthedTree() {
   const settingsReady = useSettingsReady()
   const settings = useSettings()
+  const { data: profiles = [] } = useLiveQuery((q) =>
+    q.from({ userProfiles }).select(({ userProfiles }) => ({ ...userProfiles })),
+  )
 
   const onLayoutRootView = useCallback(() => {
     if (settingsReady) SplashScreen.hideAsync()
@@ -81,6 +85,7 @@ function AuthedTree() {
   if (!settingsReady) return null
 
   const { hasOnboarded, biometricLock } = settings
+  const isAuthed = profiles.some((p) => p.authProvider !== null)
 
   return (
     <View style={{ flex: 1, backgroundColor: '#F5EFE8' }} onLayout={onLayoutRootView}>
@@ -92,10 +97,10 @@ function AuthedTree() {
             contentStyle: { backgroundColor: '#F5EFE8' },
           }}
         >
-          <Stack.Protected guard={!hasOnboarded}>
+          <Stack.Protected guard={!hasOnboarded || !isAuthed}>
             <Stack.Screen name="(onboarding)" />
           </Stack.Protected>
-          <Stack.Protected guard={hasOnboarded}>
+          <Stack.Protected guard={hasOnboarded && isAuthed}>
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="(pages)" />
           </Stack.Protected>
