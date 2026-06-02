@@ -51,10 +51,24 @@ export const DEFAULT_ACTIVITY_TAGS: { id?: string; emoji: string; label: string 
 
 // ── Encounter ──
 
+// Each item in encounters.activities is a frozen snapshot of the tag at log time.
+// Snapshotting (vs. live-joining the activity_tags table by emoji) keeps history
+// immutable when a tag is renamed or its emoji is changed later.
+//
+// Legacy rows (pre-snapshot model) stored bare emoji strings here. The one-time
+// backfill in src/db/index.ts rewrites those into object form before any TanStack
+// DB collection sync fires, so consumers can safely assume the strict shape.
+export const EncounterActivitySchema = z.object({
+  emoji: z.string(),
+  label: z.string(),
+})
+
+export type EncounterActivity = z.infer<typeof EncounterActivitySchema>
+
 export const EncounterSchema = z.object({
   id: z.string().uuid(),
   date: z.string(), // ISO date YYYY-MM-DD
-  activities: z.array(z.string()).min(1), // emoji codes, at least one required
+  activities: z.array(EncounterActivitySchema).min(1),
   partnerIds: z.array(z.string().uuid()), // optional — sessions can be logged without a partner
   stars: z.number().min(0).max(10).nullable(),
   notes: z.string().max(3000).nullable(),
@@ -153,6 +167,11 @@ export const UserProfileSchema = z.object({
   premiumExpiresAt: z.string().nullable(),
   email: z.string().nullable(),
   authProvider: z.enum(['apple', 'google']).nullable(),
+  // Stable per-user identifier from the OAuth provider — Apple's `user` field
+  // or Google's `sub`. Bound to identity: once set, only sign-ins from the
+  // same identifier can return into this device's data without an explicit
+  // erase. See auth.tsx for the match/mismatch handling.
+  providerUserId: z.string().nullable(),
 })
 
 export type UserProfile = z.infer<typeof UserProfileSchema>

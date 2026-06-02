@@ -15,10 +15,16 @@ export default function IdentityScreen() {
   const insets = useSafeAreaInsets()
   useBlockBack()
 
-  const params = useLocalSearchParams<{ email?: string; fullName?: string; provider?: 'apple' | 'google' }>()
+  const params = useLocalSearchParams<{
+    email?: string
+    fullName?: string
+    provider?: 'apple' | 'google'
+    providerUserId?: string
+  }>()
   const initialName = (params.fullName ?? '').trim()
   const initialEmail = params.email ?? ''
   const provider = (params.provider ?? null) as 'apple' | 'google' | null
+  const providerUserId = params.providerUserId ?? null
 
   const [firstName, setFirstName] = useState(initialName)
   const [email, setEmail] = useState(initialEmail)
@@ -40,6 +46,7 @@ export default function IdentityScreen() {
         draft.displayName = firstName.trim()
         draft.email = trimmedEmail.length > 0 ? trimmedEmail : null
         draft.authProvider = provider
+        draft.providerUserId = providerUserId
       })
       router.push('/(onboarding)/protect')
     } finally {

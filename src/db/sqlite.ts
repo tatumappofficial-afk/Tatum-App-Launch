@@ -136,6 +136,12 @@ const MIGRATIONS: Migration[] = [
       ALTER TABLE user_profile ADD COLUMN authProvider TEXT;
     `,
   },
+  {
+    version: 3,
+    up: `
+      ALTER TABLE user_profile ADD COLUMN providerUserId TEXT;
+    `,
+  },
 ]
 
 const TARGET_VERSION = MIGRATIONS[MIGRATIONS.length - 1].version

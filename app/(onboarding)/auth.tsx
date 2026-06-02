@@ -12,7 +12,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { colors, font } from '@/lib/theme'
 import { DecorativeGlow } from '@/lib/screens/shared/DecorativeGlow'
 import { StatusBarSpacer } from '@/lib/screens/shared/StatusBarSpacer'
-import { userProfiles } from '@/src/db'
+import { userProfiles, eraseAllUserData } from '@/src/db'
+import { useUpdateSettings } from '@/src/hooks/useSettings'
+import { DEFAULT_SETTINGS } from '@/src/db/schema'
 
 const GOOGLE_IOS_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID
 const GOOGLE_WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID
@@ -29,6 +31,7 @@ const GoogleLogo: React.FC = () => (
 export default function AuthScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const updateSettings = useUpdateSettings()
   useBlockBack()
 
   const { data: profiles = [] } = useLiveQuery((q) =>
@@ -49,13 +52,53 @@ export default function AuthScreen() {
     email: string
     fullName: string | null
     provider: 'apple' | 'google'
+    providerUserId: string
   }) => {
-    // Migration path: an existing profile with a displayName means this is a
-    // v1.0 user updating to v1.1 — their data is intact, just stamp the auth
-    // fields and drop into the app. Skip /identity (no need to re-ask for the
-    // name they already entered).
+    // Three branches based on existing profile state:
+    //   1. No existing displayName  → fresh user, route to /identity
+    //   2. Existing displayName + matching providerUserId → returning user,
+    //      refresh email + authProvider, drop into the app
+    //   3. Existing displayName + DIFFERENT providerUserId (or one set on a
+    //      legacy v1.1.0 profile from before this column existed) → identity
+    //      mismatch, force the user to either back out or erase the device's
+    //      data before this account can take ownership
+
     const existing = profiles.find((p) => p.displayName && p.displayName.trim().length > 0)
-    if (existing) {
+    if (!existing) {
+      // Fresh user — capture identity on /identity step
+      router.push({
+        pathname: '/(onboarding)/identity',
+        params: {
+          email: params.email,
+          fullName: params.fullName ?? '',
+          provider: params.provider,
+          providerUserId: params.providerUserId,
+        },
+      })
+      return
+    }
+
+    // Existing profile. Was there already an identity stamped on it?
+    const storedId = existing.providerUserId
+    const incomingId = params.providerUserId
+
+    if (storedId === null) {
+      // Legacy profile (pre-providerUserId, or never signed in before). Treat
+      // this sign-in as the canonical identity for the device's data.
+      userProfiles.update(existing.id, (draft) => {
+        draft.email = params.email || null
+        draft.authProvider = params.provider
+        draft.providerUserId = incomingId
+      })
+      router.replace('/(tabs)')
+      return
+    }
+
+    if (storedId === incomingId) {
+      // Same user returning. Refresh email + authProvider in case they switched
+      // providers (e.g. previously Apple, now Google with the same identifier)
+      // — actually no, the IDs are per-provider, so a switch shows up as a
+      // mismatch and falls into the next branch. Here just refresh email.
       userProfiles.update(existing.id, (draft) => {
         draft.email = params.email || null
         draft.authProvider = params.provider
@@ -64,14 +107,46 @@ export default function AuthScreen() {
       return
     }
 
-    router.push({
-      pathname: '/(onboarding)/identity',
-      params: {
-        email: params.email,
-        fullName: params.fullName ?? '',
-        provider: params.provider,
-      },
-    })
+    // Identity mismatch — different account trying to take over this device's
+    // data. Privacy protection: require an explicit erase before continuing.
+    Alert.alert(
+      'Different account',
+      "This device already has Tatum data from another account. To use a different account, all existing data has to be erased first. This can't be undone.",
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Erase and continue',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await eraseAllUserData()
+              updateSettings({
+                notifications: DEFAULT_SETTINGS.notifications,
+                whisperDeliveryDefault: DEFAULT_SETTINGS.whisperDeliveryDefault,
+                calendarStartDay: DEFAULT_SETTINGS.calendarStartDay,
+                biometricLock: DEFAULT_SETTINGS.biometricLock,
+                hasOnboarded: DEFAULT_SETTINGS.hasOnboarded,
+                theme: DEFAULT_SETTINGS.theme,
+              })
+              // After erase, profile is fresh — route to /identity to collect
+              // a name, the new identity will be stamped there.
+              router.push({
+                pathname: '/(onboarding)/identity',
+                params: {
+                  email: params.email,
+                  fullName: params.fullName ?? '',
+                  provider: params.provider,
+                  providerUserId: params.providerUserId,
+                },
+              })
+            } catch (err) {
+              console.error('Erase + continue failed:', err)
+              Alert.alert('Something went wrong', 'Please try signing in again.')
+            }
+          },
+        },
+      ],
+    )
   }
 
   async function handleApple() {
@@ -88,7 +163,7 @@ export default function AuthScreen() {
       // be null — we accept null name and let the user fill it on /identity.
       const fullName = credential.fullName?.givenName ?? null
       const email = credential.email ?? ''
-      handleSignedIn({ email, fullName, provider: 'apple' })
+      handleSignedIn({ email, fullName, provider: 'apple', providerUserId: credential.user })
     } catch (err: unknown) {
       if ((err as { code?: string }).code === 'ERR_REQUEST_CANCELED') return
       console.error('Apple sign-in failed:', err)
@@ -117,6 +192,7 @@ export default function AuthScreen() {
         email: user.email,
         fullName: user.givenName ?? null,
         provider: 'google',
+        providerUserId: user.id,
       })
     } catch (err: unknown) {
       console.error('Google sign-in failed:', err)

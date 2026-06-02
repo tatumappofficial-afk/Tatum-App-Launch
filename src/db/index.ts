@@ -196,6 +196,21 @@ export async function initDatabase() {
   initialized = true
 }
 
+// ── User-facing "Sign Out" ──
+//
+// Clears the auth identity fields on the user_profile row but leaves all
+// other data intact. Pairs with updateSettings({ hasOnboarded: false }) on
+// the caller side so the layout guard reactively routes to (onboarding) →
+// /auth. When the same user signs back in, auth.tsx detects the matching
+// providerUserId and silently restores them to their data.
+export async function signOutUser() {
+  userProfiles.update('default', (draft) => {
+    draft.email = null
+    draft.authProvider = null
+    draft.providerUserId = null
+  })
+}
+
 // ── User-facing "Erase Everything" ──
 //
 // Wipes all user-generated data via the TanStack DB collection APIs so the
@@ -235,6 +250,7 @@ export async function eraseAllUserData() {
     draft.displayName = null
     draft.email = null
     draft.authProvider = null
+    draft.providerUserId = null
     draft.avatarValue = 'A'
     draft.avatarGradient = DEFAULT_AVATAR_GRADIENT
     draft.tier = 'free'

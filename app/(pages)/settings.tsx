@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router'
 import { useSettings, useUpdateSettings } from '@/src/hooks/useSettings'
 import { authenticate } from '@/src/utils/biometrics'
 import { exportData } from '@/src/utils/exportData'
-import { eraseAllUserData } from '@/src/db'
+import { eraseAllUserData, signOutUser } from '@/src/db'
 import { DEFAULT_SETTINGS } from '@/src/db/schema'
 
 const PRIVACY_POLICY_URL = 'https://www.tatumapp.com/privacy.html'
@@ -82,6 +82,29 @@ export default function SettingsRoute() {
         onPrivacyPolicy={() => openExternal(PRIVACY_POLICY_URL)}
         onTerms={() => openExternal(TERMS_URL)}
         onExportData={handleExportData}
+        onSignOut={() => {
+          Alert.alert(
+            'Sign Out',
+            'Your data stays on this device. Sign back in with the same account to come right back to it.',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: 'Sign Out',
+                onPress: async () => {
+                  try {
+                    await signOutUser()
+                    // The layout guard reactively detects no authProvider and
+                    // routes to (onboarding), where welcome.tsx redirects to
+                    // /auth — no manual navigation needed.
+                  } catch (err) {
+                    console.error('Sign out failed:', err)
+                    Alert.alert('Sign out failed', 'Please try again.')
+                  }
+                },
+              },
+            ],
+          )
+        }}
         onEraseEverything={() => {
           Alert.alert(
             'Erase Everything',
