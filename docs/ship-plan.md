@@ -91,17 +91,20 @@ You'll do these in order. The prerequisite step gets a string you'll need in ste
 
 #### Prerequisite — get your Android debug SHA-1 fingerprint
 
-You'll need this when creating the Android OAuth client. Run in any terminal:
+You'll need this when creating the Android OAuth client. **Important:** Expo's prebuild generates a *project-local* debug keystore at `android/app/debug.keystore` and Gradle signs every `npx expo run:android` build with that one — not the global `~/.android/debug.keystore` Android Studio normally uses. Make sure to read from the project-local file or Google will reject sign-in with `DEVELOPER_ERROR`. Run from the repo root:
 
 ```bash
-keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android | grep SHA1
+keytool -list -v -keystore android/app/debug.keystore -alias androiddebugkey -storepass android | grep -i sha
 ```
 
-You should see a line like:
+You should see lines like:
 
 ```
 SHA1: A1:B2:C3:D4:E5:F6:...:99:00
+SHA256: ...
 ```
+
+Copy the `A1:B2:...` value after `SHA1:`.
 
 Copy the whole `A1:B2:...:99:00` string (without the `SHA1:` prefix or leading space). Save it somewhere — you'll paste it in step (iv).
 
@@ -304,8 +307,9 @@ The very last feature before public launch. Out of scope for the initial beta; t
 ## Reference commands
 
 ```bash
-# Get Android debug SHA-1 (for Google OAuth Android client setup before first production build)
-keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android
+# Get Android debug SHA-1 (for Google OAuth Android client setup before first production build).
+# Use the PROJECT-LOCAL keystore Expo prebuild generates, not the global one in ~/.android/.
+keytool -list -v -keystore android/app/debug.keystore -alias androiddebugkey -storepass android
 
 # Get Android production SHA-1 (after first EAS production build)
 eas credentials --platform android   # navigate to the keystore info
