@@ -17,11 +17,11 @@ export default function IdentityScreen() {
 
   const params = useLocalSearchParams<{ email?: string; fullName?: string; provider?: 'apple' | 'google' }>()
   const initialName = (params.fullName ?? '').trim()
-  const email = params.email ?? ''
+  const initialEmail = params.email ?? ''
   const provider = (params.provider ?? null) as 'apple' | 'google' | null
-  const isRelayEmail = email.endsWith('@privaterelay.appleid.com')
 
   const [firstName, setFirstName] = useState(initialName)
+  const [email, setEmail] = useState(initialEmail)
   const [busy, setBusy] = useState(false)
 
   const { data: profileRows } = useLiveQuery((q) =>
@@ -35,9 +35,10 @@ export default function IdentityScreen() {
     if (!canContinue || !profile) return
     setBusy(true)
     try {
+      const trimmedEmail = email.trim()
       userProfiles.update(profile.id, (draft) => {
         draft.displayName = firstName.trim()
-        draft.email = email || null
+        draft.email = trimmedEmail.length > 0 ? trimmedEmail : null
         draft.authProvider = provider
       })
       router.push('/(onboarding)/protect')
@@ -71,10 +72,10 @@ export default function IdentityScreen() {
                 marginBottom: 10,
               }}
             >
-              What should we call you?
+              A little about you
             </Text>
             <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: colors.stone, lineHeight: 20.8 }}>
-              Just a first name — it stays on your device with the rest of your data.
+              Your name and email help Tatum send you product updates and check in on how it's going. You can leave email blank.
             </Text>
           </View>
 
@@ -89,15 +90,51 @@ export default function IdentityScreen() {
                 textTransform: 'uppercase',
               }}
             >
-              First name
+              Name
             </Text>
             <TextInput
               value={firstName}
               onChangeText={setFirstName}
-              placeholder="Your first name"
+              placeholder="Your name"
               placeholderTextColor="rgba(154,136,120,0.5)"
               autoCapitalize="words"
               autoCorrect={false}
+              returnKeyType="next"
+              style={{
+                backgroundColor: colors.surface,
+                borderWidth: 1.5,
+                borderColor: 'rgba(160,100,80,0.18)',
+                borderRadius: 14,
+                paddingHorizontal: 16,
+                paddingVertical: 14,
+                fontSize: 17,
+                fontFamily: font('dmSans', '400'),
+                color: colors.ink,
+              }}
+            />
+          </View>
+
+          <View style={{ marginBottom: 22 }}>
+            <Text
+              style={{
+                fontFamily: font('dmSans', '500'),
+                fontSize: 12,
+                color: colors.stone,
+                letterSpacing: 1.5,
+                marginBottom: 8,
+                textTransform: 'uppercase',
+              }}
+            >
+              Email
+            </Text>
+            <TextInput
+              value={email}
+              onChangeText={setEmail}
+              placeholder="you@example.com"
+              placeholderTextColor="rgba(154,136,120,0.5)"
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType="email-address"
               returnKeyType="done"
               onSubmitEditing={handleContinue}
               style={{
@@ -113,48 +150,6 @@ export default function IdentityScreen() {
               }}
             />
           </View>
-
-          {email ? (
-            <View style={{ marginBottom: 22 }}>
-              <Text
-                style={{
-                  fontFamily: font('dmSans', '500'),
-                  fontSize: 12,
-                  color: colors.stone,
-                  letterSpacing: 1.5,
-                  marginBottom: 8,
-                  textTransform: 'uppercase',
-                }}
-              >
-                Email
-              </Text>
-              <View
-                style={{
-                  backgroundColor: 'rgba(160,100,80,0.05)',
-                  borderRadius: 14,
-                  paddingHorizontal: 16,
-                  paddingVertical: 14,
-                }}
-              >
-                <Text style={{ fontSize: 15, color: colors.stone, fontFamily: font('dmSans', '400') }}>
-                  {email}
-                </Text>
-              </View>
-              {isRelayEmail && (
-                <Text
-                  style={{
-                    fontFamily: font('dmSans', '300'),
-                    fontSize: 12,
-                    color: colors.stone,
-                    lineHeight: 16,
-                    marginTop: 8,
-                  }}
-                >
-                  You chose to hide your address — Apple forwards anything we send to your real email.
-                </Text>
-              )}
-            </View>
-          ) : null}
         </ScrollView>
 
         <View style={{ flexShrink: 0, paddingHorizontal: 28, paddingBottom: Math.max(insets.bottom + 8, 32) }}>
