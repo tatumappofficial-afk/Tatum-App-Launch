@@ -1,0 +1,12 @@
+node_modules
+ios
+android
+.expo
+.claude
+dist
+web-build
+package-lock.json
+TATUM_AUDIT.md
+docs
+README.md
+.github
