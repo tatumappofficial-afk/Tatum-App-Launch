@@ -160,7 +160,7 @@ export default function WelcomeScreen() {
 
       <View style={{ flexShrink: 0, paddingHorizontal: 28, paddingBottom: Math.max(insets.bottom + 8, 32) }}>
         <View style={{ marginBottom: 14 }}>
-          <GradientButton label="I Understand, Let's Begin" onPress={() => router.push('/(onboarding)/protect')} />
+          <GradientButton label="I Understand, Let's Begin" onPress={() => router.push('/(onboarding)/auth')} />
         </View>
         <StepDots current={0} />
       </View>
