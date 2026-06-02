@@ -125,7 +125,7 @@ export default function PartnerScreen() {
               marginBottom: 8,
             }}
           >
-            Step 3 of 4
+            Step 5 of 6
           </Text>
           <Text
             style={{
@@ -322,7 +322,7 @@ export default function PartnerScreen() {
             Skip for now
           </Text>
         </Pressable>
-        <StepDots current={2} />
+        <StepDots current={4} />
       </View>
     </View>
   )

@@ -7,7 +7,7 @@ export interface StepDotsProps {
   total?: number
 }
 
-export const StepDots: React.FC<StepDotsProps> = ({ current, total = 4 }) => (
+export const StepDots: React.FC<StepDotsProps> = ({ current, total = 6 }) => (
   <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 6 }}>
     {Array.from({ length: total }, (_, i) => {
       const isDone = i < current
