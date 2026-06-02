@@ -79,11 +79,7 @@ export const AllTimeView: React.FC<AllTimeViewProps> = ({
       {stats.standoutSessions.length > 0 && (
         <>
           <SectionLabel label="What stood out" style={INLINE_LABEL} />
-          <StandoutSessions
-            sessions={stats.standoutSessions}
-            partners={stats.partners}
-            onPress={onSessionPress}
-          />
+          <StandoutSessions sessions={stats.standoutSessions} partners={stats.partners} onPress={onSessionPress} />
         </>
       )}
     </View>

@@ -10,7 +10,7 @@ export interface RecentReflectionsProps {
 
 export const RecentReflections: React.FC<RecentReflectionsProps> = ({ notes, onPress }) => (
   <View style={{ gap: 6 }}>
-    {notes.map(n => (
+    {notes.map((n) => (
       <Pressable
         key={n.id}
         onPress={() => onPress?.(n)}
@@ -37,12 +37,14 @@ export const RecentReflections: React.FC<RecentReflectionsProps> = ({ notes, onP
         >
           {n.notes}
         </Text>
-        <Text style={{
-          fontSize: 12,
-          color: colors.muted,
-          fontFamily: fontFamily.dmSans,
-          marginTop: 4,
-        }}>
+        <Text
+          style={{
+            fontSize: 12,
+            color: colors.muted,
+            fontFamily: fontFamily.dmSans,
+            marginTop: 4,
+          }}
+        >
           {formatDateShort(n.date)}
         </Text>
       </Pressable>

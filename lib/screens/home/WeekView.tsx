@@ -37,12 +37,7 @@ export const WeekView: React.FC<WeekViewProps> = ({
 }) => {
   if (stats.sessionsCount === 0) {
     return (
-      <EmptyPeriod
-        period="week"
-        scenario={emptyScenario}
-        onLookBack={onLookBack}
-        onJumpToNearest={onJumpToNearest}
-      />
+      <EmptyPeriod period="week" scenario={emptyScenario} onLookBack={onLookBack} onJumpToNearest={onJumpToNearest} />
     )
   }
 
@@ -63,29 +58,15 @@ export const WeekView: React.FC<WeekViewProps> = ({
 
       {stats.partnerStats.length > 0 && (
         <>
-          <SectionLabel
-            label="Partners"
-            showChevron
-            style={INLINE_LABEL}
-            onPress={onPartnersHeaderPress}
-          />
+          <SectionLabel label="Partners" showChevron style={INLINE_LABEL} onPress={onPartnersHeaderPress} />
           <RichPartnerStrip partners={stats.partnerStats} onPress={onPartnerPress} onViewAll={onPartnersHeaderPress} />
         </>
       )}
 
       {stats.recentSessions.length > 0 && (
         <>
-          <SectionLabel
-            label="Sessions"
-            showChevron
-            style={INLINE_LABEL}
-            onPress={onSessionsHeaderPress}
-          />
-          <RecentSessionsScroller
-            sessions={stats.recentSessions}
-            partners={partners}
-            onPress={onSessionPress}
-          />
+          <SectionLabel label="Sessions" showChevron style={INLINE_LABEL} onPress={onSessionsHeaderPress} />
+          <RecentSessionsScroller sessions={stats.recentSessions} partners={partners} onPress={onSessionPress} />
         </>
       )}
     </View>
@@ -101,16 +82,20 @@ interface WeekOverviewCardProps {
 }
 
 const WeekOverviewCard: React.FC<WeekOverviewCardProps> = ({ sessionsCount, averageRating, weekdays }) => {
-  const cells: Array<{ label: string; render: () => React.ReactNode }> = [
+  const cells: { label: string; render: () => React.ReactNode }[] = [
     {
       label: 'Sessions',
       render: () => (
-        <Text style={{
-          fontFamily: font('playfair', '600'),
-          fontSize: 28,
-          color: colors.terra,
-          lineHeight: 28,
-        }}>{sessionsCount}</Text>
+        <Text
+          style={{
+            fontFamily: font('playfair', '600'),
+            fontSize: 28,
+            color: colors.terra,
+            lineHeight: 28,
+          }}
+        >
+          {sessionsCount}
+        </Text>
       ),
     },
   ]
@@ -118,12 +103,16 @@ const WeekOverviewCard: React.FC<WeekOverviewCardProps> = ({ sessionsCount, aver
     cells.push({
       label: 'Avg Rating',
       render: () => (
-        <Text style={{
-          fontFamily: font('playfair', '600'),
-          fontSize: 28,
-          color: colors.terra,
-          lineHeight: 28,
-        }}>{averageRating.toFixed(1)}</Text>
+        <Text
+          style={{
+            fontFamily: font('playfair', '600'),
+            fontSize: 28,
+            color: colors.terra,
+            lineHeight: 28,
+          }}
+        >
+          {averageRating.toFixed(1)}
+        </Text>
       ),
     })
   }
@@ -147,34 +136,43 @@ const WeekOverviewCard: React.FC<WeekOverviewCardProps> = ({ sessionsCount, aver
     })
   }
   return (
-    <View style={{
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 16,
-      paddingVertical: 14,
-      paddingHorizontal: 16,
-      flexDirection: 'row',
-      flexShrink: 0,
-    }}>
+    <View
+      style={{
+        backgroundColor: colors.surface,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 16,
+        paddingVertical: 14,
+        paddingHorizontal: 16,
+        flexDirection: 'row',
+        flexShrink: 0,
+      }}
+    >
       {cells.map((c, i) => (
-        <View key={c.label} style={{
-          flex: 1,
-          paddingHorizontal: 8,
-          borderRightWidth: i < cells.length - 1 ? 1 : 0,
-          borderRightColor: 'rgba(160,100,80,0.12)',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-        }}>
-          <Text style={{
-            fontSize: 12,
-            letterSpacing: 1.5,
-            textTransform: 'uppercase',
-            color: colors.stone,
-            marginBottom: 3,
-            fontFamily: font('dmSans', '500'),
-            textAlign: 'center',
-          }}>{c.label}</Text>
+        <View
+          key={c.label}
+          style={{
+            flex: 1,
+            paddingHorizontal: 8,
+            borderRightWidth: i < cells.length - 1 ? 1 : 0,
+            borderRightColor: 'rgba(160,100,80,0.12)',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 12,
+              letterSpacing: 1.5,
+              textTransform: 'uppercase',
+              color: colors.stone,
+              marginBottom: 3,
+              fontFamily: font('dmSans', '500'),
+              textAlign: 'center',
+            }}
+          >
+            {c.label}
+          </Text>
           {c.render()}
         </View>
       ))}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Alert } from 'react-native'
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useLocalSearchParams } from 'expo-router'
 import { useLiveQuery } from '@tanstack/react-db'
 import { generateId as uuid } from '@/src/utils/uuid'
 import { LogSessionScreen } from '@/lib/screens/LogSessionScreen'
@@ -10,23 +10,22 @@ import { useLoggedDaysForMonth } from '@/src/hooks/useLoggedDaysForMonth'
 import { useSheetDismiss } from '@/app/(sheets)/_layout'
 
 export default function LogSessionRoute() {
-  const router = useRouter()
   const dismissSheet = useSheetDismiss()
   const { id } = useLocalSearchParams<{ id?: string }>()
   const isEditing = !!id
   const now = new Date()
 
   const { data: allPartners = [] } = useLiveQuery((q) =>
-    q.from({ partners }).select(({ partners }) => ({ ...partners }))
+    q.from({ partners }).select(({ partners }) => ({ ...partners })),
   )
   const { data: allTags = [] } = useLiveQuery((q) =>
-    q.from({ activityTags }).select(({ activityTags }) => ({ ...activityTags }))
+    q.from({ activityTags }).select(({ activityTags }) => ({ ...activityTags })),
   )
   const { data: allEncounters = [] } = useLiveQuery((q) =>
-    q.from({ encounters }).select(({ encounters }) => ({ ...encounters }))
+    q.from({ encounters }).select(({ encounters }) => ({ ...encounters })),
   )
 
-  const existingEncounter = isEditing ? allEncounters.find(e => e.id === id) : null
+  const existingEncounter = isEditing ? allEncounters.find((e) => e.id === id) : null
 
   const [selectedDate, setSelectedDate] = useState(now)
   const [calendarOpen, setCalendarOpen] = useState(false)
@@ -60,17 +59,19 @@ export default function LogSessionRoute() {
     day: 'numeric',
   })
 
-  const partnerItems = allPartners.filter(p => p.isActive).map(p => ({
-    id: p.id,
-    initials: p.avatarValue,
-    gradient: p.avatarGradient,
-    name: p.displayName,
-  }))
+  const partnerItems = allPartners
+    .filter((p) => p.isActive)
+    .map((p) => ({
+      id: p.id,
+      initials: p.avatarValue,
+      gradient: p.avatarGradient,
+      name: p.displayName,
+    }))
 
   const activityItems = allTags
-    .filter(t => t.isActive)
+    .filter((t) => t.isActive)
     .sort((a, b) => a.sortOrder - b.sortOrder)
-    .map(t => ({
+    .map((t) => ({
       id: t.emoji,
       emoji: t.emoji,
       label: t.label,
@@ -84,8 +85,13 @@ export default function LogSessionRoute() {
   function handleMonthChange(delta: number) {
     let newMonth = calMonth + delta
     let newYear = calYear
-    if (newMonth < 0) { newMonth = 11; newYear-- }
-    else if (newMonth > 11) { newMonth = 0; newYear++ }
+    if (newMonth < 0) {
+      newMonth = 11
+      newYear--
+    } else if (newMonth > 11) {
+      newMonth = 0
+      newYear++
+    }
     setCalMonth(newMonth)
     setCalYear(newYear)
   }
@@ -97,37 +103,29 @@ export default function LogSessionRoute() {
   }
 
   function handlePartnerToggle(id: string) {
-    setSelectedPartnerIds(prev =>
-      prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
-    )
+    setSelectedPartnerIds((prev) => (prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]))
   }
 
   function handleActivityToggle(id: string) {
-    setSelectedActivities(prev =>
-      prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]
-    )
+    setSelectedActivities((prev) => (prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]))
   }
 
   function handleDelete() {
-    Alert.alert(
-      'Delete Session',
-      'Are you sure you want to delete this session? This can\u2019t be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => {
-            try {
-              encounters.delete(id!)
-            } catch (err) {
-              console.error('Failed to delete encounter:', err)
-            }
-            dismissSheet()
-          },
+    Alert.alert('Delete Session', 'Are you sure you want to delete this session? This can\u2019t be undone.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => {
+          try {
+            encounters.delete(id!)
+          } catch (err) {
+            console.error('Failed to delete encounter:', err)
+          }
+          dismissSheet()
         },
-      ],
-    )
+      },
+    ])
   }
 
   async function handleSave() {
@@ -203,7 +201,7 @@ export default function LogSessionRoute() {
       onSave={handleSave}
       onDelete={isEditing ? handleDelete : undefined}
       onClose={dismissSheet}
-      onDatePress={() => setCalendarOpen(prev => !prev)}
+      onDatePress={() => setCalendarOpen((prev) => !prev)}
       calendarOpen={calendarOpen}
       calendarContent={calendarContent}
       showSuccess={showSuccess}

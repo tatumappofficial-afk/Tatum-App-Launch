@@ -16,12 +16,7 @@ export interface AvatarStackProps {
   max?: number
 }
 
-export const AvatarStack: React.FC<AvatarStackProps> = ({
-  partners,
-  size = 32,
-  borderWidth = 2,
-  max = 3,
-}) => {
+export const AvatarStack: React.FC<AvatarStackProps> = ({ partners, size = 32, borderWidth = 2, max = 3 }) => {
   // Solo session — plain stone circle so the layout keeps its avatar slot.
   if (partners.length === 0) {
     return (
@@ -71,11 +66,13 @@ export const AvatarStack: React.FC<AvatarStackProps> = ({
             justifyContent: 'center',
           }}
         >
-          <Text style={{
-            fontFamily: font('dmSans', '500'),
-            fontSize: Math.round(size * 0.32),
-            color: colors.stone,
-          }}>{`+${overflow}`}</Text>
+          <Text
+            style={{
+              fontFamily: font('dmSans', '500'),
+              fontSize: Math.round(size * 0.32),
+              color: colors.stone,
+            }}
+          >{`+${overflow}`}</Text>
         </View>
       )}
     </View>

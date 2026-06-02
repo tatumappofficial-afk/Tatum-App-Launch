@@ -1,18 +1,16 @@
 import React, { useCallback, useState } from 'react'
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Pressable, ScrollView, Text, View } from 'react-native'
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated'
-import { LinearGradient } from 'expo-linear-gradient'
 import * as Haptics from 'expo-haptics'
 import Svg, { Polyline } from 'react-native-svg'
 import { Draggable, DraggableState } from 'react-native-reanimated-dnd'
-import { colors, font, fontFamily, gradientPoints, gradients, typography } from '../theme'
+import { colors, font, typography } from '../theme'
 import { SuccessOverlay, type SuccessOverlayDetails } from '../components/SuccessOverlay'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { StatusBarSpacer } from './shared/StatusBarSpacer'
 import { SectionLabel } from './shared/SectionLabel'
 import { CalendarGrid } from '../components/CalendarGrid'
 import { EmojiChip } from '../components/EmojiChip'
-import { AvatarCircle } from '../components/AvatarCircle'
 import { AvatarStack } from '../components/AvatarStack'
 import { formatPartnerLabel } from '@/src/utils/partnerLabel'
 import { StarRating } from '../components/StarRating'
@@ -41,7 +39,7 @@ export interface DaySession {
 }
 
 export interface CalendarScreenProps {
-  month: number       // 1-12
+  month: number // 1-12
   year: number
   today?: number
   /** True when the rendered month is the current real-world month. Combined
@@ -66,34 +64,51 @@ export interface CalendarScreenProps {
 /* ── Helpers ── */
 
 const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ]
-
 
 /* ── Sub-components ── */
 
 const NavHeader: React.FC = () => (
-  <View style={{
-    paddingHorizontal: 24,
-    paddingTop: 2,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    flexShrink: 0,
-    position: 'relative',
-    zIndex: 2,
-  }}>
+  <View
+    style={{
+      paddingHorizontal: 24,
+      paddingTop: 2,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      flexShrink: 0,
+      position: 'relative',
+      zIndex: 2,
+    }}
+  >
     <Text style={typography.screenTitle}>Calendar</Text>
   </View>
 )
 
 const ChevronIcon: React.FC<{ direction: 'back' | 'forward' }> = ({ direction }) => (
-  <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-    {direction === 'back'
-      ? <Polyline points="15 18 9 12 15 6" />
-      : <Polyline points="9 6 15 12 9 18" />
-    }
+  <Svg
+    width={16}
+    height={16}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={colors.terra}
+    strokeWidth={2.2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    {direction === 'back' ? <Polyline points="15 18 9 12 15 6" /> : <Polyline points="9 6 15 12 9 18" />}
   </Svg>
 )
 
@@ -103,19 +118,23 @@ const CalendarHeader: React.FC<{
   onPrev?: () => void
   onNext?: () => void
 }> = ({ month, year, onPrev, onNext }) => (
-  <View style={{
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 22,
-    paddingTop: 6,
-    paddingBottom: 4,
-  }}>
-    <Text style={{
-      fontFamily: font('playfair', '600'),
-      fontSize: 22,
-      color: colors.ink,
-    }}>
+  <View
+    style={{
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 22,
+      paddingTop: 6,
+      paddingBottom: 4,
+    }}
+  >
+    <Text
+      style={{
+        fontFamily: font('playfair', '600'),
+        fontSize: 22,
+        color: colors.ink,
+      }}
+    >
       {MONTH_NAMES[month - 1]} {year}
     </Text>
     <View style={{ flexDirection: 'row', gap: 6 }}>
@@ -157,7 +176,6 @@ const CalendarHeader: React.FC<{
   </View>
 )
 
-
 interface QuickLogWidgetProps {
   onQuickLog?: (emoji: string) => void
   emojis?: string[]
@@ -180,14 +198,12 @@ interface DraggableQuickLogChipProps {
 const DRAG_SCALE = 1.8
 const QUICK_LOG_CHIP_SIZE = 38
 
-const DraggableQuickLogChip: React.FC<DraggableQuickLogChipProps> = ({
-  emoji, onTap, onDragStart, onDragEnd,
-}) => {
+const DraggableQuickLogChip: React.FC<DraggableQuickLogChipProps> = ({ emoji, onTap, onDragStart, onDragEnd }) => {
   const [resetKey, setResetKey] = useState(0)
   const scale = useSharedValue(1)
   const animatedChipStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
-    shadowOpacity: (scale.value - 1) / (DRAG_SCALE - 1) * 0.25,
+    shadowOpacity: ((scale.value - 1) / (DRAG_SCALE - 1)) * 0.25,
   }))
   return (
     <Draggable<string>
@@ -214,15 +230,20 @@ const DraggableQuickLogChip: React.FC<DraggableQuickLogChipProps> = ({
           // back at origin. Setting scale to 0 (no spring) hides both the chip
           // and its shadow (shadowOpacity derives from scale).
           scale.value = 0
-          setResetKey(k => k + 1)
+          setResetKey((k) => k + 1)
         }
       }}
     >
-      <Animated.View style={[{
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowRadius: 8,
-      }, animatedChipStyle]}>
+      <Animated.View
+        style={[
+          {
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowRadius: 8,
+          },
+          animatedChipStyle,
+        ]}
+      >
         <EmojiChip
           emoji={emoji}
           size={QUICK_LOG_CHIP_SIZE}
@@ -235,7 +256,13 @@ const DraggableQuickLogChip: React.FC<DraggableQuickLogChipProps> = ({
   )
 }
 
-const QuickLogWidget: React.FC<QuickLogWidgetProps> = ({ onQuickLog, emojis = [], onDragStart, onDragEnd, isDragging = false }) => (
+const QuickLogWidget: React.FC<QuickLogWidgetProps> = ({
+  onQuickLog,
+  emojis = [],
+  onDragStart,
+  onDragEnd,
+  isDragging = false,
+}) => (
   // zIndex: 2 sits this section above the calendar block (zIndex: 1) so the
   // chip's upward drag transform paints over the calendar grid instead of
   // slipping behind it. The widget is rendered OUTSIDE the body ScrollView
@@ -246,24 +273,36 @@ const QuickLogWidget: React.FC<QuickLogWidgetProps> = ({ onQuickLog, emojis = []
         single line. The terra-uppercase title carries the visual weight; the
         muted italic tail explains the affordance. */}
     <Text style={{ marginBottom: 8 }}>
-      <Text style={{
-        fontFamily: font('dmSans', '500'),
-        fontSize: 12,
-        letterSpacing: 2.5,
-        textTransform: 'uppercase',
-        color: colors.terra,
-      }}>Quick Log</Text>
-      <Text style={{
-        fontFamily: font('dmSans', '300'),
-        fontSize: 12,
-        color: colors.muted,
-      }}>{'  ·  '}</Text>
-      <Text style={{
-        fontFamily: font('dmSans', '300'),
-        fontSize: 12,
-        color: colors.muted,
-        fontStyle: 'italic',
-      }}>Drag to a date · Tap to log today</Text>
+      <Text
+        style={{
+          fontFamily: font('dmSans', '500'),
+          fontSize: 12,
+          letterSpacing: 2.5,
+          textTransform: 'uppercase',
+          color: colors.terra,
+        }}
+      >
+        Quick Log
+      </Text>
+      <Text
+        style={{
+          fontFamily: font('dmSans', '300'),
+          fontSize: 12,
+          color: colors.muted,
+        }}
+      >
+        {'  ·  '}
+      </Text>
+      <Text
+        style={{
+          fontFamily: font('dmSans', '300'),
+          fontSize: 12,
+          color: colors.muted,
+          fontStyle: 'italic',
+        }}
+      >
+        Drag to a date · Tap to log today
+      </Text>
     </Text>
     {/* overflow: clip horizontally scrolled chips when idle; open up while
         dragging so the chip can travel up to the calendar grid. */}
@@ -288,7 +327,6 @@ const QuickLogWidget: React.FC<QuickLogWidgetProps> = ({ onQuickLog, emojis = []
   </View>
 )
 
-
 const SessionRow: React.FC<{ session: DaySession; onPress?: () => void }> = ({ session, onPress }) => (
   <Pressable
     onPress={onPress}
@@ -309,11 +347,15 @@ const SessionRow: React.FC<{ session: DaySession; onPress?: () => void }> = ({ s
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
       <AvatarStack partners={session.partners} size={36} borderWidth={2} />
       <View style={{ flex: 1 }}>
-        <Text style={{
-          fontFamily: font('playfair', '600'),
-          fontSize: 16,
-          color: colors.ink,
-        }}>{formatPartnerLabel(session.partners.map(p => p.name))}</Text>
+        <Text
+          style={{
+            fontFamily: font('playfair', '600'),
+            fontSize: 16,
+            color: colors.ink,
+          }}
+        >
+          {formatPartnerLabel(session.partners.map((p) => p.name))}
+        </Text>
       </View>
       <StarRating rating={session.rating} size={12} />
     </View>
@@ -323,12 +365,17 @@ const SessionRow: React.FC<{ session: DaySession; onPress?: () => void }> = ({ s
       ))}
     </View>
     {session.noteSnippet && (
-      <Text numberOfLines={1} style={{
-        fontSize: 14,
-        color: colors.stone,
-        fontStyle: 'italic',
-        fontFamily: font('dmSans', '300'),
-      }}>{session.noteSnippet}</Text>
+      <Text
+        numberOfLines={1}
+        style={{
+          fontSize: 14,
+          color: colors.stone,
+          fontStyle: 'italic',
+          fontFamily: font('dmSans', '300'),
+        }}
+      >
+        {session.noteSnippet}
+      </Text>
     )}
   </Pressable>
 )
@@ -358,79 +405,86 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
   const handleDragEnd = useCallback(() => setIsDragging(false), [])
 
   return (
-  <View style={{
-    width: '100%',
-    flex: 1,
-    position: 'relative',
-    overflow: 'hidden',
-    backgroundColor: colors.warmSand,
-  }}>
-    <DecorativeGlow position="top-right" size={220} opacity={0.09} />
-    <StatusBarSpacer />
-    <NavHeader />
+    <View
+      style={{
+        width: '100%',
+        flex: 1,
+        position: 'relative',
+        overflow: 'hidden',
+        backgroundColor: colors.warmSand,
+      }}
+    >
+      <DecorativeGlow position="top-right" size={220} opacity={0.09} />
+      <StatusBarSpacer />
+      <NavHeader />
 
-    <View style={{ flexShrink: 0, position: 'relative', zIndex: 1 }}>
-      <CalendarHeader month={month} year={year} onPrev={onPrevMonth} onNext={onNextMonth} />
-      <View style={{ paddingHorizontal: 18 }}>
-        <CalendarGrid
-          month={month - 1}
-          year={year}
-          today={today}
-          isCurrentMonth={isCurrentMonth}
-          selectedDay={selectedDay ?? undefined}
-          loggedDays={loggedDays}
-          onDayPress={onDayPress}
-          onDayDrop={onDayDrop}
-          isDragging={isDragging}
-        />
+      <View style={{ flexShrink: 0, position: 'relative', zIndex: 1 }}>
+        <CalendarHeader month={month} year={year} onPrev={onPrevMonth} onNext={onNextMonth} />
+        <View style={{ paddingHorizontal: 18 }}>
+          <CalendarGrid
+            month={month - 1}
+            year={year}
+            today={today}
+            isCurrentMonth={isCurrentMonth}
+            selectedDay={selectedDay ?? undefined}
+            loggedDays={loggedDays}
+            onDayPress={onDayPress}
+            onDayDrop={onDayDrop}
+            isDragging={isDragging}
+          />
+        </View>
       </View>
-    </View>
 
-    <View style={{ height: 1, backgroundColor: 'rgba(160,100,80,0.12)', marginHorizontal: 22, marginTop: 6, flexShrink: 0 }} />
+      <View
+        style={{
+          height: 1,
+          backgroundColor: 'rgba(160,100,80,0.12)',
+          marginHorizontal: 22,
+          marginTop: 6,
+          flexShrink: 0,
+        }}
+      />
 
-    {/* QuickLog lives OUTSIDE the body ScrollView so its draggable chip can
+      {/* QuickLog lives OUTSIDE the body ScrollView so its draggable chip can
         transform upward into the calendar's screen area without being clipped
         by the ScrollView's bounds. flexShrink: 0 keeps its height stable
         regardless of body content. The body ScrollView below holds only the
         selected-day sessions list, which gets all remaining vertical space. */}
-    <QuickLogWidget
-      onQuickLog={onQuickLog}
-      emojis={quickLogEmojis}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      isDragging={isDragging}
-    />
+      <QuickLogWidget
+        onQuickLog={onQuickLog}
+        emojis={quickLogEmojis}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        isDragging={isDragging}
+      />
 
-    <ScrollView
-      style={{ flex: 1 }}
-      contentContainerStyle={{ paddingBottom: 16 }}
-      scrollEnabled={!isDragging}
-    >
-      {selectedDay != null && (
-        <>
-          <SectionLabel label={selectedDayLabel || `Day ${selectedDay}`} style={{ marginHorizontal: 16, marginTop: 14 }} />
-          {daySessions.length > 0 ? (
-            daySessions.map((s) => (
-              <SessionRow key={s.id} session={s} onPress={() => onSessionPress?.(s.id)} />
-            ))
-          ) : (
-            <Text style={{
-              marginHorizontal: 16,
-              fontSize: 14,
-              color: colors.muted,
-              fontStyle: 'italic',
-              fontFamily: font('dmSans', '300'),
-            }}>No sessions logged</Text>
-          )}
-        </>
-      )}
-    </ScrollView>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 16 }} scrollEnabled={!isDragging}>
+        {selectedDay != null && (
+          <>
+            <SectionLabel
+              label={selectedDayLabel || `Day ${selectedDay}`}
+              style={{ marginHorizontal: 16, marginTop: 14 }}
+            />
+            {daySessions.length > 0 ? (
+              daySessions.map((s) => <SessionRow key={s.id} session={s} onPress={() => onSessionPress?.(s.id)} />)
+            ) : (
+              <Text
+                style={{
+                  marginHorizontal: 16,
+                  fontSize: 14,
+                  color: colors.muted,
+                  fontStyle: 'italic',
+                  fontFamily: font('dmSans', '300'),
+                }}
+              >
+                No sessions logged
+              </Text>
+            )}
+          </>
+        )}
+      </ScrollView>
 
-    <SuccessOverlay
-      visible={loggedOverlay != null}
-      label="Session logged"
-      details={loggedOverlay ?? undefined}
-    />
-  </View>
+      <SuccessOverlay visible={loggedOverlay != null} label="Session logged" details={loggedOverlay ?? undefined} />
+    </View>
   )
 }

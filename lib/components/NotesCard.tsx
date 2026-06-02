@@ -10,7 +10,16 @@ export interface NotesCardProps {
 }
 
 const PencilIcon: React.FC = () => (
-  <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+  <Svg
+    width={14}
+    height={14}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={colors.terra}
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <Path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
   </Svg>
 )
@@ -43,25 +52,29 @@ export const NotesCard: React.FC<NotesCardProps> = ({ note, onEditNote, showStac
   <View style={{ position: 'relative' }}>
     {/* Stacked paper shadow */}
     {showStackedShadow && (
-      <View style={{
-        position: 'absolute',
-        bottom: -4,
-        left: 6,
-        right: -6,
-        top: 4,
-        backgroundColor: colors.surface2,
-        borderRadius: 16,
-      }} />
+      <View
+        style={{
+          position: 'absolute',
+          bottom: -4,
+          left: 6,
+          right: -6,
+          top: 4,
+          backgroundColor: colors.surface2,
+          borderRadius: 16,
+        }}
+      />
     )}
     {/* Main card */}
-    <View style={{
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: 'rgba(160,100,80,0.14)',
-      borderRadius: 16,
-      overflow: 'hidden',
-      ...shadows.cardSubtle,
-    }}>
+    <View
+      style={{
+        backgroundColor: colors.surface,
+        borderWidth: 1,
+        borderColor: 'rgba(160,100,80,0.14)',
+        borderRadius: 16,
+        overflow: 'hidden',
+        ...shadows.cardSubtle,
+      }}
+    >
       <RuledLines />
       {/* Margin line */}
       <View
@@ -77,43 +90,49 @@ export const NotesCard: React.FC<NotesCardProps> = ({ note, onEditNote, showStac
       />
       {/* Text content */}
       {note ? (
-        <Text style={{
-          fontFamily: fontFamily.playfair,
-          fontSize: 14,
-          fontWeight: '400',
-          fontStyle: 'italic',
-          color: '#5A3E36',
-          lineHeight: 27,
-          padding: 12,
-          paddingHorizontal: 16,
-          paddingBottom: 16,
-        }}>
+        <Text
+          style={{
+            fontFamily: fontFamily.playfair,
+            fontSize: 14,
+            fontWeight: '400',
+            fontStyle: 'italic',
+            color: '#5A3E36',
+            lineHeight: 27,
+            padding: 12,
+            paddingHorizontal: 16,
+            paddingBottom: 16,
+          }}
+        >
           {note}
         </Text>
       ) : (
-        <Text style={{
-          padding: 14,
-          paddingHorizontal: 16,
-          fontSize: 14,
-          fontFamily: font('dmSans', '300'),
-          color: '#C4B0A0',
-          fontStyle: 'italic',
-          lineHeight: 27,
-        }}>
+        <Text
+          style={{
+            padding: 14,
+            paddingHorizontal: 16,
+            fontSize: 14,
+            fontFamily: font('dmSans', '300'),
+            color: '#C4B0A0',
+            fontStyle: 'italic',
+            lineHeight: 27,
+          }}
+        >
           No notes yet...
         </Text>
       )}
       {/* Edit note row */}
-      <View style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-        paddingVertical: 8,
-        paddingHorizontal: 14,
-        paddingBottom: 12,
-        borderTopWidth: 1,
-        borderTopColor: 'rgba(160,100,80,0.1)',
-      }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 6,
+          paddingVertical: 8,
+          paddingHorizontal: 14,
+          paddingBottom: 12,
+          borderTopWidth: 1,
+          borderTopColor: 'rgba(160,100,80,0.1)',
+        }}
+      >
         <Pressable
           onPress={onEditNote}
           accessibilityRole="button"
@@ -121,12 +140,14 @@ export const NotesCard: React.FC<NotesCardProps> = ({ note, onEditNote, showStac
           style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
         >
           <PencilIcon />
-          <Text style={{
-            fontSize: 14,
-            fontWeight: '400',
-            fontFamily: fontFamily.dmSans,
-            color: colors.terra,
-          }}>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: '400',
+              fontFamily: fontFamily.dmSans,
+              color: colors.terra,
+            }}
+          >
             {note ? 'Edit note' : 'Add note'}
           </Text>
         </Pressable>

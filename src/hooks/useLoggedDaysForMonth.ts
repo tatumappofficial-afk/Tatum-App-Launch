@@ -12,14 +12,10 @@ import type { LoggedDay } from '@/lib/components/CalendarGrid'
  * @param year four-digit year
  * @param encounters all encounters; this hook filters to the target month
  */
-export function useLoggedDaysForMonth(
-  month: number,
-  year: number,
-  encounters: Encounter[],
-): LoggedDay[] {
+export function useLoggedDaysForMonth(month: number, year: number, encounters: Encounter[]): LoggedDay[] {
   return useMemo(() => {
     const monthStr = `${year}-${String(month + 1).padStart(2, '0')}`
-    const monthEncounters = encounters.filter(e => e.date.startsWith(monthStr))
+    const monthEncounters = encounters.filter((e) => e.date.startsWith(monthStr))
     const map = new Map<number, { emojis: string[]; count: number }>()
     for (const enc of monthEncounters) {
       const day = parseInt(enc.date.split('-')[2], 10)

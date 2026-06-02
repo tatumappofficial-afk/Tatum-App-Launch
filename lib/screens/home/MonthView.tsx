@@ -47,12 +47,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
 }) => {
   if (stats.sessionsCount === 0) {
     return (
-      <EmptyPeriod
-        period="month"
-        scenario={emptyScenario}
-        onLookBack={onLookBack}
-        onJumpToNearest={onJumpToNearest}
-      />
+      <EmptyPeriod period="month" scenario={emptyScenario} onLookBack={onLookBack} onJumpToNearest={onJumpToNearest} />
     )
   }
 
@@ -95,28 +90,15 @@ export const MonthView: React.FC<MonthViewProps> = ({
 
       {stats.recentSessions.length > 0 && (
         <>
-          <SectionLabel
-            label="Sessions"
-            showChevron
-            style={INLINE_LABEL}
-            onPress={onSessionsHeaderPress}
-          />
-          <RecentSessionsScroller
-            sessions={stats.recentSessions}
-            partners={partners}
-            onPress={onSessionPress}
-          />
+          <SectionLabel label="Sessions" showChevron style={INLINE_LABEL} onPress={onSessionsHeaderPress} />
+          <RecentSessionsScroller sessions={stats.recentSessions} partners={partners} onPress={onSessionPress} />
         </>
       )}
 
       {stats.standoutSessions.length > 0 && (
         <>
           <SectionLabel label="What stood out" style={INLINE_LABEL} />
-          <StandoutSessions
-            sessions={stats.standoutSessions}
-            partners={stats.partners}
-            onPress={onSessionPress}
-          />
+          <StandoutSessions sessions={stats.standoutSessions} partners={stats.partners} onPress={onSessionPress} />
         </>
       )}
 

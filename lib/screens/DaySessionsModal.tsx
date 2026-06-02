@@ -19,11 +19,11 @@ export interface SessionCardData {
     initials: string
     gradient: string
   }[]
-  partnerName: string   // display name, e.g. "Alex" or "Alex + Jordan"
-  time: string          // e.g. "Evening · 9:30 pm"
-  score: number         // out of 10
-  tags: string[]        // emoji tags
-  duration?: string     // e.g. "45 min"
+  partnerName: string // display name, e.g. "Alex" or "Alex + Jordan"
+  time: string // e.g. "Evening · 9:30 pm"
+  score: number // out of 10
+  tags: string[] // emoji tags
+  duration?: string // e.g. "45 min"
   noteSnippet?: string
 }
 
@@ -57,8 +57,12 @@ const SessionCard: React.FC<{
       accessibilityRole="button"
       style={{
         backgroundColor: colors.surface,
-        borderWidth: 1, borderColor: 'rgba(160,100,80,0.14)',
-        borderRadius: 18, paddingVertical: 14, paddingHorizontal: 16, marginBottom: 10,
+        borderWidth: 1,
+        borderColor: 'rgba(160,100,80,0.14)',
+        borderRadius: 18,
+        paddingVertical: 14,
+        paddingHorizontal: 16,
+        marginBottom: 10,
         overflow: 'hidden',
         shadowColor: '#EDE3D8',
         shadowOffset: { width: 3, height: 4 },
@@ -68,29 +72,56 @@ const SessionCard: React.FC<{
       }}
     >
       {/* Card top row */}
-      <View style={{
-        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-        marginBottom: 10, position: 'relative', zIndex: 1,
-      }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: 10,
+          position: 'relative',
+          zIndex: 1,
+        }}
+      >
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
           {/* Avatar(s) */}
           {isSolo ? (
-            <View style={{
-              width: 38, height: 38, borderRadius: 19,
-              borderWidth: 2, borderColor: colors.warmSand,
-              backgroundColor: colors.surface2,
-              shadowColor: '#3D2B25', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 2,
-            }} />
+            <View
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: 19,
+                borderWidth: 2,
+                borderColor: colors.warmSand,
+                backgroundColor: colors.surface2,
+                shadowColor: '#3D2B25',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.12,
+                shadowRadius: 8,
+                elevation: 2,
+              }}
+            />
           ) : isMultiPartner ? (
             <View style={{ flexDirection: 'row', position: 'relative', width: 54, height: 38 }}>
-              <View style={{
-                position: 'absolute', left: 0, zIndex: 2,
-                width: 38, height: 38, borderRadius: 19,
-                alignItems: 'center', justifyContent: 'center',
-                overflow: 'hidden',
-                borderWidth: 2, borderColor: colors.warmSand,
-                shadowColor: '#3D2B25', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 2,
-              }}>
+              <View
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  zIndex: 2,
+                  width: 38,
+                  height: 38,
+                  borderRadius: 19,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  overflow: 'hidden',
+                  borderWidth: 2,
+                  borderColor: colors.warmSand,
+                  shadowColor: '#3D2B25',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.12,
+                  shadowRadius: 8,
+                  elevation: 2,
+                }}
+              >
                 <LinearGradient
                   colors={parseGradientColors(session.partners[0].gradient)}
                   start={gradientPoints.diagonal.start}
@@ -101,14 +132,26 @@ const SessionCard: React.FC<{
                   {session.partners[0].initials}
                 </Text>
               </View>
-              <View style={{
-                position: 'absolute', left: 18, zIndex: 1,
-                width: 38, height: 38, borderRadius: 19,
-                alignItems: 'center', justifyContent: 'center',
-                overflow: 'hidden',
-                borderWidth: 2, borderColor: colors.warmSand,
-                shadowColor: '#3D2B25', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 2,
-              }}>
+              <View
+                style={{
+                  position: 'absolute',
+                  left: 18,
+                  zIndex: 1,
+                  width: 38,
+                  height: 38,
+                  borderRadius: 19,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  overflow: 'hidden',
+                  borderWidth: 2,
+                  borderColor: colors.warmSand,
+                  shadowColor: '#3D2B25',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.12,
+                  shadowRadius: 8,
+                  elevation: 2,
+                }}
+              >
                 <LinearGradient
                   colors={parseGradientColors(session.partners[1].gradient)}
                   start={gradientPoints.diagonal.start}
@@ -121,13 +164,23 @@ const SessionCard: React.FC<{
               </View>
             </View>
           ) : (
-            <View style={{
-              width: 38, height: 38, borderRadius: 19,
-              alignItems: 'center', justifyContent: 'center',
-              overflow: 'hidden',
-              borderWidth: 2, borderColor: colors.warmSand,
-              shadowColor: '#3D2B25', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 2,
-            }}>
+            <View
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: 19,
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden',
+                borderWidth: 2,
+                borderColor: colors.warmSand,
+                shadowColor: '#3D2B25',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.12,
+                shadowRadius: 8,
+                elevation: 2,
+              }}
+            >
               <LinearGradient
                 colors={parseGradientColors(session.partners[0].gradient)}
                 start={gradientPoints.diagonal.start}
@@ -140,55 +193,122 @@ const SessionCard: React.FC<{
             </View>
           )}
           <View style={{ marginLeft: isMultiPartner ? 6 : 0 }}>
-            <Text style={{
-              fontFamily: font('playfair', '600'), fontSize: 16, color: colors.ink,
-            }}>{session.partnerName}</Text>
-            <Text style={{
-              fontFamily: font('dmSans', '300'), fontSize: 12, color: colors.stone, marginTop: 2,
-            }}>{session.time}</Text>
+            <Text
+              style={{
+                fontFamily: font('playfair', '600'),
+                fontSize: 16,
+                color: colors.ink,
+              }}
+            >
+              {session.partnerName}
+            </Text>
+            <Text
+              style={{
+                fontFamily: font('dmSans', '300'),
+                fontSize: 12,
+                color: colors.stone,
+                marginTop: 2,
+              }}
+            >
+              {session.time}
+            </Text>
           </View>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 1 }}>
-            <Text style={{
-              fontFamily: font('playfair', '700'), fontSize: 24, color: colors.terra,
-            }}>{session.score}</Text>
+            <Text
+              style={{
+                fontFamily: font('playfair', '700'),
+                fontSize: 24,
+                color: colors.terra,
+              }}
+            >
+              {session.score}
+            </Text>
             <Text style={{ fontSize: 14, fontWeight: '300', color: '#C4B0A0', marginHorizontal: 1 }}>/</Text>
             <Text style={{ fontSize: 14, fontWeight: '300', color: '#C4B0A0' }}>10</Text>
           </View>
-          <Pressable style={{
-            opacity: 0.45, padding: 0,
-          }}>
-            <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              <Line x1={7} y1={17} x2={17} y2={7} /><Polyline points="7 7 17 7 17 17" />
+          <Pressable
+            style={{
+              opacity: 0.45,
+              padding: 0,
+            }}
+          >
+            <Svg
+              width={18}
+              height={18}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke={colors.terra}
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <Line x1={7} y1={17} x2={17} y2={7} />
+              <Polyline points="7 7 17 7 17 17" />
             </Svg>
           </Pressable>
         </View>
       </View>
 
       {/* Tags + duration row */}
-      <View style={{
-        flexDirection: 'row', alignItems: 'center', gap: 5, flexWrap: 'wrap',
-        marginBottom: session.noteSnippet ? 8 : 0,
-        position: 'relative', zIndex: 1,
-      }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 5,
+          flexWrap: 'wrap',
+          marginBottom: session.noteSnippet ? 8 : 0,
+          position: 'relative',
+          zIndex: 1,
+        }}
+      >
         {session.tags.map((tag, i) => (
-          <Text key={i} style={{
-            fontSize: 15, backgroundColor: 'rgba(237,227,216,0.9)',
-            borderRadius: 7, paddingVertical: 2, paddingHorizontal: 6,
-            overflow: 'hidden',
-          }}>{tag}</Text>
+          <Text
+            key={i}
+            style={{
+              fontSize: 15,
+              backgroundColor: 'rgba(237,227,216,0.9)',
+              borderRadius: 7,
+              paddingVertical: 2,
+              paddingHorizontal: 6,
+              overflow: 'hidden',
+            }}
+          >
+            {tag}
+          </Text>
         ))}
         {session.duration && (
-          <View style={{
-            marginLeft: 'auto', flexDirection: 'row', alignItems: 'center', gap: 3,
-          }}>
-            <Svg width={11} height={11} viewBox="0 0 24 24" fill="none" stroke={colors.muted} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              <Circle cx={12} cy={12} r={10} /><Polyline points="12 6 12 12 16 14" />
+          <View
+            style={{
+              marginLeft: 'auto',
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 3,
+            }}
+          >
+            <Svg
+              width={11}
+              height={11}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke={colors.muted}
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <Circle cx={12} cy={12} r={10} />
+              <Polyline points="12 6 12 12 16 14" />
             </Svg>
-            <Text style={{
-              fontFamily: font('dmSans', '300'), fontSize: 12, color: colors.muted,
-            }}>{session.duration}</Text>
+            <Text
+              style={{
+                fontFamily: font('dmSans', '300'),
+                fontSize: 12,
+                color: colors.muted,
+              }}
+            >
+              {session.duration}
+            </Text>
           </View>
         )}
       </View>
@@ -198,10 +318,17 @@ const SessionCard: React.FC<{
         <Text
           numberOfLines={2}
           style={{
-            fontFamily: fontFamily.playfair, fontSize: 14, fontStyle: 'italic',
-            color: '#7A5040', lineHeight: 26, position: 'relative', zIndex: 1,
+            fontFamily: fontFamily.playfair,
+            fontSize: 14,
+            fontStyle: 'italic',
+            color: '#7A5040',
+            lineHeight: 26,
+            position: 'relative',
+            zIndex: 1,
           }}
-        >{session.noteSnippet}</Text>
+        >
+          {session.noteSnippet}
+        </Text>
       )}
     </Pressable>
   )
@@ -210,19 +337,27 @@ const SessionCard: React.FC<{
 /* ── Main Component ── */
 
 export const DaySessionsModal: React.FC<DaySessionsModalProps> = ({
-  sessionCount, sessions, dayLabel,
-  onLogAnother, onLogSession, onSessionPress,
+  sessionCount,
+  sessions,
+  dayLabel,
+  onLogAnother,
+  onLogSession,
+  onSessionPress,
 }) => (
   <View style={{ flex: 1, backgroundColor: colors.warmSand }}>
     {/* Header */}
-    <View style={{
-      flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between',
-      paddingHorizontal: 20, paddingTop: 12, flexShrink: 0,
-    }}>
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        justifyContent: 'space-between',
+        paddingHorizontal: 20,
+        paddingTop: 12,
+        flexShrink: 0,
+      }}
+    >
       <View>
-        <Text style={{ fontFamily: font('playfair', '700'), fontSize: 22, color: colors.ink }}>
-          {dayLabel}
-        </Text>
+        <Text style={{ fontFamily: font('playfair', '700'), fontSize: 22, color: colors.ink }}>{dayLabel}</Text>
         <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: colors.stone, marginTop: 2 }}>
           {sessionCount} session{sessionCount !== 1 ? 's' : ''} logged
         </Text>
@@ -230,18 +365,40 @@ export const DaySessionsModal: React.FC<DaySessionsModalProps> = ({
       <Pressable
         onPress={onLogAnother}
         style={{
-          flexDirection: 'row', alignItems: 'center', gap: 4,
-          borderWidth: 1, borderColor: 'rgba(192,120,88,0.35)',
-          borderRadius: 9999, paddingVertical: 5, paddingHorizontal: 12,
-          flexShrink: 0, marginTop: 4,
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 4,
+          borderWidth: 1,
+          borderColor: 'rgba(192,120,88,0.35)',
+          borderRadius: 9999,
+          paddingVertical: 5,
+          paddingHorizontal: 12,
+          flexShrink: 0,
+          marginTop: 4,
         }}
       >
-        <Svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth={2.5} strokeLinecap="round">
-          <Line x1={12} y1={5} x2={12} y2={19} /><Line x1={5} y1={12} x2={19} y2={12} />
+        <Svg
+          width={13}
+          height={13}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={colors.terra}
+          strokeWidth={2.5}
+          strokeLinecap="round"
+        >
+          <Line x1={12} y1={5} x2={12} y2={19} />
+          <Line x1={5} y1={12} x2={19} y2={12} />
         </Svg>
-        <Text style={{
-          fontFamily: fontFamily.dmSans, fontSize: 14, fontWeight: '400', color: colors.terra,
-        }}>Log another</Text>
+        <Text
+          style={{
+            fontFamily: fontFamily.dmSans,
+            fontSize: 14,
+            fontWeight: '400',
+            color: colors.terra,
+          }}
+        >
+          Log another
+        </Text>
       </Pressable>
     </View>
 
@@ -250,31 +407,57 @@ export const DaySessionsModal: React.FC<DaySessionsModalProps> = ({
       data={sessions}
       keyExtractor={(s) => s.id}
       contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 12 }}
-      renderItem={({ item }) => (
-        <SessionCard session={item} onPress={() => onSessionPress?.(item.id)} />
-      )}
+      renderItem={({ item }) => <SessionCard session={item} onPress={() => onSessionPress?.(item.id)} />}
     />
 
     {/* Footer */}
-    <View style={{
-      flexShrink: 0, paddingVertical: 8, paddingHorizontal: 16, paddingBottom: 24,
-      borderTopWidth: 1, borderTopColor: 'rgba(160,100,80,0.1)',
-    }}>
+    <View
+      style={{
+        flexShrink: 0,
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        paddingBottom: 24,
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(160,100,80,0.1)',
+      }}
+    >
       <Pressable
         onPress={onLogSession}
         style={{
-          width: '100%', height: 46,
-          borderWidth: 1.5, borderColor: 'rgba(192,120,88,0.3)', borderRadius: 9999,
-          flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+          width: '100%',
+          height: 46,
+          borderWidth: 1.5,
+          borderColor: 'rgba(192,120,88,0.3)',
+          borderRadius: 9999,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 6,
         }}
       >
-        <Svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke={colors.terra} strokeWidth={2.5} strokeLinecap="round">
-          <Line x1={12} y1={5} x2={12} y2={19} /><Line x1={5} y1={12} x2={19} y2={12} />
+        <Svg
+          width={15}
+          height={15}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={colors.terra}
+          strokeWidth={2.5}
+          strokeLinecap="round"
+        >
+          <Line x1={12} y1={5} x2={12} y2={19} />
+          <Line x1={5} y1={12} x2={19} y2={12} />
         </Svg>
-        <Text style={{
-          fontFamily: font('dmSans', '500'), fontSize: 14,
-          letterSpacing: 1.5, textTransform: 'uppercase', color: colors.terra,
-        }}>Log a Session</Text>
+        <Text
+          style={{
+            fontFamily: font('dmSans', '500'),
+            fontSize: 14,
+            letterSpacing: 1.5,
+            textTransform: 'uppercase',
+            color: colors.terra,
+          }}
+        >
+          Log a Session
+        </Text>
       </Pressable>
     </View>
   </View>
