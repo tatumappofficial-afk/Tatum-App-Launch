@@ -51,7 +51,12 @@
       ],
       "./plugins/withAndroidWindowBackground",
       "expo-sharing",
-      "@react-native-google-signin/google-signin"
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.242699264391-vf6a41rss675nk65pnglqo7vho6d4p5f"
+        }
+      ]
     ],
     "extra": {
       "router": {},
