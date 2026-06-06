@@ -23,3 +23,8 @@ expo-env.d.ts
 storybook-static
 storybook-static
 .DS_Store
+
+# Local developer tooling — not part of the shipped app.
+.claude/
+.terminalgraph/
+TATUM_AUDIT.md
