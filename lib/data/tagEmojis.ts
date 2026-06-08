@@ -36,6 +36,7 @@ export const TAG_EMOJIS: readonly string[] = [
   '😉',
   '😜',
   '🤭',
+  '🥸',
   '🥺',
   '🤗',
   '😴',
@@ -44,6 +45,7 @@ export const TAG_EMOJIS: readonly string[] = [
   '😡',
   // Bodies & gestures
   '💋',
+  '👄',
   '👅',
   '✋',
   '🫱',
