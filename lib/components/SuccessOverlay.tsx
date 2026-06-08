@@ -14,8 +14,10 @@ import { colors, font, gradientPoints, gradients } from '../theme'
 import { AvatarCircle } from './AvatarCircle'
 
 export interface SuccessOverlayDetails {
-  partnerInitials: string
-  partnerGradient: string
+  // Optional so partner-less logs (e.g. Period) can show emoji + date without
+  // a partner avatar.
+  partnerInitials?: string
+  partnerGradient?: string
   partnerName?: string
   emoji: string
   dateLabel: string
@@ -152,12 +154,14 @@ export const SuccessOverlay: React.FC<SuccessOverlayProps> = ({ visible, label, 
         {displayedDetails && (
           <View style={{ alignItems: 'center', gap: 8, marginTop: 4 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-              <AvatarCircle
-                initials={displayedDetails.partnerInitials}
-                gradient={displayedDetails.partnerGradient}
-                size={40}
-                borderWidth={2}
-              />
+              {displayedDetails.partnerInitials && displayedDetails.partnerGradient && (
+                <AvatarCircle
+                  initials={displayedDetails.partnerInitials}
+                  gradient={displayedDetails.partnerGradient}
+                  size={40}
+                  borderWidth={2}
+                />
+              )}
               <Text style={{ fontSize: 28 }}>{displayedDetails.emoji}</Text>
             </View>
             <Text

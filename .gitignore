@@ -28,3 +28,6 @@ storybook-static
 .claude/
 .terminalgraph/
 TATUM_AUDIT.md
+
+# Maestro flows themselves are committed; screenshots are local artifacts.
+.maestro/screenshots/

@@ -1,6 +1,6 @@
 import { getDatabase } from './sqlite'
 import { initCollections } from './collections'
-import { DEFAULT_ACTIVITY_TAGS } from './schema'
+import { DEFAULT_ACTIVITY_TAGS, PERIOD_TAG_ID } from './schema'
 import { generateId as uuid } from '@/src/utils/uuid'
 import { deriveInitials } from '@/src/utils/initials'
 
@@ -51,9 +51,39 @@ export async function initDatabase() {
       const tag = DEFAULT_ACTIVITY_TAGS[i]
       await db.runAsync(
         'INSERT INTO activity_tags (id, emoji, label, sortOrder, isDefault, isActive) VALUES (?, ?, ?, ?, 1, 1)',
-        [uuid(), tag.emoji, tag.label, i],
+        [tag.id ?? uuid(), tag.emoji, tag.label, i],
       )
     }
+  }
+
+  // Period tag is special: it's the one protected default and must always
+  // exist with the stable PERIOD_TAG_ID so downstream checks (lock state,
+  // partner-optional logging) can find it. Two heal passes:
+  // 1. Pre-stable-id installs seeded Period with a random UUID — rewrite that
+  //    row's id to PERIOD_TAG_ID. Encounters snapshot the emoji+label, not the
+  //    tag id, so updating activity_tags.id has no foreign-key consequences.
+  // 2. If Period was deleted (soft via isActive=0 or hard) in any prior build,
+  //    re-insert/re-activate it. Period can never be missing for any user.
+  await db.runAsync(
+    `UPDATE activity_tags SET id = ?
+     WHERE emoji = '🩸' AND isDefault = 1 AND id != ?`,
+    [PERIOD_TAG_ID, PERIOD_TAG_ID],
+  )
+  const periodRow = await db.getAllAsync<{ id: string; isActive: number }>(
+    'SELECT id, isActive FROM activity_tags WHERE id = ?',
+    [PERIOD_TAG_ID],
+  )
+  if (periodRow.length === 0) {
+    // Slot Period at the end so it doesn't reshuffle whatever the user already has.
+    const [{ maxOrder }] = await db.getAllAsync<{ maxOrder: number }>(
+      'SELECT COALESCE(MAX(sortOrder), -1) AS maxOrder FROM activity_tags',
+    )
+    await db.runAsync(
+      'INSERT INTO activity_tags (id, emoji, label, sortOrder, isDefault, isActive) VALUES (?, ?, ?, ?, 1, 1)',
+      [PERIOD_TAG_ID, '🩸', 'Period', maxOrder + 1],
+    )
+  } else if (periodRow[0].isActive === 0) {
+    await db.runAsync('UPDATE activity_tags SET isActive = 1 WHERE id = ?', [PERIOD_TAG_ID])
   }
 
   // Ensure at least one partner exists so the log-session picker is never
@@ -152,7 +182,7 @@ export async function resetAllData() {
     const tag = DEFAULT_ACTIVITY_TAGS[i]
     await db.runAsync(
       'INSERT INTO activity_tags (id, emoji, label, sortOrder, isDefault, isActive) VALUES (?, ?, ?, ?, 1, 1)',
-      [uuid(), tag.emoji, tag.label, i],
+      [tag.id ?? uuid(), tag.emoji, tag.label, i],
     )
   }
   await db.runAsync(

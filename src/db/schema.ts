@@ -13,7 +13,14 @@ export const ActivityTagSchema = z.object({
 
 export type ActivityTag = z.infer<typeof ActivityTagSchema>
 
-export const DEFAULT_ACTIVITY_TAGS: { emoji: string; label: string }[] = [
+// Stable id for the Period tag. Period is the one protected default — it can't
+// be renamed, have its emoji swapped, or be deleted, because its presence is
+// what unlocks period-only logging (no partner required). A stable id lets
+// every site check `tag.id === PERIOD_TAG_ID` without depending on the
+// (mutable) label or the (originally random) UUID assigned at seed time.
+export const PERIOD_TAG_ID = 'tag-period'
+
+export const DEFAULT_ACTIVITY_TAGS: { id?: string; emoji: string; label: string }[] = [
   { emoji: '🥂', label: 'Drunk Sex' },
   { emoji: '🤭', label: 'In The Butt Bob' },
   { emoji: '👉', label: 'Manual' },
@@ -39,7 +46,7 @@ export const DEFAULT_ACTIVITY_TAGS: { emoji: string; label: string }[] = [
   { emoji: '✨', label: 'Solo' },
   { emoji: '💃', label: 'She Initiated' },
   { emoji: '🥸', label: 'Faked it' },
-  { emoji: '🩸', label: 'Period' },
+  { id: PERIOD_TAG_ID, emoji: '🩸', label: 'Period' },
 ]
 
 // ── Encounter ──

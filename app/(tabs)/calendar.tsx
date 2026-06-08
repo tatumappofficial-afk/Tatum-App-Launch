@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router'
 import { generateId as uuid } from '@/src/utils/uuid'
 import { CalendarScreen } from '@/lib/screens/CalendarScreen'
 import type { SuccessOverlayDetails } from '@/lib/components/SuccessOverlay'
-import { activityTags, encounters, partners } from '@/src/db'
+import { activityTags, encounters, partners, PERIOD_TAG_ID } from '@/src/db'
 import { useActivityTagMap } from '@/src/hooks/useActivityTagMap'
 import { useLoggedDaysForMonth } from '@/src/hooks/useLoggedDaysForMonth'
 import { formatDateString } from '@/lib/stats/windows'
@@ -108,15 +108,24 @@ export default function CalendarRoute() {
   )
 
   function insertQuickEncounter(emoji: string, dateStr: string) {
-    if (allPartners.length === 0) return // can't log without a partner
     const nowStr = new Date().toISOString()
+    // Period is the only tag that can be quick-logged without a partner —
+    // it's a personal wellness marker, not a shared activity. Find by id
+    // (stable across renames) and compare emoji as the lookup key.
+    const periodTag = allTags.find((t) => t.id === PERIOD_TAG_ID)
+    const isPeriodLog = periodTag != null && emoji === periodTag.emoji
+
+    if (!isPeriodLog && allPartners.length === 0) return // every other tag needs a partner
+
     // Quick-log uses the main partner if set, else falls back to the first.
-    const target = allPartners.find((p) => p.isMain && p.isActive) ?? allPartners[0]
+    // Period skips this entirely so it can log even on a fresh, partner-less account.
+    const target = isPeriodLog ? null : (allPartners.find((p) => p.isMain && p.isActive) ?? allPartners[0])
+
     encounters.insert({
       id: uuid(),
       date: dateStr,
       activities: [emoji],
-      partnerIds: [target.id],
+      partnerIds: target ? [target.id] : [],
       stars: null,
       notes: null,
       createdAt: nowStr,
@@ -125,9 +134,9 @@ export default function CalendarRoute() {
     const d = new Date(dateStr + 'T00:00:00')
     const dateLabel = `${DAY_NAMES[d.getDay()].slice(0, 3)}, ${MONTH_NAMES[d.getMonth()]} ${d.getDate()}`
     setLoggedOverlay({
-      partnerInitials: target.avatarValue,
-      partnerGradient: target.avatarGradient,
-      partnerName: target.displayName,
+      partnerInitials: target?.avatarValue,
+      partnerGradient: target?.avatarGradient,
+      partnerName: target?.displayName,
       emoji,
       dateLabel,
     })

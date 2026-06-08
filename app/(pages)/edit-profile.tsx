@@ -7,12 +7,16 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import Svg, { Polyline } from 'react-native-svg'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Sortable, SortableItem } from 'react-native-reanimated-dnd'
 import { colors, font, gradientPoints, partnerGradients } from '@/lib/theme'
 import { AvatarCircle } from '@/lib/components/AvatarCircle'
 import { StatusBarSpacer } from '@/lib/screens/shared/StatusBarSpacer'
-import { activityTags, partners, userProfiles } from '@/src/db'
+import { activityTags, partners, userProfiles, PERIOD_TAG_ID } from '@/src/db'
 import { useUserProfile } from '@/src/hooks/useUserProfile'
 import { deriveInitials } from '@/src/utils/initials'
+
+// Matches existing tag-row visual height (vertical padding + content + border).
+const TAG_ROW_HEIGHT = 53
 
 const DEFAULT_GRADIENT = partnerGradients[0].gradient
 
@@ -117,6 +121,20 @@ export default function EditProfilePage() {
         },
       },
     ])
+  }
+
+  // Drag-reorder: reanimated-dnd's onDrop fires with the post-drop position map
+  // {[tagId]: newIndex}. Persist every id's new index as its sortOrder; tags are
+  // sorted by sortOrder everywhere, so the change ripples to all pickers.
+  // TAT-9 seam: when isPinned ships, filter the sortable's `data` to non-pinned
+  // tags and re-render pinned ones in their fixed slot above/below.
+  function handleTagReorder(_id: string, _position: number, allPositions?: { [id: string]: number }) {
+    if (!allPositions) return
+    for (const [tagId, newIndex] of Object.entries(allPositions)) {
+      activityTags.update(tagId, (draft) => {
+        draft.sortOrder = newIndex
+      })
+    }
   }
 
   return (
@@ -226,26 +244,65 @@ export default function EditProfilePage() {
           })}
         </View>
 
-        {/* Tags */}
+        {/* Tags. Sortable's items are absolutely positioned, so we give it a
+            fixed height to slot it inside the parent ScrollView without nested
+            scroll. The drag is gated by reanimated-dnd's built-in 200ms long-
+            press, so the chip Pressable handles taps normally. */}
         <Text style={styles.sectionLabel}>Your Tags</Text>
         <View style={styles.list}>
-          {activeTags.map((tag) => (
-            <View key={tag.id} style={styles.row}>
-              <View style={styles.rowLeft}>
-                <Text style={styles.tagEmoji}>{tag.emoji}</Text>
-                <Text style={styles.rowLabel}>{tag.label}</Text>
-              </View>
-              <Pressable
-                onPress={() => handleDeleteTag(tag.id, tag.label, tag.emoji)}
-                accessibilityRole="button"
-                accessibilityLabel={`Delete tag ${tag.label}`}
-                hitSlop={10}
-                style={({ pressed }) => [styles.removeButton, pressed && styles.removeButtonPressed]}
+          <Sortable
+            data={activeTags}
+            itemHeight={TAG_ROW_HEIGHT}
+            useFlatList={false}
+            style={{
+              height: TAG_ROW_HEIGHT * activeTags.length,
+              backgroundColor: 'transparent',
+            }}
+            renderItem={({ item: tag, id, positions, lowerBound, autoScrollDirection, itemsCount }) => (
+              <SortableItem
+                key={id}
+                id={id}
+                data={tag}
+                positions={positions}
+                lowerBound={lowerBound!}
+                autoScrollDirection={autoScrollDirection!}
+                itemsCount={itemsCount}
+                itemHeight={TAG_ROW_HEIGHT}
+                onDrop={handleTagReorder}
               >
-                <Ionicons name="remove-circle" size={26} color={colors.terra} />
-              </Pressable>
-            </View>
-          ))}
+                <Pressable
+                  onPress={() => router.push(`/(sheets)/edit-tag?id=${tag.id}`)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Edit tag ${tag.label}`}
+                  style={({ pressed }) => [styles.row, { height: TAG_ROW_HEIGHT }, pressed && styles.rowPressed]}
+                >
+                  <View style={styles.rowLeft}>
+                    {/* Drag-handle cue — purely visual; the whole row stays
+                        draggable via reanimated-dnd's long-press. */}
+                    <Ionicons name="reorder-three" size={22} color={colors.muted} />
+                    <Text style={styles.tagEmoji}>{tag.emoji}</Text>
+                    <Text style={styles.rowLabel}>{tag.label}</Text>
+                  </View>
+                  {/* Period is protected — hide the inline delete affordance.
+                      The row still opens the editor (in locked view) so users
+                      can see what it is. Lock icon hints at the protected state. */}
+                  {tag.id === PERIOD_TAG_ID ? (
+                    <Ionicons name="lock-closed" size={18} color={colors.muted} style={{ marginRight: 4 }} />
+                  ) : (
+                    <Pressable
+                      onPress={() => handleDeleteTag(tag.id, tag.label, tag.emoji)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Delete tag ${tag.label}`}
+                      hitSlop={10}
+                      style={({ pressed }) => [styles.removeButton, pressed && styles.removeButtonPressed]}
+                    >
+                      <Ionicons name="remove-circle" size={26} color={colors.terra} />
+                    </Pressable>
+                  )}
+                </Pressable>
+              </SortableItem>
+            )}
+          />
           <Pressable
             onPress={() => router.push('/(sheets)/add-tag')}
             accessibilityRole="button"
