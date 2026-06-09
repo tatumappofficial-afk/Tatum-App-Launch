@@ -1,0 +1,55 @@
+name: Claude code review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+      - ".maestro/**"
+      - ".github/ISSUE_TEMPLATE/**"
+
+# Cancel in-flight reviews when a new commit lands on the same PR.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    name: Claude review
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Claude review
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_args: "--model claude-sonnet-4-6 --max-turns 6"
+          prompt: |
+            Review this PR as a senior React Native / Expo engineer for Tatum — a private women's wellness app, local-first SQLite, biometric-locked, real production scale (not a small beta). Solo dev shipping client work.
+
+            Lead with the highest-impact concerns. Be terse. Don't restate the diff.
+
+            Focus on:
+            • User-facing correctness — bugs the real user will hit (auth flows, partner state, encounter writes, calendar render, biometric gate).
+            • Data integrity — anything touching the SQLite schema, migrations, the activity_tags seed, encounter partnerIds, or the heal passes in src/db/index.ts. Flag silent data loss or stale-cache risks (e.g. raw-SQL writes that bypass TanStack collections so live queries don't re-render).
+            • Privacy — Tatum stores sensitive intimate-session data locally. Flag anything that could leak it: logs, exports, analytics, telemetry, debug strings.
+            • iOS + Android parity — flag iOS-only or Android-only assumptions. Native-config diffs (app.json plugins, AndroidManifest, Info.plist).
+            • Period tag is protected (PERIOD_TAG_ID = 'tag-period') — flag any new code that lets users rename, re-emoji, or delete it, or that re-requires a partner for period-only logs.
+            • Onboarding gating is non-skippable (Apple + Google auth) — flag any change that weakens that.
+
+            Skip:
+            • Style / formatting (eslint + prettier already enforce that in the pr.yml job).
+            • Nits on naming, comments, JSDoc — only flag if genuinely misleading.
+            • Suggestions to add tests for things — verification is on-device via dev client, not test suites.
+
+            If the PR is clean, say so in one line. Don't manufacture findings.
