@@ -70,29 +70,25 @@ export default function EditTagRoute() {
 
   function handleDelete() {
     if (!tag || locked) return
-    Alert.alert(
-      'Delete tag',
-      `Delete “${tag.emoji} ${tag.label}”? Past sessions will keep this tag in their record.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => {
-            // Soft delete — encounters snapshot the emoji+label at log time, so
-            // we don't need to keep the row around for history, but flipping
-            // isActive instead of hard-deleting preserves recovery options if
-            // the user changes their mind.
-            activityTags.update(tag.id, (draft) => {
-              draft.isActive = false
-            })
-            setSuccessLabel(`${tag.emoji}  ${tag.label} removed`)
-            setShowSuccess(true)
-            dismissTimer.current = setTimeout(dismissSheet, 700)
-          },
+    Alert.alert('Delete tag', `Delete “${tag.emoji} ${tag.label}”? Past sessions will keep this tag in their record.`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => {
+          // Soft delete — encounters snapshot the emoji+label at log time, so
+          // we don't need to keep the row around for history, but flipping
+          // isActive instead of hard-deleting preserves recovery options if
+          // the user changes their mind.
+          activityTags.update(tag.id, (draft) => {
+            draft.isActive = false
+          })
+          setSuccessLabel(`${tag.emoji}  ${tag.label} removed`)
+          setShowSuccess(true)
+          dismissTimer.current = setTimeout(dismissSheet, 700)
         },
-      ],
-    )
+      },
+    ])
   }
 
   // Tag not found (deleted while sheet was open, or stale route param) — just
