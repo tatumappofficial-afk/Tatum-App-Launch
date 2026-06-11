@@ -17,21 +17,10 @@ export interface AvatarStackProps {
 }
 
 export const AvatarStack: React.FC<AvatarStackProps> = ({ partners, size = 32, borderWidth = 2, max = 3 }) => {
-  // Solo session — plain stone circle so the layout keeps its avatar slot.
-  if (partners.length === 0) {
-    return (
-      <View
-        style={{
-          width: size,
-          height: size,
-          borderRadius: size / 2,
-          backgroundColor: colors.surface2,
-          borderWidth,
-          borderColor: colors.white,
-        }}
-      />
-    )
-  }
+  // Partner-less session (most commonly a period log) — render nothing so the
+  // activity emojis take centerstage. An avatar circle always means a partner;
+  // the old stone placeholder read as a broken/blank avatar (TAT-7, TAT-13).
+  if (partners.length === 0) return null
 
   const visible = partners.slice(0, max)
   const overflow = partners.length - visible.length

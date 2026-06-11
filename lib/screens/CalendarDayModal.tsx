@@ -185,15 +185,17 @@ const SessionsState: React.FC<{
         >
           <AvatarStack partners={s.partners} size={38} borderWidth={2} />
           <View style={{ flex: 1 }}>
-            <Text
-              style={{
-                fontFamily: font('dmSans', '500'),
-                fontSize: 14,
-                color: colors.ink,
-              }}
-            >
-              {s.partnerName}
-            </Text>
+            {s.partnerName ? (
+              <Text
+                style={{
+                  fontFamily: font('dmSans', '500'),
+                  fontSize: 14,
+                  color: colors.ink,
+                }}
+              >
+                {s.partnerName}
+              </Text>
+            ) : null}
             <View style={{ flexDirection: 'row', gap: 4, marginTop: 3 }}>
               {s.tags.map((t, i) => (
                 <Text key={i} style={{ fontSize: 14 }}>

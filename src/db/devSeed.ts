@@ -58,7 +58,32 @@ const GRADIENTS = [
 // DEFAULT_ACTIVITY_TAGS emoji set on this branch (schema.ts), minus 🩸 which is
 // seeded separately as period logs. Encounters store the emoji string itself,
 // not a tag id, so this list just needs to match shipping emojis.
-const ACTIVITY_EMOJIS = ['🥂', '🤭', '👉', '🏁', '👄', '⌛️', '🏡', '😛', '👅', '☀️', '🤝', '😴', '🌅', '🛁', '🏖', '😡', '✋', '💦', '🍑', '🍆', '🌬️', '✨', '💃', '🥸']
+const ACTIVITY_EMOJIS = [
+  '🥂',
+  '🤭',
+  '👉',
+  '🏁',
+  '👄',
+  '⌛️',
+  '🏡',
+  '😛',
+  '👅',
+  '☀️',
+  '🤝',
+  '😴',
+  '🌅',
+  '🛁',
+  '🏖',
+  '😡',
+  '✋',
+  '💦',
+  '🍑',
+  '🍆',
+  '🌬️',
+  '✨',
+  '💃',
+  '🥸',
+]
 const PERIOD_EMOJI = '🩸'
 
 const SAMPLE_NOTES = [
