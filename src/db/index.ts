@@ -155,6 +155,36 @@ export async function initDatabase() {
     await db.runAsync('UPDATE encounters SET date = ? WHERE id = ?', [localDateStr, row.id])
   }
 
+  // Migrate v1.0 activities format. The original build stored each logged
+  // activity as a {emoji, label} snapshot object; every build since stores the
+  // bare emoji string and resolves the label live from activity_tags. Old rows
+  // crash rendering (an object fed to <Text>) the first time an upgraded
+  // install opens home. The LIKE filter only matches object-format JSON —
+  // plain emoji-string arrays contain no '{' — so this is a no-op for fresh
+  // installs and for rows already migrated.
+  const objectFormatRows = await db.getAllAsync<{ id: string; activities: string }>(
+    "SELECT id, activities FROM encounters WHERE activities LIKE '%{%'",
+  )
+  for (const row of objectFormatRows) {
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(row.activities)
+    } catch {
+      continue // unparseable — leave the row untouched rather than guess
+    }
+    if (!Array.isArray(parsed)) continue
+    const emojis = parsed
+      .map((a) =>
+        typeof a === 'string'
+          ? a
+          : a !== null && typeof a === 'object' && typeof (a as { emoji?: unknown }).emoji === 'string'
+            ? (a as { emoji: string }).emoji
+            : null,
+      )
+      .filter((e): e is string => e !== null)
+    await db.runAsync('UPDATE encounters SET activities = ? WHERE id = ?', [JSON.stringify(emojis), row.id])
+  }
+
   initialized = true
 }
 
