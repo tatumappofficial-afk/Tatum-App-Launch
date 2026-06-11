@@ -1,0 +1,44 @@
+appId: com.tatumapp.tatum
+# TAT-7 regression: a session logged through the full "Log a Session" form
+# without ever touching the partner row must attach the main partner (the
+# form pre-selects it) and render partner initials — not a blank circle —
+# in the Sessions Journal.
+#
+# Assumes a fresh install (run with clearState or on a clean device).
+---
+- launchApp:
+    clearState: true
+# Onboarding
+- extendedWaitUntil:
+    visible: "I Understand, Let's Begin"
+    timeout: 20000
+- tapOn: "I Understand, Let's Begin"
+# Protect: uncheck biometrics (checked by default) to reveal Skip
+- tapOn: "Enable biometric lock"
+- tapOn: "Skip for now"
+# Partner: name one — they become the main partner
+- tapOn: "Alex"
+- inputText: "Jordan"
+- hideKeyboard
+- tapOn: "ADD PARTNER"
+- tapOn: "These Look Good"
+- tapOn: "Start Logging"
+- extendedWaitUntil:
+    visible: "TATUM"
+    timeout: 15000
+# Log a session WITHOUT touching the partner row
+- tapOn: "Log a session"
+- extendedWaitUntil:
+    visible: "Log a Session"
+    timeout: 10000
+- tapOn: "Quickie"
+- tapOn: "SAVE SESSION"
+- extendedWaitUntil:
+    notVisible: "SAVE SESSION"
+    timeout: 8000
+# Sessions tab (point tap: RN tab bar exposes no stable text target)
+- tapOn:
+    point: 70%,93%
+# The session row must show the partner — blank avatar = regression
+- assertVisible: "Sessions Journal"
+- assertVisible: "Jordan"

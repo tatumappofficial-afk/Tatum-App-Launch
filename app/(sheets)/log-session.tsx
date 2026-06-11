@@ -53,6 +53,17 @@ export default function LogSessionRoute() {
     }
   }, [isEditing, existingEncounter, initialized])
 
+  // New sessions default to the main partner, same as quick-log. Without this
+  // the form starts with no partner selected and saves silently partner-less,
+  // which renders as a blank avatar circle in session lists (TAT-7).
+  useEffect(() => {
+    if (!isEditing && !initialized && allPartners.length > 0) {
+      const main = allPartners.find((p) => p.isMain && p.isActive)
+      if (main) setSelectedPartnerIds([main.id])
+      setInitialized(true)
+    }
+  }, [isEditing, initialized, allPartners])
+
   const dateDisplay = selectedDate.toLocaleDateString('en-US', {
     weekday: 'short',
     month: 'short',
