@@ -3,6 +3,7 @@ import { initCollections } from './collections'
 import { DEFAULT_ACTIVITY_TAGS, PERIOD_TAG_ID } from './schema'
 import { generateId as uuid } from '@/src/utils/uuid'
 import { deriveInitials } from '@/src/utils/initials'
+import { seedDevData } from './devSeed'
 
 export {
   activityTags,
@@ -183,6 +184,13 @@ export async function initDatabase() {
       )
       .filter((e): e is string => e !== null)
     await db.runAsync('UPDATE encounters SET activities = ? WHERE id = ?', [JSON.stringify(emojis), row.id])
+  }
+
+  // Dev-only data seed. Double-gated: __DEV__ is stripped from release builds,
+  // and EXPO_PUBLIC_DEV_SEED only lives in .env.local (never the EAS production
+  // profile). Fresh-aware — no-ops if sessions already exist.
+  if (__DEV__ && process.env.EXPO_PUBLIC_DEV_SEED === '1') {
+    await seedDevData(db)
   }
 
   initialized = true
