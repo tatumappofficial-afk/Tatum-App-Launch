@@ -14,31 +14,31 @@ appId: com.tatumapp.tatum
     timeout: 20000
 - tapOn: "I Understand, Let's Begin"
 # Protect: uncheck biometrics (checked by default) to reveal Skip
-- tapOn: "Enable biometric lock"
-- tapOn: "Skip for now"
+- tapOn: 'Enable biometric lock'
+- tapOn: 'Skip for now'
 # Partner: name one — they become the main partner
-- tapOn: "Alex"
-- inputText: "Jordan"
+- tapOn: 'Alex'
+- inputText: 'Jordan'
 - hideKeyboard
-- tapOn: "ADD PARTNER"
-- tapOn: "These Look Good"
-- tapOn: "Start Logging"
+- tapOn: 'ADD PARTNER'
+- tapOn: 'These Look Good'
+- tapOn: 'Start Logging'
 - extendedWaitUntil:
-    visible: "TATUM"
+    visible: 'TATUM'
     timeout: 15000
 # Log a session WITHOUT touching the partner row
-- tapOn: "Log a session"
+- tapOn: 'Log a session'
 - extendedWaitUntil:
-    visible: "Log a Session"
+    visible: 'Log a Session'
     timeout: 10000
-- tapOn: "Quickie"
-- tapOn: "SAVE SESSION"
+- tapOn: 'Quickie'
+- tapOn: 'SAVE SESSION'
 - extendedWaitUntil:
-    notVisible: "SAVE SESSION"
+    notVisible: 'SAVE SESSION'
     timeout: 8000
 # Sessions tab (point tap: RN tab bar exposes no stable text target)
 - tapOn:
     point: 70%,93%
 # The session row must show the partner — blank avatar = regression
-- assertVisible: "Sessions Journal"
-- assertVisible: "Jordan"
+- assertVisible: 'Sessions Journal'
+- assertVisible: 'Jordan'
