@@ -1,5 +1,5 @@
 import React, { useRef } from 'react'
-import { View, Text, Pressable } from 'react-native'
+import { Platform, Pressable, Text, View } from 'react-native'
 import Slider from '@expo/ui/community/slider'
 import * as Haptics from 'expo-haptics'
 import { colors, font } from '../theme'
@@ -64,6 +64,11 @@ export const RatingSlider: React.FC<RatingSliderProps> = ({ value, onChange }) =
           maximumValue={STEPS}
           step={1}
           minimumTrackTintColor={colors.terra}
+          // Unset, these fall back to the platform accent — Material blue on
+          // Android, which clashes with the warm palette. iOS keeps its
+          // standard white thumb; Android's gets the terra treatment.
+          maximumTrackTintColor={colors.surface2}
+          thumbTintColor={Platform.OS === 'android' ? colors.terra : undefined}
           onValueChange={emitStep}
         />
       </View>
