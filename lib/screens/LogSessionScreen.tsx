@@ -24,6 +24,10 @@ export interface Partner {
 
 export interface ActivityTag {
   id: string
+  // Stable unique row id, used as the React key. `id` is the emoji (used for
+  // selection/storage) and can collide when two tags share an emoji, so it's
+  // unsafe as a key on its own.
+  tagId?: string
   emoji: string
   label: string
 }
@@ -222,7 +226,7 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
         >
           {activities.map((tag) => (
             <TagPill
-              key={tag.id}
+              key={tag.tagId ?? tag.id}
               emoji={tag.emoji}
               label={tag.label}
               variant="selectable"

@@ -1,11 +1,11 @@
 import React from 'react'
 import { Pressable, Text, View } from 'react-native'
 import { FlashList } from '@shopify/flash-list'
-import Svg, { Polyline } from 'react-native-svg'
 import { colors, font, fontFamily } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { StatusBarSpacer } from './shared/StatusBarSpacer'
 import { AvatarStack } from '../components/AvatarStack'
+import { BackButton } from '../components/BackButton'
 import { StarRating } from '../components/StarRating'
 
 export interface SessionsListPartner {
@@ -32,21 +32,6 @@ export interface SessionsListScreenProps {
   onBack?: () => void
   onEntryPress?: (id: string) => void
 }
-
-const BackChevron: React.FC = () => (
-  <Svg
-    width={18}
-    height={18}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke={colors.stone}
-    strokeWidth={2.5}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <Polyline points="15 18 9 12 15 6" />
-  </Svg>
-)
 
 export const SessionsListScreen: React.FC<SessionsListScreenProps> = ({
   title,
@@ -79,22 +64,7 @@ export const SessionsListScreen: React.FC<SessionsListScreenProps> = ({
           zIndex: 2,
         }}
       >
-        <Pressable
-          onPress={onBack}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          style={({ pressed }) => ({
-            width: 34,
-            height: 34,
-            borderRadius: 17,
-            backgroundColor: colors.surface2,
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: pressed ? 0.7 : 1,
-          })}
-        >
-          <BackChevron />
-        </Pressable>
+        <BackButton onPress={onBack} accessibilityLabel="Back" />
       </View>
 
       {/* Title block */}

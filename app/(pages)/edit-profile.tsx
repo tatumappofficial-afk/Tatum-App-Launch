@@ -5,11 +5,11 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
-import Svg, { Polyline } from 'react-native-svg'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Sortable, SortableItem } from 'react-native-reanimated-dnd'
 import { colors, font, gradientPoints, partnerGradients } from '@/lib/theme'
 import { AvatarCircle } from '@/lib/components/AvatarCircle'
+import { BackButton } from '@/lib/components/BackButton'
 import { StatusBarSpacer } from '@/lib/screens/shared/StatusBarSpacer'
 import { activityTags, partners, userProfiles, PERIOD_TAG_ID } from '@/src/db'
 import { useUserProfile } from '@/src/hooks/useUserProfile'
@@ -143,26 +143,7 @@ export default function EditProfilePage() {
 
       {/* Sticky header — match PartnersScreen / Settings pattern */}
       <View style={styles.header}>
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={8}
-          style={styles.backButton}
-        >
-          <Svg
-            width={18}
-            height={18}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke={colors.stone}
-            strokeWidth={2.5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <Polyline points="15 18 9 12 15 6" />
-          </Svg>
-        </Pressable>
+        <BackButton onPress={() => router.back()} accessibilityLabel="Back" />
         <Text style={styles.headerTitle} pointerEvents="none">
           Edit Profile
         </Text>
@@ -362,14 +343,6 @@ const styles = StyleSheet.create({
     flexShrink: 0,
     position: 'relative',
     zIndex: 2,
-  },
-  backButton: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: colors.surface2,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   headerTitle: {
     fontFamily: font('playfair', '700'),

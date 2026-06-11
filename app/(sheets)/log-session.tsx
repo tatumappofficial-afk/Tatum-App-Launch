@@ -84,6 +84,7 @@ export default function LogSessionRoute() {
     .sort((a, b) => a.sortOrder - b.sortOrder)
     .map((t) => ({
       id: t.emoji,
+      tagId: t.id,
       emoji: t.emoji,
       label: t.label,
     }))

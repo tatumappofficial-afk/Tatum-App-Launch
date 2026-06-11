@@ -7,6 +7,8 @@ import { DecorativeGlow } from './shared/DecorativeGlow'
 import { StatusBarSpacer } from './shared/StatusBarSpacer'
 import { SectionLabel } from './shared/SectionLabel'
 import { AvatarCircle } from '../components/AvatarCircle'
+import { BackButton } from '../components/BackButton'
+import { EditButton } from '../components/EditButton'
 import { StatStrip } from '../components/StatStrip'
 import { StarRating } from '../components/StarRating'
 
@@ -92,53 +94,9 @@ export const PartnerProfileScreen: React.FC<PartnerProfileScreenProps> = ({
           zIndex: 2,
         }}
       >
-        <Pressable
-          onPress={onBack}
-          style={{
-            width: 34,
-            height: 34,
-            borderRadius: 17,
-            backgroundColor: colors.surface2,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Svg
-            width={18}
-            height={18}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke={colors.stone}
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <Polyline points="15 18 9 12 15 6" />
-          </Svg>
-        </Pressable>
+        <BackButton onPress={onBack} />
 
-        <Pressable
-          onPress={onEdit}
-          style={{
-            backgroundColor: 'transparent',
-            borderWidth: 1,
-            borderColor: 'rgba(160,100,80,0.3)',
-            borderRadius: 9999,
-            paddingVertical: 5,
-            paddingHorizontal: 14,
-          }}
-        >
-          <Text
-            style={{
-              fontFamily: font('dmSans', '500'),
-              fontSize: 14,
-              color: colors.terra,
-              letterSpacing: 0.5,
-            }}
-          >
-            Edit
-          </Text>
-        </Pressable>
+        <EditButton onPress={onEdit} />
       </View>
 
       {/* Hero */}
