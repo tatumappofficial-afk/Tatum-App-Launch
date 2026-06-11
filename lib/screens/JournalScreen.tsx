@@ -152,7 +152,7 @@ const EntryCard: React.FC<{ entry: JournalEntry; onPress?: () => void }> = ({ en
           <View style={styles.entryHeaderLeft}>
             <AvatarStack partners={entry.partners} size={32} borderWidth={2} />
             <View>
-              <Text style={styles.entryPartnerName}>{entry.partnerName}</Text>
+              {entry.partnerName ? <Text style={styles.entryPartnerName}>{entry.partnerName}</Text> : null}
               <Text style={styles.entryDate}>{entry.date}</Text>
             </View>
           </View>

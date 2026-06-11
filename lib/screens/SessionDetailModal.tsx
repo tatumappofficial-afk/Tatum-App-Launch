@@ -157,19 +157,23 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
           paddingHorizontal: 24,
         }}
       >
-        <View style={{ marginBottom: 10 }}>
-          <AvatarStack partners={partners} size={68} borderWidth={3} max={3} />
-        </View>
-        <Text
-          style={{
-            fontFamily: font('playfair', '700'),
-            fontSize: 22,
-            color: colors.ink,
-            marginBottom: 3,
-          }}
-        >
-          {partnerName}
-        </Text>
+        {partners.length > 0 && (
+          <View style={{ marginBottom: 10 }}>
+            <AvatarStack partners={partners} size={68} borderWidth={3} max={3} />
+          </View>
+        )}
+        {partnerName ? (
+          <Text
+            style={{
+              fontFamily: font('playfair', '700'),
+              fontSize: 22,
+              color: colors.ink,
+              marginBottom: 3,
+            }}
+          >
+            {partnerName}
+          </Text>
+        ) : null}
         <Text
           style={{
             fontFamily: font('dmSans', '300'),
