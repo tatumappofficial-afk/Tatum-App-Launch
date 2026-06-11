@@ -4,6 +4,7 @@ import Svg, { Line, Path, Polyline } from 'react-native-svg'
 import { colors, font, fontFamily } from '../theme'
 import { SectionLabel } from './shared/SectionLabel'
 import { AvatarStack } from '../components/AvatarStack'
+import { EditButton } from '../components/EditButton'
 import { StatStrip } from '../components/StatStrip'
 import { TagPill } from '../components/TagPill'
 
@@ -113,28 +114,7 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
         </Text>
       </Pressable>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        <Pressable
-          onPress={onEdit}
-          style={{
-            backgroundColor: 'transparent',
-            borderWidth: 1,
-            borderColor: 'rgba(160,100,80,0.3)',
-            borderRadius: 9999,
-            paddingVertical: 5,
-            paddingHorizontal: 14,
-          }}
-        >
-          <Text
-            style={{
-              fontFamily: font('dmSans', '500'),
-              fontSize: 14,
-              color: colors.terra,
-              letterSpacing: 0.5,
-            }}
-          >
-            Edit
-          </Text>
-        </Pressable>
+        <EditButton onPress={onEdit} />
         <Pressable
           onPress={onClose}
           accessibilityRole="button"

@@ -5,6 +5,7 @@ import { colors, font } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { StatusBarSpacer } from './shared/StatusBarSpacer'
 import { AvatarCircle } from '../components/AvatarCircle'
+import { BackButton } from '../components/BackButton'
 
 /* ── Types ── */
 
@@ -86,30 +87,7 @@ export const PartnersScreen: React.FC<PartnersScreenProps> = ({
           zIndex: 2,
         }}
       >
-        <Pressable
-          onPress={onBack}
-          style={{
-            width: 34,
-            height: 34,
-            borderRadius: 17,
-            backgroundColor: colors.surface2,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Svg
-            width={18}
-            height={18}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke={colors.stone}
-            strokeWidth={2.5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <Polyline points="15 18 9 12 15 6" />
-          </Svg>
-        </Pressable>
+        <BackButton onPress={onBack} />
         <Text
           style={{
             fontFamily: font('playfair', '700'),

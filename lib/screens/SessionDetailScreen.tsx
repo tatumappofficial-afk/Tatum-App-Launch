@@ -7,6 +7,8 @@ import { StatusBarSpacer } from './shared/StatusBarSpacer'
 import { SectionLabel } from './shared/SectionLabel'
 import { AvatarCircle } from '../components/AvatarCircle'
 import { AvatarStack } from '../components/AvatarStack'
+import { BackButton } from '../components/BackButton'
+import { EditButton } from '../components/EditButton'
 import { StatStrip } from '../components/StatStrip'
 import { TagPill } from '../components/TagPill'
 
@@ -90,74 +92,25 @@ const ScreenHeader: React.FC<{
       zIndex: 2,
     }}
   >
-    <Pressable
-      onPress={onBack}
-      accessibilityLabel="Go back"
-      style={({ pressed }) => ({
-        width: 34,
-        height: 34,
-        borderRadius: 17,
-        backgroundColor: pressed ? 'rgba(160,100,80,0.18)' : colors.surface2,
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 0,
-        transform: [{ scale: pressed ? 0.94 : 1 }],
-      })}
-    >
-      <Svg
-        width={18}
-        height={18}
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke={colors.stone}
-        strokeWidth={2.2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <Polyline points="15 18 9 12 15 6" />
-      </Svg>
-    </Pressable>
-    {/* Absolute-positioned so the back/edit buttons don't shift around it. */}
-    <Text
-      style={{
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        top: 11,
-        textAlign: 'center',
-        fontFamily: font('dmSans', '500'),
-        fontSize: 14,
-        letterSpacing: 1.6,
-        textTransform: 'uppercase',
-        color: colors.stone,
-        pointerEvents: 'none',
-      }}
-    >
-      Session
-    </Text>
-    <Pressable
-      onPress={onEdit}
-      style={({ pressed }) => ({
-        backgroundColor: pressed ? 'rgba(192,120,88,0.12)' : 'transparent',
-        borderWidth: 1,
-        borderColor: pressed ? colors.terra : 'rgba(160,100,80,0.3)',
-        borderRadius: 9999,
-        paddingVertical: 5,
-        paddingHorizontal: 14,
-        opacity: pressed ? 0.85 : 1,
-      })}
-    >
+    <BackButton onPress={onBack} accessibilityLabel="Go back" />
+    {/* Absolute-positioned, full-width title. Wrapped in a pointerEvents="none"
+        View so it never intercepts taps on the back/edit buttons beneath it —
+        `pointerEvents` set via style alone did not take effect on Android here. */}
+    <View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, top: 11 }}>
       <Text
         style={{
-          fontSize: 14,
+          textAlign: 'center',
           fontFamily: font('dmSans', '500'),
-          color: colors.terra,
-          letterSpacing: 0.5,
+          fontSize: 14,
+          letterSpacing: 1.6,
+          textTransform: 'uppercase',
+          color: colors.stone,
         }}
       >
-        Edit
+        Session
       </Text>
-    </Pressable>
+    </View>
+    <EditButton onPress={onEdit} />
   </View>
 )
 

@@ -8,6 +8,7 @@ import { StatusBarSpacer } from './shared/StatusBarSpacer'
 import { SectionLabel } from './shared/SectionLabel'
 import { AvatarCircle } from '../components/AvatarCircle'
 import { AvatarStack } from '../components/AvatarStack'
+import { EditButton } from '../components/EditButton'
 import { StatStrip } from '../components/StatStrip'
 import { StarRating } from '../components/StarRating'
 import { TagPill } from '../components/TagPill'
@@ -168,30 +169,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         >
           <Text style={typography.screenTitle}>Profile</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <Pressable
-              onPress={onEdit}
-              accessibilityRole="button"
-              style={({ pressed }) => ({
-                backgroundColor: pressed ? 'rgba(160,100,80,0.12)' : 'transparent',
-                borderWidth: 1,
-                borderColor: 'rgba(160,100,80,0.3)',
-                borderRadius: 9999,
-                paddingVertical: 5,
-                paddingHorizontal: 14,
-                opacity: pressed ? 0.85 : 1,
-              })}
-            >
-              <Text
-                style={{
-                  fontSize: 14,
-                  color: colors.terra,
-                  letterSpacing: 0.5,
-                  fontFamily: font('dmSans', '500'),
-                }}
-              >
-                Edit
-              </Text>
-            </Pressable>
+            <EditButton onPress={onEdit} />
             <Pressable
               onPress={onSettings}
               accessibilityLabel="Settings"
