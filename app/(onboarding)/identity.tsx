@@ -92,7 +92,8 @@ export default function IdentityScreen() {
               A little about you
             </Text>
             <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: colors.stone, lineHeight: 20.8 }}>
-              Your name and email help Tatum send you product updates and check in on how it's going. You can leave email blank.
+              Your name and email help Tatum send you product updates and check in on how it's going. You can leave
+              email blank.
             </Text>
           </View>
 

@@ -232,8 +232,18 @@ export async function seedDevData(db: SQLiteDatabase): Promise<void> {
   // ── Flip settings: onboarded, lock off (so automation isn't blocked) ──
   await db.runAsync("UPDATE user_settings SET hasOnboarded = 1, biometricLock = 0 WHERE id = 'singleton'")
 
-  // Give the main user profile a display name so the profile screen isn't blank.
-  await db.runAsync("UPDATE user_profile SET displayName = COALESCE(displayName, 'Alex') WHERE id = 'default'")
+  // Give the main user profile a display name so the profile screen isn't blank,
+  // and stamp a fake dev identity so the auth gate doesn't block automation —
+  // without authProvider set, the _layout guard routes every launch to sign-in,
+  // which the emulator can't complete (no real Google/Apple credentials).
+  await db.runAsync(
+    `UPDATE user_profile SET
+       displayName = COALESCE(displayName, 'Alex'),
+       email = COALESCE(email, 'dev-seed@example.com'),
+       authProvider = COALESCE(authProvider, 'google'),
+       providerUserId = COALESCE(providerUserId, 'dev-seed-user')
+     WHERE id = 'default'`,
+  )
 
   console.log(`[devSeed] done — ${SESSION_COUNT} sessions + period logs + ${namedPartners.length} partners`)
 }

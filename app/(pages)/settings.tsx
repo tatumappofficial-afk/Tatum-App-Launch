@@ -106,39 +106,32 @@ export default function SettingsRoute() {
           )
         }}
         onEraseEverything={() => {
-          Alert.alert(
-            'Erase Everything',
-            'This will permanently delete all your data. This action cannot be undone.',
-            [
-              { text: 'Cancel', style: 'cancel' },
-              {
-                text: 'Erase',
-                style: 'destructive',
-                onPress: async () => {
-                  try {
-                    await eraseAllUserData()
-                    // Reset settings — flipping hasOnboarded false trips the
-                    // _layout guard back to (onboarding) reactively, no manual
-                    // navigation needed.
-                    updateSettings({
-                      notifications: DEFAULT_SETTINGS.notifications,
-                      whisperDeliveryDefault: DEFAULT_SETTINGS.whisperDeliveryDefault,
-                      calendarStartDay: DEFAULT_SETTINGS.calendarStartDay,
-                      biometricLock: DEFAULT_SETTINGS.biometricLock,
-                      hasOnboarded: DEFAULT_SETTINGS.hasOnboarded,
-                      theme: DEFAULT_SETTINGS.theme,
-                    })
-                  } catch (err) {
-                    console.error('Erase failed:', err)
-                    Alert.alert(
-                      'Erase failed',
-                      'Something went wrong. Please try again.',
-                    )
-                  }
-                },
+          Alert.alert('Erase Everything', 'This will permanently delete all your data. This action cannot be undone.', [
+            { text: 'Cancel', style: 'cancel' },
+            {
+              text: 'Erase',
+              style: 'destructive',
+              onPress: async () => {
+                try {
+                  await eraseAllUserData()
+                  // Reset settings — flipping hasOnboarded false trips the
+                  // _layout guard back to (onboarding) reactively, no manual
+                  // navigation needed.
+                  updateSettings({
+                    notifications: DEFAULT_SETTINGS.notifications,
+                    whisperDeliveryDefault: DEFAULT_SETTINGS.whisperDeliveryDefault,
+                    calendarStartDay: DEFAULT_SETTINGS.calendarStartDay,
+                    biometricLock: DEFAULT_SETTINGS.biometricLock,
+                    hasOnboarded: DEFAULT_SETTINGS.hasOnboarded,
+                    theme: DEFAULT_SETTINGS.theme,
+                  })
+                } catch (err) {
+                  console.error('Erase failed:', err)
+                  Alert.alert('Erase failed', 'Something went wrong. Please try again.')
+                }
               },
-            ],
-          )
+            },
+          ])
         }}
       />
       <SuccessOverlay visible={showSuccess} label={successLabel} />

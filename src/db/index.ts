@@ -1,5 +1,14 @@
 import { getDatabase } from './sqlite'
-import { initCollections } from './collections'
+import {
+  initCollections,
+  activityTags,
+  affirmations,
+  desireEntries,
+  encounters,
+  partners,
+  userProfiles,
+  whisperMessages,
+} from './collections'
 import { DEFAULT_ACTIVITY_TAGS, PERIOD_TAG_ID } from './schema'
 import { generateId as uuid } from '@/src/utils/uuid'
 import { deriveInitials } from '@/src/utils/initials'
@@ -227,15 +236,14 @@ export async function eraseAllUserData() {
 
   // Pull every row's id from each table, then delete via the collection so the
   // optimistic store and SQLite stay aligned.
-  const [encounterRows, partnerRows, desireRows, whisperRows, affirmationRows, tagRows] =
-    await Promise.all([
-      db.getAllAsync<{ id: string }>('SELECT id FROM encounters'),
-      db.getAllAsync<{ id: string }>('SELECT id FROM partners'),
-      db.getAllAsync<{ id: string }>('SELECT id FROM desire_entries'),
-      db.getAllAsync<{ id: string }>('SELECT id FROM whisper_messages'),
-      db.getAllAsync<{ id: string }>('SELECT id FROM affirmations'),
-      db.getAllAsync<{ id: string }>('SELECT id FROM activity_tags'),
-    ])
+  const [encounterRows, partnerRows, desireRows, whisperRows, affirmationRows, tagRows] = await Promise.all([
+    db.getAllAsync<{ id: string }>('SELECT id FROM encounters'),
+    db.getAllAsync<{ id: string }>('SELECT id FROM partners'),
+    db.getAllAsync<{ id: string }>('SELECT id FROM desire_entries'),
+    db.getAllAsync<{ id: string }>('SELECT id FROM whisper_messages'),
+    db.getAllAsync<{ id: string }>('SELECT id FROM affirmations'),
+    db.getAllAsync<{ id: string }>('SELECT id FROM activity_tags'),
+  ])
 
   for (const row of encounterRows) encounters.delete(row.id)
   for (const row of partnerRows) partners.delete(row.id)
