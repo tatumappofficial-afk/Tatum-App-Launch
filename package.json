@@ -23,6 +23,7 @@
     "expo": "^56.0.3",
     "expo-age-range": "~56.0.5",
     "expo-apple-authentication": "~56.0.4",
+    "expo-build-properties": "~56.0.18",
     "expo-constants": "~56.0.14",
     "expo-crypto": "~56.0.3",
     "expo-file-system": "~56.0.7",
