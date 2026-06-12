@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { View, Text, Image, Platform, Alert, Pressable } from 'react-native'
 import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
@@ -15,6 +15,7 @@ import { StatusBarSpacer } from '@/lib/screens/shared/StatusBarSpacer'
 import { userProfiles, eraseAllUserData } from '@/src/db'
 import { useSettings, useUpdateSettings } from '@/src/hooks/useSettings'
 import { DEFAULT_SETTINGS } from '@/src/db/schema'
+import { checkAgeSignal } from '@/src/services/ageSignal'
 
 const GOOGLE_IOS_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID
 const GOOGLE_WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID
@@ -51,6 +52,10 @@ export default function AuthScreen() {
     q.from({ userProfiles }).select(({ userProfiles }) => ({ ...userProfiles })),
   )
 
+  // Set when the platform age signal (Apple/Google) definitively reports the
+  // signed-in user as under 18. Renders a terminal block screen — Tatum is 18+.
+  const [ageBlocked, setAgeBlocked] = useState(false)
+
   useEffect(() => {
     if (GOOGLE_WEB_CLIENT_ID) {
       GoogleSignin.configure({
@@ -61,12 +66,25 @@ export default function AuthScreen() {
     }
   }, [])
 
-  const handleSignedIn = (params: {
+  const handleSignedIn = async (params: {
     email: string
     fullName: string | null
     provider: 'apple' | 'google'
     providerUserId: string
   }) => {
+    // Age gate. Ask the platform (Apple/Google) for the signed-in user's age
+    // band. A definitive "under 18" blocks entry entirely — Tatum is 18+. A
+    // 'clear' or 'unavailable' verdict proceeds (the attestation checkbox on
+    // /identity is the hard in-app gate; this is the supplementary platform
+    // signal). Runs here because a valid signal requires an OS-level sign-in,
+    // which has just happened.
+    const verdict = await checkAgeSignal()
+    if (verdict === 'minor') {
+      if (params.provider === 'google') await GoogleSignin.signOut().catch(() => {})
+      setAgeBlocked(true)
+      return
+    }
+
     // The signal for "this is an existing user (fresh install or v1.0
     // migration)" is hasOnboarded — NOT displayName. v1.0 had no identity
     // capture, so a v1.0 user updating to v1.1 has hasOnboarded=true but
@@ -215,7 +233,7 @@ export default function AuthScreen() {
       // be null — we accept null name and let the user fill it on /identity.
       const fullName = credential.fullName?.givenName ?? null
       const email = credential.email ?? ''
-      handleSignedIn({ email, fullName, provider: 'apple', providerUserId: credential.user })
+      await handleSignedIn({ email, fullName, provider: 'apple', providerUserId: credential.user })
     } catch (err: unknown) {
       if ((err as { code?: string }).code === 'ERR_REQUEST_CANCELED') return
       console.error('Apple sign-in failed:', err)
@@ -237,7 +255,7 @@ export default function AuthScreen() {
       if (response.type === 'cancelled') return
       const user = response.data.user
       if (!user?.email) throw new Error('Google sign-in returned no email')
-      handleSignedIn({
+      await handleSignedIn({
         email: user.email,
         fullName: user.givenName ?? null,
         provider: 'google',
@@ -256,6 +274,42 @@ export default function AuthScreen() {
           : ''
       Alert.alert('Sign in failed', `Google Sign In could not complete.${hint}`)
     }
+  }
+
+  if (ageBlocked) {
+    return (
+      <View style={{ flex: 1, position: 'relative', overflow: 'hidden', backgroundColor: colors.warmSand }}>
+        <DecorativeGlow position="center" size={320} opacity={0.13} />
+        <StatusBarSpacer />
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 }}>
+          <Text style={{ fontSize: 56, marginBottom: 20 }}>🌸</Text>
+          <Text
+            style={{
+              fontFamily: font('playfair', '700'),
+              fontSize: 26,
+              color: colors.ink,
+              textAlign: 'center',
+              marginBottom: 14,
+              lineHeight: 32,
+            }}
+          >
+            You must be 18 or older
+          </Text>
+          <Text
+            style={{
+              fontFamily: font('dmSans', '300'),
+              fontSize: 15,
+              color: colors.stone,
+              textAlign: 'center',
+              lineHeight: 22,
+            }}
+          >
+            Tatum is an intimate wellness space for adults. Based on your account, we're not able to let you in right
+            now. We're sorry.
+          </Text>
+        </View>
+      </View>
+    )
   }
 
   return (
