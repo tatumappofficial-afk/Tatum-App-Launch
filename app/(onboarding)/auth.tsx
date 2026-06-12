@@ -244,8 +244,17 @@ export default function AuthScreen() {
         providerUserId: user.id,
       })
     } catch (err: unknown) {
-      console.error('Google sign-in failed:', err)
-      Alert.alert('Sign in failed', 'Google Sign In could not complete. Please try again.')
+      const e = err as { code?: number | string; message?: string }
+      console.error('Google sign-in failed:', JSON.stringify({ code: e.code, message: e.message }))
+      // Code 10 = DEVELOPER_ERROR: the console's Android OAuth client doesn't
+      // match this build's package name + signing SHA-1, or webClientId isn't
+      // the Web client ID. Surfaced in the alert so a setup mismatch is
+      // diagnosable without adb.
+      const hint =
+        String(e.code) === '10'
+          ? '\n\nThe Google sign-in configuration does not match this build. Check the OAuth client (package name and SHA-1) in Google Cloud Console.'
+          : ''
+      Alert.alert('Sign in failed', `Google Sign In could not complete.${hint}`)
     }
   }
 
