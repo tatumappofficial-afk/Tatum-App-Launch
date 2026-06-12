@@ -416,17 +416,6 @@ export default function AuthScreen() {
             </Text>
           </Pressable>
         </View>
-
-        <Text
-          style={{
-            fontFamily: font('dmSans', '300'),
-            fontSize: 12,
-            color: colors.stone,
-            textAlign: 'center',
-          }}
-        >
-          Your data never leaves your device.
-        </Text>
       </View>
     </View>
   )
