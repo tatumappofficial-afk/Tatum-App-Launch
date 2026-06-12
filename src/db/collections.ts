@@ -46,17 +46,27 @@ function createSqliteCollection<T extends { id: string }>(config: {
       sync: ({ begin, write, commit, markReady }) => {
         // Load all rows from SQLite on init
         const database = getDb()
-        database.getAllAsync<Record<string, unknown>>(`SELECT * FROM ${table}`).then((rows) => {
-          begin()
-          for (const row of rows) {
-            write({
-              value: rowToEntity(row),
-              type: 'insert',
-            })
-          }
-          commit()
-          markReady()
-        })
+        database
+          .getAllAsync<Record<string, unknown>>(`SELECT * FROM ${table}`)
+          .then((rows) => {
+            begin()
+            for (const row of rows) {
+              write({
+                value: rowToEntity(row),
+                type: 'insert',
+              })
+            }
+            commit()
+            markReady()
+          })
+          .catch((err) => {
+            // A swallowed rejection here permanently kills the collection:
+            // live queries stay empty and every queued mutation handler waits
+            // forever. Surface it loudly — and still markReady so the app can
+            // at least write (the table exists; only this load failed).
+            console.error(`[db] collection ${table} initial load failed:`, err)
+            markReady()
+          })
       },
     },
     onInsert: async ({ transaction }) => {
@@ -82,10 +92,15 @@ function createSqliteCollection<T extends { id: string }>(config: {
         const columns = Object.keys(row).filter((c) => c !== 'id')
         const setClause = columns.map((c) => `${c} = ?`).join(', ')
         const values = columns.map((c) => row[c])
-        await database.runAsync(`UPDATE ${table} SET ${setClause} WHERE id = ?`, [
-          ...(values as (string | number | null)[]),
-          mutation.key as string,
-        ])
+        try {
+          await database.runAsync(`UPDATE ${table} SET ${setClause} WHERE id = ?`, [
+            ...(values as (string | number | null)[]),
+            mutation.key as string,
+          ])
+        } catch (err) {
+          console.error(`UPDATE ${table} failed:`, err, { setClause, key: mutation.key })
+          throw err
+        }
       }
     },
     onDelete: async ({ transaction }) => {
