@@ -98,6 +98,8 @@ export default function AuthScreen() {
     if (isFreshUser) {
       // Fresh user — full onboarding flow continues. /identity collects the
       // name they want, then routes through /protect → /partner → /tags.
+      // The age verdict rides along so the identity screen can log it with the
+      // signup (name + email + attestation + verdict, all in one record).
       router.push({
         pathname: '/(onboarding)/identity',
         params: {
@@ -105,6 +107,7 @@ export default function AuthScreen() {
           fullName: params.fullName ?? '',
           provider: params.provider,
           providerUserId: params.providerUserId,
+          ageVerdict: verdict,
         },
       })
       return

@@ -11,6 +11,8 @@ import { DecorativeGlow } from '@/lib/screens/shared/DecorativeGlow'
 import { StatusBarSpacer } from '@/lib/screens/shared/StatusBarSpacer'
 import { userProfiles } from '@/src/db'
 import { useSettings } from '@/src/hooks/useSettings'
+import { recordSignup } from '@/src/services/signupSync'
+import type { AgeSignalVerdict } from '@/src/services/ageSignal'
 
 const Checkmark: React.FC = () => (
   <Svg
@@ -38,11 +40,13 @@ export default function IdentityScreen() {
     fullName?: string
     provider?: 'apple' | 'google'
     providerUserId?: string
+    ageVerdict?: string
   }>()
   const initialName = (params.fullName ?? '').trim()
   const initialEmail = params.email ?? ''
   const provider = (params.provider ?? null) as 'apple' | 'google' | null
   const providerUserId = params.providerUserId ?? null
+  const ageVerdict = (params.ageVerdict ?? 'unavailable') as AgeSignalVerdict
 
   const [firstName, setFirstName] = useState(initialName)
   const [email, setEmail] = useState(initialEmail)
@@ -78,6 +82,14 @@ export default function IdentityScreen() {
         draft.email = trimmedEmail.length > 0 ? trimmedEmail : null
         draft.authProvider = provider
         draft.providerUserId = providerUserId
+      })
+      // Log the signup (name + email + 18+ attestation + platform age verdict)
+      // to Alanna's Firestore. Fire-and-forget — never blocks onboarding.
+      void recordSignup({
+        name: firstName.trim(),
+        email: trimmedEmail,
+        attested18: attests18,
+        ageVerdict,
       })
       // Existing user (v1.0 → v1.1 migration, or a sign-back-in after an
       // erase) skips the rest of onboarding — they already have settings,

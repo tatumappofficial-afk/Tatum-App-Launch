@@ -24,10 +24,13 @@ const AGE_THRESHOLDS = { threshold1: 13, threshold2: 16, threshold3: 18 }
  */
 export async function checkAgeSignal(): Promise<AgeSignalVerdict> {
   try {
-    const { upperBound } = await requestAgeRangeAsync(AGE_THRESHOLDS)
+    const response = await requestAgeRangeAsync(AGE_THRESHOLDS)
+    const { lowerBound, upperBound } = response
     // A known upper bound below 18 is the only definitive "minor" signal.
     // Everything else (18+, or an open-ended upper bound) is treated as clear.
-    return upperBound != null && upperBound < 18 ? 'minor' : 'clear'
+    const verdict: AgeSignalVerdict = upperBound != null && upperBound < 18 ? 'minor' : 'clear'
+    console.log(`[ageSignal] verdict=${verdict} lowerBound=${lowerBound} upperBound=${upperBound}`)
+    return verdict
   } catch (err) {
     // Declined, unsupported, or transient — supplementary signal, so we don't
     // block on it. The attestation checkbox remains the hard gate.
