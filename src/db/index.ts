@@ -1,5 +1,14 @@
 import { getDatabase } from './sqlite'
-import { initCollections } from './collections'
+import {
+  initCollections,
+  activityTags,
+  affirmations,
+  desireEntries,
+  encounters,
+  partners,
+  userProfiles,
+  whisperMessages,
+} from './collections'
 import { DEFAULT_ACTIVITY_TAGS, PERIOD_TAG_ID } from './schema'
 import { generateId as uuid } from '@/src/utils/uuid'
 import { deriveInitials } from '@/src/utils/initials'
@@ -194,6 +203,94 @@ export async function initDatabase() {
   }
 
   initialized = true
+}
+
+// ── User-facing "Sign Out" ──
+//
+// Clears the auth identity fields on the user_profile row but leaves all
+// other data intact. Pairs with updateSettings({ hasOnboarded: false }) on
+// the caller side so the layout guard reactively routes to (onboarding) →
+// /auth. When the same user signs back in, auth.tsx detects the matching
+// providerUserId and silently restores them to their data.
+export async function signOutUser() {
+  userProfiles.update('default', (draft) => {
+    draft.email = null
+    draft.authProvider = null
+    draft.providerUserId = null
+  })
+}
+
+// ── User-facing "Erase Everything" ──
+//
+// Wipes all user-generated data via the TanStack DB collection APIs so the
+// in-memory stores update reactively (live queries re-render immediately).
+// A raw SQL wipe (see resetAllData below) would clear SQLite but leave the
+// collections showing stale data until the next full app restart.
+//
+// Leaves the user_profile row in place but resets its fields — the rest of
+// the app expects exactly one profile row with id='default' to exist at all
+// times. Re-seeds the default activity tags and the Solo partner so the user
+// has a usable starting state without needing to relaunch.
+export async function eraseAllUserData() {
+  const db = await getDatabase()
+
+  // Pull every row's id from each table, then delete via the collection so the
+  // optimistic store and SQLite stay aligned.
+  const [encounterRows, partnerRows, desireRows, whisperRows, affirmationRows, tagRows] = await Promise.all([
+    db.getAllAsync<{ id: string }>('SELECT id FROM encounters'),
+    db.getAllAsync<{ id: string }>('SELECT id FROM partners'),
+    db.getAllAsync<{ id: string }>('SELECT id FROM desire_entries'),
+    db.getAllAsync<{ id: string }>('SELECT id FROM whisper_messages'),
+    db.getAllAsync<{ id: string }>('SELECT id FROM affirmations'),
+    db.getAllAsync<{ id: string }>('SELECT id FROM activity_tags'),
+  ])
+
+  for (const row of encounterRows) encounters.delete(row.id)
+  for (const row of partnerRows) partners.delete(row.id)
+  for (const row of desireRows) desireEntries.delete(row.id)
+  for (const row of whisperRows) whisperMessages.delete(row.id)
+  for (const row of affirmationRows) affirmations.delete(row.id)
+  for (const row of tagRows) activityTags.delete(row.id)
+
+  // Reset the profile row (don't delete — the app relies on it existing).
+  const DEFAULT_AVATAR_GRADIENT = 'linear-gradient(135deg, #C07858, #7C4A5A)'
+  userProfiles.update('default', (draft) => {
+    draft.displayName = null
+    draft.email = null
+    draft.authProvider = null
+    draft.providerUserId = null
+    draft.avatarValue = 'A'
+    draft.avatarGradient = DEFAULT_AVATAR_GRADIENT
+    draft.tier = 'free'
+    draft.premiumExpiresAt = null
+  })
+
+  // Re-seed default activity tags so the log-session picker isn't empty.
+  for (let i = 0; i < DEFAULT_ACTIVITY_TAGS.length; i++) {
+    const tag = DEFAULT_ACTIVITY_TAGS[i]
+    activityTags.insert({
+      id: uuid(),
+      emoji: tag.emoji,
+      label: tag.label,
+      sortOrder: i,
+      isDefault: true,
+      isActive: true,
+    })
+  }
+
+  // Re-seed the Solo partner so the log picker has at least one target.
+  const now = new Date().toISOString()
+  partners.insert({
+    id: uuid(),
+    displayName: 'Solo',
+    avatarType: 'emoji',
+    avatarValue: '✨',
+    avatarGradient: 'linear-gradient(135deg, #9A8878, #6A5A4A)',
+    isActive: true,
+    isMain: true,
+    createdAt: now,
+    updatedAt: now,
+  })
 }
 
 // ── Reset helper for dev tools / testing ──

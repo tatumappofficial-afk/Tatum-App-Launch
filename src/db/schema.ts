@@ -153,6 +153,11 @@ export const UserProfileSchema = z.object({
   premiumExpiresAt: z.string().nullable(),
   email: z.string().nullable(),
   authProvider: z.enum(['apple', 'google']).nullable(),
+  // Stable per-user identifier from the OAuth provider — Apple's `user` field
+  // or Google's `sub`. Bound to identity: once set, only sign-ins from the
+  // same identifier can return into this device's data without an explicit
+  // erase. See auth.tsx for the match/mismatch handling.
+  providerUserId: z.string().nullable(),
 })
 
 export type UserProfile = z.infer<typeof UserProfileSchema>

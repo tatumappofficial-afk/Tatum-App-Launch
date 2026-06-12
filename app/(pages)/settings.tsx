@@ -6,6 +6,8 @@ import { useRouter } from 'expo-router'
 import { useSettings, useUpdateSettings } from '@/src/hooks/useSettings'
 import { authenticate } from '@/src/utils/biometrics'
 import { exportData } from '@/src/utils/exportData'
+import { eraseAllUserData, signOutUser } from '@/src/db'
+import { DEFAULT_SETTINGS } from '@/src/db/schema'
 
 const PRIVACY_POLICY_URL = 'https://www.tatumapp.com/privacy.html'
 const TERMS_URL = 'https://www.tatumapp.com/terms.html'
@@ -80,10 +82,55 @@ export default function SettingsRoute() {
         onPrivacyPolicy={() => openExternal(PRIVACY_POLICY_URL)}
         onTerms={() => openExternal(TERMS_URL)}
         onExportData={handleExportData}
+        onSignOut={() => {
+          Alert.alert(
+            'Sign Out',
+            'Your data stays on this device. Sign back in with the same account to come right back to it.',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: 'Sign Out',
+                onPress: async () => {
+                  try {
+                    await signOutUser()
+                    // The layout guard reactively detects no authProvider and
+                    // routes to (onboarding), where welcome.tsx redirects to
+                    // /auth — no manual navigation needed.
+                  } catch (err) {
+                    console.error('Sign out failed:', err)
+                    Alert.alert('Sign out failed', 'Please try again.')
+                  }
+                },
+              },
+            ],
+          )
+        }}
         onEraseEverything={() => {
           Alert.alert('Erase Everything', 'This will permanently delete all your data. This action cannot be undone.', [
             { text: 'Cancel', style: 'cancel' },
-            { text: 'Erase', style: 'destructive', onPress: () => console.log('Erase confirmed') },
+            {
+              text: 'Erase',
+              style: 'destructive',
+              onPress: async () => {
+                try {
+                  await eraseAllUserData()
+                  // Reset settings — flipping hasOnboarded false trips the
+                  // _layout guard back to (onboarding) reactively, no manual
+                  // navigation needed.
+                  updateSettings({
+                    notifications: DEFAULT_SETTINGS.notifications,
+                    whisperDeliveryDefault: DEFAULT_SETTINGS.whisperDeliveryDefault,
+                    calendarStartDay: DEFAULT_SETTINGS.calendarStartDay,
+                    biometricLock: DEFAULT_SETTINGS.biometricLock,
+                    hasOnboarded: DEFAULT_SETTINGS.hasOnboarded,
+                    theme: DEFAULT_SETTINGS.theme,
+                  })
+                } catch (err) {
+                  console.error('Erase failed:', err)
+                  Alert.alert('Erase failed', 'Something went wrong. Please try again.')
+                }
+              },
+            },
           ])
         }}
       />

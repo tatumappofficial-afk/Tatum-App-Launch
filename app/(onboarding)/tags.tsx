@@ -173,7 +173,7 @@ export default function TagsScreen() {
               marginBottom: 8,
             }}
           >
-            Step 4 of 4
+            Step 6 of 6
           </Text>
           <Text
             style={{
@@ -257,7 +257,7 @@ export default function TagsScreen() {
         <View style={{ marginBottom: 12 }}>
           <GradientButton label="These Look Good" onPress={() => router.push('/(onboarding)/ready')} />
         </View>
-        <StepDots current={3} />
+        <StepDots current={5} />
       </View>
     </View>
   )

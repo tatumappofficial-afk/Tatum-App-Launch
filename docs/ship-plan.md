@@ -91,17 +91,20 @@ You'll do these in order. The prerequisite step gets a string you'll need in ste
 
 #### Prerequisite — get your Android debug SHA-1 fingerprint
 
-You'll need this when creating the Android OAuth client. Run in any terminal:
+You'll need this when creating the Android OAuth client. **Important:** Expo's prebuild generates a *project-local* debug keystore at `android/app/debug.keystore` and Gradle signs every `npx expo run:android` build with that one — not the global `~/.android/debug.keystore` Android Studio normally uses. Make sure to read from the project-local file or Google will reject sign-in with `DEVELOPER_ERROR`. Run from the repo root:
 
 ```bash
-keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android | grep SHA1
+keytool -list -v -keystore android/app/debug.keystore -alias androiddebugkey -storepass android | grep -i sha
 ```
 
-You should see a line like:
+You should see lines like:
 
 ```
 SHA1: A1:B2:C3:D4:E5:F6:...:99:00
+SHA256: ...
 ```
+
+Copy the `A1:B2:...` value after `SHA1:`.
 
 Copy the whole `A1:B2:...:99:00` string (without the `SHA1:` prefix or leading space). Save it somewhere — you'll paste it in step (iv).
 
@@ -120,7 +123,7 @@ Copy the whole `A1:B2:...:99:00` string (without the `SHA1:` prefix or leading s
 2. User Type: select **External**. Click **Create**.
 3. Fill in the form:
    - App name: `Tatum`
-   - User support email: Alanna's email
+   - User support email: Tori's email for now — the dropdown only shows the currently logged-in user. Alanna will swap it to hers post-launch (see "Handoff to Alanna" section below).
    - App logo: upload `assets/icon.png` from the repo (must be 1024×1024 PNG, ≤1MB — if it errors on size, downsize first)
    - App domain → Application home page: `https://www.tatumapp.com`
    - Application privacy policy link: `https://www.tatumapp.com/privacy.html`
@@ -299,13 +302,20 @@ The very last feature before public launch. Out of scope for the initial beta; t
 - **Welcome screen "No traces left behind" copy** — needs softening once server-side email exists. Suggested wording: "Uninstalling Tatum removes all of your activity. You can also delete your account in Settings to remove your name and email." (Update this when Phase 4 lands.)
 - **Account deletion in Settings** — App Store requires apps that create server-side accounts to offer in-app account deletion. Need to wire a "Delete my account" entry that hits a Vercel endpoint to remove the user's row from the Sheet. Track this with the Phase 4 work.
 
+## Handoff to Alanna (post-launch)
+
+Small things only Alanna can do herself because the dashboards filter by logged-in user. Walk her through each one over a call or via Loom.
+
+- [ ] **OAuth Consent Screen — swap "User support email" to her email.** Set to Tori's during initial setup because the dropdown only shows the currently-signed-in user. Path: console.cloud.google.com (signed in as Alanna) → APIs & Services → OAuth consent screen → Edit App → pick her email → Save. ~30 sec.
+
 ---
 
 ## Reference commands
 
 ```bash
-# Get Android debug SHA-1 (for Google OAuth Android client setup before first production build)
-keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android
+# Get Android debug SHA-1 (for Google OAuth Android client setup before first production build).
+# Use the PROJECT-LOCAL keystore Expo prebuild generates, not the global one in ~/.android/.
+keytool -list -v -keystore android/app/debug.keystore -alias androiddebugkey -storepass android
 
 # Get Android production SHA-1 (after first EAS production build)
 eas credentials --platform android   # navigate to the keystore info

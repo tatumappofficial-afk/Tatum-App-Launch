@@ -21,6 +21,7 @@ export interface SettingsScreenProps {
   onPrivacyPolicy?: () => void
   onTerms?: () => void
   onExportData?: () => void
+  onSignOut?: () => void
   onEraseEverything?: () => void
 }
 
@@ -106,6 +107,23 @@ const TrashIcon: React.FC = () => (
   </Svg>
 )
 
+const SignOutIcon: React.FC = () => (
+  <Svg
+    width={17}
+    height={17}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={colors.terra}
+    strokeWidth={1.8}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <Path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+    <Polyline points="16 17 21 12 16 7" />
+    <Line x1="21" y1="12" x2="9" y2="12" />
+  </Svg>
+)
+
 /** Outward-arrow / "share out" icon used for the Export Data row. */
 const ExportIcon: React.FC = () => (
   <Svg
@@ -171,6 +189,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   onPrivacyPolicy,
   onTerms,
   onExportData,
+  onSignOut,
   onEraseEverything,
 }) => {
   return (
@@ -326,6 +345,14 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             title="Face ID / Touch ID"
             subtitle="Unlock Tatum with biometrics"
             trailing={<ToggleSwitch enabled={biometricsEnabled} onToggle={onToggleBiometrics} />}
+          />
+          <SettingsRow
+            icon={<SignOutIcon />}
+            iconBg="rgba(192,120,88,0.1)"
+            title="Sign Out"
+            subtitle="Your data stays on this device"
+            trailing={<ChevronForwardIcon />}
+            onPress={onSignOut}
             showBorder={false}
           />
         </View>

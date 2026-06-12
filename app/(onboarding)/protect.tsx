@@ -106,7 +106,7 @@ export default function ProtectScreen() {
               marginBottom: 8,
             }}
           >
-            Step 2 of 4
+            Step 4 of 6
           </Text>
           <Text
             style={{
@@ -194,7 +194,7 @@ export default function ProtectScreen() {
             disabled={!caps || busy}
           />
         </View>
-        <StepDots current={1} />
+        <StepDots current={3} />
       </View>
     </View>
   )
