@@ -11,6 +11,8 @@ import { DEFAULT_SETTINGS } from '@/src/db/schema'
 
 const PRIVACY_POLICY_URL = 'https://www.tatumapp.com/privacy.html'
 const TERMS_URL = 'https://www.tatumapp.com/terms.html'
+// Opens the user's mail app with a pre-addressed draft — no backend needed.
+const FEEDBACK_MAILTO = `mailto:tatum.app.official@gmail.com?subject=${encodeURIComponent('Tatum Feedback')}`
 
 async function openExternal(url: string) {
   try {
@@ -82,6 +84,7 @@ export default function SettingsRoute() {
         onPrivacyPolicy={() => openExternal(PRIVACY_POLICY_URL)}
         onTerms={() => openExternal(TERMS_URL)}
         onExportData={handleExportData}
+        onSubmitFeedback={() => openExternal(FEEDBACK_MAILTO)}
         onSignOut={() => {
           Alert.alert(
             'Sign Out',
