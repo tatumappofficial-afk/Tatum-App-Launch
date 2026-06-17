@@ -168,17 +168,30 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
     const day = d
     const logged = logMap.get(day)
     const isFuture = isCurrentMonth && today != null && day > today
+    const isSelected = mode === 'day' && day === selectedDay
+    const muted = loggedOnly && !logged
+    // Android (Fabric) view flattening drops the *painted* content of a day
+    // cell when it re-renders in place after a drag-and-drop quick-log: the day
+    // number and emoji stay in the view tree (measured, present in the a11y
+    // hierarchy) but are never painted — the cell goes blank until the calendar
+    // is remounted. `collapsable={false}` + a transparent background (the prior
+    // fixes) hold on first mount but not across the dynamic logged<->unlogged /
+    // selected<->deselected transition a drop triggers. Re-keying the cell on
+    // its full visible state forces a fresh mount on exactly those transitions —
+    // the same thing reopening the calendar does, which always paints — while
+    // identical re-renders keep the same key, so there's no needless churn.
+    const cellKey = `${day}|${day === today ? 't' : ''}|${isSelected ? 's' : ''}|${logged?.emoji ?? ''}|${logged?.hasMultiple ? 'm' : ''}|${muted ? 'd' : ''}`
     const cell = (
       <DayCell
-        key={day}
+        key={cellKey}
         day={day}
         isToday={day === today}
         // Per-cell circle highlight is suppressed in week mode — the row
         // background carries the selection signal instead.
-        isSelected={mode === 'day' && day === selectedDay}
+        isSelected={isSelected}
         logged={logged}
         compact={compact}
-        muted={loggedOnly && !logged}
+        muted={muted}
         onPress={() => onDayPress?.(day)}
       />
     )
