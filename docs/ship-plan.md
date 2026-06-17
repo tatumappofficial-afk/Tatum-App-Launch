@@ -2,7 +2,9 @@
 
 A step-by-step runbook from "code is clean" to "in Alanna's hands via Google Play Internal Testing + TestFlight." Check off items as you go. Toggle a checkbox by changing `- [ ]` → `- [x]`.
 
-> **Strategy update (2026-05-27):** auth is deferred to v1.1 so we can get builds into Alanna's hands by EOD. A parallel Claude session is building the OAuth UI shells (no wiring). After she's played with the app and finishes the Google Cloud Console setup on her end (instructions sent via email), we ship v1.1 with real auth wired through. Current build ships with the existing pre-auth onboarding flow.
+> **⚠️ STATUS (2026-06-17): Auth is SHIPPED — do NOT defer, strip, or rebuild it.** Apple + Google Sign In, the identity screen, and the data-preserving migration gate merged to `main` (PR #14); the 21+ age gate + signup logging shipped in PR #16. The "DEFERRED to v1.1" markers in Phases 2/4/5 below are **historical** — leave the shipped auth alone. App-store reviewer access (the app only supports Apple/Google OAuth) is tracked in **TAT-16** (email/password reviewer sign-in).
+>
+> _Historical note (2026-05-27): auth was temporarily deferred for an EOD beta. That deferral is over._
 
 ## Context
 
@@ -31,7 +33,8 @@ Foundational changes that affect everything downstream. Do these first because t
 
 - [x] **🧑 Transfer GitHub repo to Alanna's account.** _Done via orphan-commit push to her new repo `tatumappofficial-afk/Tatum-App-Launch` (not GitHub's Transfer feature) so she got a clean single-commit history with no AI/Claude mentions._
 - [x] **🧑 Add yourself back as admin** on the transferred repo.
-- [x] **🧑 Update local remote:** `origin` → Alanna's repo, `personal` → Tori's archive (`torij2294/tatum-app`). Local `main` tracks `personal/main`.
+- [x] **🧑 Update local remote:** `origin` → Alanna's repo, `personal` → Tori's archive (`torij2294/tatum-app`).
+  - **⚠️ Source of truth = `origin/main` (Alanna's repo).** Always branch and build from `origin/main`. The local `main` branch may still track the stale, divergent `personal/main` clone — do **not** use local `main` as a base or build from it, or you'll be working on weeks-old code (this caused a full day of phantom "regressions").
 - [x] **🤖 Update `app.json`:**
   - `expo.ios.bundleIdentifier` → `com.tatumapp.tatum`
   - `expo.android.package` → `com.tatumapp.tatum`
