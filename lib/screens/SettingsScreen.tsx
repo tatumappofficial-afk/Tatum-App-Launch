@@ -1,7 +1,7 @@
 import React from 'react'
 import { ScrollView, StyleSheet, View, Text } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
-import Svg, { Line, Path, Polyline, Rect } from 'react-native-svg'
+import Svg, { Line, Path, Polyline } from 'react-native-svg'
 import { colors, font, gradientPoints, gradients } from '../theme'
 import { DecorativeGlow } from './shared/DecorativeGlow'
 import { StatusBarSpacer } from './shared/StatusBarSpacer'
@@ -15,7 +15,6 @@ import { BackButton } from '../components/BackButton'
 export interface SettingsScreenProps {
   biometricsEnabled?: boolean
   onBack?: () => void
-  onChangePasscode?: () => void
   onToggleBiometrics?: () => void
   onSubmitFeedback?: () => void
   onPrivacyPolicy?: () => void
@@ -39,22 +38,6 @@ const ChevronForwardIcon: React.FC<{ color?: string }> = ({ color = '#C4B0A0' })
     strokeLinejoin="round"
   >
     <Polyline points="9 18 15 12 9 6" />
-  </Svg>
-)
-
-const LockIcon: React.FC = () => (
-  <Svg
-    width={17}
-    height={17}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke={colors.terra}
-    strokeWidth={1.8}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <Rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-    <Path d="M7 11V7a5 5 0 0110 0v4" />
   </Svg>
 )
 
@@ -183,7 +166,6 @@ const ExternalLinkIcon: React.FC<{ color?: string }> = ({ color = '#C4B0A0' }) =
 export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   biometricsEnabled = true,
   onBack,
-  onChangePasscode,
   onToggleBiometrics,
   onSubmitFeedback,
   onPrivacyPolicy,
@@ -331,14 +313,6 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             flexShrink: 0,
           }}
         >
-          <SettingsRow
-            icon={<LockIcon />}
-            iconBg="rgba(192,120,88,0.1)"
-            title="Change Passcode"
-            subtitle="Confirm current, then set a new one"
-            trailing={<ChevronForwardIcon />}
-            onPress={onChangePasscode}
-          />
           <SettingsRow
             icon={<FingerprintIcon />}
             iconBg="rgba(139,168,136,0.12)"
