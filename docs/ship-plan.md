@@ -2,7 +2,7 @@
 
 A step-by-step runbook from "code is clean" to "in Alanna's hands via Google Play Internal Testing + TestFlight." Check off items as you go. Toggle a checkbox by changing `- [ ]` → `- [x]`.
 
-> **⚠️ STATUS (2026-06-17): Auth is SHIPPED — do NOT defer, strip, or rebuild it.** Apple + Google Sign In, the identity screen, and the data-preserving migration gate merged to `main` (PR #14); the 21+ age gate + signup logging shipped in PR #16. The "DEFERRED to v1.1" markers in Phases 2/4/5 below are **historical** — leave the shipped auth alone. App-store reviewer access (the app only supports Apple/Google OAuth) is tracked in **TAT-16** (email/password reviewer sign-in).
+> **⚠️ STATUS (2026-06-17): Auth is SHIPPED — do NOT defer, strip, or rebuild it.** Apple + Google Sign In, the identity screen, and the data-preserving migration gate merged to `main` (PR #14); the 21+ age gate + signup logging shipped in PR #16. The "DEFERRED to v1.1" markers in Phases 2/4/5 below are **historical** — leave the shipped auth alone. App-store reviewer access: **TAT-16 implemented (2026-06-17)** — since the app only supports Apple/Google OAuth (which reviewers can't complete), a "dev mode" email/password login behind the gear (⚙) menu on the sign-up screen lets reviewers in. Credential + OTA kill switch live in `src/config/reviewerAccess.ts`: the whole gear is gated by `REVIEWER_ACCESS_ENABLED` — flip it to `false` and ship an `eas update` to remove it post-approval (no rebuild). Put the credential in the App Store Connect / Play Console review-notes "demo account" fields.
 >
 > _Historical note (2026-05-27): auth was temporarily deferred for an EOD beta. That deferral is over._
 
