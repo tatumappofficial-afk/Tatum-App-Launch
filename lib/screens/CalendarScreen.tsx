@@ -12,7 +12,6 @@ import { SectionLabel } from './shared/SectionLabel'
 import { CalendarGrid } from '../components/CalendarGrid'
 import { EmojiChip } from '../components/EmojiChip'
 import { AvatarStack } from '../components/AvatarStack'
-import { formatPartnerLabel } from '@/src/utils/partnerLabel'
 import { StarRating } from '../components/StarRating'
 import { TagPill } from '../components/TagPill'
 
@@ -345,18 +344,10 @@ const SessionRow: React.FC<{ session: DaySession; onPress?: () => void }> = ({ s
     })}
   >
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+      {/* Discretion-first: identify the session by the initials avatar only —
+          never the partner's full name. */}
       <AvatarStack partners={session.partners} size={36} borderWidth={2} />
-      <View style={{ flex: 1 }}>
-        <Text
-          style={{
-            fontFamily: font('playfair', '600'),
-            fontSize: 16,
-            color: colors.ink,
-          }}
-        >
-          {formatPartnerLabel(session.partners.map((p) => p.name))}
-        </Text>
-      </View>
+      <View style={{ flex: 1 }} />
       <StarRating rating={session.rating} size={12} />
     </View>
     <View style={{ flexDirection: 'row', gap: 5, flexWrap: 'wrap' }}>
