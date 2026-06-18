@@ -51,15 +51,15 @@ function getFirstDayOfWeek(month: number, year: number): number {
 
 /* ── Day cell ── */
 
-const DayCell: React.FC<{
+const DayCellImpl: React.FC<{
   day: number
   isToday: boolean
   isSelected: boolean
   logged?: LoggedDay
   compact: boolean
   muted?: boolean
-  onPress?: () => void
-}> = ({ day, isToday, isSelected, logged, compact, muted = false, onPress }) => {
+  onDayPress?: (day: number) => void
+}> = ({ day, isToday, isSelected, logged, compact, muted = false, onDayPress }) => {
   const isLoggedDay = !!logged
   const fontSize = compact ? 11 : 12
   const emojiFontSize = compact ? 7 : 8
@@ -67,7 +67,7 @@ const DayCell: React.FC<{
 
   return (
     <Pressable
-      onPress={muted ? undefined : onPress}
+      onPress={muted ? undefined : () => onDayPress?.(day)}
       disabled={muted}
       accessibilityRole="button"
       accessibilityLabel={`Day ${day}${isToday ? ', today' : ''}${isSelected ? ', selected' : ''}`}
@@ -136,6 +136,23 @@ const DayCell: React.FC<{
   )
 }
 
+// Memoized so a quick-log drop (which recomputes loggedDays into fresh `logged`
+// objects for every cell) only re-renders the cells whose visible content
+// actually changed, not all ~31. `logged` is compared by value; everything else
+// is a primitive or the stable onDayPress handler.
+const DayCell = React.memo(
+  DayCellImpl,
+  (prev, next) =>
+    prev.day === next.day &&
+    prev.isToday === next.isToday &&
+    prev.isSelected === next.isSelected &&
+    prev.compact === next.compact &&
+    prev.muted === next.muted &&
+    prev.onDayPress === next.onDayPress &&
+    prev.logged?.emoji === next.logged?.emoji &&
+    prev.logged?.hasMultiple === next.logged?.hasMultiple,
+)
+
 /* ── Main component ── */
 
 export const CalendarGrid: React.FC<CalendarGridProps> = ({
@@ -192,7 +209,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
         logged={logged}
         compact={compact}
         muted={muted}
-        onPress={() => onDayPress?.(day)}
+        onDayPress={onDayPress}
       />
     )
     cells.push(
