@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { InteractionManager } from 'react-native'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useRouter } from 'expo-router'
 import { HomeScreen } from '@/lib/screens/HomeScreen'
@@ -27,6 +28,20 @@ const CALENDAR_START_DAY: CalendarStartDay = 'sunday'
 
 export default function HomeRoute() {
   const router = useRouter()
+
+  // Preload the Calendar tab once Home settles. Bottom tabs lazy-mount, so the
+  // first Calendar tap otherwise pays the full first-mount of its heavy
+  // drag-and-drop tree (~56 reanimated-dnd nodes) all at once, stalling the tab
+  // transition by a beat. Prefetching mounts that exact tree ahead of time —
+  // same components, so drag-and-drop behavior and all its fixes are unchanged —
+  // and gating it behind InteractionManager keeps it on an idle frame so it
+  // never competes with Home's own first paint.
+  useEffect(() => {
+    const task = InteractionManager.runAfterInteractions(() => {
+      router.prefetch('/(tabs)/calendar')
+    })
+    return () => task.cancel()
+  }, [router])
 
   const { data: allEncounters = [], isReady: encReady } = useLiveQuery((q) =>
     q.from({ encounters }).select(({ encounters }) => ({ ...encounters })),
