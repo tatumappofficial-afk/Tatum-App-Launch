@@ -23,7 +23,7 @@ export const PERIOD_TAG_ID = 'tag-period'
 export const DEFAULT_ACTIVITY_TAGS: { id?: string; emoji: string; label: string }[] = [
   { emoji: '🥂', label: 'Drunk Sex' },
   { emoji: '🤭', label: 'In The Butt Bob' },
-  { emoji: '👉', label: 'Manual' },
+  { emoji: '🫱', label: 'Manual' },
   { emoji: '🏁', label: 'Quickie' },
   { emoji: '👄', label: 'Just The Tip' },
   { emoji: '⌛️', label: 'Marathon Sex' },

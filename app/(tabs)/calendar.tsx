@@ -45,10 +45,18 @@ export default function CalendarRoute() {
 
   const tagMap = useActivityTagMap()
 
-  const quickLogEmojis = allTags
-    .filter((t) => t.isActive)
-    .sort((a, b) => a.sortOrder - b.sortOrder)
-    .map((t) => t.emoji)
+  // De-duplicate by emoji: two default tags can share an emoji (e.g. Manual and
+  // Fingering both 👉), which collides the quick-log chip keys (key={emoji}) —
+  // a React "two children with the same key" error plus two identical chips.
+  // Set preserves first-seen order (lowest sortOrder wins).
+  const quickLogEmojis = [
+    ...new Set(
+      allTags
+        .filter((t) => t.isActive)
+        .sort((a, b) => a.sortOrder - b.sortOrder)
+        .map((t) => t.emoji),
+    ),
+  ]
 
   // useLoggedDaysForMonth uses 0-indexed month; this screen tracks 1-indexed.
   const loggedDays = useLoggedDaysForMonth(month - 1, year, allEncounters)
