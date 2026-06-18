@@ -89,7 +89,10 @@ function AuthedTree() {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#F5EFE8' }} onLayout={onLayoutRootView}>
-      <LockGate initialLocked={biometricLock}>
+      {/* Only lock a fully onboarded, signed-in user. Otherwise the biometric
+          prompt could fire on cold start over the sign-in/onboarding screens —
+          before the user has even reached the /protect step where they opt in. */}
+      <LockGate initialLocked={biometricLock && hasOnboarded && isAuthed}>
         <Stack
           screenOptions={{
             headerShown: false,
