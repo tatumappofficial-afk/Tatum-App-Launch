@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { View, Text, Image, Platform, Alert, Pressable } from 'react-native'
 import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
-import Svg, { Path } from 'react-native-svg'
+import Svg, { Path, Polyline } from 'react-native-svg'
 import * as AppleAuthentication from 'expo-apple-authentication'
 import { GoogleSignin } from '@react-native-google-signin/google-signin'
 import * as Haptics from 'expo-haptics'
@@ -41,6 +41,21 @@ const GoogleLogo: React.FC = () => (
   </Svg>
 )
 
+const Checkmark: React.FC = () => (
+  <Svg
+    width={15}
+    height={15}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="white"
+    strokeWidth={3}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <Polyline points="20 6 9 17 4 12" />
+  </Svg>
+)
+
 export default function AuthScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
@@ -55,6 +70,19 @@ export default function AuthScreen() {
   // Set when the platform age signal (Apple/Google) definitively reports the
   // signed-in user as under 18. Renders a terminal block screen — Tatum is 18+.
   const [ageBlocked, setAgeBlocked] = useState(false)
+
+  // 18+ self-attestation. Tatum is adults-only, so the user must affirm this
+  // before any sign-in can begin — it gates the OAuth buttons below. Placing it
+  // here (rather than the old spot on /identity) means it applies to everyone:
+  // fresh, returning, and v1.0-migrated users alike, who otherwise skip
+  // /identity entirely. The attestation rides into the signed signup record,
+  // which is also the team's age-compliance proof.
+  const [attests18, setAttests18] = useState(false)
+
+  const requireAttestation = () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning)
+    Alert.alert('Confirm your age', 'Please confirm that you are 18 or older to continue.')
+  }
 
   useEffect(() => {
     if (GOOGLE_WEB_CLIENT_ID) {
@@ -108,6 +136,7 @@ export default function AuthScreen() {
           provider: params.provider,
           providerUserId: params.providerUserId,
           ageVerdict: verdict,
+          attested18: 'true',
         },
       })
       return
@@ -126,6 +155,7 @@ export default function AuthScreen() {
           fullName: params.fullName ?? '',
           provider: params.provider,
           providerUserId: params.providerUserId,
+          attested18: 'true',
         },
       })
       return
@@ -152,6 +182,7 @@ export default function AuthScreen() {
             fullName: params.fullName ?? '',
             provider: params.provider,
             providerUserId: params.providerUserId,
+            attested18: 'true',
           },
         })
         return
@@ -210,6 +241,7 @@ export default function AuthScreen() {
                   fullName: params.fullName ?? '',
                   provider: params.provider,
                   providerUserId: params.providerUserId,
+                  attested18: 'true',
                 },
               })
             } catch (err) {
@@ -223,6 +255,10 @@ export default function AuthScreen() {
   }
 
   async function handleApple() {
+    if (!attests18) {
+      requireAttestation()
+      return
+    }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
     try {
       const credential = await AppleAuthentication.signInAsync({
@@ -245,6 +281,10 @@ export default function AuthScreen() {
   }
 
   async function handleGoogle() {
+    if (!attests18) {
+      requireAttestation()
+      return
+    }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
     if (!GOOGLE_WEB_CLIENT_ID) {
       Alert.alert('Setup incomplete', 'Google client IDs are not configured yet. See docs/ship-plan.md Phase 2B.')
@@ -366,6 +406,33 @@ export default function AuthScreen() {
       </View>
 
       <View style={{ flexShrink: 0, paddingHorizontal: 28, paddingBottom: Math.max(insets.bottom + 8, 32) }}>
+        <Pressable
+          onPress={() => setAttests18((prev) => !prev)}
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: attests18 }}
+          accessibilityLabel="I confirm that I am 18 years of age or older"
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 4, marginBottom: 18 }}
+        >
+          <View
+            style={{
+              width: 24,
+              height: 24,
+              borderRadius: 7,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: attests18 ? colors.terra : 'transparent',
+              borderWidth: attests18 ? 0 : 2,
+              borderColor: 'rgba(160,100,80,0.4)',
+            }}
+          >
+            {attests18 && <Checkmark />}
+          </View>
+          <Text
+            style={{ flex: 1, fontFamily: font('dmSans', '400'), fontSize: 13, color: colors.stone, lineHeight: 18 }}
+          >
+            I confirm that I am 18 years of age or older.
+          </Text>
+        </Pressable>
         <View style={{ gap: 12, marginBottom: 20 }}>
           {Platform.OS === 'ios' && (
             <Pressable
@@ -380,7 +447,7 @@ export default function AuthScreen() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: 8,
-                opacity: pressed ? 0.8 : 1,
+                opacity: !attests18 ? 0.4 : pressed ? 0.8 : 1,
               })}
             >
               <Ionicons name="logo-apple" size={20} color="#fff" />
@@ -407,7 +474,7 @@ export default function AuthScreen() {
               shadowOpacity: 0.1,
               shadowRadius: 8,
               elevation: 2,
-              opacity: pressed ? 0.85 : 1,
+              opacity: !attests18 ? 0.4 : pressed ? 0.85 : 1,
             })}
           >
             <GoogleLogo />
