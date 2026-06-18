@@ -61,7 +61,7 @@ const GRADIENTS = [
 const ACTIVITY_EMOJIS = [
   '🥂',
   '🤭',
-  '👉',
+  '🫱',
   '🏁',
   '👄',
   '⌛️',
@@ -79,6 +79,7 @@ const ACTIVITY_EMOJIS = [
   '💦',
   '🍑',
   '🍆',
+  '👉',
   '🌬️',
   '✨',
   '💃',
