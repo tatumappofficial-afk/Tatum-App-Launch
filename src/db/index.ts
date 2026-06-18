@@ -245,31 +245,79 @@ export async function eraseAllUserData() {
     db.getAllAsync<{ id: string }>('SELECT id FROM activity_tags'),
   ])
 
-  for (const row of encounterRows) encounters.delete(row.id)
-  for (const row of partnerRows) partners.delete(row.id)
-  for (const row of desireRows) desireEntries.delete(row.id)
-  for (const row of whisperRows) whisperMessages.delete(row.id)
-  for (const row of affirmationRows) affirmations.delete(row.id)
-  for (const row of tagRows) activityTags.delete(row.id)
+  // Delete through the collections so their optimistic stores stay in sync, but
+  // tolerate ids the store doesn't know about. A collection only holds the rows
+  // it loaded at sync time; anything written straight to SQLite outside a
+  // collection (the dev seed does this) lives in the table but not the store,
+  // and `collection.delete` throws "no item with this key" on those — which
+  // aborted the whole erase before it reached the re-seed. Swallowing the miss
+  // lets the raw wipe below clear those orphan rows from SQLite.
+  const deleteThrough = (collection: { delete: (id: string) => unknown }, rows: { id: string }[]) => {
+    for (const row of rows) {
+      try {
+        collection.delete(row.id)
+      } catch {
+        // Not in the optimistic store — the raw wipe below removes it from SQLite.
+      }
+    }
+  }
+  // Order matters: children before parents, or the foreign keys throw.
+  // desire_entries -> partners + encounters, whisper_messages -> partners, so
+  // both parent tables (encounters, partners) must go last.
+  deleteThrough(desireEntries, desireRows)
+  deleteThrough(whisperMessages, whisperRows)
+  deleteThrough(affirmations, affirmationRows)
+  deleteThrough(activityTags, tagRows)
+  deleteThrough(encounters, encounterRows)
+  deleteThrough(partners, partnerRows)
+
+  // Safety net: wipe anything the collections couldn't reach so no user data
+  // survives an erase. Same child-before-parent ordering as above. The
+  // profile/settings tables are intentionally untouched — the profile row is
+  // reset (not deleted) below, since the app relies on it.
+  await db.execAsync(`
+    DELETE FROM desire_entries;
+    DELETE FROM whisper_messages;
+    DELETE FROM affirmations;
+    DELETE FROM activity_tags;
+    DELETE FROM encounters;
+    DELETE FROM partners;
+  `)
 
   // Reset the profile row (don't delete — the app relies on it existing).
   const DEFAULT_AVATAR_GRADIENT = 'linear-gradient(135deg, #C07858, #7C4A5A)'
-  userProfiles.update('default', (draft) => {
-    draft.displayName = null
-    draft.email = null
-    draft.authProvider = null
-    draft.providerUserId = null
-    draft.avatarValue = 'A'
-    draft.avatarGradient = DEFAULT_AVATAR_GRADIENT
-    draft.tier = 'free'
-    draft.premiumExpiresAt = null
-  })
+  try {
+    userProfiles.update('default', (draft) => {
+      draft.displayName = null
+      draft.email = null
+      draft.authProvider = null
+      draft.providerUserId = null
+      draft.avatarValue = 'A'
+      draft.avatarGradient = DEFAULT_AVATAR_GRADIENT
+      draft.tier = 'free'
+      draft.premiumExpiresAt = null
+    })
+  } catch {
+    // Same divergence guard as the deletes above: if the profile row isn't in
+    // the optimistic store, fall back to a raw update so the reset still lands.
+    await db.runAsync(
+      `UPDATE user_profile
+         SET displayName = NULL, email = NULL, authProvider = NULL, providerUserId = NULL,
+             avatarValue = 'A', avatarGradient = ?, tier = 'free', premiumExpiresAt = NULL
+       WHERE id = 'default'`,
+      [DEFAULT_AVATAR_GRADIENT],
+    )
+  }
 
   // Re-seed default activity tags so the log-session picker isn't empty.
+  // `tag.id ?? uuid()` mirrors initDatabase: the Period tag must keep its stable
+  // PERIOD_TAG_ID so the lock-state / period-logging checks that compare against
+  // it keep working after an erase. (Using uuid() for every tag here silently
+  // broke period logging on a reset.)
   for (let i = 0; i < DEFAULT_ACTIVITY_TAGS.length; i++) {
     const tag = DEFAULT_ACTIVITY_TAGS[i]
     activityTags.insert({
-      id: uuid(),
+      id: tag.id ?? uuid(),
       emoji: tag.emoji,
       label: tag.label,
       sortOrder: i,
