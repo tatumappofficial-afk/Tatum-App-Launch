@@ -17,6 +17,15 @@ export const colors = {
   white: '#FFFFFF',
 } as const
 
+// Modal/overlay scrim — the dimming layer behind sheets and confirmation
+// overlays. Single source of truth so every dimmed surface matches: when one
+// dimmed layer fades into another (e.g. the log sheet → the "session logged"
+// overlay) there's no shade jump/flicker. The base color is applied at full
+// alpha; SCRIM_OPACITY is the settled dim level (an animated opacity ramps the
+// layer 0 → SCRIM_OPACITY). Keep these the only place these values are defined.
+export const SCRIM_COLOR = 'rgba(30,18,12,1)'
+export const SCRIM_OPACITY = 0.4
+
 // Gradient color tuples — pass directly to <LinearGradient colors={...}>.
 export const gradients = {
   primaryCta: ['#C07858', '#7C4A5A'] as const, // Terra → Fig

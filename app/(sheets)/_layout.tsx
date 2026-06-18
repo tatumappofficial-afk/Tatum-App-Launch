@@ -4,12 +4,14 @@ import { Platform, Pressable, StyleSheet, View, useWindowDimensions } from 'reac
 import { useRouter } from 'expo-router'
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
-import { colors } from '@/lib/theme'
+import { colors, SCRIM_COLOR, SCRIM_OPACITY } from '@/lib/theme'
 
 // Dismiss after the sheet has been pulled down past this fraction of its own height.
 const DISMISS_DISTANCE_RATIO = 1 / 4
 const SNAP_BACK_DURATION_MS = 100
-const MAX_BACKDROP_OPACITY = 0.4
+// Settled dim level for the sheet backdrop — shared with the success overlay
+// (see lib/theme SCRIM_*) so the two dimmed layers match exactly.
+const MAX_BACKDROP_OPACITY = SCRIM_OPACITY
 const OPEN_DURATION_MS = 250
 const DISMISS_DURATION_MS = 200
 // Direction thresholds for the manual-activation pan.
@@ -153,7 +155,7 @@ function AndroidSheetChrome({ children }: { children: React.ReactNode }) {
         <View style={{ flex: 1 }}>
           <AnimatedPressable
             onPress={dismissWithAnimation}
-            style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(30,18,12,1)' }, backdropStyle]}
+            style={[StyleSheet.absoluteFill, { backgroundColor: SCRIM_COLOR }, backdropStyle]}
           />
           <View style={{ flex: 1, justifyContent: 'flex-end' }} pointerEvents="box-none">
             <GestureDetector gesture={panGesture}>
