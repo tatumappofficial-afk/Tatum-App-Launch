@@ -361,7 +361,7 @@ const SessionRow: React.FC<{ session: DaySession; onPress?: () => void }> = ({ s
     </View>
     <View style={{ flexDirection: 'row', gap: 5, flexWrap: 'wrap' }}>
       {session.tags.map((t) => (
-        <TagPill key={t.emoji} emoji={t.emoji} label={t.label} variant="display" />
+        <TagPill key={t.emoji} emoji={t.emoji} label={t.label} variant="display" emojiOnly />
       ))}
     </View>
     {session.noteSnippet && (
