@@ -423,7 +423,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               icon={<TrashIcon />}
               iconBg="rgba(176,112,128,0.1)"
               title="Erase Everything"
-              subtitle="Permanently delete all data \u00B7 Cannot be undone"
+              subtitle="Permanently delete all data · Cannot be undone"
               destructive
               trailing={<ChevronForwardIcon color={colors.mauve} />}
               onPress={onEraseEverything}
