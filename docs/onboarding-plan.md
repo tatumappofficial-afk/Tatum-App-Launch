@@ -4,6 +4,8 @@
 
 Five-screen forward-only onboarding flow gated on a new `hasOnboarded` boolean in `user_settings`. Built fresh in `app/(onboarding)/`, with the cofounder's `lib/screens/Onboarding*Screen.tsx` files (and stories) deleted entirely. Reuses existing data paths for partners and tags — no parallel structures. Adds biometric lock-on-launch as a separate but related feature, since the current `biometricLock` setting toggle in Settings is inert. Designed to be auth-agnostic; when Apple/Google sign-up ships later, it slots in cleanly without restructuring.
 
+> **Current status:** this is a historical implementation plan. Apple/Google auth, identity capture, 18+ attestation, platform age signal, and signup logging have shipped. Do not copy old privacy assumptions from this doc into user-facing copy; current wording should say that logged activity stays on-device, while signup/account metadata is collected for account and developer communication purposes.
+
 ---
 
 ## Architecture
@@ -136,8 +138,8 @@ The `biometricLock` setting toggle at `app/(pages)/settings.tsx` is currently in
 
 ## Open items deferred to future work
 
-- **Auth flow** (Apple/Google sign-up): when this lands, marketing-email opt-in checkbox lives alongside T&Cs at signup. Apple "Hide My Email" returns relay address; Apple name only on first auth — must capture immediately, fall back to `'user'` if backend write fails.
-- **Backend** (minimal — just stores `{user_id, email, name, created_at}` so Alanna can see who signed up). Triggers privacy-policy update; Screen 1's pillar 2 ("Delete the app, delete everything") will need a footnote about server-side account data.
+- **Auth flow** (Apple/Google sign-up): shipped. Apple "Hide My Email" can return a relay address; Apple name only appears on first auth, so identity capture happens immediately.
+- **Signup metadata backend:** shipped as a webhook path. It stores limited signup/account metadata so Alanna can see who signed up. Privacy copy must distinguish this from local-only wellness logs: sessions, notes, tags, and partner records stay on-device; name, email, 18+ attestation, platform age-signal verdict, and platform can be sent server-side.
 - **RevenueCat hard paywall** between Screen 4 and START LOGGING. Comment stub in place at `app/(onboarding)/ready.tsx`.
 - **Display name population** on Screen 5: drop-in change once auth captures it.
 - **Tag rename / tag soft-delete in Profile**: not built yet. The hint copy on Screen 4 only promises "Remove" (which `edit-profile.tsx` already supports). If you later want rename, extend `add-tag.tsx` to take an optional `id` for edit mode.

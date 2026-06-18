@@ -2,7 +2,7 @@
 
 A step-by-step runbook from "code is clean" to "in Alanna's hands via Google Play Internal Testing + TestFlight." Check off items as you go. Toggle a checkbox by changing `- [ ]` → `- [x]`.
 
-> **⚠️ STATUS (2026-06-17): Auth is SHIPPED — do NOT defer, strip, or rebuild it.** Apple + Google Sign In, the identity screen, and the data-preserving migration gate merged to `main` (PR #14); the 21+ age gate + signup logging shipped in PR #16. The "DEFERRED to v1.1" markers in Phases 2/4/5 below are **historical** — leave the shipped auth alone. App-store reviewer access (the app only supports Apple/Google OAuth) is tracked in **TAT-16** (email/password reviewer sign-in).
+> **⚠️ STATUS (2026-06-17): Auth is SHIPPED — do NOT defer, strip, or rebuild it.** Apple + Google Sign In, the identity screen, and the data-preserving migration gate merged to `main` (PR #14); the 18+ age gate + signup logging shipped in PR #16. The "DEFERRED to v1.1" markers in Phases 2/4/5 below are **historical** — leave the shipped auth alone. App-store reviewer access (the app only supports Apple/Google OAuth) is tracked in **TAT-16** (email/password reviewer sign-in).
 >
 > _Historical note (2026-05-27): auth was temporarily deferred for an EOD beta. That deferral is over._
 
@@ -202,7 +202,7 @@ Both stores require these as live URLs before they'll accept submissions. Both O
 - [x] **🧑 Privacy Policy live at `https://www.tatumapp.com/privacy.html`** — already linked from settings (`app/(pages)/settings.tsx:10`).
 - [x] **🧑 Terms of Service live at `https://www.tatumapp.com/terms.html`** — already linked from settings (`app/(pages)/settings.tsx:11`).
 - [x] **🧑 Support contact email:** `tatum.app.official@gmail.com` (used in `SettingsScreen.tsx:250`).
-- [ ] **🧑 Re-read the Privacy Policy** — once OAuth lands and we're collecting name+email server-side, confirm the existing policy text reflects that. If it says "everything stays on device" verbatim, it needs softening.
+- [ ] **🧑 Re-read the Privacy Policy** — OAuth + signup logging have shipped. The policy must say that sessions/notes/tags/partners stay on-device, while signup/account metadata (name, email, 18+ attestation, platform age-signal verdict, and platform) is sent to Tatum's signup endpoint for account and developer communication purposes.
 
 ---
 
@@ -230,16 +230,20 @@ UI shells built in parallel by a separate Claude session. Wiring (this list) hap
 
 ---
 
-## Phase 5 — Signup data destination — **DEFERRED to v1.1**
+## Phase 5 — Signup data destination — **SHIPPED**
 
-Blocked on Phase 4. Tackle when auth lands.
+Historical note: this was originally deferred, then shipped with auth. Current app code calls `recordSignup()` from `app/(onboarding)/identity.tsx` and posts to the webhook configured by `EXPO_PUBLIC_SIGNUP_WEBHOOK_URL`.
 
 
-- [ ] **🧑 Decision: Mailchimp connected directly from Vercel proxy, or just Google Sheet for v1?** Currently leaning Sheet-only.
-- [ ] **🧑 Create a Google Sheet** in Alanna's Workspace: columns = timestamp, name, email, platform, app_version.
-- [ ] **🧑 Create a Vercel serverless function** under Alanna's Vercel account at `https://www.tatumapp.com/api/signup` — accepts POST `{name, email, platform}`, appends to the Sheet via Google Sheets API.
-- [ ] **🤖 Wire `identity.tsx` to POST to `/api/signup`** after the user confirms their info.
-- [ ] **🧑 Test end-to-end:** fresh install → onboarding → see row appear in the Sheet.
+- [x] **🤖 Wire `identity.tsx` to record signup metadata** after the user confirms their info.
+- [ ] **🧑 Confirm production destination:** Cloud Function / Firestore is the current implementation target. Keep docs and privacy policy in sync if this changes to Google Sheets, Mailchimp, or another system.
+- [ ] **🧑 Confirm production env vars in EAS:** `EXPO_PUBLIC_SIGNUP_WEBHOOK_URL` and `EXPO_PUBLIC_SIGNUP_TOKEN`.
+- [ ] **🧑 Test end-to-end:** fresh install → onboarding → verify the record appears in Alanna's destination with expected fields: timestamp, name, email, attested18, ageVerdict, and platform.
+- [ ] **🧑 Add deletion path for server-side signup/account metadata.** Erase Everything clears local app data; server-side signup metadata needs its own deletion process or in-app endpoint.
+
+### Signup webhook token safety
+
+`EXPO_PUBLIC_SIGNUP_TOKEN` is embedded in the mobile bundle, so it is **not a secret**. Treat it as a lightweight spam/abuse hint only. The server endpoint must assume the token can be extracted by anyone and should protect itself with server-side controls: validate payload shape, rate-limit, reject unexpected origins/user agents if useful, log abuse, avoid privileged actions, and store only the small signup metadata the privacy policy promises. Do not use this token to authorize reads, deletes, admin operations, or access to any private data.
 
 ---
 
@@ -253,7 +257,7 @@ The Android version goes out first since Alanna's on Android.
   - App or game: App
   - Free or paid: (decide — currently planned as one-time payment per memory note)
 - [ ] **🧑 Fill out the Play Store listing fields:** short description, full description, screenshots (2–8 phone), feature graphic (1024×500), category (Health & Fitness / Lifestyle?), content rating questionnaire.
-- [ ] **🧑 Complete the Data Safety questionnaire:** for v1.0 (no auth) — **"No data collected."** All wellness data is local-only SQLite. Update to "Name + Email collected, used for account / developer communications" when v1.1 ships with auth.
+- [ ] **🧑 Complete the Data Safety questionnaire:** wellness logs are local-only SQLite and not collected. Signup/account metadata is collected: name, email, 18+ attestation, platform age-signal verdict, and platform; used for account/developer communications and adult-access compliance.
 - [ ] **🤖 Production EAS Android build:** `eas build --platform android --profile production`.
 - [ ] **🤖 Submit to Internal Testing:** `eas submit --platform android --latest` (handles upload to Play Console).
 - [ ] **🧑 Add Alanna + you as Internal Testers** in Play Console.
@@ -269,7 +273,7 @@ Mirrors Phase 6 for iOS. Can happen in parallel once Phase 4 is done, but Androi
   - Bundle ID: `com.tatumapp.tatum`
   - Default language, SKU, category
 - [ ] **🧑 Fill out App Store listing fields:** name, subtitle, description, keywords, screenshots (6.5" + 6.7" device classes minimum).
-- [ ] **🧑 Complete App Privacy disclosure:** for v1.0 (no auth) — **"Data Not Collected."** Update to "Name + Email, linked to user identity, for Developer Communications" when v1.1 ships with auth.
+- [ ] **🧑 Complete App Privacy disclosure:** wellness logs are local-only SQLite and not collected. Signup/account metadata is collected: name, email, 18+ attestation, platform age-signal verdict, and platform; linked to the user's account identity and used for account/developer communications and adult-access compliance.
 - [ ] **🧑 Enable "Sign in with Apple" capability** on the App ID in Apple Developer Console — **DEFERRED to v1.1** (only required when the app actually offers third-party sign-in).
 - [ ] **🤖 Production EAS iOS build:** `eas build --platform ios --profile production`.
 - [ ] **🤖 Submit to TestFlight:** `eas submit --platform ios --latest`.
@@ -295,15 +299,15 @@ The very last feature before public launch. Out of scope for the initial beta; t
 - **Display name:** `Tatum` (capitalized) — applies to home screen icon label, store listings, OAuth consent screen.
 - **Bundle ID:** `com.tatumapp.tatum` (single bundle, no `.dev` variant for now).
 - **Auth: required, not skippable.** No "continue without signing in" option. Every user gets captured.
-- **Captured at signup:** first name + email only. No extra fields (age, location, referral, etc.).
+- **Captured at signup:** first name, email, 18+ attestation, platform age-signal verdict, and platform. No logged sessions, notes, tags, partner records, location, referral, or wellness activity analytics.
 - **Reinstall behavior: standard re-auth on each install.** On reinstall, user taps Sign in with Apple/Google again. The OS handles credential lookup natively — no re-typing of email/password. Apple/Google return the same stable user identifier, so we can match the returning user. Since SQLite data lives in the app sandbox and is wiped on uninstall anyway, there's no benefit to "silent" re-auth — they're starting fresh inside the app regardless.
-- **Email destination:** Google Sheet for v1 via Vercel proxy. Mailchimp added later when Alanna commits.
+- **Signup metadata destination:** Cloud Function / Firestore for v1. Mailchimp added later only if Alanna commits.
 - **Paywall:** RevenueCat hard paywall at the end of the onboarding flow (`ready.tsx`). App is free to download, paywall blocks `hasOnboarded: true` until purchase succeeds or is restored.
 
 ## Out-of-scope notes
 
-- **Welcome screen "No traces left behind" copy** — needs softening once server-side email exists. Suggested wording: "Uninstalling Tatum removes all of your activity. You can also delete your account in Settings to remove your name and email." (Update this when Phase 4 lands.)
-- **Account deletion in Settings** — App Store requires apps that create server-side accounts to offer in-app account deletion. Need to wire a "Delete my account" entry that hits a Vercel endpoint to remove the user's row from the Sheet. Track this with the Phase 4 work.
+- **Privacy copy rule:** say "what you log stays on your phone" rather than "nothing leaves your phone." Signup/account metadata does leave the device.
+- **Account deletion in Settings** — App Store requires apps that create server-side accounts to offer in-app account deletion. Need to wire a "Delete my account" path that removes the user's server-side signup/account metadata from the production destination. Track this with TAT-16 / account-reviewer access work.
 
 ## Handoff to Alanna (post-launch)
 

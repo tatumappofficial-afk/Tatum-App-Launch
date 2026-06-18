@@ -1,10 +1,10 @@
 # Tatum
 
-A private women's wellness app for understanding your own intimate life — on your terms, in your own words, completely off the grid.
+A private women's wellness app for understanding your own intimate life — on your terms, in your own words, with your logs kept on your device.
 
 ## About
 
-Tatum gives you a clear, judgment-free picture of your intimate wellness. Whether you're married, dating, navigating a new season of life, or simply learning your own patterns — your data stays on your phone and belongs to you alone.
+Tatum gives you a clear, judgment-free picture of your intimate wellness. Whether you're married, dating, navigating a new season of life, or simply learning your own patterns — what you log stays on your phone and belongs to you alone.
 
 ## What Tatum does
 
@@ -18,7 +18,7 @@ Tatum gives you a clear, judgment-free picture of your intimate wellness. Whethe
 
 ## Privacy
 
-Everything you log stays on your phone. No accounts, no cloud, no analytics. Delete the app and every trace of your data goes with it.
+Everything you log — sessions, notes, tags, and partner shorthand — stays on your phone. Tatum uses Apple/Google sign-in and records signup details like name, email, 18+ attestation, and platform age-signal verdict for account and developer communication purposes. The app does not send your logged activity to Tatum servers, and OS backup only applies if you have iCloud or Google backup enabled.
 
 ## Pricing
 
@@ -28,7 +28,7 @@ $24.99 — one-time purchase. No subscriptions, no tiers, yours forever.
 
 - **React Native + Expo** — cross-platform iOS and Android from a single codebase
 - **TypeScript** — type-safe code end-to-end
-- **expo-sqlite** — on-device database, never leaves the phone
+- **expo-sqlite** — on-device database for private logs
 - **TanStack DB** — reactive queries on top of SQLite
 - **Reanimated + Gesture Handler** — smooth, native-feeling interactions
 - **Expo Router** — file-based navigation

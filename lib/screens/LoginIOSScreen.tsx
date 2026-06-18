@@ -205,7 +205,7 @@ export const LoginIOSScreen: React.FC = () => (
             lineHeight: 17.6,
           }}
         >
-          Your data never leaves your device.
+          What you log stays on this device.
         </Text>
       </View>
     </View>
