@@ -152,7 +152,9 @@ export const UserProfileSchema = z.object({
   tier: z.enum(['free', 'premium']),
   premiumExpiresAt: z.string().nullable(),
   email: z.string().nullable(),
-  authProvider: z.enum(['apple', 'google']).nullable(),
+  // 'reviewer' is the App Store / Play Store reviewer demo identity — a scoped
+  // on-device bypass (no OAuth), see src/config/reviewerAccess.ts and auth.tsx.
+  authProvider: z.enum(['apple', 'google', 'reviewer']).nullable(),
   // Stable per-user identifier from the OAuth provider — Apple's `user` field
   // or Google's `sub`. Bound to identity: once set, only sign-ins from the
   // same identifier can return into this device's data without an explicit

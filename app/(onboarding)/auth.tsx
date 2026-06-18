@@ -1,5 +1,17 @@
 import { useEffect, useState } from 'react'
-import { View, Text, Image, Platform, Alert, Pressable } from 'react-native'
+import {
+  View,
+  Text,
+  Image,
+  Platform,
+  Alert,
+  Pressable,
+  TextInput,
+  ActivityIndicator,
+  Modal,
+  Linking,
+  KeyboardAvoidingView,
+} from 'react-native'
 import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import Svg, { Path, Polyline } from 'react-native-svg'
@@ -16,9 +28,11 @@ import { userProfiles, eraseAllUserData } from '@/src/db'
 import { useSettings, useUpdateSettings } from '@/src/hooks/useSettings'
 import { DEFAULT_SETTINGS } from '@/src/db/schema'
 import { checkAgeSignal } from '@/src/services/ageSignal'
+import { REVIEWER_ACCESS_ENABLED, isReviewerCredential } from '@/src/config/reviewerAccess'
 
 const GOOGLE_IOS_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID
 const GOOGLE_WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID
+const FEEDBACK_MAILTO = `mailto:tatum.app.official@gmail.com?subject=${encodeURIComponent('Tatum Feedback')}`
 
 const GoogleLogo: React.FC = () => (
   <Svg width={20} height={20} viewBox="0 0 48 48">
@@ -78,6 +92,27 @@ export default function AuthScreen() {
   // /identity entirely. The attestation rides into the signed signup record,
   // which is also the team's age-compliance proof.
   const [attests18, setAttests18] = useState(false)
+
+  // Sign-up overflow menu (gear, top-right). Holds "Give feedback" and — while
+  // REVIEWER_ACCESS_ENABLED — the App Store / Play Store reviewer login
+  // (TAT-16): a scoped on-device bypass so reviewers, who can't complete a real
+  // Apple/Google sign-in, can open the app. The whole gear is gated by the
+  // OTA-flippable flag, so one `eas update` removes it post-approval.
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [menuMode, setMenuMode] = useState<'menu' | 'devLogin'>('menu')
+  const [reviewerEmail, setReviewerEmail] = useState('')
+  const [reviewerPassword, setReviewerPassword] = useState('')
+  const [reviewerBusy, setReviewerBusy] = useState(false)
+
+  const openMenu = () => {
+    setMenuMode('menu')
+    setMenuOpen(true)
+  }
+  const closeMenu = () => setMenuOpen(false)
+  const openFeedback = () => {
+    closeMenu()
+    Linking.openURL(FEEDBACK_MAILTO).catch(() => {})
+  }
 
   const requireAttestation = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning)
@@ -319,6 +354,43 @@ export default function AuthScreen() {
     }
   }
 
+  // App Store / Play Store reviewer sign-in. Validates the supplied credential
+  // against the hardcoded reviewer pair (see src/config/reviewerAccess.ts). On
+  // match, this deliberately bypasses OAuth, the platform age signal, and the
+  // signup webhook — it just stamps a local `reviewer` identity and routes into
+  // the app, the minimum needed for a reviewer to evaluate it. On no match it
+  // reads like any wrong-password attempt, so the door isn't obviously special.
+  async function handleReviewerSignIn() {
+    if (reviewerBusy) return
+    if (!isReviewerCredential(reviewerEmail, reviewerPassword)) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
+      Alert.alert('Sign in failed', "That email and password don't match. Please check and try again.")
+      return
+    }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+    setReviewerBusy(true)
+    try {
+      const profile = profiles[0]
+      if (profile) {
+        userProfiles.update(profile.id, (draft) => {
+          draft.displayName = draft.displayName ?? 'App Reviewer'
+          draft.email = reviewerEmail.trim()
+          draft.authProvider = 'reviewer'
+          draft.providerUserId = 'reviewer-demo'
+        })
+      }
+      // Mark onboarding complete so the layout guard (hasOnboarded && isAuthed)
+      // routes straight into the app rather than back through onboarding.
+      setMenuOpen(false)
+      updateSettings({ hasOnboarded: true })
+      router.replace('/(tabs)')
+    } catch (err) {
+      console.error('Reviewer sign-in failed:', err)
+      setReviewerBusy(false)
+      Alert.alert('Sign in failed', 'Something went wrong. Please try again.')
+    }
+  }
+
   if (ageBlocked) {
     return (
       <View style={{ flex: 1, position: 'relative', overflow: 'hidden', backgroundColor: colors.warmSand }}>
@@ -359,6 +431,29 @@ export default function AuthScreen() {
     <View style={{ flex: 1, position: 'relative', overflow: 'hidden', backgroundColor: colors.warmSand }}>
       <DecorativeGlow position="center" size={320} opacity={0.13} />
       <StatusBarSpacer />
+
+      {/* Overflow menu trigger. Entire gear is gated by REVIEWER_ACCESS_ENABLED
+          so a single OTA `eas update` removes it from the screen post-approval. */}
+      {REVIEWER_ACCESS_ENABLED && (
+        <Pressable
+          onPress={openMenu}
+          accessibilityRole="button"
+          accessibilityLabel="More options"
+          hitSlop={12}
+          style={{
+            position: 'absolute',
+            top: insets.top + 8,
+            right: 12,
+            zIndex: 10,
+            width: 40,
+            height: 40,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Ionicons name="settings-outline" size={22} color={colors.stone} />
+        </Pressable>
+      )}
 
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 28 }}>
         <View
@@ -484,6 +579,157 @@ export default function AuthScreen() {
           </Pressable>
         </View>
       </View>
+
+      {/* Overflow menu: Give feedback + (while enabled) the reviewer dev-mode
+          login (TAT-16). Whole thing gated by REVIEWER_ACCESS_ENABLED. */}
+      {REVIEWER_ACCESS_ENABLED && (
+        <Modal visible={menuOpen} transparent animationType="fade" onRequestClose={closeMenu}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            style={{ flex: 1 }}
+          >
+            <Pressable
+              onPress={closeMenu}
+              style={{
+                flex: 1,
+                backgroundColor: 'rgba(40,28,24,0.35)',
+                justifyContent: 'center',
+                paddingHorizontal: 28,
+              }}
+            >
+              {/* Inner Pressable swallows taps so they don't dismiss the sheet. */}
+              <Pressable
+                onPress={() => {}}
+                style={{
+                  backgroundColor: colors.surface,
+                  borderRadius: 20,
+                  padding: 20,
+                  shadowColor: '#7C4A5A',
+                  shadowOffset: { width: 0, height: 12 },
+                  shadowOpacity: 0.2,
+                  shadowRadius: 28,
+                  elevation: 12,
+                }}
+              >
+                {menuMode === 'menu' ? (
+                  <View style={{ gap: 2 }}>
+                    <Pressable
+                      onPress={openFeedback}
+                      accessibilityRole="button"
+                      accessibilityLabel="Give feedback"
+                      style={({ pressed }) => ({
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 12,
+                        paddingVertical: 14,
+                        paddingHorizontal: 8,
+                        borderRadius: 12,
+                        opacity: pressed ? 0.6 : 1,
+                      })}
+                    >
+                      <Ionicons name="chatbubble-ellipses-outline" size={20} color={colors.stone} />
+                      <Text style={{ fontFamily: font('dmSans', '500'), fontSize: 16, color: colors.ink }}>
+                        Give feedback
+                      </Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => setMenuMode('devLogin')}
+                      accessibilityRole="button"
+                      accessibilityLabel="Sign in with dev mode"
+                      style={({ pressed }) => ({
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 12,
+                        paddingVertical: 14,
+                        paddingHorizontal: 8,
+                        borderRadius: 12,
+                        opacity: pressed ? 0.6 : 1,
+                      })}
+                    >
+                      <Ionicons name="construct-outline" size={20} color={colors.stone} />
+                      <Text style={{ fontFamily: font('dmSans', '500'), fontSize: 16, color: colors.ink }}>
+                        Sign in with dev mode
+                      </Text>
+                    </Pressable>
+                  </View>
+                ) : (
+                  <View style={{ gap: 12 }}>
+                    <Text
+                      style={{ fontFamily: font('playfair', '700'), fontSize: 20, color: colors.ink, marginBottom: 2 }}
+                    >
+                      Dev mode sign in
+                    </Text>
+                    <TextInput
+                      value={reviewerEmail}
+                      onChangeText={setReviewerEmail}
+                      placeholder="Email"
+                      placeholderTextColor="rgba(154,136,120,0.5)"
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      keyboardType="email-address"
+                      textContentType="emailAddress"
+                      style={{
+                        backgroundColor: colors.warmSand,
+                        borderWidth: 1.5,
+                        borderColor: 'rgba(160,100,80,0.18)',
+                        borderRadius: 14,
+                        paddingHorizontal: 16,
+                        paddingVertical: 14,
+                        fontSize: 16,
+                        fontFamily: font('dmSans', '400'),
+                        color: colors.ink,
+                      }}
+                    />
+                    <TextInput
+                      value={reviewerPassword}
+                      onChangeText={setReviewerPassword}
+                      placeholder="Password"
+                      placeholderTextColor="rgba(154,136,120,0.5)"
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      secureTextEntry
+                      textContentType="password"
+                      returnKeyType="go"
+                      onSubmitEditing={handleReviewerSignIn}
+                      style={{
+                        backgroundColor: colors.warmSand,
+                        borderWidth: 1.5,
+                        borderColor: 'rgba(160,100,80,0.18)',
+                        borderRadius: 14,
+                        paddingHorizontal: 16,
+                        paddingVertical: 14,
+                        fontSize: 16,
+                        fontFamily: font('dmSans', '400'),
+                        color: colors.ink,
+                      }}
+                    />
+                    <Pressable
+                      onPress={handleReviewerSignIn}
+                      disabled={reviewerBusy}
+                      accessibilityRole="button"
+                      accessibilityLabel="Sign in"
+                      style={({ pressed }) => ({
+                        height: 52,
+                        borderRadius: 9999,
+                        backgroundColor: colors.terra,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        opacity: reviewerBusy ? 0.6 : pressed ? 0.85 : 1,
+                      })}
+                    >
+                      {reviewerBusy ? (
+                        <ActivityIndicator color="#fff" />
+                      ) : (
+                        <Text style={{ fontFamily: font('dmSans', '500'), fontSize: 16, color: '#fff' }}>Sign In</Text>
+                      )}
+                    </Pressable>
+                  </View>
+                )}
+              </Pressable>
+            </Pressable>
+          </KeyboardAvoidingView>
+        </Modal>
+      )}
     </View>
   )
 }
