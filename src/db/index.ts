@@ -337,6 +337,18 @@ export async function eraseAllUserData() {
     createdAt: now,
     updatedAt: now,
   })
+
+  // Forensic hardening: with secure_delete = ON the raw wipe above already
+  // overwrote the freed page contents, but the bytes can still linger in the
+  // WAL until it's checkpointed and in the freelist until the file is
+  // compacted. Fold the WAL back into the main DB (TRUNCATE shrinks the -wal
+  // file to zero) and VACUUM to rebuild the file with the freelist collapsed,
+  // so no deleted intimate rows remain carvable on disk. VACUUM must run
+  // outside any transaction; execAsync does not open one.
+  await db.execAsync(`
+    PRAGMA wal_checkpoint(TRUNCATE);
+    VACUUM;
+  `)
 }
 
 // ── Reset helper for dev tools / testing ──
