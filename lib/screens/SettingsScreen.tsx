@@ -14,8 +14,10 @@ import { BackButton } from '../components/BackButton'
 
 export interface SettingsScreenProps {
   biometricsEnabled?: boolean
+  backupEnabled?: boolean
   onBack?: () => void
   onToggleBiometrics?: () => void
+  onToggleBackup?: () => void
   onSubmitFeedback?: () => void
   onPrivacyPolicy?: () => void
   onTerms?: () => void
@@ -56,6 +58,21 @@ const FingerprintIcon: React.FC = () => (
     <Path d="M5 12a7 7 0 0114 0" />
     <Path d="M8 12a4 4 0 018 0" />
     <Path d="M12 12v8" />
+  </Svg>
+)
+
+const CloudIcon: React.FC = () => (
+  <Svg
+    width={17}
+    height={17}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={colors.sage}
+    strokeWidth={1.8}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <Path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z" />
   </Svg>
 )
 
@@ -165,8 +182,10 @@ const ExternalLinkIcon: React.FC<{ color?: string }> = ({ color = '#C4B0A0' }) =
 
 export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   biometricsEnabled = true,
+  backupEnabled = true,
   onBack,
   onToggleBiometrics,
+  onToggleBackup,
   onSubmitFeedback,
   onPrivacyPolicy,
   onTerms,
@@ -411,6 +430,13 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               overflow: 'hidden',
             }}
           >
+            <SettingsRow
+              icon={<CloudIcon />}
+              iconBg="rgba(139,168,136,0.12)"
+              title="iCloud Backup"
+              subtitle="Backs up your logs to iCloud so they move to a new phone"
+              trailing={<ToggleSwitch enabled={backupEnabled} onToggle={onToggleBackup} />}
+            />
             <SettingsRow
               icon={<ExportIcon />}
               iconBg="rgba(192,120,88,0.1)"

@@ -129,15 +129,26 @@ export async function exportData(): Promise<void> {
   const dateSlug = new Date().toISOString().slice(0, 10)
   const fileName = `tatum-backup-${dateSlug}.json`
 
+  // Write to the cache dir, not Documents: this plaintext copy of all user data
+  // is short-lived scratch. Cache isn't backed up to iCloud/Google and the OS can
+  // reclaim it, so a stray export can't linger or ride device backups. We also
+  // delete it ourselves in the finally below once the share sheet closes.
   // expo-file-system v56 class-based API. `write()` is synchronous (JSI-backed).
-  const file = new File(Paths.document, fileName)
+  const file = new File(Paths.cache, fileName)
   if (file.exists) file.delete()
   file.create()
   file.write(json)
 
-  await Sharing.shareAsync(file.uri, {
-    mimeType: 'application/json',
-    UTI: 'public.json',
-    dialogTitle: 'Export Tatum data',
-  })
+  try {
+    await Sharing.shareAsync(file.uri, {
+      mimeType: 'application/json',
+      UTI: 'public.json',
+      dialogTitle: 'Export Tatum data',
+    })
+  } finally {
+    // Remove the temp file once the share sheet resolves (saved/sent) or is
+    // dismissed. By this point the OS has handed the data to the chosen
+    // destination, so nothing depends on this scratch copy anymore.
+    if (file.exists) file.delete()
+  }
 }

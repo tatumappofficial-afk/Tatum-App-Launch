@@ -82,7 +82,9 @@ const PartnerChip: React.FC<{ partner: Partner; onPress?: () => void }> = ({ par
   <Pressable
     onPress={onPress}
     accessibilityRole="button"
-    accessibilityLabel={partner.displayName}
+    // Discretion-first: identify the partner by their initials only — never the
+    // full name, including in the accessibility label.
+    accessibilityLabel={`Partner ${partner.avatarValue}`}
     style={({ pressed }) => {
       const baseOpacity = partner.isActive ? 1 : 0.6
       return {

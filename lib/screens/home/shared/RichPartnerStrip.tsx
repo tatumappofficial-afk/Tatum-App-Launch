@@ -85,7 +85,9 @@ const RichPartnerCard: React.FC<{ stats: PartnerLifetimeStats; onPress?: () => v
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={partner.displayName}
+      // Discretion-first: identify the partner by their initials only — never
+      // the full name, including in the accessibility label.
+      accessibilityLabel={`Partner ${partner.avatarValue}`}
       style={({ pressed }) => ({
         flexShrink: 0,
         width: 168,

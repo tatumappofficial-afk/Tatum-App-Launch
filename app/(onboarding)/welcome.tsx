@@ -179,7 +179,7 @@ export default function WelcomeScreen() {
         <View style={{ marginBottom: 14 }}>
           <GradientButton label="I Understand, Let's Begin" onPress={() => router.push('/(onboarding)/auth')} />
         </View>
-        <StepDots current={0} />
+        <StepDots current={0} total={7} />
       </View>
     </View>
   )

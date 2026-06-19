@@ -142,6 +142,12 @@ const MIGRATIONS: Migration[] = [
       ALTER TABLE user_profile ADD COLUMN providerUserId TEXT;
     `,
   },
+  {
+    version: 4,
+    up: `
+      ALTER TABLE user_settings ADD COLUMN backupEnabled INTEGER NOT NULL DEFAULT 1;
+    `,
+  },
 ]
 
 const TARGET_VERSION = MIGRATIONS[MIGRATIONS.length - 1].version
@@ -153,10 +159,14 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
   db = await SQLite.openDatabaseAsync(DB_NAME)
 
   // Connection-level PRAGMAs. journal_mode persists in the file; foreign_keys
-  // is per-connection and must be set on every open. Both are safe to re-run.
+  // is per-connection and must be set on every open. secure_delete makes
+  // DELETEs zero out freed pages so deleted intimate rows aren't forensically
+  // carvable from the freelist — it persists in the file header but is cheap to
+  // re-assert on open. All three are safe to re-run.
   await db.execAsync(`
     PRAGMA journal_mode = WAL;
     PRAGMA foreign_keys = ON;
+    PRAGMA secure_delete = ON;
   `)
 
   await runMigrations(db)

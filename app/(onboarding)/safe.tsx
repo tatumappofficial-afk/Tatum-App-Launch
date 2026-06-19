@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
-import { StyleSheet, View, Text, Pressable } from 'react-native'
+import { useState } from 'react'
+import { StyleSheet, View, Text } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
-import Svg, { Polyline, Path, Rect, Circle } from 'react-native-svg'
+import Svg, { Path } from 'react-native-svg'
 import { useRouter } from 'expo-router'
 import { useBlockBack } from '@/src/hooks/useBlockBack'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -10,10 +10,8 @@ import { GradientButton } from '@/lib/components/GradientButton'
 import { StepDots } from '@/lib/components/StepDots'
 import { DecorativeGlow } from '@/lib/screens/shared/DecorativeGlow'
 import { StatusBarSpacer } from '@/lib/screens/shared/StatusBarSpacer'
-import { authenticate, getBiometricCapabilities, type BiometricCapabilities } from '@/src/utils/biometrics'
-import { useUpdateSettings } from '@/src/hooks/useSettings'
 
-const LockIcon: React.FC = () => (
+const ShieldIcon: React.FC = () => (
   <Svg
     width={28}
     height={28}
@@ -24,68 +22,24 @@ const LockIcon: React.FC = () => (
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <Rect x={3} y={11} width={18} height={11} rx={2} ry={2} />
-    <Path d="M7 11V7a5 5 0 0110 0v4" />
-    <Circle cx={12} cy={16} r={1} />
+    <Path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    <Path d="M9 12l2 2 4-4" />
   </Svg>
 )
 
-const CheckCircle: React.FC = () => (
-  <Svg
-    width={20}
-    height={20}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke={colors.terra}
-    strokeWidth={2.5}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <Polyline points="20 6 9 17 4 12" />
-  </Svg>
-)
-
-export default function ProtectScreen() {
+export default function SafeScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
-  const updateSettings = useUpdateSettings()
   useBlockBack()
 
-  const [caps, setCaps] = useState<BiometricCapabilities | null>(null)
   const [busy, setBusy] = useState(false)
-  const [enableLock, setEnableLock] = useState(true)
 
-  useEffect(() => {
-    getBiometricCapabilities()
-      .then(setCaps)
-      .catch((err) => {
-        console.error('Failed to load biometric capabilities:', err)
-        setCaps({ hasHardware: false, isEnrolled: false, label: 'Use device passcode' })
-      })
-  }, [])
-
-  // Stays busy through router.push so a second tap can't re-trigger the
-  // biometric prompt while the next screen is animating in.
-  async function handlePrimary() {
+  // Stays busy through router.push so a second tap can't queue a duplicate
+  // navigation while the next screen is animating in.
+  function handlePrimary() {
     if (busy) return
     setBusy(true)
-    if (!enableLock) {
-      updateSettings({ biometricLock: false })
-      router.push('/(onboarding)/safe')
-      return
-    }
-    let ok = false
-    try {
-      ok = await authenticate('Unlock Tatum')
-    } catch (err) {
-      console.error('Biometric auth failed:', err)
-    }
-    if (!ok) {
-      setBusy(false)
-      return
-    }
-    updateSettings({ biometricLock: true })
-    router.push('/(onboarding)/safe')
+    router.push('/(onboarding)/partner')
   }
 
   return (
@@ -106,7 +60,7 @@ export default function ProtectScreen() {
               marginBottom: 8,
             }}
           >
-            Step 4 of 7
+            Step 5 of 7
           </Text>
           <Text
             style={{
@@ -117,23 +71,20 @@ export default function ProtectScreen() {
               marginBottom: 8,
             }}
           >
-            Protect your space
+            Your data stays yours
           </Text>
           <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: colors.stone, lineHeight: 20.8 }}>
-            Lock Tatum so your data stays private even if someone picks up your phone.
+            Everything you log lives on your phone, locked behind your Face ID. It backs up to your iCloud so you won't
+            lose it when you switch phones — and you're always in control.
           </Text>
         </View>
 
-        {/* Lock card — tap to toggle whether the user wants to enable biometrics. */}
-        <Pressable
-          onPress={() => setEnableLock((prev) => !prev)}
-          accessibilityRole="checkbox"
-          accessibilityState={{ checked: enableLock }}
-          accessibilityLabel="Enable biometric lock"
-          style={({ pressed }) => ({
+        {/* Reassurance card */}
+        <View
+          style={{
             backgroundColor: colors.surface,
             borderWidth: 2,
-            borderColor: enableLock ? colors.terra : 'rgba(160,100,80,0.15)',
+            borderColor: colors.terra,
             borderRadius: 18,
             padding: 16,
             flexDirection: 'row',
@@ -141,11 +92,10 @@ export default function ProtectScreen() {
             gap: 14,
             shadowColor: '#7C4A5A',
             shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: enableLock ? 0.12 : 0.04,
+            shadowOpacity: 0.12,
             shadowRadius: 12,
-            elevation: enableLock ? 3 : 1,
-            opacity: pressed ? 0.9 : 1,
-          })}
+            elevation: 3,
+          }}
         >
           <View
             style={{
@@ -155,7 +105,6 @@ export default function ProtectScreen() {
               alignItems: 'center',
               justifyContent: 'center',
               overflow: 'hidden',
-              opacity: enableLock ? 1 : 0.5,
             }}
           >
             <LinearGradient
@@ -164,11 +113,11 @@ export default function ProtectScreen() {
               end={gradientPoints.diagonal.end}
               style={[StyleSheet.absoluteFill, { borderRadius: 14 }]}
             />
-            <LockIcon />
+            <ShieldIcon />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={{ fontFamily: font('dmSans', '500'), fontSize: 16, color: colors.ink, marginBottom: 2 }}>
-              {caps?.label ?? 'Loading…'}
+              You're in control
             </Text>
             <Text
               style={{
@@ -178,23 +127,18 @@ export default function ProtectScreen() {
                 lineHeight: 17.5,
               }}
             >
-              You'll be prompted each time you open Tatum.
+              Prefer to keep it off the cloud? Turn backup off anytime in Settings.
             </Text>
           </View>
-          {enableLock && <CheckCircle />}
-        </Pressable>
+        </View>
       </View>
 
       {/* Bottom area */}
       <View style={{ flexShrink: 0, paddingHorizontal: 28, paddingBottom: Math.max(insets.bottom + 8, 32) }}>
         <View style={{ marginBottom: 14 }}>
-          <GradientButton
-            label={enableLock ? 'Enable Lock' : 'Skip for now'}
-            onPress={handlePrimary}
-            disabled={!caps || busy}
-          />
+          <GradientButton label="Got it" onPress={handlePrimary} disabled={busy} />
         </View>
-        <StepDots current={3} total={7} />
+        <StepDots current={4} total={7} />
       </View>
     </View>
   )

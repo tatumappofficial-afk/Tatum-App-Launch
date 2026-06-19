@@ -80,7 +80,10 @@ function createSqliteCollection<T extends { id: string }>(config: {
         try {
           await database.runAsync(sql, values as (string | number | null)[])
         } catch (err) {
-          console.error(`INSERT into ${table} failed:`, err, { sql, values })
+          // Never log `values` outside dev — it carries sensitive row data
+          // (notes, partner names). Surface table + error only in production.
+          console.error(`INSERT into ${table} failed:`, err)
+          if (__DEV__) console.error('[db] failed statement:', { sql, values })
           throw err
         }
       }
