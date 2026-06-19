@@ -22,7 +22,6 @@ export interface ActivityTag {
 export interface SessionPartner {
   id: string
   initials: string
-  name: string
   gradient: string
   sessionCount: number
   avgSatisfaction: number
@@ -30,7 +29,6 @@ export interface SessionPartner {
 
 export interface SessionDetailScreenProps {
   partners: SessionPartner[]
-  partnerNames: string // e.g. "Alex + Jordan"
   date: string // e.g. "Saturday, March 14, 2026"
   rating: number
   ratingMax?: number
@@ -116,11 +114,11 @@ const ScreenHeader: React.FC<{
 
 const Hero: React.FC<{
   partners: SessionPartner[]
-  partnerNames: string
   date: string
-}> = ({ partners, partnerNames, date }) => (
-  // Date is the headline; partners shrink to an inline "with X" annotation —
-  // distinguishes this from PartnerProfile, where the avatar + name dominate.
+}> = ({ partners, date }) => (
+  // Date is the headline; partners shrink to an inline initials-avatar
+  // annotation. Discretion-first: identify the session by the initials avatar
+  // only — never the partner's full name.
   <View
     style={{
       flexShrink: 0,
@@ -147,16 +145,6 @@ const Hero: React.FC<{
     {partners.length > 0 && (
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         <AvatarStack partners={partners} size={28} borderWidth={2} max={3} />
-        <Text
-          style={{
-            fontSize: 14,
-            fontFamily: font('dmSans', '400'),
-            color: colors.stone,
-            letterSpacing: 0.2,
-          }}
-        >
-          with <Text style={{ color: colors.ink, fontFamily: font('dmSans', '500') }}>{partnerNames}</Text>
-        </Text>
       </View>
     )}
   </View>
@@ -338,7 +326,9 @@ const PartnerRow: React.FC<{
   >
     {/* Avatar */}
     <AvatarCircle initials={partner.initials} gradient={partner.gradient} size={42} borderWidth={2} />
-    {/* Name + subtitle */}
+    {/* Initials + subtitle. Discretion-first: identify the partner by their
+        initials avatar only — the full name lives on the partner profile this
+        row opens, never on the session surface. */}
     <View style={{ flex: 1 }}>
       <Text
         style={{
@@ -347,7 +337,7 @@ const PartnerRow: React.FC<{
           color: colors.ink,
         }}
       >
-        {partner.name}
+        {partner.initials}
       </Text>
       <Text
         style={{
@@ -392,7 +382,6 @@ const PartnerRow: React.FC<{
 
 export const SessionDetailScreen: React.FC<SessionDetailScreenProps> = ({
   partners,
-  partnerNames,
   date,
   rating,
   ratingMax = 10,
@@ -418,7 +407,7 @@ export const SessionDetailScreen: React.FC<SessionDetailScreenProps> = ({
     <StatusBarSpacer />
     <ScreenHeader onBack={onBack} onEdit={onEdit} />
 
-    <Hero partners={partners} partnerNames={partnerNames} date={date} />
+    <Hero partners={partners} date={date} />
     <SessionStatStrip rating={rating} ratingMax={ratingMax} dayOfWeek={dayOfWeek} />
 
     {/* Scrollable body */}

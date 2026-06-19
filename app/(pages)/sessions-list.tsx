@@ -4,7 +4,6 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { SessionsListScreen, type SessionsListEntry } from '@/lib/screens/SessionsListScreen'
 import { encounters, partners } from '@/src/db'
 import { filterByWindow, formatPeriodCaption, getWindow, parseDateString, type Period } from '@/lib/stats'
-import { formatPartnerLabel } from '@/src/utils/partnerLabel'
 
 const CALENDAR_START_DAY = 'sunday' as const
 
@@ -86,7 +85,6 @@ export default function SessionsListRoute() {
             initials: p.avatarValue,
             gradient: p.avatarGradient,
           })),
-          partnerName: formatPartnerLabel(sessionPartners.map((p) => p.displayName)),
           date: new Date(enc.date + 'T00:00:00').toLocaleDateString('en-US', {
             weekday: 'short',
             month: 'short',

@@ -16,8 +16,6 @@ export interface SessionsListPartner {
 export interface SessionsListEntry {
   id: string
   partners: SessionsListPartner[]
-  /** Optional — when omitted, only the date is shown in the row's text column. */
-  partnerName?: string
   /** Display label, e.g. "Sat · Apr 25" */
   date: string
   rating: number | null
@@ -131,26 +129,15 @@ export const SessionsListScreen: React.FC<SessionsListScreenProps> = ({
               })}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                {/* Discretion-first: identify the session by the initials avatar
+                    only — never the partner's full name. */}
                 <AvatarStack partners={entry.partners} size={36} borderWidth={2} />
                 <View style={{ flex: 1 }}>
-                  {entry.partnerName && (
-                    <Text
-                      style={{
-                        fontFamily: font('playfair', '600'),
-                        fontSize: 16,
-                        color: colors.ink,
-                        lineHeight: 18,
-                      }}
-                    >
-                      {entry.partnerName}
-                    </Text>
-                  )}
                   <Text
                     style={{
                       fontSize: 12,
                       color: colors.stone,
                       fontFamily: font('dmSans', '300'),
-                      marginTop: entry.partnerName ? 2 : 0,
                     }}
                   >
                     {entry.date}
