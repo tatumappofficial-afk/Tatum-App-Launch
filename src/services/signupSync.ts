@@ -9,6 +9,8 @@ export interface SignupRecord {
   email: string
   attested18: boolean
   ageVerdict: AgeSignalVerdict
+  provider?: string | null
+  providerUserId?: string | null
 }
 
 /**
@@ -20,7 +22,7 @@ export interface SignupRecord {
 export async function recordSignup(record: SignupRecord): Promise<void> {
   if (!WEBHOOK_URL || !TOKEN) return // not configured (e.g. local dev) — no-op
   try {
-    await fetch(WEBHOOK_URL, {
+    const response = await fetch(WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -29,9 +31,14 @@ export async function recordSignup(record: SignupRecord): Promise<void> {
         email: record.email,
         attested18: record.attested18,
         ageVerdict: record.ageVerdict,
+        provider: record.provider,
+        providerUserId: record.providerUserId,
         platform: Platform.OS,
       }),
     })
+    if (!response.ok) {
+      console.warn(`[signupSync] failed with ${response.status}: ${response.statusText}`)
+    }
   } catch (err) {
     console.warn('[signupSync] failed (non-blocking):', err)
   }

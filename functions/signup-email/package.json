@@ -1,0 +1,15 @@
+{
+  "name": "tatum-signup-email",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "functions-framework --target=tatumSignup",
+    "check": "node --check index.js"
+  },
+  "dependencies": {
+    "@google-cloud/firestore": "^7.11.6",
+    "@google-cloud/functions-framework": "^4.0.0",
+    "nodemailer": "^7.0.10"
+  }
+}

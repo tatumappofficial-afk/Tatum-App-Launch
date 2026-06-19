@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import { View, Text, TextInput, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native'
+import { View, Text, TextInput, ScrollView, KeyboardAvoidingView, Platform, Alert, Pressable } from 'react-native'
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import { useLiveQuery } from '@tanstack/react-db'
+import Svg, { Polyline } from 'react-native-svg'
+import { GoogleSignin } from '@react-native-google-signin/google-signin'
 import { useBlockBack } from '@/src/hooks/useBlockBack'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { colors, font } from '@/lib/theme'
@@ -12,6 +14,21 @@ import { userProfiles } from '@/src/db'
 import { useSettings } from '@/src/hooks/useSettings'
 import { recordSignup } from '@/src/services/signupSync'
 import type { AgeSignalVerdict } from '@/src/services/ageSignal'
+
+const Checkmark: React.FC = () => (
+  <Svg
+    width={15}
+    height={15}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="white"
+    strokeWidth={3}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <Polyline points="20 6 9 17 4 12" />
+  </Svg>
+)
 
 export default function IdentityScreen() {
   const router = useRouter()
@@ -32,13 +49,10 @@ export default function IdentityScreen() {
   const provider = (params.provider ?? null) as 'apple' | 'google' | null
   const providerUserId = params.providerUserId ?? null
   const ageVerdict = (params.ageVerdict ?? 'unavailable') as AgeSignalVerdict
-  // 18+ attestation now happens on the sign-up screen (auth.tsx) before any
-  // OAuth, so it's already affirmed by the time we reach this screen — we just
-  // carry it into the signup record (the team's age-compliance proof).
-  const attested18 = params.attested18 === 'true'
 
   const [firstName, setFirstName] = useState(initialName)
   const [email, setEmail] = useState(initialEmail)
+  const [attests18, setAttests18] = useState(params.attested18 === 'true')
   const [busy, setBusy] = useState(false)
 
   const { data: profileRows } = useLiveQuery((q) =>
@@ -55,6 +69,10 @@ export default function IdentityScreen() {
       Alert.alert('Add your name', 'Please enter your name to continue.')
       return
     }
+    if (!attests18) {
+      Alert.alert('Confirm your age', 'Please confirm that you are 18 or older to continue.')
+      return
+    }
     setBusy(true)
     try {
       const trimmedEmail = email.trim()
@@ -69,8 +87,10 @@ export default function IdentityScreen() {
       void recordSignup({
         name: firstName.trim(),
         email: trimmedEmail,
-        attested18,
+        attested18: true,
         ageVerdict,
+        provider,
+        providerUserId,
       })
       // Existing user (v1.0 → v1.1 migration, or a sign-back-in after an
       // erase) skips the rest of onboarding — they already have settings,
@@ -84,6 +104,11 @@ export default function IdentityScreen() {
     } finally {
       setBusy(false)
     }
+  }
+
+  async function handleExistingAccount() {
+    if (provider === 'google') await GoogleSignin.signOut().catch(() => {})
+    router.replace('/(onboarding)/auth')
   }
 
   return (
@@ -111,11 +136,11 @@ export default function IdentityScreen() {
                 marginBottom: 10,
               }}
             >
-              A little about you
+              Create your account
             </Text>
             <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: colors.stone, lineHeight: 20.8 }}>
-              Your name and email help Tatum send you product updates and check in on how it's going. You can leave
-              email blank.
+              Your account uses the Apple or Google sign-in you just chose. Add your name, confirm you're 18 or older,
+              and choose the email Tatum can use for welcome notes and product updates.
             </Text>
           </View>
 
@@ -190,10 +215,54 @@ export default function IdentityScreen() {
               }}
             />
           </View>
+
+          <Pressable
+            onPress={() => setAttests18((prev) => !prev)}
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: attests18 }}
+            accessibilityLabel="I confirm that I am 18 years of age or older"
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 12,
+              paddingHorizontal: 4,
+              marginBottom: 22,
+            }}
+          >
+            <View
+              style={{
+                width: 24,
+                height: 24,
+                borderRadius: 7,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: attests18 ? colors.terra : 'transparent',
+                borderWidth: attests18 ? 0 : 2,
+                borderColor: 'rgba(160,100,80,0.4)',
+              }}
+            >
+              {attests18 && <Checkmark />}
+            </View>
+            <Text
+              style={{ flex: 1, fontFamily: font('dmSans', '400'), fontSize: 13, color: colors.stone, lineHeight: 18 }}
+            >
+              I confirm that I am 18 years of age or older.
+            </Text>
+          </Pressable>
         </ScrollView>
 
-        <View style={{ flexShrink: 0, paddingHorizontal: 28, paddingBottom: Math.max(insets.bottom + 8, 32) }}>
+        <View style={{ flexShrink: 0, paddingHorizontal: 28, paddingBottom: Math.max(insets.bottom + 8, 32), gap: 14 }}>
           <GradientButton label="Continue" onPress={handleContinue} disabled={busy} />
+          <Pressable
+            onPress={handleExistingAccount}
+            accessibilityRole="button"
+            accessibilityLabel="Sign in with existing account"
+            style={({ pressed }) => ({ alignItems: 'center', opacity: pressed ? 0.6 : 1 })}
+          >
+            <Text style={{ fontFamily: font('dmSans', '500'), fontSize: 14, color: colors.terra }}>
+              Sign in with existing account?
+            </Text>
+          </Pressable>
         </View>
       </View>
     </KeyboardAvoidingView>
