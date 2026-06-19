@@ -1,4 +1,4 @@
-import { Image, View, Text, ScrollView } from 'react-native'
+import { Image, ScrollView, Text, View } from 'react-native'
 import { Redirect, useRouter } from 'expo-router'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useBlockBack } from '@/src/hooks/useBlockBack'
@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { colors, font, fontFamily } from '@/lib/theme'
 import { GradientButton } from '@/lib/components/GradientButton'
 import { StepDots } from '@/lib/components/StepDots'
+import { ReviewerAccessMenu } from '@/lib/components/ReviewerAccessMenu'
 import { DecorativeGlow } from '@/lib/screens/shared/DecorativeGlow'
 import { StatusBarSpacer } from '@/lib/screens/shared/StatusBarSpacer'
 import { useSettings } from '@/src/hooks/useSettings'
@@ -54,6 +55,7 @@ export default function WelcomeScreen() {
     >
       <DecorativeGlow position="center" size={320} opacity={0.13} />
       <StatusBarSpacer />
+      <ReviewerAccessMenu />
 
       <ScrollView
         style={{ flex: 1, position: 'relative', zIndex: 1 }}
