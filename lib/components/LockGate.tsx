@@ -3,6 +3,7 @@ import { AppState, type AppStateStatus } from 'react-native'
 import { authenticate } from '@/src/utils/biometrics'
 import { useSettings } from '@/src/hooks/useSettings'
 import { LockOverlay } from './LockOverlay'
+import { PrivacyCover } from './PrivacyCover'
 
 export interface LockGateProps {
   /**
@@ -27,6 +28,10 @@ export interface LockGateProps {
 export function LockGate({ initialLocked, children }: LockGateProps) {
   const [locked, setLocked] = useState(initialLocked)
   const [needsRetry, setNeedsRetry] = useState(false)
+  // Always-on snapshot cover: true whenever the app is not foregrounded, so the
+  // OS app-switcher / multitasking snapshot never captures private content.
+  // Independent of the biometric lock setting.
+  const [covered, setCovered] = useState(AppState.currentState !== 'active')
   const lastState = useRef<AppStateStatus>(AppState.currentState)
   const isAuthenticating = useRef(false)
 
@@ -48,8 +53,13 @@ export function LockGate({ initialLocked, children }: LockGateProps) {
       const prev = lastState.current
       lastState.current = state
 
-      // Only react to background → active and active → background transitions.
-      // Ignore the brief 'inactive' state (control center, app switcher, etc).
+      // Always-on privacy cover: raise it the instant we leave 'active' (both
+      // 'inactive' — app switcher / control center — and 'background'), and drop
+      // it only once we're foregrounded again. This blocks the OS snapshot
+      // regardless of the biometric lock setting.
+      setCovered(state !== 'active')
+
+      // Biometric lock (separate from the snapshot cover above).
       if (state === 'background') {
         if (biometricLockRef.current) {
           setLocked(true)
@@ -88,6 +98,9 @@ export function LockGate({ initialLocked, children }: LockGateProps) {
     <>
       {children}
       {locked && <LockOverlay showRetry={needsRetry} onUnlock={attemptUnlock} />}
+      {/* Snapshot cover sits above everything (incl. the lock) whenever the app
+          is not foregrounded, so the OS multitasking snapshot stays opaque. */}
+      {covered && <PrivacyCover />}
     </>
   )
 }
