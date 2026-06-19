@@ -60,7 +60,7 @@ The feature that makes Tatum unlike anything else. Log not just what happened bu
 Add partners by initial or emoji — your private shorthand. Track patterns by partner. Works for women who are married, dating, exploring, or tracking solo experiences.
 
 📓  PRIVATE JOURNAL
-Write notes on any session. Completely private, encrypted on your device. Your words. Your experience. Your record.
+Write notes on any session. Completely private and stored locally on your device. Your words. Your experience. Your record.
 
 🔒  ZERO DATA POLICY
 Tatum never collects your data. No server ever receives what you log. Delete the app and everything disappears — no traces left behind.
@@ -179,8 +179,8 @@ The feature that makes Tatum unique. Log how the experience felt — passionate,
 👤  PARTNER PROFILES
 Track by partner using initials or emojis — your own private language. Works for any relationship configuration.
 
-📓  ENCRYPTED JOURNAL
-Add private notes to any session. Your words stay on your device, encrypted, and visible only to you.
+📓  PRIVATE JOURNAL
+Add private notes to any session. Your words stay locally on your device and visible only to you.
 
 🔒  ZERO DATA COLLECTION
 Tatum never transmits your data anywhere. No account means no breach risk. Delete the app and everything is gone.

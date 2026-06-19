@@ -67,7 +67,7 @@ Five-screen forward-only onboarding flow gated on a new `hasOnboarded` boolean i
 
 - **Greeting:** `"You're all set."` (no name) for v1. When Apple/Google auth + backend ship, swap to `userProfiles.displayName`.
 - **Three feature teasers** (Calendar / Home / Journal): unchanged from mock
-- **Footer:** **"Your data is private and yours alone."** ("encrypted" dropped — `expo-sqlite` doesn't actually encrypt)
+- **Footer:** **"Your data is private and yours alone."**
 - **CTA: `START LOGGING`** → handler:
   ```ts
   // FUTURE: RevenueCat hard paywall here. If purchase succeeds → continue.
