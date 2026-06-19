@@ -207,16 +207,14 @@ export async function initDatabase() {
 
 // ── User-facing "Sign Out" ──
 //
-// Clears the auth identity fields on the user_profile row but leaves all
-// other data intact. Pairs with updateSettings({ hasOnboarded: false }) on
-// the caller side so the layout guard reactively routes to (onboarding) →
-// /auth. When the same user signs back in, auth.tsx detects the matching
-// providerUserId and silently restores them to their data.
+// Clears the active auth gate on the user_profile row but leaves both user data
+// and the owning providerUserId intact. Preserving providerUserId is what lets
+// auth.tsx distinguish "same account returning" from "different account trying
+// to open this device's local data."
 export async function signOutUser() {
   userProfiles.update('default', (draft) => {
     draft.email = null
     draft.authProvider = null
-    draft.providerUserId = null
   })
 }
 

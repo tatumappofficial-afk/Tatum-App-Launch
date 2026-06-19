@@ -56,6 +56,9 @@ export default function AuthScreen() {
   // Set when the platform age signal (Apple/Google) definitively reports the
   // signed-in user as under 18. Renders a terminal block screen — Tatum is 18+.
   const [ageBlocked, setAgeBlocked] = useState(false)
+  const routeToTabs = () => {
+    requestAnimationFrame(() => router.replace('/(tabs)'))
+  }
 
   useEffect(() => {
     if (GOOGLE_WEB_CLIENT_ID) {
@@ -164,7 +167,7 @@ export default function AuthScreen() {
         draft.authProvider = params.provider
         draft.providerUserId = incomingId
       })
-      router.replace('/(tabs)')
+      routeToTabs()
       return
     }
 
@@ -178,12 +181,13 @@ export default function AuthScreen() {
         draft.email = params.email || null
         draft.authProvider = params.provider
       })
-      router.replace('/(tabs)')
+      routeToTabs()
       return
     }
 
     // Identity mismatch — different account trying to take over this device's
     // data. Privacy protection: require an explicit erase before continuing.
+    if (params.provider === 'google') await GoogleSignin.signOut().catch(() => {})
     Alert.alert(
       'Different account',
       "This device already has Tatum data from another account. To use a different account, all existing data has to be erased first. This can't be undone.",

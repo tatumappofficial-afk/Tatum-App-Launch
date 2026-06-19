@@ -3,6 +3,7 @@ import { Alert, Linking } from 'react-native'
 import { SettingsScreen } from '@/lib/screens/SettingsScreen'
 import { SuccessOverlay } from '@/lib/components/SuccessOverlay'
 import { useRouter } from 'expo-router'
+import { GoogleSignin } from '@react-native-google-signin/google-signin'
 import { useSettings, useUpdateSettings } from '@/src/hooks/useSettings'
 import { authenticate } from '@/src/utils/biometrics'
 import { exportData } from '@/src/utils/exportData'
@@ -95,6 +96,7 @@ export default function SettingsRoute() {
                 text: 'Sign Out',
                 onPress: async () => {
                   try {
+                    await GoogleSignin.signOut().catch(() => {})
                     await signOutUser()
                     // The layout guard reactively detects no authProvider and
                     // routes to (onboarding), where welcome.tsx redirects to
