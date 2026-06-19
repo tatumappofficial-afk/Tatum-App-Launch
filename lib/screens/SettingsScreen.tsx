@@ -14,10 +14,9 @@ import { BackButton } from '../components/BackButton'
 
 export interface SettingsScreenProps {
   biometricsEnabled?: boolean
-  backupEnabled?: boolean
   onBack?: () => void
   onToggleBiometrics?: () => void
-  onToggleBackup?: () => void
+  onOpenBackupSettings?: () => void
   onSubmitFeedback?: () => void
   onPrivacyPolicy?: () => void
   onTerms?: () => void
@@ -182,10 +181,9 @@ const ExternalLinkIcon: React.FC<{ color?: string }> = ({ color = '#C4B0A0' }) =
 
 export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   biometricsEnabled = true,
-  backupEnabled = true,
   onBack,
   onToggleBiometrics,
-  onToggleBackup,
+  onOpenBackupSettings,
   onSubmitFeedback,
   onPrivacyPolicy,
   onTerms,
@@ -408,8 +406,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               lineHeight: 19,
             }}
           >
-            Everything you log stays in your hands — on your phone and in your iCloud or Google backup if you've turned
-            it on. Our servers never see your data. You can export a copy or permanently delete it whenever you want.
+            Everything you log stays in your hands — on your phone. Your device backup settings control whether app data
+            is included in iCloud or Google backup. Our servers never see your data.
           </Text>
         </View>
 
@@ -433,9 +431,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             <SettingsRow
               icon={<CloudIcon />}
               iconBg="rgba(139,168,136,0.12)"
-              title="iCloud Backup"
-              subtitle="Backs up your logs to iCloud so they move to a new phone"
-              trailing={<ToggleSwitch enabled={backupEnabled} onToggle={onToggleBackup} />}
+              title="Device Backup"
+              subtitle="Manage app backup in your phone settings"
+              trailing={<ExternalLinkIcon color={colors.sage} />}
+              onPress={onOpenBackupSettings}
             />
             <SettingsRow
               icon={<ExportIcon />}

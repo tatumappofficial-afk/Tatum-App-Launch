@@ -67,22 +67,13 @@ export default function SettingsRoute() {
     setBusy(false)
   }
 
-  // Backup is on by default. Turning it off only persists the preference — the
-  // native backup-exclusion wiring lands separately. We confirm on the way off
-  // so the user understands the recovery tradeoff before their logs stop syncing.
-  function handleToggleBackup() {
-    if (settings.backupEnabled) {
-      Alert.alert(
-        'Turn off backup?',
-        "Your logs will only live on this phone. If it's lost or replaced, they can't be recovered.",
-        [
-          { text: 'Keep backup on', style: 'cancel' },
-          { text: 'Turn off', style: 'destructive', onPress: () => updateSettings({ backupEnabled: false }) },
-        ],
-      )
-      return
+  async function handleOpenDeviceSettings() {
+    try {
+      await Linking.openSettings()
+    } catch (err) {
+      console.error('Failed to open device settings', err)
+      Alert.alert('Could not open settings', 'Open your phone settings to manage device backup.')
     }
-    updateSettings({ backupEnabled: true })
   }
 
   async function handleExportData() {
@@ -98,10 +89,9 @@ export default function SettingsRoute() {
     <>
       <SettingsScreen
         biometricsEnabled={settings.biometricLock}
-        backupEnabled={settings.backupEnabled}
         onBack={() => router.back()}
         onToggleBiometrics={handleToggleBiometrics}
-        onToggleBackup={handleToggleBackup}
+        onOpenBackupSettings={handleOpenDeviceSettings}
         onPrivacyPolicy={() => openExternal(PRIVACY_POLICY_URL)}
         onTerms={() => openExternal(TERMS_URL)}
         onExportData={handleExportData}

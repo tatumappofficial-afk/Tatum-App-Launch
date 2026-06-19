@@ -26,8 +26,9 @@ export interface LockGateProps {
  * (via useSettings); if it's true, locks and prompts.
  */
 export function LockGate({ initialLocked, children }: LockGateProps) {
-  const [locked, setLocked] = useState(initialLocked)
+  const [locked, setLockedState] = useState(initialLocked)
   const [needsRetry, setNeedsRetry] = useState(false)
+  const lockedRef = useRef(initialLocked)
   // Always-on snapshot cover: true whenever the app is not foregrounded, so the
   // OS app-switcher / multitasking snapshot never captures private content.
   // Independent of the biometric lock setting.
@@ -42,6 +43,11 @@ export function LockGate({ initialLocked, children }: LockGateProps) {
   useEffect(() => {
     biometricLockRef.current = settings.biometricLock
   }, [settings])
+
+  function setLocked(value: boolean) {
+    lockedRef.current = value
+    setLockedState(value)
+  }
 
   useEffect(() => {
     // Cold start: if locked, prompt immediately.
@@ -66,8 +72,11 @@ export function LockGate({ initialLocked, children }: LockGateProps) {
           setNeedsRetry(false)
         }
       } else if (state === 'active' && prev === 'background') {
-        // Returning from background — auto-prompt if we're locked.
-        attemptUnlock()
+        // Returning from background — auto-prompt only when the user opted in
+        // and this gate actually locked while backgrounded.
+        if (biometricLockRef.current && lockedRef.current) {
+          attemptUnlock()
+        }
       }
     })
 
