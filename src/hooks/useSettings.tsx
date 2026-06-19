@@ -27,14 +27,15 @@ function rowFromSettings(s: UserSettings): (string | number)[] {
     s.whisperDeliveryDefault,
     s.calendarStartDay,
     s.biometricLock ? 1 : 0,
+    s.backupEnabled ? 1 : 0,
     s.hasOnboarded ? 1 : 0,
     s.theme,
   ]
 }
 
 const UPSERT_SQL = `INSERT OR REPLACE INTO user_settings
-    (id, notifications, whisperDeliveryDefault, calendarStartDay, biometricLock, hasOnboarded, theme)
-   VALUES (?, ?, ?, ?, ?, ?, ?)`
+    (id, notifications, whisperDeliveryDefault, calendarStartDay, biometricLock, backupEnabled, hasOnboarded, theme)
+   VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS)
@@ -53,6 +54,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
           whisperDeliveryDefault: string
           calendarStartDay: string
           biometricLock: number
+          backupEnabled: number
           hasOnboarded: number
           theme: string
         }>('SELECT * FROM user_settings WHERE id = ?', [SETTINGS_ID])
@@ -65,6 +67,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
             whisperDeliveryDefault: row.whisperDeliveryDefault as UserSettings['whisperDeliveryDefault'],
             calendarStartDay: row.calendarStartDay as UserSettings['calendarStartDay'],
             biometricLock: row.biometricLock === 1,
+            backupEnabled: row.backupEnabled === 1,
             hasOnboarded: row.hasOnboarded === 1,
             theme: 'warm',
           })

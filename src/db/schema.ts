@@ -137,6 +137,7 @@ export const UserSettingsSchema = z.object({
   whisperDeliveryDefault: z.enum(['sms', 'in-app', 'copy']),
   calendarStartDay: z.enum(['sunday', 'monday']),
   biometricLock: z.boolean(),
+  backupEnabled: z.boolean(),
   hasOnboarded: z.boolean(),
   theme: z.literal('warm'),
 })
@@ -170,6 +171,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   whisperDeliveryDefault: 'copy',
   calendarStartDay: 'sunday',
   biometricLock: false,
+  backupEnabled: true,
   hasOnboarded: false,
   theme: 'warm',
 }

@@ -142,6 +142,12 @@ const MIGRATIONS: Migration[] = [
       ALTER TABLE user_profile ADD COLUMN providerUserId TEXT;
     `,
   },
+  {
+    version: 4,
+    up: `
+      ALTER TABLE user_settings ADD COLUMN backupEnabled INTEGER NOT NULL DEFAULT 1;
+    `,
+  },
 ]
 
 const TARGET_VERSION = MIGRATIONS[MIGRATIONS.length - 1].version
