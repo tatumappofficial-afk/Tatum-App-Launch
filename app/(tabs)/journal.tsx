@@ -2,7 +2,6 @@ import { useLiveQuery } from '@tanstack/react-db'
 import { useRouter } from 'expo-router'
 import { JournalScreen } from '@/lib/screens/JournalScreen'
 import { encounters, partners } from '@/src/db'
-import { formatPartnerLabel } from '@/src/utils/partnerLabel'
 
 export default function JournalRoute() {
   const router = useRouter()
@@ -24,7 +23,6 @@ export default function JournalRoute() {
           initials: p.avatarValue,
           gradient: p.avatarGradient,
         })),
-        partnerName: formatPartnerLabel(sessionPartners.map((p) => p.displayName)),
         date: new Date(enc.date + 'T00:00:00').toLocaleDateString('en-US', {
           weekday: 'short',
           month: 'short',

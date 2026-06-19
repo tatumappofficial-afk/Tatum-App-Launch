@@ -4,7 +4,6 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { SessionDetailScreen } from '@/lib/screens/SessionDetailScreen'
 import { encounters, partners } from '@/src/db'
 import { useActivityTagMap } from '@/src/hooks/useActivityTagMap'
-import { formatPartnerLabel } from '@/src/utils/partnerLabel'
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
@@ -32,15 +31,7 @@ export default function SessionDetailRoute() {
 
   if (!encounter) {
     return (
-      <SessionDetailScreen
-        partners={[]}
-        partnerNames=""
-        date=""
-        rating={0}
-        dayOfWeek=""
-        activities={[]}
-        onBack={() => router.back()}
-      />
+      <SessionDetailScreen partners={[]} date="" rating={0} dayOfWeek="" activities={[]} onBack={() => router.back()} />
     )
   }
 
@@ -64,7 +55,6 @@ export default function SessionDetailRoute() {
       return {
         id: p.id,
         initials: p.avatarValue,
-        name: p.displayName,
         gradient: p.avatarGradient,
         sessionCount: pEncs.length,
         avgSatisfaction: avg,
@@ -78,7 +68,6 @@ export default function SessionDetailRoute() {
   return (
     <SessionDetailScreen
       partners={sessionPartners}
-      partnerNames={formatPartnerLabel(sessionPartners.map((p) => p.name))}
       date={dateStr}
       rating={encounter.stars || 0}
       dayOfWeek={dayOfWeek.slice(0, 3)}

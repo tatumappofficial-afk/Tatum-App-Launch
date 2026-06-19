@@ -22,7 +22,6 @@ export interface JournalPartner {
 export interface JournalEntry {
   id: string
   partners: JournalPartner[]
-  partnerName: string
   /** Display label, e.g. "Sat, Mar 14" */
   date: string
   /** Raw ISO date YYYY-MM-DD — used for calendar navigation and visible-month tracking */
@@ -139,7 +138,7 @@ const EntryCard: React.FC<{ entry: JournalEntry; onPress?: () => void }> = ({ en
       <Pressable
         onPress={onPress}
         accessibilityRole="button"
-        accessibilityLabel={`${entry.partnerName} session on ${entry.date}`}
+        accessibilityLabel={`Session on ${entry.date}`}
         android_ripple={{ color: 'rgba(192,120,88,0.12)' }}
         style={({ pressed }) => [styles.entryPaper, pressed && onPress ? { opacity: 0.85 } : null]}
       >
@@ -150,9 +149,10 @@ const EntryCard: React.FC<{ entry: JournalEntry; onPress?: () => void }> = ({ en
         <View style={styles.entryHeader}>
           {/* Left side */}
           <View style={styles.entryHeaderLeft}>
+            {/* Discretion-first: identify the session by the initials avatar
+                only — never the partner's full name. */}
             <AvatarStack partners={entry.partners} size={32} borderWidth={2} />
             <View>
-              {entry.partnerName ? <Text style={styles.entryPartnerName}>{entry.partnerName}</Text> : null}
               <Text style={styles.entryDate}>{entry.date}</Text>
             </View>
           </View>
@@ -479,12 +479,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-  },
-  entryPartnerName: {
-    fontFamily: font('playfair', '600'),
-    fontSize: 17,
-    color: colors.ink,
-    lineHeight: 20,
   },
   entryDate: {
     fontSize: 12,
