@@ -1,5 +1,5 @@
 import React from 'react'
-import { ScrollView, StyleSheet, View, Text } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, View, Text } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Line, Path, Polyline } from 'react-native-svg'
 import { colors, font, gradientPoints, gradients } from '../theme'
@@ -21,6 +21,7 @@ export interface SettingsScreenProps {
   onPrivacyPolicy?: () => void
   onTerms?: () => void
   onExportData?: () => void
+  onOpenPremium?: () => void
   onSignOut?: () => void
   onEraseEverything?: () => void
 }
@@ -188,6 +189,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   onPrivacyPolicy,
   onTerms,
   onExportData,
+  onOpenPremium,
   onSignOut,
   onEraseEverything,
 }) => {
@@ -236,9 +238,11 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       >
         {/* ── Pro Membership Card ── */}
         <View style={{ marginTop: 14, flexShrink: 0 }}>
-          <View
+          <Pressable
+            onPress={onOpenPremium}
+            accessibilityRole="button"
             accessibilityLabel="Tatum Premium"
-            style={{
+            style={({ pressed }) => ({
               marginHorizontal: 20,
               borderRadius: 16,
               paddingVertical: 14,
@@ -247,7 +251,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               alignItems: 'center',
               gap: 12,
               overflow: 'hidden',
-            }}
+              opacity: pressed ? 0.86 : 1,
+            })}
           >
             <LinearGradient
               colors={gradients.primaryCta}
@@ -311,10 +316,11 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   marginTop: 2,
                 }}
               >
-                Lifetime access · $24.99 paid
+                Lifetime access · $24.99 one-time
               </Text>
             </View>
-          </View>
+            <ChevronForwardIcon color="rgba(255,255,255,0.72)" />
+          </Pressable>
         </View>
 
         {/* ── Security Section ── */}

@@ -195,7 +195,7 @@ export default function ReadyScreen() {
             textAlign: 'center',
           }}
         >
-          You're all set.
+          Unlock Tatum for life.
         </Text>
 
         <Text
@@ -208,7 +208,7 @@ export default function ReadyScreen() {
             letterSpacing: 0.3,
           }}
         >
-          Here's what's waiting for you.
+          Tatum Lifetime is a one-time $24.99 purchase. No subscription, no recurring charge.
         </Text>
 
         <View style={{ gap: 8, width: '100%', marginBottom: 32 }}>
@@ -245,7 +245,7 @@ export default function ReadyScreen() {
       <View style={{ paddingHorizontal: 28, paddingBottom: Math.max(insets.bottom + 8, 40) }}>
         <View style={{ marginBottom: 12 }}>
           <GradientButton
-            label={starting ? 'Starting...' : 'Start Logging'}
+            label={starting ? 'Opening...' : 'Unlock Lifetime Access'}
             height={56}
             fontSize={14}
             onPress={handleStart}
@@ -261,7 +261,7 @@ export default function ReadyScreen() {
             lineHeight: 16.5,
           }}
         >
-          Your data is private and yours alone.
+          Already purchased? Use Restore Purchases on the next screen.
         </Text>
       </View>
     </View>

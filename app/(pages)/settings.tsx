@@ -9,6 +9,8 @@ import { authenticate } from '@/src/utils/biometrics'
 import { exportData } from '@/src/utils/exportData'
 import { eraseAllUserData, signOutUser } from '@/src/db'
 import { DEFAULT_SETTINGS } from '@/src/db/schema'
+import { isRevenueCatPaywallConfigured, presentRevenueCatPaywallIfNeeded } from '@/src/services/revenueCat'
+import { useUserProfile } from '@/src/hooks/useUserProfile'
 
 const PRIVACY_POLICY_URL = 'https://www.tatumapp.com/privacy.html'
 const TERMS_URL = 'https://www.tatumapp.com/terms.html'
@@ -28,6 +30,7 @@ export default function SettingsRoute() {
   const router = useRouter()
   const settings = useSettings()
   const updateSettings = useUpdateSettings()
+  const { raw: profile } = useUserProfile()
 
   const [busy, setBusy] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
@@ -85,6 +88,29 @@ export default function SettingsRoute() {
     }
   }
 
+  async function handleOpenPremium() {
+    if (busy) return
+    if (!isRevenueCatPaywallConfigured()) {
+      Alert.alert('Purchases are not ready yet', 'Tatum Lifetime will be available once App Store setup is complete.')
+      return
+    }
+
+    setBusy(true)
+    try {
+      const result = await presentRevenueCatPaywallIfNeeded(profile?.providerUserId ?? null)
+      if (result === 'unlocked') {
+        setSuccessLabel('Lifetime access active')
+        setShowSuccess(true)
+        if (successTimer.current) clearTimeout(successTimer.current)
+        successTimer.current = setTimeout(() => setShowSuccess(false), 1400)
+      } else if (result === 'error') {
+        Alert.alert('Purchase unavailable', 'Please try again in a moment.')
+      }
+    } finally {
+      setBusy(false)
+    }
+  }
+
   return (
     <>
       <SettingsScreen
@@ -95,6 +121,7 @@ export default function SettingsRoute() {
         onPrivacyPolicy={() => openExternal(PRIVACY_POLICY_URL)}
         onTerms={() => openExternal(TERMS_URL)}
         onExportData={handleExportData}
+        onOpenPremium={handleOpenPremium}
         onSubmitFeedback={() => openExternal(FEEDBACK_MAILTO)}
         onSignOut={() => {
           Alert.alert(

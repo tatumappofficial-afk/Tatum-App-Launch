@@ -14,7 +14,13 @@ export interface UseUserProfileResult {
   /** Avatar gradient with terra fallback. */
   gradient: string
   /** Raw profile row; null until the live query hydrates. */
-  raw: { id: string; displayName: string | null; avatarValue: string | null; avatarGradient: string | null } | null
+  raw: {
+    id: string
+    displayName: string | null
+    avatarValue: string | null
+    avatarGradient: string | null
+    providerUserId: string | null
+  } | null
 }
 
 /**
@@ -41,6 +47,7 @@ export function useUserProfile(): UseUserProfileResult {
           displayName: profile.displayName,
           avatarValue: profile.avatarValue,
           avatarGradient: profile.avatarGradient,
+          providerUserId: profile.providerUserId,
         }
       : null,
   }

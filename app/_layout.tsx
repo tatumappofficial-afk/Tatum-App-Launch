@@ -20,6 +20,7 @@ import { useLiveQuery } from '@tanstack/react-db'
 import { initDatabase, userProfiles } from '@/src/db'
 import { SettingsProvider, useSettings, useSettingsReady } from '@/src/hooks/useSettings'
 import { LockGate } from '@/lib/components/LockGate'
+import { PremiumAccessGate } from '@/lib/components/PremiumAccessGate'
 
 SplashScreen.preventAutoHideAsync()
 
@@ -86,52 +87,55 @@ function AuthedTree() {
 
   const { hasOnboarded, biometricLock } = settings
   const isAuthed = profiles.some((p) => p.authProvider !== null)
+  const authedProfile = profiles.find((p) => p.authProvider !== null) ?? null
 
   return (
     <View style={{ flex: 1, backgroundColor: '#F5EFE8' }} onLayout={onLayoutRootView}>
       {/* Only lock a fully onboarded, signed-in user. Otherwise the biometric
           prompt could fire on cold start over the sign-in/onboarding screens —
           before the user has even reached the /protect step where they opt in. */}
-      <LockGate initialLocked={biometricLock && hasOnboarded && isAuthed}>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            // Pin to the splash color so a routed screen mid-mount can't flash black on Android.
-            contentStyle: { backgroundColor: '#F5EFE8' },
-          }}
-        >
-          <Stack.Protected guard={!hasOnboarded || !isAuthed}>
-            <Stack.Screen name="(onboarding)" />
-          </Stack.Protected>
-          <Stack.Protected guard={hasOnboarded && isAuthed}>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="(pages)" />
-          </Stack.Protected>
-          {/* Sheets stay reachable from both onboarding and the main app. */}
-          <Stack.Screen
-            name="(sheets)"
-            options={Platform.select({
-              ios: {
-                presentation: 'formSheet' as const,
-                sheetAllowedDetents: [0.85],
-                sheetInitialDetentIndex: 0,
-                sheetGrabberVisible: true,
-                sheetCornerRadius: 24,
-                sheetExpandsWhenScrolledToEdge: false,
-              },
-              default: {
-                presentation: 'transparentModal' as const,
-                // AndroidSheetChrome runs the slide + backdrop fade; the screen transition stays out of the way.
-                animation: 'none' as const,
-                // Override the parent Stack's opaque #F5EFE8 — otherwise the sheet container
-                // covers the underlying tab/page, and the AndroidSheetChrome backdrop fade
-                // reveals warm sand instead of the actual app on dismiss.
-                contentStyle: { backgroundColor: 'transparent' },
-              },
-            })}
-          />
-        </Stack>
-      </LockGate>
+      <PremiumAccessGate active={hasOnboarded && isAuthed} appUserID={authedProfile?.providerUserId ?? null}>
+        <LockGate initialLocked={biometricLock && hasOnboarded && isAuthed}>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              // Pin to the splash color so a routed screen mid-mount can't flash black on Android.
+              contentStyle: { backgroundColor: '#F5EFE8' },
+            }}
+          >
+            <Stack.Protected guard={!hasOnboarded || !isAuthed}>
+              <Stack.Screen name="(onboarding)" />
+            </Stack.Protected>
+            <Stack.Protected guard={hasOnboarded && isAuthed}>
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="(pages)" />
+            </Stack.Protected>
+            {/* Sheets stay reachable from both onboarding and the main app. */}
+            <Stack.Screen
+              name="(sheets)"
+              options={Platform.select({
+                ios: {
+                  presentation: 'formSheet' as const,
+                  sheetAllowedDetents: [0.85],
+                  sheetInitialDetentIndex: 0,
+                  sheetGrabberVisible: true,
+                  sheetCornerRadius: 24,
+                  sheetExpandsWhenScrolledToEdge: false,
+                },
+                default: {
+                  presentation: 'transparentModal' as const,
+                  // AndroidSheetChrome runs the slide + backdrop fade; the screen transition stays out of the way.
+                  animation: 'none' as const,
+                  // Override the parent Stack's opaque #F5EFE8 — otherwise the sheet container
+                  // covers the underlying tab/page, and the AndroidSheetChrome backdrop fade
+                  // reveals warm sand instead of the actual app on dismiss.
+                  contentStyle: { backgroundColor: 'transparent' },
+                },
+              })}
+            />
+          </Stack>
+        </LockGate>
+      </PremiumAccessGate>
     </View>
   )
 }
