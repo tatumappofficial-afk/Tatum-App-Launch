@@ -7,7 +7,6 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.tatumapp.tatum",
@@ -82,6 +81,12 @@
         "projectId": "0f07d45e-b9fe-46f0-b58e-5f89f85f7b20"
       }
     },
-    "owner": "tatum-app"
+    "owner": "tatum-app",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/0f07d45e-b9fe-46f0-b58e-5f89f85f7b20"
+    }
   }
 }

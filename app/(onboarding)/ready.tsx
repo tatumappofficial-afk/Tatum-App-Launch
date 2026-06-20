@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { StyleSheet, View, Text } from 'react-native'
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Rect, Line, Path, Polyline } from 'react-native-svg'
 import { useRouter } from 'expo-router'
+import { useLiveQuery } from '@tanstack/react-db'
 import { useBlockBack } from '@/src/hooks/useBlockBack'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { colors, font, gradientPoints } from '@/lib/theme'
@@ -11,6 +12,8 @@ import { GradientButton } from '@/lib/components/GradientButton'
 import { RadialGlow } from '@/lib/screens/shared/DecorativeGlow'
 import { StatusBarSpacer } from '@/lib/screens/shared/StatusBarSpacer'
 import { useUpdateSettings } from '@/src/hooks/useSettings'
+import { presentRevenueCatPaywallIfNeeded } from '@/src/services/revenueCat'
+import { userProfiles } from '@/src/db'
 
 const CalendarIcon: React.FC = () => (
   <Svg
@@ -87,6 +90,11 @@ export default function ReadyScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
   const updateSettings = useUpdateSettings()
+  const [starting, setStarting] = useState(false)
+  const { data: profiles = [] } = useLiveQuery((q) =>
+    q.from({ userProfiles }).select(({ userProfiles }) => ({ ...userProfiles })),
+  )
+  const appUserID = profiles.find((profile) => profile.id === 'default')?.providerUserId ?? null
   useBlockBack()
 
   const logoRotation = useSharedValue(0)
@@ -100,12 +108,22 @@ export default function ReadyScreen() {
     transform: [{ rotate: `${logoRotation.value}deg` }],
   }))
 
-  function handleStart() {
-    // Context update is synchronous — Stack.Protected guards in _layout.tsx
-    // re-evaluate on the next render, so (tabs) is mounted by the time
-    // router.replace fires.
-    updateSettings({ hasOnboarded: true })
-    router.replace('/(tabs)')
+  async function handleStart() {
+    if (starting) return
+
+    setStarting(true)
+    try {
+      const paywallResult = await presentRevenueCatPaywallIfNeeded(appUserID)
+      if (paywallResult === 'blocked' || paywallResult === 'error') return
+
+      // Context update is synchronous — Stack.Protected guards in _layout.tsx
+      // re-evaluate on the next render, so (tabs) is mounted by the time
+      // router.replace fires.
+      updateSettings({ hasOnboarded: true })
+      router.replace('/(tabs)')
+    } finally {
+      setStarting(false)
+    }
   }
 
   return (
@@ -226,7 +244,13 @@ export default function ReadyScreen() {
 
       <View style={{ paddingHorizontal: 28, paddingBottom: Math.max(insets.bottom + 8, 40) }}>
         <View style={{ marginBottom: 12 }}>
-          <GradientButton label="Start Logging" height={56} fontSize={14} onPress={handleStart} />
+          <GradientButton
+            label={starting ? 'Starting...' : 'Start Logging'}
+            height={56}
+            fontSize={14}
+            onPress={handleStart}
+            disabled={starting}
+          />
         </View>
         <Text
           style={{
