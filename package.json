@@ -12,7 +12,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format:check": "prettier --check .",
-    "format:write": "prettier --write ."
+    "format:write": "prettier --write .",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@expo/ui": "~56.0.18",
@@ -27,6 +28,7 @@
     "expo-build-properties": "~56.0.19",
     "expo-constants": "~56.0.14",
     "expo-crypto": "~56.0.4",
+    "expo-dev-client": "~56.0.20",
     "expo-file-system": "~56.0.7",
     "expo-font": "~56.0.5",
     "expo-haptics": "~56.0.3",
@@ -48,7 +50,6 @@
     "react-native-gesture-handler": "~2.31.1",
     "react-native-keyboard-controller": "1.21.6",
     "react-native-purchases": "^10.4.0",
-    "react-native-purchases-ui": "^10.4.0",
     "react-native-reanimated": "4.3.1",
     "react-native-reanimated-dnd": "^2.0.0",
     "react-native-safe-area-context": "~5.7.0",
@@ -66,6 +67,8 @@
     "@types/uuid": "^10.0.0",
     "eslint": "^9.39.4",
     "eslint-config-expo": "^56.0.4",
+    "patch-package": "^8.0.1",
+    "postinstall-postinstall": "^2.1.0",
     "prettier": "^3.8.3",
     "typescript": "~6.0.3"
   },

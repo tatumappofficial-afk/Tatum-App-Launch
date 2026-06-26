@@ -6,9 +6,9 @@ export default function OnboardingLayout() {
       initialRouteName="welcome"
       screenOptions={{
         headerShown: false,
-        // Onboarding is forward-only — no swipe-back, no header back, no
-        // hardware back. Each screen also calls usePreventRemove(true) to
-        // catch programmatic pops.
+        // Onboarding is forward-only because some steps commit side effects.
+        // iOS swipe-back is disabled here; Android hardware back is blocked by
+        // each screen's useBlockBack call.
         gestureEnabled: false,
       }}
     />

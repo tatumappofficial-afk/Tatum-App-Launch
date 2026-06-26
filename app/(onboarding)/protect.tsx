@@ -183,6 +183,19 @@ export default function ProtectScreen() {
           </View>
           {enableLock && <CheckCircle />}
         </Pressable>
+        <Text
+          style={{
+            fontFamily: font('dmSans', '300'),
+            fontSize: 12,
+            color: '#C4B0A0',
+            fontStyle: 'italic',
+            textAlign: 'center',
+            lineHeight: 16,
+            marginTop: 14,
+          }}
+        >
+          You can change this later in Settings.
+        </Text>
       </View>
 
       {/* Bottom area */}

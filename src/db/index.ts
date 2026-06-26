@@ -33,23 +33,31 @@ export async function initDatabase() {
   initCollections(db)
 
   // Ensure default user profile exists
-  const profiles = await db.getAllAsync<{ id: string; avatarValue: string | null; avatarGradient: string | null }>(
-    'SELECT id, avatarValue, avatarGradient FROM user_profile LIMIT 1',
-  )
+  const profiles = await db.getAllAsync<{
+    id: string
+    displayName: string | null
+    avatarValue: string | null
+    avatarGradient: string | null
+  }>('SELECT id, displayName, avatarValue, avatarGradient FROM user_profile LIMIT 1')
   const DEFAULT_AVATAR_GRADIENT = 'linear-gradient(135deg, #C07858, #7C4A5A)' // partnerGradients[0] (terra)
   if (profiles.length === 0) {
     const now = new Date().toISOString()
     await db.runAsync(
       'INSERT INTO user_profile (id, displayName, avatarValue, avatarGradient, createdAt, tier, premiumExpiresAt) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      ['default', null, 'A', DEFAULT_AVATAR_GRADIENT, now, 'free', null],
+      ['default', null, null, DEFAULT_AVATAR_GRADIENT, now, 'free', null],
     )
   } else {
     // Backfill avatar fields for legacy rows that pre-date these columns
     const existing = profiles[0]
-    if (existing.avatarValue == null || existing.avatarGradient == null) {
+    const derivedAvatarValue = existing.displayName ? deriveInitials(existing.displayName) || null : null
+    const avatarValue =
+      existing.avatarValue == null || (existing.avatarValue === 'A' && derivedAvatarValue)
+        ? derivedAvatarValue
+        : existing.avatarValue
+    if (avatarValue !== existing.avatarValue || existing.avatarGradient == null) {
       await db.runAsync(
-        'UPDATE user_profile SET avatarValue = COALESCE(avatarValue, ?), avatarGradient = COALESCE(avatarGradient, ?) WHERE id = ?',
-        ['A', DEFAULT_AVATAR_GRADIENT, existing.id],
+        'UPDATE user_profile SET avatarValue = ?, avatarGradient = COALESCE(avatarGradient, ?) WHERE id = ?',
+        [avatarValue, DEFAULT_AVATAR_GRADIENT, existing.id],
       )
     }
   }
@@ -290,7 +298,7 @@ export async function eraseAllUserData() {
       draft.email = null
       draft.authProvider = null
       draft.providerUserId = null
-      draft.avatarValue = 'A'
+      draft.avatarValue = null
       draft.avatarGradient = DEFAULT_AVATAR_GRADIENT
       draft.tier = 'free'
       draft.premiumExpiresAt = null
@@ -301,7 +309,7 @@ export async function eraseAllUserData() {
     await db.runAsync(
       `UPDATE user_profile
          SET displayName = NULL, email = NULL, authProvider = NULL, providerUserId = NULL,
-             avatarValue = 'A', avatarGradient = ?, tier = 'free', premiumExpiresAt = NULL
+             avatarValue = NULL, avatarGradient = ?, tier = 'free', premiumExpiresAt = NULL
        WHERE id = 'default'`,
       [DEFAULT_AVATAR_GRADIENT],
     )

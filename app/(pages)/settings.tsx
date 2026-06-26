@@ -9,7 +9,11 @@ import { authenticate } from '@/src/utils/biometrics'
 import { exportData } from '@/src/utils/exportData'
 import { eraseAllUserData, signOutUser } from '@/src/db'
 import { DEFAULT_SETTINGS } from '@/src/db/schema'
-import { isRevenueCatPaywallConfigured, presentRevenueCatPaywallIfNeeded } from '@/src/services/revenueCat'
+import {
+  getRevenueCatDiagnosticMessage,
+  isRevenueCatPaywallConfigured,
+  purchaseRevenueCatPremium,
+} from '@/src/services/revenueCat'
 import { useUserProfile } from '@/src/hooks/useUserProfile'
 
 const PRIVACY_POLICY_URL = 'https://www.tatumapp.com/privacy.html'
@@ -91,20 +95,20 @@ export default function SettingsRoute() {
   async function handleOpenPremium() {
     if (busy) return
     if (!isRevenueCatPaywallConfigured()) {
-      Alert.alert('Purchases are not ready yet', 'Tatum Lifetime will be available once App Store setup is complete.')
+      Alert.alert('Purchases are not ready yet', 'Tatum Premium will be available once App Store setup is complete.')
       return
     }
 
     setBusy(true)
     try {
-      const result = await presentRevenueCatPaywallIfNeeded(profile?.providerUserId ?? null)
+      const result = await purchaseRevenueCatPremium(profile?.providerUserId ?? null)
       if (result === 'unlocked') {
-        setSuccessLabel('Lifetime access active')
+        setSuccessLabel('Tatum Premium active')
         setShowSuccess(true)
         if (successTimer.current) clearTimeout(successTimer.current)
         successTimer.current = setTimeout(() => setShowSuccess(false), 1400)
       } else if (result === 'error') {
-        Alert.alert('Purchase unavailable', 'Please try again in a moment.')
+        Alert.alert('Purchase unavailable', getRevenueCatDiagnosticMessage())
       }
     } finally {
       setBusy(false)

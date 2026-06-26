@@ -13,8 +13,21 @@ import { DecorativeGlow } from '@/lib/screens/shared/DecorativeGlow'
 import { StatusBarSpacer } from '@/lib/screens/shared/StatusBarSpacer'
 import { activityTags } from '@/src/db'
 
-const TagChip: React.FC<{ emoji: string; label: string }> = ({ emoji, label }) => (
-  <View style={{ flexDirection: 'column', alignItems: 'center', gap: 5, width: 72 }}>
+const TagChip: React.FC<{ emoji: string; label: string; onPress: () => void }> = ({ emoji, label, onPress }) => (
+  <Pressable
+    onPress={onPress}
+    accessibilityRole="button"
+    accessibilityLabel={`Edit tag ${label}`}
+    hitSlop={6}
+    style={({ pressed }) => ({
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: 5,
+      width: 72,
+      opacity: pressed ? 0.85 : 1,
+      transform: [{ scale: pressed ? 0.96 : 1 }],
+    })}
+  >
     <View
       style={{
         width: 64,
@@ -51,7 +64,7 @@ const TagChip: React.FC<{ emoji: string; label: string }> = ({ emoji, label }) =
     >
       {label}
     </Text>
-  </View>
+  </Pressable>
 )
 
 const AddChip: React.FC<{ onPress: () => void }> = ({ onPress }) => {
@@ -139,6 +152,11 @@ export default function TagsScreen() {
   ]
   const columns = chunkArray(items, 3)
 
+  function handleEditTag(id: string) {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+    router.push(`/(sheets)/edit-tag?id=${id}`)
+  }
+
   return (
     <View
       style={{
@@ -187,7 +205,8 @@ export default function TagsScreen() {
             Make it yours
           </Text>
           <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: colors.stone, lineHeight: 20.8 }}>
-            These are your activity tags. Add your own to make Tatum feel like yours.
+            These are your activity tags. Tap any tag to edit or delete it, or add your own to make Tatum feel like
+            yours.
           </Text>
         </View>
 
@@ -212,7 +231,7 @@ export default function TagsScreen() {
             style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: '#7A5A50', lineHeight: 18.6, flex: 1 }}
           >
             <Text style={{ fontWeight: '500', color: colors.ink }}>Activity tags</Text> are the emoji labels you tap
-            when logging a session. They're completely private — tap "Add yours" to create your own.
+            when logging a session. They're completely private — tap any tag to make changes.
           </Text>
         </View>
 
@@ -229,7 +248,7 @@ export default function TagsScreen() {
                 item.kind === 'add' ? (
                   <AddChip key={`add-${ri}`} onPress={() => router.push('/(sheets)/add-tag')} />
                 ) : (
-                  <TagChip key={item.id} emoji={item.emoji} label={item.label} />
+                  <TagChip key={item.id} emoji={item.emoji} label={item.label} onPress={() => handleEditTag(item.id)} />
                 ),
               )}
             </View>
@@ -247,7 +266,7 @@ export default function TagsScreen() {
               textAlign: 'center',
             }}
           >
-            You can add or remove tags from your profile anytime.
+            You can keep editing these from your profile anytime.
           </Text>
         </View>
       </View>
@@ -255,7 +274,7 @@ export default function TagsScreen() {
       {/* Bottom area */}
       <View style={{ flexShrink: 0, paddingHorizontal: 28, paddingBottom: Math.max(insets.bottom + 8, 32) }}>
         <View style={{ marginBottom: 12 }}>
-          <GradientButton label="These Look Good" onPress={() => router.push('/(onboarding)/ready')} />
+          <GradientButton label="Continue" onPress={() => router.push('/(onboarding)/ready')} />
         </View>
         <StepDots current={6} total={7} />
       </View>

@@ -23,6 +23,7 @@ export interface Partner {
 }
 
 export interface ActivityTag {
+  id?: string
   emoji: string
   label: string
 }
@@ -60,6 +61,7 @@ export interface ProfileScreenProps {
   onSettings?: () => void
   onAddPartner?: () => void
   onAddTag?: () => void
+  onTagPress?: (index: number) => void
   onPartnersSection?: () => void
   onPartnerPress?: (index: number) => void
   onSessionPress?: (id: string) => void
@@ -136,6 +138,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   onSettings,
   onAddPartner,
   onAddTag,
+  onTagPress,
   onPartnersSection,
   onPartnerPress,
   onSessionPress,
@@ -372,7 +375,15 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         <View style={{ flexShrink: 0, paddingHorizontal: 24 }}>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
             {activityTags.map((tag, i) => (
-              <TagPill key={i} emoji={tag.emoji} label={tag.label} variant="display" />
+              <Pressable
+                key={tag.id ?? i}
+                onPress={() => onTagPress?.(i)}
+                accessibilityRole="button"
+                accessibilityLabel={`Edit tag ${tag.label}`}
+                style={({ pressed }) => ({ opacity: pressed ? 0.75 : 1 })}
+              >
+                <TagPill emoji={tag.emoji} label={tag.label} variant="display" />
+              </Pressable>
             ))}
             {/* Add tag chip */}
             <Pressable

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { View, Text, Image, Platform, Alert, Pressable } from 'react-native'
+import { View, Text, Image, Platform, Alert, Pressable, ActivityIndicator } from 'react-native'
 import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import Svg, { Path } from 'react-native-svg'
@@ -56,8 +56,24 @@ export default function AuthScreen() {
   // Set when the platform age signal (Apple/Google) definitively reports the
   // signed-in user as under 18. Renders a terminal block screen — Tatum is 18+.
   const [ageBlocked, setAgeBlocked] = useState(false)
+  const [authBusyLabel, setAuthBusyLabel] = useState<string | null>(null)
+  const isAuthBusy = authBusyLabel !== null
   const routeToTabs = () => {
+    setAuthBusyLabel('Opening Tatum...')
     requestAnimationFrame(() => router.replace('/(tabs)'))
+  }
+  const routeToIdentity = (params: {
+    email: string
+    fullName: string
+    provider: 'apple' | 'google'
+    providerUserId: string
+    ageVerdict: string
+  }) => {
+    setAuthBusyLabel('Setting up your account...')
+    router.push({
+      pathname: '/(onboarding)/identity',
+      params,
+    })
   }
 
   useEffect(() => {
@@ -76,6 +92,7 @@ export default function AuthScreen() {
     provider: 'apple' | 'google'
     providerUserId: string
   }) => {
+    setAuthBusyLabel('Checking your account...')
     // Age signal. Ask the platform (Apple/Google) for the signed-in user's age
     // band. A definitive "under 18" blocks entry entirely. A 'clear' or
     // 'unavailable' verdict proceeds. The one-time self-attestation happens on
@@ -84,6 +101,7 @@ export default function AuthScreen() {
     const verdict = await checkAgeSignal()
     if (verdict === 'minor') {
       if (params.provider === 'google') await GoogleSignin.signOut().catch(() => {})
+      setAuthBusyLabel(null)
       setAgeBlocked(true)
       return
     }
@@ -103,15 +121,12 @@ export default function AuthScreen() {
       // name they want, then routes through /protect → /partner → /tags.
       // The age verdict rides along so the identity screen can log it with the
       // signup (name + email + attestation + verdict, all in one record).
-      router.push({
-        pathname: '/(onboarding)/identity',
-        params: {
-          email: params.email,
-          fullName: params.fullName ?? '',
-          provider: params.provider,
-          providerUserId: params.providerUserId,
-          ageVerdict: verdict,
-        },
+      routeToIdentity({
+        email: params.email,
+        fullName: params.fullName ?? '',
+        provider: params.provider,
+        providerUserId: params.providerUserId,
+        ageVerdict: verdict,
       })
       return
     }
@@ -122,15 +137,12 @@ export default function AuthScreen() {
     if (!profile) {
       // Defensive: hasOnboarded=true with no profile shouldn't happen
       // (initDatabase guarantees one). Fall through to fresh path.
-      router.push({
-        pathname: '/(onboarding)/identity',
-        params: {
-          email: params.email,
-          fullName: params.fullName ?? '',
-          provider: params.provider,
-          providerUserId: params.providerUserId,
-          ageVerdict: verdict,
-        },
+      routeToIdentity({
+        email: params.email,
+        fullName: params.fullName ?? '',
+        provider: params.provider,
+        providerUserId: params.providerUserId,
+        ageVerdict: verdict,
       })
       return
     }
@@ -149,15 +161,12 @@ export default function AuthScreen() {
       // device's data. If they don't have a name yet, capture it on
       // /identity (which will route home, not into more onboarding).
       if (!hasName) {
-        router.push({
-          pathname: '/(onboarding)/identity',
-          params: {
-            email: params.email,
-            fullName: params.fullName ?? '',
-            provider: params.provider,
-            providerUserId: params.providerUserId,
-            ageVerdict: verdict,
-          },
+        routeToIdentity({
+          email: params.email,
+          fullName: params.fullName ?? '',
+          provider: params.provider,
+          providerUserId: params.providerUserId,
+          ageVerdict: verdict,
         })
         return
       }
@@ -188,6 +197,7 @@ export default function AuthScreen() {
     // Identity mismatch — different account trying to take over this device's
     // data. Privacy protection: require an explicit erase before continuing.
     if (params.provider === 'google') await GoogleSignin.signOut().catch(() => {})
+    setAuthBusyLabel(null)
     Alert.alert(
       'Different account',
       "This device already has Tatum data from another account. To use a different account, all existing data has to be erased first. This can't be undone.",
@@ -197,6 +207,7 @@ export default function AuthScreen() {
           text: 'Erase and continue',
           style: 'destructive',
           onPress: async () => {
+            setAuthBusyLabel('Resetting Tatum...')
             try {
               await eraseAllUserData()
               updateSettings({
@@ -209,18 +220,16 @@ export default function AuthScreen() {
               })
               // After erase, profile is fresh — route to /identity to collect
               // a name, the new identity will be stamped there.
-              router.push({
-                pathname: '/(onboarding)/identity',
-                params: {
-                  email: params.email,
-                  fullName: params.fullName ?? '',
-                  provider: params.provider,
-                  providerUserId: params.providerUserId,
-                  ageVerdict: verdict,
-                },
+              routeToIdentity({
+                email: params.email,
+                fullName: params.fullName ?? '',
+                provider: params.provider,
+                providerUserId: params.providerUserId,
+                ageVerdict: verdict,
               })
             } catch (err) {
               console.error('Erase + continue failed:', err)
+              setAuthBusyLabel(null)
               Alert.alert('Something went wrong', 'Please try signing in again.')
             }
           },
@@ -230,6 +239,8 @@ export default function AuthScreen() {
   }
 
   async function handleApple() {
+    if (isAuthBusy) return
+    setAuthBusyLabel('Opening Apple Sign In...')
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
     try {
       const credential = await AppleAuthentication.signInAsync({
@@ -245,6 +256,7 @@ export default function AuthScreen() {
       const email = credential.email ?? ''
       await handleSignedIn({ email, fullName, provider: 'apple', providerUserId: credential.user })
     } catch (err: unknown) {
+      setAuthBusyLabel(null)
       if ((err as { code?: string }).code === 'ERR_REQUEST_CANCELED') return
       console.error('Apple sign-in failed:', err)
       Alert.alert('Sign in failed', 'Apple Sign In could not complete. Please try again.')
@@ -252,17 +264,22 @@ export default function AuthScreen() {
   }
 
   async function handleGoogle() {
+    if (isAuthBusy) return
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
     if (!GOOGLE_WEB_CLIENT_ID) {
       Alert.alert('Setup incomplete', 'Google client IDs are not configured yet. See docs/ship-plan.md Phase 2B.')
       return
     }
+    setAuthBusyLabel('Opening Google Sign In...')
     try {
       if (Platform.OS === 'android') {
         await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true })
       }
       const response = await GoogleSignin.signIn()
-      if (response.type === 'cancelled') return
+      if (response.type === 'cancelled') {
+        setAuthBusyLabel(null)
+        return
+      }
       const user = response.data.user
       if (!user?.email) throw new Error('Google sign-in returned no email')
       await handleSignedIn({
@@ -272,6 +289,7 @@ export default function AuthScreen() {
         providerUserId: user.id,
       })
     } catch (err: unknown) {
+      setAuthBusyLabel(null)
       const e = err as { code?: number | string; message?: string }
       console.error('Google sign-in failed:', JSON.stringify({ code: e.code, message: e.message }))
       // Code 10 = DEVELOPER_ERROR: the console's Android OAuth client doesn't
@@ -374,56 +392,80 @@ export default function AuthScreen() {
       </View>
 
       <View style={{ flexShrink: 0, paddingHorizontal: 28, paddingBottom: Math.max(insets.bottom + 8, 32) }}>
-        <View style={{ gap: 12, marginBottom: 20 }}>
-          {Platform.OS === 'ios' && (
-            <Pressable
-              onPress={handleApple}
-              accessibilityRole="button"
-              accessibilityLabel="Continue with Apple"
-              style={({ pressed }) => ({
-                height: 52,
-                borderRadius: 9999,
-                backgroundColor: '#000',
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 8,
-                opacity: pressed ? 0.8 : 1,
-              })}
-            >
-              <Ionicons name="logo-apple" size={20} color="#fff" />
-              <Text style={{ fontFamily: font('dmSans', '500'), fontSize: 16, color: '#fff' }}>
-                Continue with Apple
-              </Text>
-            </Pressable>
-          )}
-
-          <Pressable
-            onPress={handleGoogle}
-            accessibilityRole="button"
-            accessibilityLabel="Continue with Google"
-            style={({ pressed }) => ({
+        {isAuthBusy ? (
+          <View
+            accessibilityRole="progressbar"
+            accessibilityLabel={authBusyLabel}
+            style={{
               height: 52,
               borderRadius: 9999,
-              backgroundColor: '#fff',
+              backgroundColor: 'rgba(251,247,242,0.92)',
+              borderWidth: 1,
+              borderColor: 'rgba(160,100,80,0.14)',
               flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'center',
               gap: 10,
-              shadowColor: '#7C4A5A',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.1,
-              shadowRadius: 8,
-              elevation: 2,
-              opacity: pressed ? 0.85 : 1,
-            })}
+              marginBottom: 20,
+            }}
           >
-            <GoogleLogo />
-            <Text style={{ fontFamily: font('dmSans', '500'), fontSize: 16, color: colors.ink }}>
-              Continue with Google
-            </Text>
-          </Pressable>
-        </View>
+            <ActivityIndicator color={colors.terra} />
+            <Text style={{ fontFamily: font('dmSans', '500'), fontSize: 15, color: colors.ink }}>{authBusyLabel}</Text>
+          </View>
+        ) : (
+          <View style={{ gap: 12, marginBottom: 20 }}>
+            {Platform.OS === 'ios' && (
+              <Pressable
+                onPress={handleApple}
+                disabled={isAuthBusy}
+                accessibilityRole="button"
+                accessibilityLabel="Continue with Apple"
+                style={({ pressed }) => ({
+                  height: 52,
+                  borderRadius: 9999,
+                  backgroundColor: '#000',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  opacity: pressed ? 0.8 : 1,
+                })}
+              >
+                <Ionicons name="logo-apple" size={20} color="#fff" />
+                <Text style={{ fontFamily: font('dmSans', '500'), fontSize: 16, color: '#fff' }}>
+                  Continue with Apple
+                </Text>
+              </Pressable>
+            )}
+
+            <Pressable
+              onPress={handleGoogle}
+              disabled={isAuthBusy}
+              accessibilityRole="button"
+              accessibilityLabel="Continue with Google"
+              style={({ pressed }) => ({
+                height: 52,
+                borderRadius: 9999,
+                backgroundColor: '#fff',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 10,
+                shadowColor: '#7C4A5A',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.1,
+                shadowRadius: 8,
+                elevation: 2,
+                opacity: pressed ? 0.85 : 1,
+              })}
+            >
+              <GoogleLogo />
+              <Text style={{ fontFamily: font('dmSans', '500'), fontSize: 16, color: colors.ink }}>
+                Continue with Google
+              </Text>
+            </Pressable>
+          </View>
+        )}
       </View>
     </View>
   )

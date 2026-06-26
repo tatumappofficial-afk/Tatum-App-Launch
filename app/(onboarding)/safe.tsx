@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { StyleSheet, View, Text } from 'react-native'
+import { Platform, StyleSheet, View, Text } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Path } from 'react-native-svg'
 import { useRouter } from 'expo-router'
@@ -33,6 +33,8 @@ export default function SafeScreen() {
   useBlockBack()
 
   const [busy, setBusy] = useState(false)
+  const deviceLockLabel = Platform.OS === 'ios' ? 'Face ID' : 'your device lock'
+  const backupLabel = Platform.OS === 'ios' ? 'iCloud' : 'Google backup'
 
   // Stays busy through router.push so a second tap can't queue a duplicate
   // navigation while the next screen is animating in.
@@ -74,8 +76,8 @@ export default function SafeScreen() {
             Your data stays yours
           </Text>
           <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: colors.stone, lineHeight: 20.8 }}>
-            Everything you log lives on your phone, locked behind your Face ID. It backs up to your iCloud so you won't
-            lose it when you switch phones — and you're always in control.
+            Everything you log lives on your phone, protected by {deviceLockLabel}. It can back up with {backupLabel} so
+            you won't lose it when you switch phones — and you're always in control.
           </Text>
         </View>
 

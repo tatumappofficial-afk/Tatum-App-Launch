@@ -14,6 +14,7 @@ import { userProfiles } from '@/src/db'
 import { useSettings } from '@/src/hooks/useSettings'
 import { recordSignup } from '@/src/services/signupSync'
 import type { AgeSignalVerdict } from '@/src/services/ageSignal'
+import { deriveInitials } from '@/src/utils/initials'
 
 const Checkmark: React.FC = () => (
   <Svg
@@ -75,17 +76,23 @@ export default function IdentityScreen() {
     }
     setBusy(true)
     try {
+      const trimmedName = firstName.trim()
       const trimmedEmail = email.trim()
+      const derivedAvatarValue = deriveInitials(trimmedName) || 'A'
       userProfiles.update(profile.id, (draft) => {
-        draft.displayName = firstName.trim()
+        const hadGeneratedAvatar = !draft.avatarValue || (draft.avatarValue === 'A' && !draft.displayName)
+        draft.displayName = trimmedName
         draft.email = trimmedEmail.length > 0 ? trimmedEmail : null
         draft.authProvider = provider
         draft.providerUserId = providerUserId
+        if (!hasOnboarded || hadGeneratedAvatar) {
+          draft.avatarValue = derivedAvatarValue
+        }
       })
       // Log the signup (name + email + 18+ attestation + platform age verdict)
       // to Alanna's Firestore. Fire-and-forget — never blocks onboarding.
       void recordSignup({
-        name: firstName.trim(),
+        name: trimmedName,
         email: trimmedEmail,
         attested18: true,
         ageVerdict,
@@ -249,6 +256,19 @@ export default function IdentityScreen() {
               I confirm that I am 18 years of age or older.
             </Text>
           </Pressable>
+          <Text
+            style={{
+              fontFamily: font('dmSans', '300'),
+              fontSize: 12,
+              color: '#C4B0A0',
+              fontStyle: 'italic',
+              textAlign: 'center',
+              lineHeight: 16,
+              paddingHorizontal: 10,
+            }}
+          >
+            You can update your profile details later.
+          </Text>
         </ScrollView>
 
         <View style={{ flexShrink: 0, paddingHorizontal: 28, paddingBottom: Math.max(insets.bottom + 8, 32), gap: 14 }}>

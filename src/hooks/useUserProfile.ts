@@ -35,7 +35,7 @@ export function useUserProfile(): UseUserProfileResult {
   )
   const profile = profiles.find((p) => p.id === 'default') ?? null
   const displayName = profile?.displayName ?? DEFAULT_NAME
-  const initials = profile?.avatarValue ?? deriveInitials(displayName) ?? DEFAULT_INITIAL
+  const initials = profile?.avatarValue?.trim() || deriveInitials(displayName) || DEFAULT_INITIAL
   const gradient = profile?.avatarGradient ?? DEFAULT_GRADIENT
   return {
     displayName,
