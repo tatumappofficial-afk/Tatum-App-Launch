@@ -1,8 +1,9 @@
 import { useEffect } from 'react'
 import { BackHandler } from 'react-native'
 
-// Blocks the Android hardware back button. iOS swipe-back is killed at the
-// Stack level via `gestureEnabled: false`. Used by onboarding to keep the user moving forward.
+// Blocks Android hardware back during onboarding. Several onboarding screens
+// commit side effects (signup logging, auth stamping, partner creation), so
+// setup stays forward-only and each screen explains what can be changed later.
 export function useBlockBack() {
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => true)

@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react'
-import { Image, StyleSheet, Text, View } from 'react-native'
+import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { colors, font, gradientPoints } from '@/lib/theme'
 import { GradientButton } from '@/lib/components/GradientButton'
 import { StatusBarSpacer } from '@/lib/screens/shared/StatusBarSpacer'
 import {
   getRevenueCatAccessStatus,
+  getRevenueCatDiagnosticMessage,
   isRevenueCatPaywallConfigured,
-  presentRevenueCatPaywallIfNeeded,
+  purchaseRevenueCatPremium,
+  restoreRevenueCatPurchases,
 } from '@/src/services/revenueCat'
 
 type GateState = 'checking' | 'active' | 'needs_purchase'
@@ -49,9 +51,28 @@ export function PremiumAccessGate({
     if (busy) return
     setBusy(true)
     try {
-      const result = await presentRevenueCatPaywallIfNeeded(appUserID)
+      const result = await purchaseRevenueCatPremium(appUserID)
       if (result === 'unlocked' || result === 'not_enabled') {
         setGateState('active')
+      } else if (result === 'error') {
+        Alert.alert('Purchase unavailable', getRevenueCatDiagnosticMessage())
+      }
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function handleRestore() {
+    if (busy) return
+    setBusy(true)
+    try {
+      const result = await restoreRevenueCatPurchases(appUserID)
+      if (result === 'unlocked' || result === 'not_enabled') {
+        setGateState('active')
+      } else if (result === 'blocked') {
+        Alert.alert('No purchase found', 'We could not find Tatum Premium on this Apple or Google account.')
+      } else {
+        Alert.alert('Restore unavailable', getRevenueCatDiagnosticMessage())
       }
     } finally {
       setBusy(false)
@@ -84,7 +105,7 @@ export function PremiumAccessGate({
               marginBottom: 12,
             }}
           >
-            Unlock Tatum for life.
+            Tatum Premium
           </Text>
           <Text
             style={{
@@ -95,27 +116,47 @@ export function PremiumAccessGate({
               textAlign: 'center',
             }}
           >
-            Tatum Lifetime is a one-time $24.99 purchase. No subscription, no recurring charge.
+            One-time purchase of $24.99. No subscription or recurring charge.
           </Text>
         </View>
         <GradientButton
-          label={busy ? 'Opening...' : 'Unlock Lifetime Access'}
+          label={busy ? 'Opening...' : 'Unlock Tatum Premium'}
           height={56}
           fontSize={13}
           onPress={handleUnlock}
           disabled={busy}
         />
+        <Pressable
+          onPress={handleRestore}
+          disabled={busy}
+          accessibilityRole="button"
+          accessibilityLabel="Restore purchases"
+        >
+          <Text
+            style={{
+              fontFamily: font('dmSans', '300'),
+              fontSize: 13,
+              lineHeight: 18,
+              color: colors.muted,
+              textAlign: 'center',
+              marginTop: 14,
+              textDecorationLine: 'underline',
+            }}
+          >
+            Already purchased? Restore purchases.
+          </Text>
+        </Pressable>
         <Text
           style={{
             fontFamily: font('dmSans', '300'),
-            fontSize: 13,
-            lineHeight: 18,
+            fontSize: 12,
+            lineHeight: 16,
             color: colors.muted,
             textAlign: 'center',
-            marginTop: 14,
+            marginTop: 12,
           }}
         >
-          Already purchased? Use Restore Purchases on the next screen.
+          Access continues while Tatum is available and supported.
         </Text>
       </View>
     </View>

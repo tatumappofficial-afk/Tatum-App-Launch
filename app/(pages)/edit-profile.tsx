@@ -1,12 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'expo-router'
 import { useLiveQuery } from '@tanstack/react-db'
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
+import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Sortable, SortableItem } from 'react-native-reanimated-dnd'
+import { ScrollView } from 'react-native-gesture-handler'
 import { colors, font, gradientPoints, partnerGradients } from '@/lib/theme'
 import { AvatarCircle } from '@/lib/components/AvatarCircle'
 import { BackButton } from '@/lib/components/BackButton'
@@ -53,10 +53,21 @@ export default function EditProfilePage() {
     hydratedRef.current = true
   }, [profile])
 
-  const activeTags = allTags.filter((t) => t.isActive).sort((a, b) => a.sortOrder - b.sortOrder)
-  const activePartners = allPartners
-    .filter((p) => p.isActive)
-    .sort((a, b) => a.displayName.localeCompare(b.displayName))
+  // Active tags sorted by saved order; Period is pinned last (it is forced to the
+  // highest sortOrder wherever order is written, e.g. the dedicated reorder page).
+  const activeTags = useMemo(
+    () => allTags.filter((t) => t.isActive).sort((a, b) => a.sortOrder - b.sortOrder),
+    [allTags],
+  )
+  const reorderableTags = useMemo(
+    () => activeTags.filter((t) => t.id !== PERIOD_TAG_ID),
+    [activeTags],
+  )
+  const periodTag = useMemo(() => activeTags.find((t) => t.id === PERIOD_TAG_ID), [activeTags])
+  const activePartners = useMemo(
+    () => allPartners.filter((p) => p.isActive).sort((a, b) => a.displayName.localeCompare(b.displayName)),
+    [allPartners],
+  )
 
   function commitProfile(patch: Partial<{ displayName: string | null; avatarValue: string; avatarGradient: string }>) {
     if (!profile) return
@@ -123,17 +134,22 @@ export default function EditProfilePage() {
     ])
   }
 
-  // Drag-reorder: reanimated-dnd's onDrop fires with the post-drop position map
-  // {[tagId]: newIndex}. Persist every id's new index as its sortOrder; tags are
-  // sorted by sortOrder everywhere, so the change ripples to all pickers.
-  // TAT-9 seam: when isPinned ships, filter the sortable's `data` to non-pinned
-  // tags and re-render pinned ones in their fixed slot above/below.
-  function handleTagReorder(_id: string, _position: number, allPositions?: { [id: string]: number }) {
-    if (!allPositions) return
-    for (const [tagId, newIndex] of Object.entries(allPositions)) {
-      activityTags.update(tagId, (draft) => {
-        draft.sortOrder = newIndex
+  // Re-sequence reorderable tags to a clean 0..n-1 (Period pinned last) before
+  // a new tag is prepended, so the saved order never drifts.
+  function normalizeTagSortOrders() {
+    reorderableTags.forEach((tag, index) => {
+      if (tag.sortOrder === index) return
+      activityTags.update(tag.id, (draft) => {
+        draft.sortOrder = index
       })
+    })
+    if (periodTag) {
+      const lastOrder = reorderableTags.length
+      if (periodTag.sortOrder !== lastOrder) {
+        activityTags.update(periodTag.id, (draft) => {
+          draft.sortOrder = lastOrder
+        })
+      }
     }
   }
 
@@ -144,9 +160,12 @@ export default function EditProfilePage() {
       {/* Sticky header — match PartnersScreen / Settings pattern */}
       <View style={styles.header}>
         <BackButton onPress={() => router.back()} accessibilityLabel="Back" />
-        <Text style={styles.headerTitle} pointerEvents="none">
-          Edit Profile
-        </Text>
+        {/* Title wrapped in a pointerEvents="none" View — an absolute full-width
+            title otherwise swallows center taps on the buttons beneath it, and
+            pointerEvents set on the Text alone is a no-op on Android. */}
+        <View pointerEvents="none" style={styles.headerTitleWrap}>
+          <Text style={styles.headerTitle}>Edit Profile</Text>
+        </View>
         <Pressable
           onPress={handleSavePress}
           accessibilityRole="button"
@@ -225,76 +244,7 @@ export default function EditProfilePage() {
           })}
         </View>
 
-        {/* Tags. Sortable's items are absolutely positioned, so we give it a
-            fixed height to slot it inside the parent ScrollView without nested
-            scroll. The drag is gated by reanimated-dnd's built-in 200ms long-
-            press, so the chip Pressable handles taps normally. */}
-        <Text style={styles.sectionLabel}>Your Tags</Text>
-        <View style={styles.list}>
-          <Sortable
-            data={activeTags}
-            itemHeight={TAG_ROW_HEIGHT}
-            useFlatList={false}
-            style={{
-              height: TAG_ROW_HEIGHT * activeTags.length,
-              backgroundColor: 'transparent',
-            }}
-            renderItem={({ item: tag, id, positions, lowerBound, autoScrollDirection, itemsCount }) => (
-              <SortableItem
-                key={id}
-                id={id}
-                data={tag}
-                positions={positions}
-                lowerBound={lowerBound!}
-                autoScrollDirection={autoScrollDirection!}
-                itemsCount={itemsCount}
-                itemHeight={TAG_ROW_HEIGHT}
-                onDrop={handleTagReorder}
-              >
-                <Pressable
-                  onPress={() => router.push(`/(sheets)/edit-tag?id=${tag.id}`)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Edit tag ${tag.label}`}
-                  style={({ pressed }) => [styles.row, { height: TAG_ROW_HEIGHT }, pressed && styles.rowPressed]}
-                >
-                  <View style={styles.rowLeft}>
-                    {/* Drag-handle cue — purely visual; the whole row stays
-                        draggable via reanimated-dnd's long-press. */}
-                    <Ionicons name="reorder-three" size={22} color={colors.muted} />
-                    <Text style={styles.tagEmoji}>{tag.emoji}</Text>
-                    <Text style={styles.rowLabel}>{tag.label}</Text>
-                  </View>
-                  {/* Period is protected — hide the inline delete affordance.
-                      The row still opens the editor (in locked view) so users
-                      can see what it is. Lock icon hints at the protected state. */}
-                  {tag.id === PERIOD_TAG_ID ? (
-                    <Ionicons name="lock-closed" size={18} color={colors.muted} style={{ marginRight: 4 }} />
-                  ) : (
-                    <Pressable
-                      onPress={() => handleDeleteTag(tag.id, tag.label, tag.emoji)}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Delete tag ${tag.label}`}
-                      hitSlop={10}
-                      style={({ pressed }) => [styles.removeButton, pressed && styles.removeButtonPressed]}
-                    >
-                      <Ionicons name="remove-circle" size={26} color={colors.terra} />
-                    </Pressable>
-                  )}
-                </Pressable>
-              </SortableItem>
-            )}
-          />
-          <Pressable
-            onPress={() => router.push('/(sheets)/add-tag')}
-            accessibilityRole="button"
-            style={({ pressed }) => [styles.addRow, pressed && styles.rowPressed]}
-          >
-            <Ionicons name="add-circle-outline" size={22} color={colors.terra} />
-            <Text style={styles.addRowLabel}>Add a tag</Text>
-          </Pressable>
-        </View>
-
-        {/* Partners */}
+        {/* Partners — kept above Tags */}
         <Text style={styles.sectionLabel}>Your Partners</Text>
         <View style={styles.list}>
           {activePartners.map((p) => (
@@ -324,6 +274,76 @@ export default function EditProfilePage() {
             <Text style={styles.addRowLabel}>Add a partner</Text>
           </Pressable>
         </View>
+
+        {/* Tags — tap a card to edit, minus to delete. Reordering is its own screen. */}
+        <View style={styles.tagSectionHeader}>
+          <Text style={[styles.sectionLabel, styles.sectionLabelInline]}>Your Tags</Text>
+          <Pressable
+            onPress={() => router.push('/(pages)/reorder-tags')}
+            accessibilityRole="button"
+            accessibilityLabel="Reorder tags"
+            hitSlop={8}
+            style={({ pressed }) => [styles.reorderPill, pressed && styles.reorderPillPressed]}
+          >
+            <Ionicons name="swap-vertical" size={14} color={colors.terra} />
+            <Text style={styles.reorderPillLabel}>Reorder tags</Text>
+          </Pressable>
+        </View>
+        <View style={styles.list}>
+          {activeTags.map((tag) => {
+            const isPeriod = tag.id === PERIOD_TAG_ID
+            return (
+              <View key={tag.id} style={[styles.tagRow, { height: TAG_ROW_HEIGHT }]}>
+                {/* Base layer: tapping the card opens edit and shades the whole row. */}
+                <Pressable
+                  onPress={() => router.push(`/(sheets)/edit-tag?id=${tag.id}`)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Edit tag ${tag.label}`}
+                  style={({ pressed }) => [styles.tagCardPressable, pressed && styles.rowPressed]}
+                >
+                  <View style={styles.tagRowLabelGroup}>
+                    <Text style={styles.tagEmoji}>{tag.emoji}</Text>
+                    <Text style={styles.rowLabel}>{tag.label}</Text>
+                  </View>
+                </Pressable>
+                {/* Left island: minus (delete) shades only its icon. Period shows a
+                    lock and stays tappable to edit (touch falls through to the card). */}
+                {isPeriod ? (
+                  <View style={styles.tagActionButton} pointerEvents="none">
+                    <View style={styles.tagActionIcon}>
+                      <Ionicons name="lock-closed" size={18} color={colors.muted} />
+                    </View>
+                  </View>
+                ) : (
+                  <Pressable
+                    onPress={() => handleDeleteTag(tag.id, tag.label, tag.emoji)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Delete tag ${tag.label}`}
+                    hitSlop={6}
+                    style={styles.tagActionButton}
+                  >
+                    {({ pressed }) => (
+                      <View style={[styles.tagActionIcon, pressed && styles.tagActionIconPressed]}>
+                        <Ionicons name="remove-circle" size={24} color={colors.terra} />
+                      </View>
+                    )}
+                  </Pressable>
+                )}
+              </View>
+            )
+          })}
+          <Pressable
+            onPress={() => {
+              normalizeTagSortOrders()
+              router.push('/(sheets)/add-tag')
+            }}
+            accessibilityRole="button"
+            style={({ pressed }) => [styles.addRow, pressed && styles.rowPressed]}
+          >
+            <Ionicons name="add-circle-outline" size={22} color={colors.terra} />
+            <Text style={styles.addRowLabel}>Add a tag</Text>
+          </Pressable>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   )
@@ -344,13 +364,19 @@ const styles = StyleSheet.create({
     position: 'relative',
     zIndex: 2,
   },
+  headerTitleWrap: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   headerTitle: {
     fontFamily: font('playfair', '700'),
     fontSize: 20,
     color: colors.ink,
-    position: 'absolute',
-    left: 0,
-    right: 0,
     textAlign: 'center',
   },
   saveButton: {
@@ -383,6 +409,36 @@ const styles = StyleSheet.create({
     color: colors.stone,
     marginBottom: 10,
     marginTop: 8,
+  },
+  sectionLabelInline: {
+    marginTop: 0,
+    marginBottom: 0,
+  },
+  tagSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 8,
+    marginBottom: 10,
+  },
+  reorderPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: colors.terra,
+    backgroundColor: colors.surface,
+  },
+  reorderPillPressed: {
+    backgroundColor: colors.surface2,
+  },
+  reorderPillLabel: {
+    fontFamily: font('dmSans', '500'),
+    fontSize: 13,
+    color: colors.terra,
   },
   textInput: {
     fontFamily: font('dmSans', '400'),
@@ -459,6 +515,47 @@ const styles = StyleSheet.create({
   rowPressed: {
     backgroundColor: colors.surface2,
   },
+  tagRow: {
+    position: 'relative',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(160,100,80,0.08)',
+  },
+  tagCardPressable: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingLeft: 52,
+    paddingRight: 16,
+  },
+  tagRowLabelGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+  },
+  tagActionButton: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tagActionIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tagActionIconPressed: {
+    backgroundColor: 'rgba(160,100,80,0.14)',
+  },
   rowLeft: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -475,14 +572,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     width: 28,
     textAlign: 'center',
-  },
-  removeButton: {
-    padding: 2,
-    borderRadius: 9999,
-  },
-  removeButtonPressed: {
-    backgroundColor: 'rgba(160,100,80,0.18)',
-    opacity: 0.9,
   },
   editAffordance: {
     flexDirection: 'row',

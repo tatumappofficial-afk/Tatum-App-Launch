@@ -4,12 +4,25 @@ const PAYWALL_ENABLED = process.env.EXPO_PUBLIC_REVENUECAT_PAYWALL_ENABLED === '
 const IOS_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY
 const ANDROID_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY
 const ENTITLEMENT_ID = process.env.EXPO_PUBLIC_REVENUECAT_ENTITLEMENT_ID ?? 'premium'
+const DEV_SEED_BYPASS = __DEV__ && process.env.EXPO_PUBLIC_DEV_SEED === '1'
 
 export type RevenueCatPaywallResult = 'not_enabled' | 'unlocked' | 'blocked' | 'error'
 export type RevenueCatAccessStatus = 'not_enabled' | 'active' | 'inactive' | 'error'
 
 let configured = false
 let configuredAppUserID: string | null = null
+
+type RevenueCatDiagnosticKind = 'access' | 'no_package' | 'purchase' | 'restore'
+
+type RevenueCatDiagnostic = {
+  kind: RevenueCatDiagnosticKind
+  code?: string
+  readableCode?: string
+  message?: string
+  underlyingMessage?: string
+}
+
+let lastDiagnostic: RevenueCatDiagnostic | null = null
 
 function getApiKey(): string | undefined {
   if (Platform.OS === 'ios') return IOS_API_KEY
@@ -18,12 +31,75 @@ function getApiKey(): string | undefined {
 }
 
 export function isRevenueCatPaywallConfigured(): boolean {
+  if (DEV_SEED_BYPASS) return false
   return PAYWALL_ENABLED && Boolean(getApiKey()) && Boolean(ENTITLEMENT_ID)
+}
+
+function hasActiveEntitlement(customerInfo: { entitlements?: { active?: Record<string, unknown> } }): boolean {
+  return Boolean(customerInfo.entitlements?.active?.[ENTITLEMENT_ID])
+}
+
+function isUserCancelled(err: unknown): boolean {
+  return Boolean(
+    err && typeof err === 'object' && 'userCancelled' in err && (err as { userCancelled?: boolean }).userCancelled,
+  )
+}
+
+function captureRevenueCatDiagnostic(kind: RevenueCatDiagnosticKind, err?: unknown) {
+  if (err && typeof err === 'object') {
+    const details = err as {
+      code?: string | number
+      readableErrorCode?: string
+      message?: string
+      underlyingErrorMessage?: string
+      userInfo?: { readableErrorCode?: string }
+    }
+    lastDiagnostic = {
+      kind,
+      code: details.code === undefined ? undefined : String(details.code),
+      readableCode: details.userInfo?.readableErrorCode ?? details.readableErrorCode,
+      message: details.message,
+      underlyingMessage: details.underlyingErrorMessage,
+    }
+    return
+  }
+
+  lastDiagnostic = { kind }
+}
+
+function clearRevenueCatDiagnostic() {
+  lastDiagnostic = null
+}
+
+export function getRevenueCatDiagnosticMessage(): string {
+  if (!lastDiagnostic) return 'Please try again in a moment.'
+
+  const readableCode = lastDiagnostic.readableCode ?? lastDiagnostic.code
+  const suffix = readableCode ? ` (${readableCode})` : ''
+
+  if (lastDiagnostic.kind === 'no_package') {
+    return `Tatum Premium is not available from the App Store for this build yet. Check App Store Connect and RevenueCat product setup.${suffix}`
+  }
+
+  if (lastDiagnostic.code === '5' || lastDiagnostic.readableCode === 'PRODUCT_NOT_AVAILABLE_FOR_PURCHASE_ERROR') {
+    return `The App Store says Tatum Premium is not available for purchase in this TestFlight build yet.${suffix}`
+  }
+
+  if (lastDiagnostic.code === '23' || lastDiagnostic.readableCode === 'CONFIGURATION_ERROR') {
+    return `RevenueCat found a purchase configuration issue for this build.${suffix}`
+  }
+
+  if (lastDiagnostic.code === '10' || lastDiagnostic.code === '35') {
+    return `The App Store purchase service could not be reached. Please check connection and try again.${suffix}`
+  }
+
+  if (lastDiagnostic.kind === 'restore') return `Restore is unavailable right now. Please try again in a moment.${suffix}`
+  return `Please try again in a moment.${suffix}`
 }
 
 async function ensureRevenueCatConfigured(appUserID?: string | null) {
   const apiKey = getApiKey()
-  if (!PAYWALL_ENABLED || !apiKey || !ENTITLEMENT_ID) return null
+  if (DEV_SEED_BYPASS || !PAYWALL_ENABLED || !apiKey || !ENTITLEMENT_ID) return null
 
   const normalizedAppUserID = appUserID?.trim() || null
   const { default: Purchases, LOG_LEVEL } = await import('react-native-purchases')
@@ -53,40 +129,56 @@ export async function getRevenueCatAccessStatus(appUserID?: string | null): Prom
     const Purchases = await ensureRevenueCatConfigured(appUserID)
     if (!Purchases) return 'not_enabled'
     const customerInfo = await Purchases.getCustomerInfo()
-    const activeEntitlements = customerInfo.entitlements.active as Record<string, unknown>
-    return activeEntitlements[ENTITLEMENT_ID] ? 'active' : 'inactive'
+    clearRevenueCatDiagnostic()
+    return hasActiveEntitlement(customerInfo) ? 'active' : 'inactive'
   } catch (err) {
+    captureRevenueCatDiagnostic('access', err)
     console.warn('[revenueCat] entitlement check failed:', err)
     return 'error'
   }
 }
 
-export async function presentRevenueCatPaywallIfNeeded(appUserID?: string | null): Promise<RevenueCatPaywallResult> {
+export async function purchaseRevenueCatPremium(appUserID?: string | null): Promise<RevenueCatPaywallResult> {
   if (!isRevenueCatPaywallConfigured()) return 'not_enabled'
 
   try {
     const Purchases = await ensureRevenueCatConfigured(appUserID)
     if (!Purchases) return 'not_enabled'
-    const { default: RevenueCatUI } = await import('react-native-purchases-ui')
 
-    const result = String(
-      await RevenueCatUI.presentPaywallIfNeeded({
-        requiredEntitlementIdentifier: ENTITLEMENT_ID,
-      }),
-    )
+    const currentStatus = await getRevenueCatAccessStatus(appUserID)
+    if (currentStatus === 'active' || currentStatus === 'not_enabled') return 'unlocked'
 
-    if (result === 'NOT_PRESENTED' || result === 'PURCHASED' || result === 'RESTORED') {
-      return 'unlocked'
+    const offerings = await Purchases.getOfferings()
+    const packageToPurchase = offerings.current?.availablePackages?.[0]
+    if (!packageToPurchase) {
+      captureRevenueCatDiagnostic('no_package')
+      console.warn('[revenueCat] no available package on current offering')
+      return 'error'
     }
 
-    if (result === 'CANCELLED') {
-      return 'blocked'
-    }
-
-    console.warn(`[revenueCat] paywall returned ${result}`)
-    return 'error'
+    const result = await Purchases.purchasePackage(packageToPurchase)
+    clearRevenueCatDiagnostic()
+    return hasActiveEntitlement(result.customerInfo) ? 'unlocked' : 'blocked'
   } catch (err) {
-    console.warn('[revenueCat] paywall failed:', err)
+    if (isUserCancelled(err)) return 'blocked'
+    captureRevenueCatDiagnostic('purchase', err)
+    console.warn('[revenueCat] purchase failed:', err)
+    return 'error'
+  }
+}
+
+export async function restoreRevenueCatPurchases(appUserID?: string | null): Promise<RevenueCatPaywallResult> {
+  if (!isRevenueCatPaywallConfigured()) return 'not_enabled'
+
+  try {
+    const Purchases = await ensureRevenueCatConfigured(appUserID)
+    if (!Purchases) return 'not_enabled'
+    const customerInfo = await Purchases.restorePurchases()
+    clearRevenueCatDiagnostic()
+    return hasActiveEntitlement(customerInfo) ? 'unlocked' : 'blocked'
+  } catch (err) {
+    captureRevenueCatDiagnostic('restore', err)
+    console.warn('[revenueCat] restore failed:', err)
     return 'error'
   }
 }

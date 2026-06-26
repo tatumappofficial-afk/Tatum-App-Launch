@@ -316,7 +316,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   marginTop: 2,
                 }}
               >
-                Lifetime access · $24.99 one-time
+                One-time purchase · $24.99
               </Text>
             </View>
             <ChevronForwardIcon color="rgba(255,255,255,0.72)" />

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { StyleSheet, View, Text } from 'react-native'
+import { Alert, Pressable, StyleSheet, View, Text } from 'react-native'
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Rect, Line, Path, Polyline } from 'react-native-svg'
@@ -12,7 +12,11 @@ import { GradientButton } from '@/lib/components/GradientButton'
 import { RadialGlow } from '@/lib/screens/shared/DecorativeGlow'
 import { StatusBarSpacer } from '@/lib/screens/shared/StatusBarSpacer'
 import { useUpdateSettings } from '@/src/hooks/useSettings'
-import { presentRevenueCatPaywallIfNeeded } from '@/src/services/revenueCat'
+import {
+  getRevenueCatDiagnosticMessage,
+  purchaseRevenueCatPremium,
+  restoreRevenueCatPurchases,
+} from '@/src/services/revenueCat'
 import { userProfiles } from '@/src/db'
 
 const CalendarIcon: React.FC = () => (
@@ -113,12 +117,38 @@ export default function ReadyScreen() {
 
     setStarting(true)
     try {
-      const paywallResult = await presentRevenueCatPaywallIfNeeded(appUserID)
-      if (paywallResult === 'blocked' || paywallResult === 'error') return
+      const paywallResult = await purchaseRevenueCatPremium(appUserID)
+      if (paywallResult === 'blocked') return
+      if (paywallResult === 'error') {
+        Alert.alert('Purchase unavailable', getRevenueCatDiagnosticMessage())
+        return
+      }
 
       // Context update is synchronous — Stack.Protected guards in _layout.tsx
       // re-evaluate on the next render, so (tabs) is mounted by the time
       // router.replace fires.
+      updateSettings({ hasOnboarded: true })
+      router.replace('/(tabs)')
+    } finally {
+      setStarting(false)
+    }
+  }
+
+  async function handleRestore() {
+    if (starting) return
+
+    setStarting(true)
+    try {
+      const paywallResult = await restoreRevenueCatPurchases(appUserID)
+      if (paywallResult === 'blocked') {
+        Alert.alert('No purchase found', 'We could not find Tatum Premium on this Apple or Google account.')
+        return
+      }
+      if (paywallResult === 'error') {
+        Alert.alert('Restore unavailable', getRevenueCatDiagnosticMessage())
+        return
+      }
+
       updateSettings({ hasOnboarded: true })
       router.replace('/(tabs)')
     } finally {
@@ -195,7 +225,7 @@ export default function ReadyScreen() {
             textAlign: 'center',
           }}
         >
-          Unlock Tatum for life.
+          Tatum Premium
         </Text>
 
         <Text
@@ -208,7 +238,7 @@ export default function ReadyScreen() {
             letterSpacing: 0.3,
           }}
         >
-          Tatum Lifetime is a one-time $24.99 purchase. No subscription, no recurring charge.
+          One-time purchase of $24.99. No subscription or recurring charge.
         </Text>
 
         <View style={{ gap: 8, width: '100%', marginBottom: 32 }}>
@@ -245,23 +275,43 @@ export default function ReadyScreen() {
       <View style={{ paddingHorizontal: 28, paddingBottom: Math.max(insets.bottom + 8, 40) }}>
         <View style={{ marginBottom: 12 }}>
           <GradientButton
-            label={starting ? 'Opening...' : 'Unlock Lifetime Access'}
+            label={starting ? 'Opening...' : 'Unlock Tatum Premium'}
             height={56}
             fontSize={14}
             onPress={handleStart}
             disabled={starting}
           />
         </View>
+        <Pressable
+          onPress={handleRestore}
+          disabled={starting}
+          accessibilityRole="button"
+          accessibilityLabel="Restore purchases"
+        >
+          <Text
+            style={{
+              fontFamily: font('dmSans', '300'),
+              textAlign: 'center',
+              fontSize: 14,
+              color: colors.muted,
+              lineHeight: 16.5,
+              textDecorationLine: 'underline',
+            }}
+          >
+            Already purchased? Restore purchases.
+          </Text>
+        </Pressable>
         <Text
           style={{
             fontFamily: font('dmSans', '300'),
             textAlign: 'center',
-            fontSize: 14,
+            fontSize: 12,
             color: colors.muted,
-            lineHeight: 16.5,
+            lineHeight: 15,
+            marginTop: 10,
           }}
         >
-          Already purchased? Use Restore Purchases on the next screen.
+          Access continues while Tatum is available and supported.
         </Text>
       </View>
     </View>

@@ -20,10 +20,8 @@ export default function ProfileRoute() {
   const { displayName: userName, initials: userInitial, gradient: userGradient } = useUserProfile()
 
   // All active activity tags from the DB, sorted by sortOrder
-  const activityTagList = allTags
-    .filter((t) => t.isActive)
-    .sort((a, b) => a.sortOrder - b.sortOrder)
-    .map((t) => ({ emoji: t.emoji, label: t.label }))
+  const activeActivityTags = allTags.filter((t) => t.isActive).sort((a, b) => a.sortOrder - b.sortOrder)
+  const activityTagList = activeActivityTags.map((t) => ({ id: t.id, emoji: t.emoji, label: t.label }))
 
   // Partners (matches ProfileScreen Partner interface: initials, gradient, since)
   // Main partner is always first; remaining sorted by createdAt (oldest first).
@@ -80,6 +78,10 @@ export default function ProfileRoute() {
       onSettings={() => router.push('/(pages)/settings')}
       onPartnersSection={() => router.push('/(pages)/partners?showAdd=1')}
       onAddTag={() => router.push('/(sheets)/add-tag')}
+      onTagPress={(index) => {
+        const tag = activeActivityTags[index]
+        if (tag) router.push(`/(sheets)/edit-tag?id=${tag.id}`)
+      }}
       onAddPartner={() => router.push('/(sheets)/edit-partner')}
       onPartnerPress={(index) => {
         const partner = sortedActivePartners[index]
