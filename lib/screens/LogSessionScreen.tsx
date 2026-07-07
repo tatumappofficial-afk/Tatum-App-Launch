@@ -250,8 +250,11 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
           placeholder={'How did it feel? What made this moment special…'}
           placeholderTextColor={colors.muted}
           multiline
-          scrollEnabled={false}
-          numberOfLines={3}
+          // On Fabric, numberOfLines hard-caps the iOS field height (and iOS
+          // internal scroll must stay enabled so the caret/loupe can reach
+          // overflowing text). Android keeps its native 3-line + caret-follow
+          // behavior via numberOfLines; scrollEnabled is an iOS-only prop.
+          numberOfLines={Platform.OS === 'android' ? 3 : undefined}
           maxLength={3000}
           autoCapitalize="sentences"
           autoCorrect
@@ -430,6 +433,8 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     marginBottom: 4,
     minHeight: 70,
+    // iOS only: grow with content up to ~8 lines, then scroll internally.
+    ...(Platform.OS === 'ios' ? { maxHeight: 192 } : null),
     textAlignVertical: 'top',
   },
   charCount: {
