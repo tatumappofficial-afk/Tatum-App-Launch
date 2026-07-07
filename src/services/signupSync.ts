@@ -19,6 +19,38 @@ export interface SignupRecord {
  * a missing config or a failed request never blocks onboarding — the user's
  * own data already lives on-device; this is a one-way notification.
  */
+/**
+ * Deletes the server-side signup records (name/email log + welcome-email doc)
+ * for an account being deleted in-app. Same fire-and-forget contract as
+ * recordSignup: the user's real data lives on-device and is wiped locally;
+ * this clears the only server-side trace. A failed request never blocks the
+ * in-app deletion.
+ */
+export async function deleteSignupRecord(identity: {
+  email: string | null
+  providerUserId: string | null
+}): Promise<void> {
+  if (!WEBHOOK_URL || !TOKEN) return // not configured (e.g. local dev) — no-op
+  if (!identity.email && !identity.providerUserId) return // nothing to key the deletion on
+  try {
+    const response = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        token: TOKEN,
+        action: 'delete',
+        email: identity.email,
+        providerUserId: identity.providerUserId,
+      }),
+    })
+    if (!response.ok) {
+      console.warn(`[signupSync] delete failed with ${response.status}: ${response.statusText}`)
+    }
+  } catch (err) {
+    console.warn('[signupSync] delete failed (non-blocking):', err)
+  }
+}
+
 export async function recordSignup(record: SignupRecord): Promise<void> {
   if (!WEBHOOK_URL || !TOKEN) return // not configured (e.g. local dev) — no-op
   try {

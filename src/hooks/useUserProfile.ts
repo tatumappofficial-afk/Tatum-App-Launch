@@ -19,6 +19,8 @@ export interface UseUserProfileResult {
     displayName: string | null
     avatarValue: string | null
     avatarGradient: string | null
+    email: string | null
+    authProvider: 'apple' | 'google' | null
     providerUserId: string | null
   } | null
 }
@@ -47,6 +49,8 @@ export function useUserProfile(): UseUserProfileResult {
           displayName: profile.displayName,
           avatarValue: profile.avatarValue,
           avatarGradient: profile.avatarGradient,
+          email: profile.email,
+          authProvider: profile.authProvider,
           providerUserId: profile.providerUserId,
         }
       : null,

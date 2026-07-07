@@ -11,7 +11,7 @@ import { StepDots } from '@/lib/components/StepDots'
 import { DecorativeGlow } from '@/lib/screens/shared/DecorativeGlow'
 import { StatusBarSpacer } from '@/lib/screens/shared/StatusBarSpacer'
 import { authenticate, getBiometricCapabilities, type BiometricCapabilities } from '@/src/utils/biometrics'
-import { useUpdateSettings } from '@/src/hooks/useSettings'
+import { updateOnboardingSession } from '@/src/services/onboardingSession'
 
 const LockIcon: React.FC = () => (
   <Svg
@@ -48,7 +48,6 @@ const CheckCircle: React.FC = () => (
 export default function ProtectScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
-  const updateSettings = useUpdateSettings()
   useBlockBack()
 
   const [caps, setCaps] = useState<BiometricCapabilities | null>(null)
@@ -70,7 +69,7 @@ export default function ProtectScreen() {
     if (busy) return
     setBusy(true)
     if (!enableLock) {
-      updateSettings({ biometricLock: false })
+      updateOnboardingSession({ biometricLock: false })
       router.push('/(onboarding)/safe')
       return
     }
@@ -84,7 +83,7 @@ export default function ProtectScreen() {
       setBusy(false)
       return
     }
-    updateSettings({ biometricLock: true })
+    updateOnboardingSession({ biometricLock: true })
     router.push('/(onboarding)/safe')
   }
 

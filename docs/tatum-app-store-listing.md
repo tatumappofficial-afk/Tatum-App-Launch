@@ -33,16 +33,28 @@ Track Intimacy & Confidence
 ### Full Description (4,000 character max)
 
 ```
-You have been showing up. You just never had anywhere to see it clearly.
+You have been showing up.
 
-Tatum is a private wellness app built for women who want to understand their own intimate lives — on their terms, in their own words, completely off the grid. No accounts. No cloud. No one else ever sees your data.
+You just never had anywhere to see it clearly.
 
-Everything you log lives only on your device, protected by Face ID, Touch ID, or your personal passcode.
+Tatum is a private wellness app built for women who want to understand their own intimate lives on their terms, in their own words.
+
+Everything you log lives only on your device, protected by Face ID, Touch ID, or your personal passcode where available.
 
 ─────────────────────────────
 WHY TATUM IS DIFFERENT
 
-Most women approach intimacy as something they do for someone else. Tatum was built around a different idea entirely — that your intimate wellness belongs to you first. That tracking it, seeing it, and understanding it builds confidence and dissolves resentment. That you deserve to see your own truth clearly.
+Most women approach intimacy as something they do for someone else. Tatum was built around a different idea: your intimate wellness belongs to you first.
+
+Tracking it, seeing it, and understanding it builds confidence and dissolves resentment. You deserve to see your own truth clearly.
+
+Tatum is for every woman at every stage of life:
+
+• The new mom
+• The woman in perimenopause
+• The woman with low desire who has never been told fluctuation is normal
+• The wife who has been made to feel like she never initiates
+• The woman dating who has never had a private space that was just hers to track her partners
 
 ─────────────────────────────
 WHAT YOU CAN DO WITH TATUM
@@ -51,29 +63,37 @@ WHAT YOU CAN DO WITH TATUM
 Your default home screen. Every session logged and marked privately on your calendar. See your month at a glance — not to judge yourself, but to know yourself.
 
 📊  INSIGHTS DASHBOARD
-Track patterns over a week, a month, a year. See your emotional tones, your most common activities, your consistency. Watch your confidence build as your own data tells your real story.
+Track patterns over a week, a month, or a year. Whether your numbers are high or low, seeing them clearly is the first step to understanding yourself and releasing shame either way.
 
 💛  EMOTIONAL TONE TAGS
-The feature that makes Tatum unlike anything else. Log not just what happened but how it felt — passionate, tender, playful, connected, present. Your emotional experience matters.
+The feature that makes Tatum unlike anything else. Log not just what happened, but how it felt:
+
+• Passionate
+• Tender
+• Playful
+• Connected
+• Present
+
+Your emotional experience matters.
 
 👤  PARTNER PROFILES
-Add partners by initial or emoji — your private shorthand. Track patterns by partner. Works for women who are married, dating, exploring, or tracking solo experiences.
+Add partners by initial or as your private shorthand. Track patterns by partner. Works for women who are married, dating one person, or seeing multiple people.
 
 📓  PRIVATE JOURNAL
-Write notes on any session. Completely private and stored locally on your device. Your words. Your experience. Your record.
+Write notes on any session or an honest answer to why you did not want to engage or initiate. Over time your journal reveals patterns your mind cannot see alone. Stored locally on your device.
 
-🔒  ZERO DATA POLICY
-Tatum never collects your data. No server ever receives what you log. Delete the app and everything disappears — no traces left behind.
+🔒  WHAT YOU LOG STAYS YOURS
+Tatum never collects what you log. No server ever receives your entries. Delete your local data and what you logged disappears from your device.
 
 ─────────────────────────────
 TATUM IS FOR YOU IF:
 
 • You want to stop feeling like intimacy is something you owe
-• You have ever been made to feel like you are not showing up enough
-• You want to understand your own patterns without anyone else seeing them
-• You are dating and want a private record that belongs only to you
-• You are a new mom navigating intimacy in a new season of life
-• You simply want to pay attention to your own wellness — privately
+• You are a new mom and want to see that showing up twice a month is enough
+• You are in perimenopause and your desire feels completely different
+• You have low desire and want to understand your own pattern without shame
+• You are dating one person or several and want a private record that is yours to keep track of things
+• You simply want to pay attention to your own intimacy wellness
 
 ─────────────────────────────
 ONE-TIME PURCHASE · NO SUBSCRIPTION · NO FREE TIER
@@ -83,12 +103,9 @@ $24.99 once. Everything included. Forever. No monthly fees. No paywalled feature
 ─────────────────────────────
 YOUR PRIVACY IS THE PRODUCT
 
-• Stored only on your phone
-• No account required
-• No email address collected
-• No analytics or usage tracking
-• Face ID / Touch ID / Passcode protected
-• Delete the app, delete everything
+• Entries stored only on your phone
+• Face ID / Touch ID / Passcode protected where available
+• Delete your local data whenever you choose
 
 ─────────────────────────────
 "You have always been showing up. Tatum helps you see it."
@@ -139,7 +156,7 @@ Tatum: Intimate Wellness Diary for Women
 ### Short Description (80 character max)
 
 ```
-Private intimacy tracker & journal. No accounts. No cloud. Just yours.
+Private intimacy tracker & journal for women. Just yours.
 ```
 
 ✅ 71 characters. Leads with the key differentiator immediately.
@@ -151,9 +168,9 @@ TATUM — The Private Intimacy Wellness App Built for Women
 
 You have been showing up. You just never had anywhere to see it clearly.
 
-Tatum is a private wellness app that helps women understand their own intimate lives — on their terms, with complete privacy, and with no one else involved. Everything you log stays on your device. No accounts. No cloud storage. No data sent to any server.
+Tatum is a private wellness app that helps women understand their own intimate lives — on their terms, with complete privacy, and with no one else involved. Everything you log stays on your device.
 
-Your intimate wellness diary is protected by your fingerprint, face, or passcode — and is visible only to you.
+Your private journal can be protected by your fingerprint, face, or passcode where available.
 
 ──────────────────────────────────
 WHY WOMEN CHOOSE TATUM
@@ -182,8 +199,8 @@ Track by partner using initials or emojis — your own private language. Works f
 📓  PRIVATE JOURNAL
 Add private notes to any session. Your words stay locally on your device and visible only to you.
 
-🔒  ZERO DATA COLLECTION
-Tatum never transmits your data anywhere. No account means no breach risk. Delete the app and everything is gone.
+🔒  WHAT YOU LOG STAYS YOURS
+Tatum never collects what you log. No server ever receives your entries. Delete your local data and what you logged disappears from your device.
 
 ──────────────────────────────────
 TATUM IS BUILT FOR:
@@ -201,11 +218,9 @@ $24.99 — one-time purchase. No subscription. No free tier with locked features
 ──────────────────────────────────
 PRIVACY DETAILS
 
-• All data stored locally on your device only
-• No account or email address required
-• No analytics, crash reporting, or usage tracking that identifies you
+• Entries stored only on your device
 • Biometric lock (fingerprint or face) on every open
-• Uninstall the app and all data is permanently deleted
+• Delete your local data whenever you choose
 
 tatumapp.com
 ```
@@ -225,7 +240,7 @@ Each store screenshot should have a short headline overlaid. Recommended lines i
 | 3 | Home / Insights | Your patterns. Your confidence. Your data. |
 | 4 | Log a Session | Log how it felt. Not just that it happened. |
 | 5 | Session Detail / Journal | Private notes only you ever read. |
-| 6 | Welcome / Privacy Screen | No accounts. No cloud. Nothing leaves your phone. |
+| 6 | Welcome / Privacy Screen | What you log stays on your device. |
 
 ---
 

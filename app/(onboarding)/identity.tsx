@@ -15,6 +15,7 @@ import { useSettings } from '@/src/hooks/useSettings'
 import { recordSignup } from '@/src/services/signupSync'
 import type { AgeSignalVerdict } from '@/src/services/ageSignal'
 import { deriveInitials } from '@/src/utils/initials'
+import { getOnboardingSession, startOnboardingSession, updateOnboardingSession } from '@/src/services/onboardingSession'
 
 const Checkmark: React.FC = () => (
   <Svg
@@ -64,7 +65,7 @@ export default function IdentityScreen() {
   const nameFilled = firstName.trim().length > 0
 
   async function handleContinue() {
-    if (busy || !profile) return
+    if (busy) return
     // Name is required; surface why the button isn't advancing.
     if (!nameFilled) {
       Alert.alert('Add your name', 'Please enter your name to continue.')
@@ -78,6 +79,37 @@ export default function IdentityScreen() {
     try {
       const trimmedName = firstName.trim()
       const trimmedEmail = email.trim()
+      if (!hasOnboarded) {
+        if (!provider || !providerUserId) {
+          Alert.alert('Sign in again', 'Please return to sign in before continuing.')
+          router.replace('/(onboarding)/auth')
+          return
+        }
+
+        if (!getOnboardingSession()) {
+          startOnboardingSession({
+            email: trimmedEmail,
+            fullName: initialName,
+            provider,
+            providerUserId,
+            ageVerdict,
+          })
+        }
+        updateOnboardingSession({
+          email: trimmedEmail,
+          displayName: trimmedName,
+          attested18: true,
+        })
+        router.push('/(onboarding)/protect')
+        return
+      }
+
+      if (!profile) {
+        Alert.alert('Something went wrong', 'Please try signing in again.')
+        router.replace('/(onboarding)/auth')
+        return
+      }
+
       const derivedAvatarValue = deriveInitials(trimmedName) || 'A'
       userProfiles.update(profile.id, (draft) => {
         const hadGeneratedAvatar = !draft.avatarValue || (draft.avatarValue === 'A' && !draft.displayName)
@@ -146,8 +178,8 @@ export default function IdentityScreen() {
               Create your account
             </Text>
             <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: colors.stone, lineHeight: 20.8 }}>
-              Your account uses the Apple or Google sign-in you just chose. Add your name, confirm you're 18 or older,
-              and choose the email Tatum can use for welcome notes and product updates.
+              Your account uses the Apple or Google sign-in you just chose. Add your name and confirm you're 18 or
+              older. If you'd like welcome notes and product updates, you can also leave an email.
             </Text>
           </View>
 
@@ -197,7 +229,7 @@ export default function IdentityScreen() {
                 textTransform: 'uppercase',
               }}
             >
-              Email
+              Email (optional)
             </Text>
             <TextInput
               value={email}
@@ -276,11 +308,11 @@ export default function IdentityScreen() {
           <Pressable
             onPress={handleExistingAccount}
             accessibilityRole="button"
-            accessibilityLabel="Sign in with existing account"
+            accessibilityLabel="Use a different sign-in"
             style={({ pressed }) => ({ alignItems: 'center', opacity: pressed ? 0.6 : 1 })}
           >
             <Text style={{ fontFamily: font('dmSans', '500'), fontSize: 14, color: colors.terra }}>
-              Sign in with existing account?
+              Use a different sign-in?
             </Text>
           </Pressable>
         </View>

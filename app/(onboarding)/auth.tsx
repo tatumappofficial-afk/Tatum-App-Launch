@@ -10,13 +10,13 @@ import { useLiveQuery } from '@tanstack/react-db'
 import { useBlockBack } from '@/src/hooks/useBlockBack'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { colors, font } from '@/lib/theme'
-import { ReviewerAccessMenu } from '@/lib/components/ReviewerAccessMenu'
 import { DecorativeGlow } from '@/lib/screens/shared/DecorativeGlow'
 import { StatusBarSpacer } from '@/lib/screens/shared/StatusBarSpacer'
 import { userProfiles, eraseAllUserData } from '@/src/db'
 import { useSettings, useUpdateSettings } from '@/src/hooks/useSettings'
 import { DEFAULT_SETTINGS } from '@/src/db/schema'
 import { checkAgeSignal } from '@/src/services/ageSignal'
+import { startOnboardingSession } from '@/src/services/onboardingSession'
 
 const GOOGLE_IOS_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID
 const GOOGLE_WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID
@@ -117,10 +117,26 @@ export default function AuthScreen() {
     const isFreshUser = !hasOnboarded
 
     if (isFreshUser) {
-      // Fresh user — full onboarding flow continues. /identity collects the
-      // name they want, then routes through /protect → /partner → /tags.
-      // The age verdict rides along so the identity screen can log it with the
-      // signup (name + email + attestation + verdict, all in one record).
+      // Fresh unpaid user — wipe any incomplete pre-purchase draft data left
+      // by an abandoned onboarding attempt, then keep the new signup only in
+      // memory until RevenueCat confirms purchase/restore on /ready.
+      setAuthBusyLabel('Preparing onboarding...')
+      await eraseAllUserData()
+      updateSettings({
+        notifications: DEFAULT_SETTINGS.notifications,
+        whisperDeliveryDefault: DEFAULT_SETTINGS.whisperDeliveryDefault,
+        calendarStartDay: DEFAULT_SETTINGS.calendarStartDay,
+        biometricLock: DEFAULT_SETTINGS.biometricLock,
+        hasOnboarded: DEFAULT_SETTINGS.hasOnboarded,
+        theme: DEFAULT_SETTINGS.theme,
+      })
+      startOnboardingSession({
+        email: params.email,
+        fullName: params.fullName ?? '',
+        provider: params.provider,
+        providerUserId: params.providerUserId,
+        ageVerdict: verdict,
+      })
       routeToIdentity({
         email: params.email,
         fullName: params.fullName ?? '',
@@ -195,46 +211,14 @@ export default function AuthScreen() {
     }
 
     // Identity mismatch — different account trying to take over this device's
-    // data. Privacy protection: require an explicit erase before continuing.
+    // paid local data. Privacy protection: never offer destructive reset from
+    // a signed-out/wrong-account state.
     if (params.provider === 'google') await GoogleSignin.signOut().catch(() => {})
     setAuthBusyLabel(null)
     Alert.alert(
-      'Different account',
-      "This device already has Tatum data from another account. To use a different account, all existing data has to be erased first. This can't be undone.",
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Erase and continue',
-          style: 'destructive',
-          onPress: async () => {
-            setAuthBusyLabel('Resetting Tatum...')
-            try {
-              await eraseAllUserData()
-              updateSettings({
-                notifications: DEFAULT_SETTINGS.notifications,
-                whisperDeliveryDefault: DEFAULT_SETTINGS.whisperDeliveryDefault,
-                calendarStartDay: DEFAULT_SETTINGS.calendarStartDay,
-                biometricLock: DEFAULT_SETTINGS.biometricLock,
-                hasOnboarded: DEFAULT_SETTINGS.hasOnboarded,
-                theme: DEFAULT_SETTINGS.theme,
-              })
-              // After erase, profile is fresh — route to /identity to collect
-              // a name, the new identity will be stamped there.
-              routeToIdentity({
-                email: params.email,
-                fullName: params.fullName ?? '',
-                provider: params.provider,
-                providerUserId: params.providerUserId,
-                ageVerdict: verdict,
-              })
-            } catch (err) {
-              console.error('Erase + continue failed:', err)
-              setAuthBusyLabel(null)
-              Alert.alert('Something went wrong', 'Please try signing in again.')
-            }
-          },
-        },
-      ],
+      'This device already has a Tatum account',
+      'For privacy, this local Tatum data can only be opened by the Apple or Google account that created it. Please return to sign in and choose the original account.',
+      [{ text: 'Return to sign in', style: 'default' }],
     )
   }
 
@@ -344,7 +328,6 @@ export default function AuthScreen() {
     <View style={{ flex: 1, position: 'relative', overflow: 'hidden', backgroundColor: colors.warmSand }}>
       <DecorativeGlow position="center" size={320} opacity={0.13} />
       <StatusBarSpacer />
-      <ReviewerAccessMenu />
 
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 28 }}>
         <View

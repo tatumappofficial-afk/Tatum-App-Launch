@@ -20,6 +20,15 @@
       "autoIncrement": true,
       "environment": "production",
       "channel": "production"
+    },
+    "internalNoPaywall": {
+      "autoIncrement": true,
+      "environment": "production",
+      "channel": "internal-free",
+      "env": {
+        "EXPO_PUBLIC_REVENUECAT_PAYWALL_ENABLED": "0",
+        "EXPO_PUBLIC_REVENUECAT_PAYWALL_BYPASS": "1"
+      }
     }
   },
   "submit": {

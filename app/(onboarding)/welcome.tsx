@@ -6,7 +6,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { colors, font, fontFamily } from '@/lib/theme'
 import { GradientButton } from '@/lib/components/GradientButton'
 import { StepDots } from '@/lib/components/StepDots'
-import { ReviewerAccessMenu } from '@/lib/components/ReviewerAccessMenu'
 import { DecorativeGlow } from '@/lib/screens/shared/DecorativeGlow'
 import { StatusBarSpacer } from '@/lib/screens/shared/StatusBarSpacer'
 import { useSettings } from '@/src/hooks/useSettings'
@@ -55,7 +54,6 @@ export default function WelcomeScreen() {
     >
       <DecorativeGlow position="center" size={320} opacity={0.13} />
       <StatusBarSpacer />
-      <ReviewerAccessMenu />
 
       <ScrollView
         style={{ flex: 1, position: 'relative', zIndex: 1 }}
@@ -148,7 +146,7 @@ export default function WelcomeScreen() {
           <PromiseItem
             emoji="🗑️"
             title="Delete any time"
-            desc="Delete all your data from the app at any time from the settings page."
+            desc="Delete your account and all your data at any time from the settings page."
           />
           <PromiseItem
             emoji="📱"

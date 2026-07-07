@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native'
+import { View, Text, Pressable, ScrollView, StyleSheet, Alert } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import * as Haptics from 'expo-haptics'
 import { useRouter } from 'expo-router'
@@ -152,9 +152,14 @@ export default function TagsScreen() {
   ]
   const columns = chunkArray(items, 3)
 
-  function handleEditTag(id: string) {
+  function handleEditTag() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-    router.push(`/(sheets)/edit-tag?id=${id}`)
+    Alert.alert('Unlock first', 'You can customize activity tags after Tatum Premium is unlocked.')
+  }
+
+  function handleAddTag() {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+    Alert.alert('Unlock first', 'You can add custom activity tags after Tatum Premium is unlocked.')
   }
 
   return (
@@ -205,8 +210,7 @@ export default function TagsScreen() {
             Make it yours
           </Text>
           <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: colors.stone, lineHeight: 20.8 }}>
-            These are your activity tags. Tap any tag to edit or delete it, or add your own to make Tatum feel like
-            yours.
+            These are your starting activity tags. You can customize them after Tatum Premium is unlocked.
           </Text>
         </View>
 
@@ -246,9 +250,9 @@ export default function TagsScreen() {
             <View key={ci} style={{ flexDirection: 'column', gap: 10 }}>
               {col.map((item, ri) =>
                 item.kind === 'add' ? (
-                  <AddChip key={`add-${ri}`} onPress={() => router.push('/(sheets)/add-tag')} />
+                  <AddChip key={`add-${ri}`} onPress={handleAddTag} />
                 ) : (
-                  <TagChip key={item.id} emoji={item.emoji} label={item.label} onPress={() => handleEditTag(item.id)} />
+                  <TagChip key={item.id} emoji={item.emoji} label={item.label} onPress={handleEditTag} />
                 ),
               )}
             </View>

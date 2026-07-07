@@ -4,20 +4,27 @@ import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from '
 import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Rect, Line, Path, Polyline } from 'react-native-svg'
 import { useRouter } from 'expo-router'
-import { useLiveQuery } from '@tanstack/react-db'
 import { useBlockBack } from '@/src/hooks/useBlockBack'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { colors, font, gradientPoints } from '@/lib/theme'
 import { GradientButton } from '@/lib/components/GradientButton'
+import { PaywallLegalLinks } from '@/lib/components/PaywallLegalLinks'
 import { RadialGlow } from '@/lib/screens/shared/DecorativeGlow'
 import { StatusBarSpacer } from '@/lib/screens/shared/StatusBarSpacer'
 import { useUpdateSettings } from '@/src/hooks/useSettings'
 import {
+  canBypassRevenueCatPaywall,
   getRevenueCatDiagnosticMessage,
+  isRevenueCatPaywallConfigured,
   purchaseRevenueCatPremium,
   restoreRevenueCatPurchases,
 } from '@/src/services/revenueCat'
-import { userProfiles } from '@/src/db'
+import {
+  clearOnboardingSession,
+  commitOnboardingSession,
+  getOnboardingSession,
+} from '@/src/services/onboardingSession'
+import { recordSignup } from '@/src/services/signupSync'
 
 const CalendarIcon: React.FC = () => (
   <Svg
@@ -95,10 +102,8 @@ export default function ReadyScreen() {
   const insets = useSafeAreaInsets()
   const updateSettings = useUpdateSettings()
   const [starting, setStarting] = useState(false)
-  const { data: profiles = [] } = useLiveQuery((q) =>
-    q.from({ userProfiles }).select(({ userProfiles }) => ({ ...userProfiles })),
-  )
-  const appUserID = profiles.find((profile) => profile.id === 'default')?.providerUserId ?? null
+  const appUserID = getOnboardingSession()?.providerUserId ?? null
+  const paywallConfigured = isRevenueCatPaywallConfigured()
   useBlockBack()
 
   const logoRotation = useSharedValue(0)
@@ -112,23 +117,65 @@ export default function ReadyScreen() {
     transform: [{ rotate: `${logoRotation.value}deg` }],
   }))
 
+  async function finishOnboarding() {
+    const session = getOnboardingSession()
+    if (!session) {
+      Alert.alert('Sign in again', 'Please return to sign in before unlocking Tatum Premium.')
+      router.replace('/(onboarding)/auth')
+      return
+    }
+
+    const committed = await commitOnboardingSession()
+    void recordSignup({
+      name: committed.displayName ?? committed.fullName,
+      email: committed.email,
+      attested18: true,
+      ageVerdict: committed.ageVerdict,
+      provider: committed.provider,
+      providerUserId: committed.providerUserId,
+    })
+
+    updateSettings({
+      biometricLock: committed.biometricLock ?? false,
+      hasOnboarded: true,
+    })
+    clearOnboardingSession()
+    router.replace('/(tabs)')
+  }
+
   async function handleStart() {
     if (starting) return
 
     setStarting(true)
     try {
+      if (!appUserID) {
+        Alert.alert('Sign in again', 'Please return to sign in before unlocking Tatum Premium.')
+        router.replace('/(onboarding)/auth')
+        return
+      }
+
+      if (!paywallConfigured) {
+        if (canBypassRevenueCatPaywall()) {
+          await finishOnboarding()
+          return
+        }
+
+        Alert.alert('Purchase unavailable', 'Tatum Premium is not enabled for this build.')
+        return
+      }
+
       const paywallResult = await purchaseRevenueCatPremium(appUserID)
       if (paywallResult === 'blocked') return
+      if (paywallResult === 'not_enabled') {
+        Alert.alert('Purchase unavailable', 'Tatum Premium is not enabled for this build.')
+        return
+      }
       if (paywallResult === 'error') {
         Alert.alert('Purchase unavailable', getRevenueCatDiagnosticMessage())
         return
       }
 
-      // Context update is synchronous — Stack.Protected guards in _layout.tsx
-      // re-evaluate on the next render, so (tabs) is mounted by the time
-      // router.replace fires.
-      updateSettings({ hasOnboarded: true })
-      router.replace('/(tabs)')
+      await finishOnboarding()
     } finally {
       setStarting(false)
     }
@@ -136,9 +183,19 @@ export default function ReadyScreen() {
 
   async function handleRestore() {
     if (starting) return
+    if (!paywallConfigured) {
+      Alert.alert('Restore unavailable', 'Tatum Premium is not enabled for this build.')
+      return
+    }
 
     setStarting(true)
     try {
+      if (!appUserID) {
+        Alert.alert('Sign in again', 'Please return to sign in before restoring Tatum Premium.')
+        router.replace('/(onboarding)/auth')
+        return
+      }
+
       const paywallResult = await restoreRevenueCatPurchases(appUserID)
       if (paywallResult === 'blocked') {
         Alert.alert('No purchase found', 'We could not find Tatum Premium on this Apple or Google account.')
@@ -148,9 +205,12 @@ export default function ReadyScreen() {
         Alert.alert('Restore unavailable', getRevenueCatDiagnosticMessage())
         return
       }
+      if (paywallResult === 'not_enabled') {
+        Alert.alert('Restore unavailable', 'Tatum Premium is not enabled for this build.')
+        return
+      }
 
-      updateSettings({ hasOnboarded: true })
-      router.replace('/(tabs)')
+      await finishOnboarding()
     } finally {
       setStarting(false)
     }
@@ -225,7 +285,7 @@ export default function ReadyScreen() {
             textAlign: 'center',
           }}
         >
-          Tatum Premium
+          {paywallConfigured ? 'Tatum Premium' : 'Ready to begin'}
         </Text>
 
         <Text
@@ -238,7 +298,9 @@ export default function ReadyScreen() {
             letterSpacing: 0.3,
           }}
         >
-          One-time purchase of $24.99. No subscription or recurring charge.
+          {paywallConfigured
+            ? 'One-time purchase of $24.99. No subscription or recurring charge.'
+            : 'Your private diary is set up. Start logging when you are ready.'}
         </Text>
 
         <View style={{ gap: 8, width: '100%', marginBottom: 32 }}>
@@ -275,44 +337,49 @@ export default function ReadyScreen() {
       <View style={{ paddingHorizontal: 28, paddingBottom: Math.max(insets.bottom + 8, 40) }}>
         <View style={{ marginBottom: 12 }}>
           <GradientButton
-            label={starting ? 'Opening...' : 'Unlock Tatum Premium'}
+            label={starting ? 'Opening...' : paywallConfigured ? 'Unlock Tatum Premium' : 'Start Logging'}
             height={56}
             fontSize={14}
             onPress={handleStart}
             disabled={starting}
           />
         </View>
-        <Pressable
-          onPress={handleRestore}
-          disabled={starting}
-          accessibilityRole="button"
-          accessibilityLabel="Restore purchases"
-        >
-          <Text
-            style={{
-              fontFamily: font('dmSans', '300'),
-              textAlign: 'center',
-              fontSize: 14,
-              color: colors.muted,
-              lineHeight: 16.5,
-              textDecorationLine: 'underline',
-            }}
-          >
-            Already purchased? Restore purchases.
-          </Text>
-        </Pressable>
-        <Text
-          style={{
-            fontFamily: font('dmSans', '300'),
-            textAlign: 'center',
-            fontSize: 12,
-            color: colors.muted,
-            lineHeight: 15,
-            marginTop: 10,
-          }}
-        >
-          Access continues while Tatum is available and supported.
-        </Text>
+        {paywallConfigured && (
+          <>
+            <Pressable
+              onPress={handleRestore}
+              disabled={starting}
+              accessibilityRole="button"
+              accessibilityLabel="Restore purchases"
+            >
+              <Text
+                style={{
+                  fontFamily: font('dmSans', '300'),
+                  textAlign: 'center',
+                  fontSize: 14,
+                  color: colors.muted,
+                  lineHeight: 16.5,
+                  textDecorationLine: 'underline',
+                }}
+              >
+                Already purchased? Restore purchases.
+              </Text>
+            </Pressable>
+            <Text
+              style={{
+                fontFamily: font('dmSans', '300'),
+                textAlign: 'center',
+                fontSize: 12,
+                color: colors.muted,
+                lineHeight: 15,
+                marginTop: 10,
+              }}
+            >
+              Access continues while Tatum is available and supported.
+            </Text>
+            <PaywallLegalLinks marginTop={10} />
+          </>
+        )}
       </View>
     </View>
   )

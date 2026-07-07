@@ -5,6 +5,7 @@ const IOS_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY
 const ANDROID_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY
 const ENTITLEMENT_ID = process.env.EXPO_PUBLIC_REVENUECAT_ENTITLEMENT_ID ?? 'premium'
 const DEV_SEED_BYPASS = __DEV__ && process.env.EXPO_PUBLIC_DEV_SEED === '1'
+const EXPLICIT_PAYWALL_BYPASS = process.env.EXPO_PUBLIC_REVENUECAT_PAYWALL_BYPASS === '1'
 
 export type RevenueCatPaywallResult = 'not_enabled' | 'unlocked' | 'blocked' | 'error'
 export type RevenueCatAccessStatus = 'not_enabled' | 'active' | 'inactive' | 'error'
@@ -12,7 +13,7 @@ export type RevenueCatAccessStatus = 'not_enabled' | 'active' | 'inactive' | 'er
 let configured = false
 let configuredAppUserID: string | null = null
 
-type RevenueCatDiagnosticKind = 'access' | 'no_package' | 'purchase' | 'restore'
+type RevenueCatDiagnosticKind = 'access' | 'no_package' | 'purchase' | 'restore' | 'already_purchased'
 
 type RevenueCatDiagnostic = {
   kind: RevenueCatDiagnosticKind
@@ -31,8 +32,12 @@ function getApiKey(): string | undefined {
 }
 
 export function isRevenueCatPaywallConfigured(): boolean {
-  if (DEV_SEED_BYPASS) return false
+  if (canBypassRevenueCatPaywall()) return false
   return PAYWALL_ENABLED && Boolean(getApiKey()) && Boolean(ENTITLEMENT_ID)
+}
+
+export function canBypassRevenueCatPaywall(): boolean {
+  return DEV_SEED_BYPASS || EXPLICIT_PAYWALL_BYPASS
 }
 
 function hasActiveEntitlement(customerInfo: { entitlements?: { active?: Record<string, unknown> } }): boolean {
@@ -45,15 +50,29 @@ function isUserCancelled(err: unknown): boolean {
   )
 }
 
+function getRevenueCatErrorDetails(err: unknown) {
+  if (!err || typeof err !== 'object') return null
+
+  return err as {
+    code?: string | number
+    readableErrorCode?: string
+    message?: string
+    underlyingErrorMessage?: string
+    userInfo?: { readableErrorCode?: string }
+  }
+}
+
+function isProductAlreadyPurchased(err: unknown): boolean {
+  const details = getRevenueCatErrorDetails(err)
+  if (!details) return false
+
+  const readableCode = details.userInfo?.readableErrorCode ?? details.readableErrorCode
+  return String(details.code) === '6' || readableCode === 'PRODUCT_ALREADY_PURCHASED_ERROR'
+}
+
 function captureRevenueCatDiagnostic(kind: RevenueCatDiagnosticKind, err?: unknown) {
-  if (err && typeof err === 'object') {
-    const details = err as {
-      code?: string | number
-      readableErrorCode?: string
-      message?: string
-      underlyingErrorMessage?: string
-      userInfo?: { readableErrorCode?: string }
-    }
+  const details = getRevenueCatErrorDetails(err)
+  if (details) {
     lastDiagnostic = {
       kind,
       code: details.code === undefined ? undefined : String(details.code),
@@ -76,17 +95,27 @@ export function getRevenueCatDiagnosticMessage(): string {
 
   const readableCode = lastDiagnostic.readableCode ?? lastDiagnostic.code
   const suffix = readableCode ? ` (${readableCode})` : ''
+  const detail = lastDiagnostic.underlyingMessage ?? lastDiagnostic.message
+  const detailSentence = detail ? ` ${detail}` : ''
 
   if (lastDiagnostic.kind === 'no_package') {
     return `Tatum Premium is not available from the App Store for this build yet. Check App Store Connect and RevenueCat product setup.${suffix}`
   }
 
   if (lastDiagnostic.code === '5' || lastDiagnostic.readableCode === 'PRODUCT_NOT_AVAILABLE_FOR_PURCHASE_ERROR') {
-    return `The App Store says Tatum Premium is not available for purchase in this TestFlight build yet.${suffix}`
+    return `The App Store says Tatum Premium is not available for purchase in this TestFlight build yet.${detailSentence}${suffix}`
   }
 
   if (lastDiagnostic.code === '23' || lastDiagnostic.readableCode === 'CONFIGURATION_ERROR') {
-    return `RevenueCat found a purchase configuration issue for this build.${suffix}`
+    return `RevenueCat found a purchase configuration issue for this build.${detailSentence}${suffix}`
+  }
+
+  if (
+    lastDiagnostic.kind === 'already_purchased' ||
+    lastDiagnostic.code === '6' ||
+    lastDiagnostic.readableCode === 'PRODUCT_ALREADY_PURCHASED_ERROR'
+  ) {
+    return `Google Play says this Google account already owns Tatum Premium, but we could not attach the purchase to this Tatum account yet. Check that the Play Store app is using the intended tester account, then tap Restore purchases.${suffix}`
   }
 
   if (lastDiagnostic.code === '10' || lastDiagnostic.code === '35') {
@@ -99,7 +128,7 @@ export function getRevenueCatDiagnosticMessage(): string {
 
 async function ensureRevenueCatConfigured(appUserID?: string | null) {
   const apiKey = getApiKey()
-  if (DEV_SEED_BYPASS || !PAYWALL_ENABLED || !apiKey || !ENTITLEMENT_ID) return null
+  if (canBypassRevenueCatPaywall() || !PAYWALL_ENABLED || !apiKey || !ENTITLEMENT_ID) return null
 
   const normalizedAppUserID = appUserID?.trim() || null
   const { default: Purchases, LOG_LEVEL } = await import('react-native-purchases')
@@ -146,7 +175,8 @@ export async function purchaseRevenueCatPremium(appUserID?: string | null): Prom
     if (!Purchases) return 'not_enabled'
 
     const currentStatus = await getRevenueCatAccessStatus(appUserID)
-    if (currentStatus === 'active' || currentStatus === 'not_enabled') return 'unlocked'
+    if (currentStatus === 'active') return 'unlocked'
+    if (currentStatus === 'not_enabled') return 'not_enabled'
 
     const offerings = await Purchases.getOfferings()
     const packageToPurchase = offerings.current?.availablePackages?.[0]
@@ -161,6 +191,12 @@ export async function purchaseRevenueCatPremium(appUserID?: string | null): Prom
     return hasActiveEntitlement(result.customerInfo) ? 'unlocked' : 'blocked'
   } catch (err) {
     if (isUserCancelled(err)) return 'blocked'
+    if (isProductAlreadyPurchased(err)) {
+      const restoreResult = await restoreRevenueCatPurchases(appUserID)
+      if (restoreResult === 'unlocked') return 'unlocked'
+      captureRevenueCatDiagnostic('already_purchased', err)
+      return 'error'
+    }
     captureRevenueCatDiagnostic('purchase', err)
     console.warn('[revenueCat] purchase failed:', err)
     return 'error'

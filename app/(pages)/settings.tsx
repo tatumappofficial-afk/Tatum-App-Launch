@@ -5,16 +5,12 @@ import { SuccessOverlay } from '@/lib/components/SuccessOverlay'
 import { useRouter } from 'expo-router'
 import { GoogleSignin } from '@react-native-google-signin/google-signin'
 import { useSettings, useUpdateSettings } from '@/src/hooks/useSettings'
+import { useUserProfile } from '@/src/hooks/useUserProfile'
 import { authenticate } from '@/src/utils/biometrics'
 import { exportData } from '@/src/utils/exportData'
 import { eraseAllUserData, signOutUser } from '@/src/db'
 import { DEFAULT_SETTINGS } from '@/src/db/schema'
-import {
-  getRevenueCatDiagnosticMessage,
-  isRevenueCatPaywallConfigured,
-  purchaseRevenueCatPremium,
-} from '@/src/services/revenueCat'
-import { useUserProfile } from '@/src/hooks/useUserProfile'
+import { deleteSignupRecord } from '@/src/services/signupSync'
 
 const PRIVACY_POLICY_URL = 'https://www.tatumapp.com/privacy.html'
 const TERMS_URL = 'https://www.tatumapp.com/terms.html'
@@ -92,29 +88,6 @@ export default function SettingsRoute() {
     }
   }
 
-  async function handleOpenPremium() {
-    if (busy) return
-    if (!isRevenueCatPaywallConfigured()) {
-      Alert.alert('Purchases are not ready yet', 'Tatum Premium will be available once App Store setup is complete.')
-      return
-    }
-
-    setBusy(true)
-    try {
-      const result = await purchaseRevenueCatPremium(profile?.providerUserId ?? null)
-      if (result === 'unlocked') {
-        setSuccessLabel('Tatum Premium active')
-        setShowSuccess(true)
-        if (successTimer.current) clearTimeout(successTimer.current)
-        successTimer.current = setTimeout(() => setShowSuccess(false), 1400)
-      } else if (result === 'error') {
-        Alert.alert('Purchase unavailable', getRevenueCatDiagnosticMessage())
-      }
-    } finally {
-      setBusy(false)
-    }
-  }
-
   return (
     <>
       <SettingsScreen
@@ -125,7 +98,6 @@ export default function SettingsRoute() {
         onPrivacyPolicy={() => openExternal(PRIVACY_POLICY_URL)}
         onTerms={() => openExternal(TERMS_URL)}
         onExportData={handleExportData}
-        onOpenPremium={handleOpenPremium}
         onSubmitFeedback={() => openExternal(FEEDBACK_MAILTO)}
         onSignOut={() => {
           Alert.alert(
@@ -151,34 +123,49 @@ export default function SettingsRoute() {
             ],
           )
         }}
-        onEraseEverything={() => {
-          Alert.alert('Erase Everything', 'This will permanently delete all your data. This action cannot be undone.', [
-            { text: 'Cancel', style: 'cancel' },
-            {
-              text: 'Erase',
-              style: 'destructive',
-              onPress: async () => {
-                try {
-                  await eraseAllUserData()
-                  // Reset settings — flipping hasOnboarded false trips the
-                  // _layout guard back to (onboarding) reactively, no manual
-                  // navigation needed.
-                  updateSettings({
-                    notifications: DEFAULT_SETTINGS.notifications,
-                    whisperDeliveryDefault: DEFAULT_SETTINGS.whisperDeliveryDefault,
-                    calendarStartDay: DEFAULT_SETTINGS.calendarStartDay,
-                    biometricLock: DEFAULT_SETTINGS.biometricLock,
-                    backupEnabled: DEFAULT_SETTINGS.backupEnabled,
-                    hasOnboarded: DEFAULT_SETTINGS.hasOnboarded,
-                    theme: DEFAULT_SETTINGS.theme,
-                  })
-                } catch (err) {
-                  console.error('Erase failed:', err)
-                  Alert.alert('Erase failed', 'Something went wrong. Please try again.')
-                }
+        onDeleteAccount={() => {
+          Alert.alert(
+            'Delete Account & Data',
+            "This permanently deletes your account and everything you've logged in Tatum. This cannot be undone.",
+            [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: 'Delete',
+                style: 'destructive',
+                onPress: async () => {
+                  try {
+                    // Capture the identity before the wipe nulls it — the
+                    // server-side signup record is keyed by these fields.
+                    const identity = {
+                      email: profile?.email ?? null,
+                      providerUserId: profile?.providerUserId ?? null,
+                    }
+                    await eraseAllUserData()
+                    await GoogleSignin.signOut().catch(() => {})
+                    // Best-effort, non-blocking (same contract as recordSignup):
+                    // the account's data lives on-device and is already gone; this
+                    // clears the server-side signup log (name/email).
+                    void deleteSignupRecord(identity)
+                    // Reset settings — flipping hasOnboarded false trips the
+                    // _layout guard back to (onboarding) reactively, no manual
+                    // navigation needed.
+                    updateSettings({
+                      notifications: DEFAULT_SETTINGS.notifications,
+                      whisperDeliveryDefault: DEFAULT_SETTINGS.whisperDeliveryDefault,
+                      calendarStartDay: DEFAULT_SETTINGS.calendarStartDay,
+                      biometricLock: DEFAULT_SETTINGS.biometricLock,
+                      backupEnabled: DEFAULT_SETTINGS.backupEnabled,
+                      hasOnboarded: DEFAULT_SETTINGS.hasOnboarded,
+                      theme: DEFAULT_SETTINGS.theme,
+                    })
+                  } catch (err) {
+                    console.error('Account deletion failed:', err)
+                    Alert.alert('Deletion failed', 'Something went wrong. Please try again.')
+                  }
+                },
               },
-            },
-          ])
+            ],
+          )
         }}
       />
       <SuccessOverlay visible={showSuccess} label={successLabel} />

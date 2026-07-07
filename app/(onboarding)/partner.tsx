@@ -3,7 +3,6 @@ import { StyleSheet, View, Text, TextInput, Pressable, Alert } from 'react-nativ
 import { LinearGradient } from 'expo-linear-gradient'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 import { useRouter } from 'expo-router'
-import { useLiveQuery } from '@tanstack/react-db'
 import { useBlockBack } from '@/src/hooks/useBlockBack'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { colors, font, gradientPoints, partnerGradients } from '@/lib/theme'
@@ -12,18 +11,13 @@ import { StepDots } from '@/lib/components/StepDots'
 import { AvatarCircle } from '@/lib/components/AvatarCircle'
 import { DecorativeGlow } from '@/lib/screens/shared/DecorativeGlow'
 import { StatusBarSpacer } from '@/lib/screens/shared/StatusBarSpacer'
-import { generateId } from '@/src/utils/uuid'
 import { deriveInitials } from '@/src/utils/initials'
-import { partners } from '@/src/db'
+import { updateOnboardingSession } from '@/src/services/onboardingSession'
 
 export default function PartnerScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
   useBlockBack()
-
-  const { data: allPartners = [] } = useLiveQuery((q) =>
-    q.from({ partners }).select(({ partners }) => ({ ...partners })),
-  )
 
   const [displayName, setDisplayName] = useState('')
   const [initials, setInitials] = useState('')
@@ -47,42 +41,16 @@ export default function PartnerScreen() {
     if (!name) return
 
     const finalInitials = initials.trim() || deriveInitials(name)
-    const now = new Date().toISOString()
-
-    const collision = allPartners.find((p) => p.avatarValue === finalInitials && p.avatarGradient === selectedGradient)
-    if (collision) {
-      Alert.alert(
-        'Already taken',
-        'Another partner already uses this initial and color combination. Pick a different color or change the initial.',
-      )
-      return
-    }
-
-    try {
-      // First real partner added in onboarding always becomes main. The seeded
-      // Solo row was auto-promoted to main by the initDatabase backfill (so the
-      // profile badge isn't empty on first launch), but a user-created partner
-      // should supersede that placeholder.
-      const previousMain = allPartners.find((p) => p.isMain)
-      if (previousMain) {
-        partners.update(previousMain.id, (draft) => {
-          draft.isMain = false
-          draft.updatedAt = now
-        })
-      }
-      partners.insert({
-        id: generateId(),
+    const session = updateOnboardingSession({
+      partner: {
         displayName: name,
-        avatarType: 'initials',
         avatarValue: finalInitials,
         avatarGradient: selectedGradient,
-        isActive: true,
-        isMain: true,
-        createdAt: now,
-        updatedAt: now,
-      })
-    } catch (err) {
-      console.error('Failed to insert partner:', err)
+      },
+    })
+    if (!session) {
+      Alert.alert('Sign in again', 'Please return to sign in before continuing.')
+      router.replace('/(onboarding)/auth')
       return
     }
     router.push('/(onboarding)/tags')

@@ -234,6 +234,43 @@ async function markFailed(ref, err) {
   )
 }
 
+// In-app "Delete Account & Data" (App Store guideline 5.1.1(v)). Removes every
+// server-side trace of a signup: the signups log entries (matched by email
+// and/or providerUserId) and the welcome-email doc (which embeds a copy of the
+// signup record). The user's actual content never leaves their device, so this
+// completes the account deletion.
+async function handleDelete(req, res) {
+  const email = normalizeEmail(req.body?.email)
+  const providerUserId = req.body?.providerUserId ? String(req.body.providerUserId) : null
+
+  if (!email && !providerUserId) {
+    json(res, 200, { ok: true, skipped: 'missing_identity' })
+    return
+  }
+
+  const refs = new Map()
+  if (email) {
+    const byEmail = await firestore.collection(SIGNUPS_COLLECTION).where('email', '==', email).get()
+    byEmail.docs.forEach((doc) => refs.set(doc.ref.path, doc.ref))
+  }
+  if (providerUserId) {
+    const byProvider = await firestore
+      .collection(SIGNUPS_COLLECTION)
+      .where('providerUserId', '==', providerUserId)
+      .get()
+    byProvider.docs.forEach((doc) => refs.set(doc.ref.path, doc.ref))
+  }
+  if (email) {
+    refs.set(`${SENT_COLLECTION}/${docIdForEmail(email)}`, firestore.collection(SENT_COLLECTION).doc(docIdForEmail(email)))
+  }
+
+  const batch = firestore.batch()
+  refs.forEach((ref) => batch.delete(ref))
+  await batch.commit()
+
+  json(res, 200, { ok: true, deleted: refs.size })
+}
+
 async function handleSignup(req, res) {
   res.set('Access-Control-Allow-Origin', '*')
   res.set('Access-Control-Allow-Headers', 'Content-Type')
@@ -252,6 +289,11 @@ async function handleSignup(req, res) {
   const expectedToken = process.env.SIGNUP_TOKEN
   if (!expectedToken || req.body?.token !== expectedToken) {
     json(res, 401, { ok: false, error: 'unauthorized' })
+    return
+  }
+
+  if (req.body?.action === 'delete') {
+    await handleDelete(req, res)
     return
   }
 

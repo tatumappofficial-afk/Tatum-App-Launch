@@ -118,6 +118,19 @@ export async function initDatabase() {
 
   // user_settings singleton is seeded by SQL in sqlite.ts (INSERT OR IGNORE),
   // so no JS-side seeding is needed here.
+  //
+  // Legacy access backfill: early testers could fully complete onboarding
+  // before the RevenueCat gate existed. Those installs have hasOnboarded=1
+  // but a stale free tier, which would strand them behind the new paywall even
+  // though their local account/data is already established.
+  const onboardedSettings = await db.getAllAsync<{ hasOnboarded: number }>(
+    "SELECT hasOnboarded FROM user_settings WHERE id = 'singleton' LIMIT 1",
+  )
+  if (onboardedSettings[0]?.hasOnboarded === 1) {
+    await db.runAsync(
+      "UPDATE user_profile SET tier = 'premium', premiumExpiresAt = NULL WHERE tier != 'premium'",
+    )
+  }
 
   // Backfill: every user with at least one active partner should have a main
   // partner. If none is set, promote the oldest active partner so quick-log
@@ -218,7 +231,8 @@ export async function initDatabase() {
 // Clears the active auth gate on the user_profile row but leaves both user data
 // and the owning providerUserId intact. Preserving providerUserId is what lets
 // auth.tsx distinguish "same account returning" from "different account trying
-// to open this device's local data."
+// to open this device's local data." Wrong-account sign-in is non-destructive;
+// local reset is only offered from Settings once the account is open.
 export async function signOutUser() {
   userProfiles.update('default', (draft) => {
     draft.email = null
@@ -226,7 +240,7 @@ export async function signOutUser() {
   })
 }
 
-// ── User-facing "Erase Everything" ──
+// ── User-facing "Delete Account & Data" ──
 //
 // Wipes all user-generated data via the TanStack DB collection APIs so the
 // in-memory stores update reactively (live queries re-render immediately).

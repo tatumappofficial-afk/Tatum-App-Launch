@@ -88,13 +88,20 @@ function AuthedTree() {
   const { hasOnboarded, biometricLock } = settings
   const isAuthed = profiles.some((p) => p.authProvider !== null)
   const authedProfile = profiles.find((p) => p.authProvider !== null) ?? null
+  // hasOnboarded is the legacy access pass for early users. New users only get
+  // this flipped in /ready after purchase or restore.
+  const hasLocalPremiumAccess = hasOnboarded || authedProfile?.tier === 'premium'
 
   return (
     <View style={{ flex: 1, backgroundColor: '#F5EFE8' }} onLayout={onLayoutRootView}>
       {/* Only lock a fully onboarded, signed-in user. Otherwise the biometric
           prompt could fire on cold start over the sign-in/onboarding screens —
           before the user has even reached the /protect step where they opt in. */}
-      <PremiumAccessGate active={hasOnboarded && isAuthed} appUserID={authedProfile?.providerUserId ?? null}>
+      <PremiumAccessGate
+        active={hasOnboarded && isAuthed}
+        appUserID={authedProfile?.providerUserId ?? null}
+        hasLocalPremiumAccess={hasLocalPremiumAccess}
+      >
         <LockGate initialLocked={biometricLock && hasOnboarded && isAuthed}>
           <Stack
             screenOptions={{

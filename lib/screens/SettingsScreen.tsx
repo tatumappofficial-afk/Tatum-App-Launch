@@ -1,5 +1,5 @@
 import React from 'react'
-import { Pressable, ScrollView, StyleSheet, View, Text } from 'react-native'
+import { ScrollView, StyleSheet, View, Text } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Line, Path, Polyline } from 'react-native-svg'
 import { colors, font, gradientPoints, gradients } from '../theme'
@@ -21,9 +21,8 @@ export interface SettingsScreenProps {
   onPrivacyPolicy?: () => void
   onTerms?: () => void
   onExportData?: () => void
-  onOpenPremium?: () => void
   onSignOut?: () => void
-  onEraseEverything?: () => void
+  onDeleteAccount?: () => void
 }
 
 /* ── Inline icon helpers ── */
@@ -178,6 +177,73 @@ const ExternalLinkIcon: React.FC<{ color?: string }> = ({ color = '#C4B0A0' }) =
   </Svg>
 )
 
+const PremiumCardContent: React.FC<{ subtitle: string }> = ({ subtitle }) => (
+  <>
+    <LinearGradient
+      colors={gradients.primaryCta}
+      start={gradientPoints.diagonal.start}
+      end={gradientPoints.diagonal.end}
+      style={[StyleSheet.absoluteFill, { borderRadius: 16 }]}
+    />
+    <View
+      style={{
+        position: 'absolute',
+        top: -30,
+        right: -30,
+        width: 100,
+        height: 100,
+        backgroundColor: 'rgba(255,255,255,0.07)',
+        borderRadius: 50,
+      }}
+    />
+    <View
+      style={{
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.35)',
+        borderRadius: 9999,
+        paddingVertical: 4,
+        paddingHorizontal: 10,
+        flexShrink: 0,
+      }}
+    >
+      <Text
+        style={{
+          fontSize: 12,
+          fontWeight: '600',
+          letterSpacing: 2,
+          textTransform: 'uppercase',
+          color: colors.white,
+        }}
+      >
+        {'\u2726'} Pro
+      </Text>
+    </View>
+    <View style={{ flex: 1 }}>
+      <Text
+        style={{
+          fontFamily: font('playfair', '600'),
+          fontSize: 16,
+          color: colors.white,
+          lineHeight: 17,
+        }}
+      >
+        Tatum Premium
+      </Text>
+      <Text
+        style={{
+          fontSize: 12,
+          fontWeight: '300',
+          color: 'rgba(255,255,255,0.7)',
+          marginTop: 2,
+        }}
+      >
+        {subtitle}
+      </Text>
+    </View>
+  </>
+)
+
 /* ── Main component ── */
 
 export const SettingsScreen: React.FC<SettingsScreenProps> = ({
@@ -189,9 +255,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   onPrivacyPolicy,
   onTerms,
   onExportData,
-  onOpenPremium,
   onSignOut,
-  onEraseEverything,
+  onDeleteAccount,
 }) => {
   return (
     <View
@@ -238,11 +303,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       >
         {/* ── Pro Membership Card ── */}
         <View style={{ marginTop: 14, flexShrink: 0 }}>
-          <Pressable
-            onPress={onOpenPremium}
-            accessibilityRole="button"
-            accessibilityLabel="Tatum Premium"
-            style={({ pressed }) => ({
+          <View
+            accessible
+            accessibilityLabel="Tatum Premium active"
+            style={{
               marginHorizontal: 20,
               borderRadius: 16,
               paddingVertical: 14,
@@ -251,76 +315,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               alignItems: 'center',
               gap: 12,
               overflow: 'hidden',
-              opacity: pressed ? 0.86 : 1,
-            })}
+            }}
           >
-            <LinearGradient
-              colors={gradients.primaryCta}
-              start={gradientPoints.diagonal.start}
-              end={gradientPoints.diagonal.end}
-              style={[StyleSheet.absoluteFill, { borderRadius: 16 }]}
-            />
-            {/* Decorative circle */}
-            <View
-              style={{
-                position: 'absolute',
-                top: -30,
-                right: -30,
-                width: 100,
-                height: 100,
-                backgroundColor: 'rgba(255,255,255,0.07)',
-                borderRadius: 50,
-              }}
-            />
-            {/* Badge */}
-            <View
-              style={{
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                borderWidth: 1,
-                borderColor: 'rgba(255,255,255,0.35)',
-                borderRadius: 9999,
-                paddingVertical: 4,
-                paddingHorizontal: 10,
-                flexShrink: 0,
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontWeight: '600',
-                  letterSpacing: 2,
-                  textTransform: 'uppercase',
-                  color: colors.white,
-                }}
-              >
-                {'\u2726'} Pro
-              </Text>
-            </View>
-            {/* Text */}
-            <View style={{ flex: 1 }}>
-              <Text
-                style={{
-                  fontFamily: font('playfair', '600'),
-                  fontSize: 16,
-                  color: colors.white,
-                  lineHeight: 17,
-                }}
-              >
-                Tatum Premium
-              </Text>
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontWeight: '300',
-                  color: 'rgba(255,255,255,0.7)',
-                  marginTop: 2,
-                }}
-              >
-                One-time purchase · $24.99
-              </Text>
-            </View>
-            <ChevronForwardIcon color="rgba(255,255,255,0.72)" />
-          </Pressable>
+            <PremiumCardContent subtitle="Premium access active" />
+          </View>
         </View>
 
         {/* ── Security Section ── */}
@@ -453,11 +451,11 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             <SettingsRow
               icon={<TrashIcon />}
               iconBg="rgba(176,112,128,0.1)"
-              title="Erase Everything"
-              subtitle="Permanently delete all data · Cannot be undone"
+              title="Delete Account & Data"
+              subtitle="Permanently delete your account and all data · Cannot be undone"
               destructive
               trailing={<ChevronForwardIcon color={colors.mauve} />}
-              onPress={onEraseEverything}
+              onPress={onDeleteAccount}
               showBorder={false}
             />
           </View>
