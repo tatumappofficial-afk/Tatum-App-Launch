@@ -1,6 +1,6 @@
 import type { ActivityTag } from './schema'
 import { activityTags } from './collections'
-import { currentTagLabel } from '@/src/utils/tagLabels'
+import { findCurrentTagLabel } from '@/src/utils/tagLabels'
 
 /**
  * Tag-name history writes.
@@ -18,12 +18,22 @@ import { currentTagLabel } from '@/src/utils/tagLabels'
 /**
  * Labels map for a session's activities. Diff-based on purpose:
  *   - emojis already in `previousLabels` keep their existing (older) label —
- *     editing a session's notes/rating/date/partners never re-labels it
+ *     editing a session's notes/rating/date/partners never re-labels
+ *     activities that already have snapshots
  *   - newly added emojis record the label the picker showed just now
  *   - removed emojis drop out (only current activities are kept)
+ *   - emojis with NO tag row at all are left out of the map (never freeze a
+ *     bare glyph as a "label"; the live fallback keeps working, including
+ *     when a tag is later re-created for that emoji)
  *
  * `tags` comes from the caller's live query so this stays synchronous and
  * can be computed inside the same collection write as the session itself.
+ *
+ * Legacy sessions (pre-snapshot, empty previousLabels) get their activities
+ * pinned at the current labels on their first edit — deliberate: their
+ * log-time names are unrecoverable, and pinning at first touch is the
+ * earliest possible stop to the "renames rewrite history" behavior they
+ * otherwise keep exhibiting via the live fallback.
  */
 export function buildActivityLabels(
   activities: string[],
@@ -32,7 +42,8 @@ export function buildActivityLabels(
 ): Record<string, string> {
   const labels: Record<string, string> = {}
   for (const emoji of activities) {
-    labels[emoji] = previousLabels[emoji] ?? currentTagLabel(emoji, tags)
+    const label = previousLabels[emoji] ?? findCurrentTagLabel(emoji, tags)
+    if (label != null) labels[emoji] = label
   }
   return labels
 }

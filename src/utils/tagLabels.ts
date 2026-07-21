@@ -23,6 +23,17 @@ import type { ActivityTag, Encounter } from '@/src/db/schema'
  *   - else the emoji itself
  */
 export function currentTagLabel(emoji: string, tags: ActivityTag[]): string {
+  return findCurrentTagLabel(emoji, tags) ?? emoji
+}
+
+/**
+ * Same resolution as currentTagLabel but returns null when NO tag row (active
+ * or retired) exists for the emoji — callers that persist labels use this so
+ * a bare glyph is never frozen into a snapshot (e.g. saving an edit before
+ * the tags query has loaded, or an emoji whose tag was hard-deleted by a
+ * pre-soft-delete build).
+ */
+export function findCurrentTagLabel(emoji: string, tags: ActivityTag[]): string | null {
   let best: ActivityTag | null = null
   for (const t of tags) {
     if (t.emoji !== emoji) continue
@@ -42,7 +53,7 @@ export function currentTagLabel(emoji: string, tags: ActivityTag[]): string {
       if (a > b || (a === b && t.sortOrder < best.sortOrder)) best = t
     }
   }
-  return best ? best.label : emoji
+  return best ? best.label : null
 }
 
 /**
