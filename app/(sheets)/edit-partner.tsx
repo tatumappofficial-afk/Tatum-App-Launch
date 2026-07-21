@@ -17,7 +17,7 @@ import { SuccessOverlay } from '@/lib/components/SuccessOverlay'
 import { AvatarCircle } from '@/lib/components/AvatarCircle'
 import { ToggleSwitch } from '@/lib/components/ToggleSwitch'
 import { useSheetPanGesture, useSheetDismiss } from '@/app/(sheets)/_layout'
-import { encounters, partners, removeEncounterTagSnapshots } from '@/src/db'
+import { encounters, partners } from '@/src/db'
 
 export default function EditPartnerSheet() {
   const router = useRouter()
@@ -179,12 +179,6 @@ export default function EditPartnerSheet() {
             try {
               for (const enc of soleEncounters) {
                 encounters.delete(enc.id)
-                // The confirm copy promises "everything you've logged with
-                // them" is deleted — that includes the session's tag-label
-                // snapshots, which would otherwise linger (and export).
-                removeEncounterTagSnapshots(enc.id).catch((err) =>
-                  console.error('Failed to remove tag snapshots:', err),
-                )
               }
               for (const enc of sharedEncounters) {
                 encounters.update(enc.id, (draft) => {

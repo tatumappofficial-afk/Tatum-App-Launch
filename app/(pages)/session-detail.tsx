@@ -62,7 +62,7 @@ export default function SessionDetailRoute() {
     })
 
   const activities = encounter.activities.map((emoji) => {
-    return { emoji, label: sessionLabel(encounter.id, emoji) }
+    return { emoji, label: sessionLabel(encounter, emoji) }
   })
 
   return (

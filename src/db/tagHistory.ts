@@ -1,66 +1,40 @@
-import { activityTags, encounterTagLabels } from './collections'
-import { encounterTagLabelId } from './schema'
+import type { ActivityTag } from './schema'
+import { activityTags } from './collections'
 import { currentTagLabel } from '@/src/utils/tagLabels'
 
 /**
- * Tag-name history writes. Everything that creates, edits, or deletes the
- * things history depends on funnels through here so the invariants live in
- * one place:
+ * Tag-name history writes.
  *
- *   - every session activity gets a label snapshot at write time
- *   - every soft-deleted tag row records WHEN it stopped being current
+ * Every session write records the label each activity has at that moment in
+ * `encounter.activityLabels` (same row, same write — nothing to keep in sync,
+ * nothing to orphan). `buildActivityLabels` computes that map; the caller
+ * stores it in the same insert/update as the activities array.
  *
- * See src/utils/tagLabels.ts for how these are read back.
+ * Every tag soft-delete stamps `deactivatedAt` via `deactivateTag`, which
+ * keeps label resolution deterministic for sessions that predate snapshotting
+ * (see src/utils/tagLabels.ts).
  */
 
 /**
- * Bring an encounter's label snapshots in line with its activities array.
- * Diff-based on purpose:
- *   - emojis already snapshotted keep their existing (older) label — editing
- *     a session's notes/rating/date/partners never re-labels its activities
- *   - newly added emojis snapshot the label the picker showed just now
- *   - removed emojis drop their snapshot
+ * Labels map for a session's activities. Diff-based on purpose:
+ *   - emojis already in `previousLabels` keep their existing (older) label —
+ *     editing a session's notes/rating/date/partners never re-labels it
+ *   - newly added emojis record the label the picker showed just now
+ *   - removed emojis drop out (only current activities are kept)
  *
- * Runs after the encounter write. The two writes aren't atomic; if this half
- * is lost (crash between them) the session just falls back to the current
- * label until the next edit — same rendering as pre-snapshot legacy sessions.
- *
- * Both helpers await preload() before reading: `.values()`/`.toArray` on a
- * collection whose initial load hasn't committed silently return EMPTY (they
- * don't start sync), which would misclassify every kept emoji as new here and
- * overwrite its historical snapshot with today's label via INSERT OR REPLACE.
- * Never read these collections in this module without the preload.
+ * `tags` comes from the caller's live query so this stays synchronous and
+ * can be computed inside the same collection write as the session itself.
  */
-export async function syncEncounterTagSnapshots(encounterId: string, emojis: string[]): Promise<void> {
-  await Promise.all([activityTags.preload(), encounterTagLabels.preload()])
-  const tags = activityTags.toArray
-  const desired = new Set(emojis)
-
-  const existing = new Map<string, string>() // emoji -> row id
-  for (const row of encounterTagLabels.values()) {
-    if (row.encounterId === encounterId) existing.set(row.emoji, row.id)
+export function buildActivityLabels(
+  activities: string[],
+  previousLabels: Record<string, string>,
+  tags: ActivityTag[],
+): Record<string, string> {
+  const labels: Record<string, string> = {}
+  for (const emoji of activities) {
+    labels[emoji] = previousLabels[emoji] ?? currentTagLabel(emoji, tags)
   }
-
-  for (const [emoji, rowId] of existing) {
-    if (!desired.has(emoji)) encounterTagLabels.delete(rowId)
-  }
-  for (const emoji of desired) {
-    if (existing.has(emoji)) continue
-    encounterTagLabels.insert({
-      id: encounterTagLabelId(encounterId, emoji),
-      encounterId,
-      emoji,
-      label: currentTagLabel(emoji, tags),
-    })
-  }
-}
-
-/** Drop all label snapshots for a deleted encounter. */
-export async function removeEncounterTagSnapshots(encounterId: string): Promise<void> {
-  await encounterTagLabels.preload()
-  for (const row of [...encounterTagLabels.values()]) {
-    if (row.encounterId === encounterId) encounterTagLabels.delete(row.id)
-  }
+  return labels
 }
 
 /**

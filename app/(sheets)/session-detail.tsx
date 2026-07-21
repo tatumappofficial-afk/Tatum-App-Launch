@@ -73,7 +73,7 @@ export default function SheetSessionDetailRoute() {
 
   const activities = encounter.activities.map((emoji) => ({
     emoji,
-    label: sessionLabel(encounter.id, emoji),
+    label: sessionLabel(encounter, emoji),
   }))
 
   return (

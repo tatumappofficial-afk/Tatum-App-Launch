@@ -19,26 +19,6 @@ export const ActivityTagSchema = z.object({
 
 export type ActivityTag = z.infer<typeof ActivityTagSchema>
 
-// ── Encounter tag-label snapshot ──
-//
-// One row per (encounter, emoji): the tag label that was current when the
-// user logged (or edited in) that activity. This is what lets past sessions
-// keep the name a tag had at log time, while deleted/re-created or renamed
-// tags only affect sessions logged afterwards. Encounters keep storing bare
-// emoji strings; this sidecar carries the history.
-export const EncounterTagLabelSchema = z.object({
-  id: z.string(), // `${encounterId}:${emoji}` — deterministic composite key
-  encounterId: z.string(),
-  emoji: z.string(),
-  label: z.string(),
-})
-
-export type EncounterTagLabel = z.infer<typeof EncounterTagLabelSchema>
-
-export function encounterTagLabelId(encounterId: string, emoji: string): string {
-  return `${encounterId}:${emoji}`
-}
-
 // Stable id for the Period tag. Period is the one protected default — it can't
 // be renamed, have its emoji swapped, or be deleted, because its presence is
 // what unlocks period-only logging (no partner required). A stable id lets
@@ -81,6 +61,13 @@ export const EncounterSchema = z.object({
   id: z.string().uuid(),
   date: z.string(), // ISO date YYYY-MM-DD
   activities: z.array(z.string()).min(1), // emoji codes, at least one required
+  // Label each activity had when it was logged (or edited onto the session),
+  // keyed by emoji. This is what lets past sessions keep the name a tag had
+  // at log time while deleted/re-created or renamed tags only affect sessions
+  // logged afterwards. Lives on the row so it's written/deleted atomically
+  // with the session. Empty for sessions from before snapshotting existed —
+  // those fall back to the emoji's current label (src/utils/tagLabels.ts).
+  activityLabels: z.record(z.string(), z.string()),
   partnerIds: z.array(z.string().uuid()), // optional — sessions can be logged without a partner
   stars: z.number().min(0).max(10).nullable(),
   notes: z.string().max(3000).nullable(),

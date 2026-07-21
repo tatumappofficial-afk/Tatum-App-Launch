@@ -95,9 +95,9 @@ export default function EditTagRoute() {
         style: 'destructive',
         onPress: () => {
           // Soft delete. Sessions logged while this tag was current keep its
-          // name via their encounter_tag_labels snapshots; the row itself is
-          // kept (with deactivatedAt stamped) so sessions from before
-          // snapshotting existed can still resolve a name for this emoji.
+          // name via their activityLabels snapshots; the row itself is kept
+          // (with deactivatedAt stamped) so sessions from before snapshotting
+          // existed can still resolve a name for this emoji.
           deactivateTag(tag.id)
           setSuccessLabel(`${tag.emoji}  ${tag.label} removed`)
           setShowSuccess(true)

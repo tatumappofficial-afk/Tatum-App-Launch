@@ -15,8 +15,8 @@ import { getDatabase, parseJsonColumn } from '@/src/db/sqlite'
  * feature verify the file came from a compatible Tatum.
  */
 
-// v2: activity_tags gained deactivatedAt; encounterTagLabels (per-session
-// label snapshots) added to the payload.
+// v2: activity_tags gained deactivatedAt; encounters gained activityLabels
+// (per-session label snapshots).
 const EXPORT_SCHEMA_VERSION = 2
 
 interface ExportPayload {
@@ -27,7 +27,6 @@ interface ExportPayload {
     partners: Record<string, unknown>[]
     encounters: Record<string, unknown>[]
     activityTags: Record<string, unknown>[]
-    encounterTagLabels: Record<string, unknown>[]
     desireEntries: Record<string, unknown>[]
     whisperMessages: Record<string, unknown>[]
     affirmations: Record<string, unknown>[]
@@ -66,6 +65,7 @@ export async function buildExportPayload(): Promise<ExportPayload> {
   const encounters = (await db.getAllAsync<Record<string, unknown>>('SELECT * FROM encounters')).map((r) =>
     decodeJson(r, [
       { field: 'activities', fallback: [] },
+      { field: 'activityLabels', fallback: {} },
       { field: 'partnerIds', fallback: [] },
     ]),
   )
@@ -73,8 +73,6 @@ export async function buildExportPayload(): Promise<ExportPayload> {
   const activityTags = (await db.getAllAsync<Record<string, unknown>>('SELECT * FROM activity_tags')).map((r) =>
     decodeBools(r, ['isDefault', 'isActive']),
   )
-
-  const encounterTagLabels = await db.getAllAsync<Record<string, unknown>>('SELECT * FROM encounter_tag_labels')
 
   const desireEntries = (await db.getAllAsync<Record<string, unknown>>('SELECT * FROM desire_entries')).map((r) =>
     decodeBools(r, ['actedOn']),
@@ -104,7 +102,6 @@ export async function buildExportPayload(): Promise<ExportPayload> {
       partners,
       encounters,
       activityTags,
-      encounterTagLabels,
       desireEntries,
       whisperMessages,
       affirmations,

@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router'
 import { generateId as uuid } from '@/src/utils/uuid'
 import { CalendarScreen } from '@/lib/screens/CalendarScreen'
 import type { SuccessOverlayDetails } from '@/lib/components/SuccessOverlay'
-import { activityTags, encounters, partners, syncEncounterTagSnapshots, PERIOD_TAG_ID } from '@/src/db'
+import { activityTags, buildActivityLabels, encounters, partners, PERIOD_TAG_ID } from '@/src/db'
 import { useTagLabels } from '@/src/hooks/useTagLabels'
 import { useLoggedDaysForMonth } from '@/src/hooks/useLoggedDaysForMonth'
 import { formatDateString } from '@/lib/stats/windows'
@@ -86,7 +86,7 @@ export default function CalendarRoute() {
       rating: enc.stars || 0,
       tags: enc.activities.map((emoji) => ({
         emoji,
-        label: sessionLabel(enc.id, emoji),
+        label: sessionLabel(enc, emoji),
       })),
       noteSnippet: enc.notes?.slice(0, 80),
     }
@@ -131,18 +131,17 @@ export default function CalendarRoute() {
     // Period skips this entirely so it can log even on a fresh, partner-less account.
     const target = isPeriodLog ? null : (allPartners.find((p) => p.isMain && p.isActive) ?? allPartners[0])
 
-    const newId = uuid()
     encounters.insert({
-      id: newId,
+      id: uuid(),
       date: dateStr,
       activities: [emoji],
+      activityLabels: buildActivityLabels([emoji], {}, allTags),
       partnerIds: target ? [target.id] : [],
       stars: null,
       notes: null,
       createdAt: nowStr,
       updatedAt: nowStr,
     })
-    syncEncounterTagSnapshots(newId, [emoji]).catch((err) => console.error('Failed to snapshot tag label:', err))
     const d = new Date(dateStr + 'T00:00:00')
     const dateLabel = `${DAY_NAMES[d.getDay()].slice(0, 3)}, ${MONTH_NAMES[d.getMonth()]} ${d.getDate()}`
     setLoggedOverlay({

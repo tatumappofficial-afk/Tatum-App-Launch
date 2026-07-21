@@ -3,7 +3,6 @@ import type { SQLiteDatabase } from 'expo-sqlite'
 import type {
   ActivityTag,
   Encounter,
-  EncounterTagLabel,
   Partner,
   DesireEntry,
   WhisperMessage,
@@ -22,14 +21,19 @@ function createSqliteCollection<T extends { id: string }>(config: {
   table: string
   db: () => SQLiteDatabase
   jsonColumns?: string[]
+  /** JSON columns whose empty/missing value is an object, not an array. */
+  jsonObjectColumns?: string[]
   boolColumns?: string[]
 }) {
-  const { id, table, db: getDb, jsonColumns = [], boolColumns = [] } = config
+  const { id, table, db: getDb, jsonColumns = [], jsonObjectColumns = [], boolColumns = [] } = config
 
   function rowToEntity(row: Record<string, unknown>): T {
     const entity = { ...row } as Record<string, unknown>
     for (const col of jsonColumns) {
       entity[col] = parseJsonColumn(row[col] as string | null, [])
+    }
+    for (const col of jsonObjectColumns) {
+      entity[col] = parseJsonColumn(row[col] as string | null, {})
     }
     for (const col of boolColumns) {
       entity[col] = row[col] === 1 || row[col] === true
@@ -39,7 +43,7 @@ function createSqliteCollection<T extends { id: string }>(config: {
 
   function entityToRow(entity: T): Record<string, unknown> {
     const row = { ...entity } as Record<string, unknown>
-    for (const col of jsonColumns) {
+    for (const col of [...jsonColumns, ...jsonObjectColumns]) {
       row[col] = serializeJsonColumn((entity as Record<string, unknown>)[col])
     }
     for (const col of boolColumns) {
@@ -141,17 +145,12 @@ export const activityTags = createSqliteCollection<ActivityTag>({
   boolColumns: ['isDefault', 'isActive'],
 })
 
-export const encounterTagLabels = createSqliteCollection<EncounterTagLabel>({
-  id: 'encounter_tag_labels',
-  table: 'encounter_tag_labels',
-  db,
-})
-
 export const encounters = createSqliteCollection<Encounter>({
   id: 'encounters',
   table: 'encounters',
   db,
   jsonColumns: ['activities', 'partnerIds'],
+  jsonObjectColumns: ['activityLabels'],
 })
 
 export const partners = createSqliteCollection<Partner>({

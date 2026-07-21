@@ -5,7 +5,7 @@ import { useLiveQuery } from '@tanstack/react-db'
 import { generateId as uuid } from '@/src/utils/uuid'
 import { LogSessionScreen } from '@/lib/screens/LogSessionScreen'
 import { DatePickerDropdown } from '@/lib/components/DatePickerDropdown'
-import { activityTags, encounters, partners, removeEncounterTagSnapshots, syncEncounterTagSnapshots } from '@/src/db'
+import { activityTags, buildActivityLabels, encounters, partners } from '@/src/db'
 import { useLoggedDaysForMonth } from '@/src/hooks/useLoggedDaysForMonth'
 import { useSheetDismiss } from '@/app/(sheets)/_layout'
 
@@ -131,7 +131,6 @@ export default function LogSessionRoute() {
         onPress: () => {
           try {
             encounters.delete(id!)
-            removeEncounterTagSnapshots(id!).catch((err) => console.error('Failed to remove tag snapshots:', err))
           } catch (err) {
             console.error('Failed to delete encounter:', err)
           }
@@ -152,30 +151,30 @@ export default function LogSessionRoute() {
 
     try {
       if (isEditing && existingEncounter) {
+        // Labels are diffed: activities kept on the session keep their
+        // log-time labels; only newly added ones snapshot today's name.
+        const labels = buildActivityLabels(selectedActivities, existingEncounter.activityLabels, allTags)
         encounters.update(id, (draft) => {
           draft.date = dateStr
           draft.activities = selectedActivities
+          draft.activityLabels = labels
           draft.partnerIds = selectedPartnerIds
           draft.stars = rating
           draft.notes = notes || null
           draft.updatedAt = nowStr
         })
-        // Snapshots are diffed: activities kept on the session keep their
-        // log-time labels; only newly added ones snapshot today's name.
-        await syncEncounterTagSnapshots(id!, selectedActivities)
       } else {
-        const newId = uuid()
         encounters.insert({
-          id: newId,
+          id: uuid(),
           date: dateStr,
           activities: selectedActivities,
+          activityLabels: buildActivityLabels(selectedActivities, {}, allTags),
           partnerIds: selectedPartnerIds,
           stars: rating,
           notes: notes || null,
           createdAt: nowStr,
           updatedAt: nowStr,
         })
-        await syncEncounterTagSnapshots(newId, selectedActivities)
       }
       setShowSuccess(true)
       setTimeout(dismissSheet, 900)
