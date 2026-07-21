@@ -1,4 +1,5 @@
 import type { ActivityTag, Encounter, Partner } from '@/src/db/schema'
+import { currentTagLabel } from '@/src/utils/tagLabels'
 import type { CalendarStartDay, DateWindow } from './windows'
 import { parseDateString } from './windows'
 
@@ -167,7 +168,7 @@ export function topEnjoyedActivities(
 
 /** Sessions with stars ≥ threshold, newest first. */
 export function standoutSessions(encounters: Encounter[], threshold = 8): Encounter[] {
-  return encounters.filter((e) => e.stars !== null && e.stars >= threshold).sort((a, b) => b.date.localeCompare(a.date))
+  return encounters.filter((e) => e.stars !== null && e.stars >= threshold).sort(compareEncountersNewestFirst)
 }
 
 /** Mean of star-rated encounters in the set. Returns null when none are rated. */
@@ -183,15 +184,26 @@ export function averageRating(encounters: Encounter[]): number | null {
 export function recentNotes(encounters: Encounter[], limit = 3): Encounter[] {
   return encounters
     .filter((e) => e.notes !== null && e.notes.trim().length > 0)
-    .sort((a, b) => b.date.localeCompare(a.date))
+    .sort(compareEncountersNewestFirst)
     .slice(0, limit)
 }
 
 // ── Recent sessions ──
 
+/**
+ * Newest first: by day, then by log time within the day. `date` alone is just
+ * a YYYY-MM-DD string, so without the createdAt tie-break same-day sessions
+ * render in arbitrary live-query order.
+ */
+export function compareEncountersNewestFirst(a: Encounter, b: Encounter): number {
+  const byDate = b.date.localeCompare(a.date)
+  if (byDate !== 0) return byDate
+  return b.createdAt.localeCompare(a.createdAt)
+}
+
 /** Encounters sorted newest first, sliced to `limit`. */
 export function recentEncounters(encounters: Encounter[], limit = 5): Encounter[] {
-  return [...encounters].sort((a, b) => b.date.localeCompare(a.date)).slice(0, limit)
+  return [...encounters].sort(compareEncountersNewestFirst).slice(0, limit)
 }
 
 // ── Lifetime partner stats ──
@@ -279,14 +291,13 @@ export function partnerLifetimeStats(allEncounters: Encounter[], partners: Partn
 // ── Lookup helpers ──
 
 /**
- * Resolves an activity emoji to a label by checking the tag table (active or
- * inactive). Falls back to the emoji itself when no tag matches.
+ * Resolves an activity emoji to its CURRENT label for aggregate surfaces
+ * (Top Activities, Most Enjoyed, …), which group by emoji across the whole
+ * window and so can't use per-session snapshots. Deterministic across
+ * duplicate-emoji rows — see src/utils/tagLabels.ts for the rules.
  */
 export function lookupTagLabel(emoji: string, tags: ActivityTag[]): string {
-  for (const t of tags) {
-    if (t.emoji === emoji) return t.label
-  }
-  return emoji
+  return currentTagLabel(emoji, tags)
 }
 
 /** Distinct partners present in the encounter set, including inactive ones. */

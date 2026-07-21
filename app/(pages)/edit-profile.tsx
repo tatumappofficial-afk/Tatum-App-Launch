@@ -11,7 +11,7 @@ import { colors, font, gradientPoints, partnerGradients } from '@/lib/theme'
 import { AvatarCircle } from '@/lib/components/AvatarCircle'
 import { BackButton } from '@/lib/components/BackButton'
 import { StatusBarSpacer } from '@/lib/screens/shared/StatusBarSpacer'
-import { activityTags, partners, userProfiles, PERIOD_TAG_ID } from '@/src/db'
+import { activityTags, deactivateTag, partners, userProfiles, PERIOD_TAG_ID } from '@/src/db'
 import { useUserProfile } from '@/src/hooks/useUserProfile'
 import { deriveInitials } from '@/src/utils/initials'
 
@@ -126,9 +126,7 @@ export default function EditProfilePage() {
         text: 'Delete',
         style: 'destructive',
         onPress: () => {
-          activityTags.update(tagId, (draft) => {
-            draft.isActive = false
-          })
+          deactivateTag(tagId)
         },
       },
     ])

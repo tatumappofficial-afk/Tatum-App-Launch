@@ -4,7 +4,7 @@ import { useLocalSearchParams } from 'expo-router'
 import { useLiveQuery } from '@tanstack/react-db'
 import { AddTagModal } from '@/lib/screens/AddTagModal'
 import { SuccessOverlay } from '@/lib/components/SuccessOverlay'
-import { activityTags, PERIOD_TAG_ID } from '@/src/db'
+import { activityTags, deactivateTag, PERIOD_TAG_ID } from '@/src/db'
 import { useSheetDismiss } from '@/app/(sheets)/_layout'
 
 const PERIOD_LOCKED_HINT =
@@ -76,13 +76,11 @@ export default function EditTagRoute() {
         text: 'Delete',
         style: 'destructive',
         onPress: () => {
-          // Soft delete — encounters snapshot the emoji+label at log time, so
-          // we don't need to keep the row around for history, but flipping
-          // isActive instead of hard-deleting preserves recovery options if
-          // the user changes their mind.
-          activityTags.update(tag.id, (draft) => {
-            draft.isActive = false
-          })
+          // Soft delete. Sessions logged while this tag was current keep its
+          // name via their encounter_tag_labels snapshots; the row itself is
+          // kept (with deactivatedAt stamped) so sessions from before
+          // snapshotting existed can still resolve a name for this emoji.
+          deactivateTag(tag.id)
           setSuccessLabel(`${tag.emoji}  ${tag.label} removed`)
           setShowSuccess(true)
           dismissTimer.current = setTimeout(dismissSheet, 700)

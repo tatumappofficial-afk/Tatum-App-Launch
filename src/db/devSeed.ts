@@ -143,7 +143,7 @@ export async function seedDevData(db: SQLiteDatabase): Promise<void> {
   const maxOrderRows = await db.getAllAsync<{ m: number | null }>('SELECT MAX(sortOrder) as m FROM activity_tags')
   const nextOrder = (maxOrderRows[0]?.m ?? 0) + 1
   await db.runAsync(
-    'INSERT INTO activity_tags (id, emoji, label, sortOrder, isDefault, isActive) VALUES (?, ?, ?, ?, 0, 1)',
+    'INSERT INTO activity_tags (id, emoji, label, sortOrder, isDefault, isActive, deactivatedAt) VALUES (?, ?, ?, ?, 0, 1, NULL)',
     [uuid(), '🔥', 'Spicy', nextOrder],
   )
 

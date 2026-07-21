@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router'
 import { ProfileScreen } from '@/lib/screens/ProfileScreen'
 import { activityTags, encounters, partners } from '@/src/db'
 import { useUserProfile } from '@/src/hooks/useUserProfile'
+import { compareEncountersNewestFirst } from '@/lib/stats'
 
 export default function ProfileRoute() {
   const router = useRouter()
@@ -38,8 +39,10 @@ export default function ProfileRoute() {
   }))
 
   // Recent sessions (matches RecentSession: partnerInitials, partnerGradient, date, ratingPercent, tags, note)
+  // .slice() first — .sort() in place would mutate the live-query array.
   const recentSessions = allEncounters
-    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice()
+    .sort(compareEncountersNewestFirst)
     .slice(0, 5)
     .map((enc) => {
       const sessionPartners = enc.partnerIds

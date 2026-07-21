@@ -5,6 +5,7 @@ import {
   affirmations,
   desireEntries,
   encounters,
+  encounterTagLabels,
   partners,
   userProfiles,
   whisperMessages,
@@ -17,6 +18,7 @@ import { seedDevData } from './devSeed'
 export {
   activityTags,
   encounters,
+  encounterTagLabels,
   partners,
   desireEntries,
   whisperMessages,
@@ -24,6 +26,7 @@ export {
   userProfiles,
 } from './collections'
 export * from './schema'
+export * from './tagHistory'
 
 let initialized = false
 
@@ -78,10 +81,13 @@ export async function initDatabase() {
   // exist with the stable PERIOD_TAG_ID so downstream checks (lock state,
   // partner-optional logging) can find it. Two heal passes:
   // 1. Pre-stable-id installs seeded Period with a random UUID — rewrite that
-  //    row's id to PERIOD_TAG_ID. Encounters snapshot the emoji+label, not the
-  //    tag id, so updating activity_tags.id has no foreign-key consequences.
+  //    row's id to PERIOD_TAG_ID. Encounters reference activities by emoji
+  //    (with label snapshots in encounter_tag_labels), never by tag id, so
+  //    updating activity_tags.id has no foreign-key consequences.
   // 2. If Period was deleted (soft via isActive=0 or hard) in any prior build,
   //    re-insert/re-activate it. Period can never be missing for any user.
+  //    Re-activation also clears deactivatedAt — an active row must never
+  //    carry a deactivation stamp (see src/utils/tagLabels.ts).
   await db.runAsync(
     `UPDATE activity_tags SET id = ?
      WHERE emoji = '🩸' AND isDefault = 1 AND id != ?`,
@@ -101,7 +107,7 @@ export async function initDatabase() {
       [PERIOD_TAG_ID, '🩸', 'Period', maxOrder + 1],
     )
   } else if (periodRow[0].isActive === 0) {
-    await db.runAsync('UPDATE activity_tags SET isActive = 1 WHERE id = ?', [PERIOD_TAG_ID])
+    await db.runAsync('UPDATE activity_tags SET isActive = 1, deactivatedAt = NULL WHERE id = ?', [PERIOD_TAG_ID])
   }
 
   // Ensure at least one partner exists so the log-session picker is never
@@ -256,14 +262,16 @@ export async function eraseAllUserData() {
 
   // Pull every row's id from each table, then delete via the collection so the
   // optimistic store and SQLite stay aligned.
-  const [encounterRows, partnerRows, desireRows, whisperRows, affirmationRows, tagRows] = await Promise.all([
-    db.getAllAsync<{ id: string }>('SELECT id FROM encounters'),
-    db.getAllAsync<{ id: string }>('SELECT id FROM partners'),
-    db.getAllAsync<{ id: string }>('SELECT id FROM desire_entries'),
-    db.getAllAsync<{ id: string }>('SELECT id FROM whisper_messages'),
-    db.getAllAsync<{ id: string }>('SELECT id FROM affirmations'),
-    db.getAllAsync<{ id: string }>('SELECT id FROM activity_tags'),
-  ])
+  const [encounterRows, partnerRows, desireRows, whisperRows, affirmationRows, tagRows, tagLabelRows] =
+    await Promise.all([
+      db.getAllAsync<{ id: string }>('SELECT id FROM encounters'),
+      db.getAllAsync<{ id: string }>('SELECT id FROM partners'),
+      db.getAllAsync<{ id: string }>('SELECT id FROM desire_entries'),
+      db.getAllAsync<{ id: string }>('SELECT id FROM whisper_messages'),
+      db.getAllAsync<{ id: string }>('SELECT id FROM affirmations'),
+      db.getAllAsync<{ id: string }>('SELECT id FROM activity_tags'),
+      db.getAllAsync<{ id: string }>('SELECT id FROM encounter_tag_labels'),
+    ])
 
   // Delete through the collections so their optimistic stores stay in sync, but
   // tolerate ids the store doesn't know about. A collection only holds the rows
@@ -287,6 +295,7 @@ export async function eraseAllUserData() {
   deleteThrough(desireEntries, desireRows)
   deleteThrough(whisperMessages, whisperRows)
   deleteThrough(affirmations, affirmationRows)
+  deleteThrough(encounterTagLabels, tagLabelRows)
   deleteThrough(activityTags, tagRows)
   deleteThrough(encounters, encounterRows)
   deleteThrough(partners, partnerRows)
@@ -299,6 +308,7 @@ export async function eraseAllUserData() {
     DELETE FROM desire_entries;
     DELETE FROM whisper_messages;
     DELETE FROM affirmations;
+    DELETE FROM encounter_tag_labels;
     DELETE FROM activity_tags;
     DELETE FROM encounters;
     DELETE FROM partners;
@@ -343,6 +353,7 @@ export async function eraseAllUserData() {
       sortOrder: i,
       isDefault: true,
       isActive: true,
+      deactivatedAt: null,
     })
   }
 
@@ -380,6 +391,7 @@ export async function resetAllData() {
   await db.execAsync(`
     DELETE FROM whisper_messages;
     DELETE FROM desire_entries;
+    DELETE FROM encounter_tag_labels;
     DELETE FROM encounters;
     DELETE FROM partners;
     DELETE FROM affirmations;

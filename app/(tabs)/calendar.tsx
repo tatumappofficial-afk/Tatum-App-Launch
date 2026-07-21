@@ -5,8 +5,8 @@ import { useRouter } from 'expo-router'
 import { generateId as uuid } from '@/src/utils/uuid'
 import { CalendarScreen } from '@/lib/screens/CalendarScreen'
 import type { SuccessOverlayDetails } from '@/lib/components/SuccessOverlay'
-import { activityTags, encounters, partners, PERIOD_TAG_ID } from '@/src/db'
-import { useActivityTagMap } from '@/src/hooks/useActivityTagMap'
+import { activityTags, encounters, partners, syncEncounterTagSnapshots, PERIOD_TAG_ID } from '@/src/db'
+import { useTagLabels } from '@/src/hooks/useTagLabels'
 import { useLoggedDaysForMonth } from '@/src/hooks/useLoggedDaysForMonth'
 import { formatDateString } from '@/lib/stats/windows'
 
@@ -43,7 +43,7 @@ export default function CalendarRoute() {
     q.from({ activityTags }).select(({ activityTags }) => ({ ...activityTags })),
   )
 
-  const tagMap = useActivityTagMap()
+  const { sessionLabel } = useTagLabels()
 
   // De-duplicate by emoji: two default tags can share an emoji (e.g. Manual and
   // Fingering both 👉), which collides the quick-log chip keys (key={emoji}) —
@@ -69,7 +69,9 @@ export default function CalendarRoute() {
   const dayOfWeek = DAY_NAMES[selectedDateObj.getDay()]
   const selectedDayLabel = `${dayOfWeek}, ${MONTH_NAMES[month - 1]} ${selectedDay}`
 
-  const dayEncounters = allEncounters.filter((e) => e.date === selectedDateStr)
+  const dayEncounters = allEncounters
+    .filter((e) => e.date === selectedDateStr)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
   const daySessions = dayEncounters.map((enc) => {
     const sessionPartners = enc.partnerIds
       .map((pid) => allPartners.find((p) => p.id === pid))
@@ -84,7 +86,7 @@ export default function CalendarRoute() {
       rating: enc.stars || 0,
       tags: enc.activities.map((emoji) => ({
         emoji,
-        label: tagMap.get(emoji) || emoji,
+        label: sessionLabel(enc.id, emoji),
       })),
       noteSnippet: enc.notes?.slice(0, 80),
     }
@@ -129,8 +131,9 @@ export default function CalendarRoute() {
     // Period skips this entirely so it can log even on a fresh, partner-less account.
     const target = isPeriodLog ? null : (allPartners.find((p) => p.isMain && p.isActive) ?? allPartners[0])
 
+    const newId = uuid()
     encounters.insert({
-      id: uuid(),
+      id: newId,
       date: dateStr,
       activities: [emoji],
       partnerIds: target ? [target.id] : [],
@@ -139,6 +142,7 @@ export default function CalendarRoute() {
       createdAt: nowStr,
       updatedAt: nowStr,
     })
+    syncEncounterTagSnapshots(newId, [emoji])
     const d = new Date(dateStr + 'T00:00:00')
     const dateLabel = `${DAY_NAMES[d.getDay()].slice(0, 3)}, ${MONTH_NAMES[d.getMonth()]} ${d.getDate()}`
     setLoggedOverlay({

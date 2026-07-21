@@ -9,9 +9,35 @@ export const ActivityTagSchema = z.object({
   sortOrder: z.number(),
   isDefault: z.boolean(),
   isActive: z.boolean(),
+  // When this tag stopped being the emoji's current name (soft delete). Null
+  // while active. Only used to pick a deterministic label for sessions that
+  // predate snapshotting when the emoji no longer has an active tag — see
+  // src/utils/tagLabels.ts. Nullable string (not required) because rows written
+  // by raw-SQL seeds may omit it.
+  deactivatedAt: z.string().nullable(),
 })
 
 export type ActivityTag = z.infer<typeof ActivityTagSchema>
+
+// ── Encounter tag-label snapshot ──
+//
+// One row per (encounter, emoji): the tag label that was current when the
+// user logged (or edited in) that activity. This is what lets past sessions
+// keep the name a tag had at log time, while deleted/re-created or renamed
+// tags only affect sessions logged afterwards. Encounters keep storing bare
+// emoji strings; this sidecar carries the history.
+export const EncounterTagLabelSchema = z.object({
+  id: z.string(), // `${encounterId}:${emoji}` — deterministic composite key
+  encounterId: z.string(),
+  emoji: z.string(),
+  label: z.string(),
+})
+
+export type EncounterTagLabel = z.infer<typeof EncounterTagLabelSchema>
+
+export function encounterTagLabelId(encounterId: string, emoji: string): string {
+  return `${encounterId}:${emoji}`
+}
 
 // Stable id for the Period tag. Period is the one protected default — it can't
 // be renamed, have its emoji swapped, or be deleted, because its presence is

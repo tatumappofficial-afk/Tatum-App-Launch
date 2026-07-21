@@ -1,6 +1,15 @@
 import { createCollection } from '@tanstack/db'
 import type { SQLiteDatabase } from 'expo-sqlite'
-import type { ActivityTag, Encounter, Partner, DesireEntry, WhisperMessage, Affirmation, UserProfile } from './schema'
+import type {
+  ActivityTag,
+  Encounter,
+  EncounterTagLabel,
+  Partner,
+  DesireEntry,
+  WhisperMessage,
+  Affirmation,
+  UserProfile,
+} from './schema'
 import { parseJsonColumn, serializeJsonColumn } from './sqlite'
 
 // ── SQLite sync factory ──
@@ -130,6 +139,12 @@ export const activityTags = createSqliteCollection<ActivityTag>({
   table: 'activity_tags',
   db,
   boolColumns: ['isDefault', 'isActive'],
+})
+
+export const encounterTagLabels = createSqliteCollection<EncounterTagLabel>({
+  id: 'encounter_tag_labels',
+  table: 'encounter_tag_labels',
+  db,
 })
 
 export const encounters = createSqliteCollection<Encounter>({

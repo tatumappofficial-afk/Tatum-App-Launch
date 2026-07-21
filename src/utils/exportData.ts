@@ -15,7 +15,9 @@ import { getDatabase, parseJsonColumn } from '@/src/db/sqlite'
  * feature verify the file came from a compatible Tatum.
  */
 
-const EXPORT_SCHEMA_VERSION = 1
+// v2: activity_tags gained deactivatedAt; encounterTagLabels (per-session
+// label snapshots) added to the payload.
+const EXPORT_SCHEMA_VERSION = 2
 
 interface ExportPayload {
   appName: 'Tatum'
@@ -25,6 +27,7 @@ interface ExportPayload {
     partners: Record<string, unknown>[]
     encounters: Record<string, unknown>[]
     activityTags: Record<string, unknown>[]
+    encounterTagLabels: Record<string, unknown>[]
     desireEntries: Record<string, unknown>[]
     whisperMessages: Record<string, unknown>[]
     affirmations: Record<string, unknown>[]
@@ -71,6 +74,8 @@ export async function buildExportPayload(): Promise<ExportPayload> {
     decodeBools(r, ['isDefault', 'isActive']),
   )
 
+  const encounterTagLabels = await db.getAllAsync<Record<string, unknown>>('SELECT * FROM encounter_tag_labels')
+
   const desireEntries = (await db.getAllAsync<Record<string, unknown>>('SELECT * FROM desire_entries')).map((r) =>
     decodeBools(r, ['actedOn']),
   )
@@ -99,6 +104,7 @@ export async function buildExportPayload(): Promise<ExportPayload> {
       partners,
       encounters,
       activityTags,
+      encounterTagLabels,
       desireEntries,
       whisperMessages,
       affirmations,

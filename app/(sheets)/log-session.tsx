@@ -5,7 +5,7 @@ import { useLiveQuery } from '@tanstack/react-db'
 import { generateId as uuid } from '@/src/utils/uuid'
 import { LogSessionScreen } from '@/lib/screens/LogSessionScreen'
 import { DatePickerDropdown } from '@/lib/components/DatePickerDropdown'
-import { activityTags, encounters, partners } from '@/src/db'
+import { activityTags, encounters, partners, removeEncounterTagSnapshots, syncEncounterTagSnapshots } from '@/src/db'
 import { useLoggedDaysForMonth } from '@/src/hooks/useLoggedDaysForMonth'
 import { useSheetDismiss } from '@/app/(sheets)/_layout'
 
@@ -131,6 +131,7 @@ export default function LogSessionRoute() {
         onPress: () => {
           try {
             encounters.delete(id!)
+            removeEncounterTagSnapshots(id!)
           } catch (err) {
             console.error('Failed to delete encounter:', err)
           }
@@ -159,9 +160,13 @@ export default function LogSessionRoute() {
           draft.notes = notes || null
           draft.updatedAt = nowStr
         })
+        // Snapshots are diffed: activities kept on the session keep their
+        // log-time labels; only newly added ones snapshot today's name.
+        syncEncounterTagSnapshots(id!, selectedActivities)
       } else {
+        const newId = uuid()
         encounters.insert({
-          id: uuid(),
+          id: newId,
           date: dateStr,
           activities: selectedActivities,
           partnerIds: selectedPartnerIds,
@@ -170,6 +175,7 @@ export default function LogSessionRoute() {
           createdAt: nowStr,
           updatedAt: nowStr,
         })
+        syncEncounterTagSnapshots(newId, selectedActivities)
       }
       setShowSuccess(true)
       setTimeout(dismissSheet, 900)
