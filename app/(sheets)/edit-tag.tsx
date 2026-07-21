@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Alert } from 'react-native'
 import { useLocalSearchParams } from 'expo-router'
 import { useLiveQuery } from '@tanstack/react-db'
+import { generateId as uuid } from '@/src/utils/uuid'
 import { AddTagModal } from '@/lib/screens/AddTagModal'
 import { SuccessOverlay } from '@/lib/components/SuccessOverlay'
 import { activityTags, deactivateTag, PERIOD_TAG_ID } from '@/src/db'
@@ -58,6 +59,23 @@ export default function EditTagRoute() {
     if (!label || !selectedEmoji) return
     const isDuplicate = otherTags.some((t) => t.label.toLowerCase() === label.toLowerCase())
     if (isDuplicate) return
+
+    // Swapping the emoji retires the old one — semantically a delete of that
+    // emoji's current name. Record it as an inactive row (invisible to every
+    // picker, which all filter isActive) so pre-snapshot legacy sessions and
+    // aggregates using the old emoji still resolve its last name instead of
+    // falling through to an older dead generation or the bare glyph.
+    if (selectedEmoji !== tag.emoji) {
+      activityTags.insert({
+        id: uuid(),
+        emoji: tag.emoji,
+        label: tag.label,
+        sortOrder: tag.sortOrder,
+        isDefault: false,
+        isActive: false,
+        deactivatedAt: new Date().toISOString(),
+      })
+    }
 
     activityTags.update(tag.id, (draft) => {
       draft.label = label

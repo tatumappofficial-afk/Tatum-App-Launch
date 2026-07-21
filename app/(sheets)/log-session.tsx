@@ -131,7 +131,7 @@ export default function LogSessionRoute() {
         onPress: () => {
           try {
             encounters.delete(id!)
-            removeEncounterTagSnapshots(id!)
+            removeEncounterTagSnapshots(id!).catch((err) => console.error('Failed to remove tag snapshots:', err))
           } catch (err) {
             console.error('Failed to delete encounter:', err)
           }
@@ -162,7 +162,7 @@ export default function LogSessionRoute() {
         })
         // Snapshots are diffed: activities kept on the session keep their
         // log-time labels; only newly added ones snapshot today's name.
-        syncEncounterTagSnapshots(id!, selectedActivities)
+        await syncEncounterTagSnapshots(id!, selectedActivities)
       } else {
         const newId = uuid()
         encounters.insert({
@@ -175,7 +175,7 @@ export default function LogSessionRoute() {
           createdAt: nowStr,
           updatedAt: nowStr,
         })
-        syncEncounterTagSnapshots(newId, selectedActivities)
+        await syncEncounterTagSnapshots(newId, selectedActivities)
       }
       setShowSuccess(true)
       setTimeout(dismissSheet, 900)

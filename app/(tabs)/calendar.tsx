@@ -142,7 +142,7 @@ export default function CalendarRoute() {
       createdAt: nowStr,
       updatedAt: nowStr,
     })
-    syncEncounterTagSnapshots(newId, [emoji])
+    syncEncounterTagSnapshots(newId, [emoji]).catch((err) => console.error('Failed to snapshot tag label:', err))
     const d = new Date(dateStr + 'T00:00:00')
     const dateLabel = `${DAY_NAMES[d.getDay()].slice(0, 3)}, ${MONTH_NAMES[d.getMonth()]} ${d.getDate()}`
     setLoggedOverlay({

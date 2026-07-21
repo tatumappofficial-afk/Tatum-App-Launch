@@ -24,8 +24,15 @@ import { currentTagLabel } from '@/src/utils/tagLabels'
  * Runs after the encounter write. The two writes aren't atomic; if this half
  * is lost (crash between them) the session just falls back to the current
  * label until the next edit — same rendering as pre-snapshot legacy sessions.
+ *
+ * Both helpers await preload() before reading: `.values()`/`.toArray` on a
+ * collection whose initial load hasn't committed silently return EMPTY (they
+ * don't start sync), which would misclassify every kept emoji as new here and
+ * overwrite its historical snapshot with today's label via INSERT OR REPLACE.
+ * Never read these collections in this module without the preload.
  */
-export function syncEncounterTagSnapshots(encounterId: string, emojis: string[]) {
+export async function syncEncounterTagSnapshots(encounterId: string, emojis: string[]): Promise<void> {
+  await Promise.all([activityTags.preload(), encounterTagLabels.preload()])
   const tags = activityTags.toArray
   const desired = new Set(emojis)
 
@@ -49,7 +56,8 @@ export function syncEncounterTagSnapshots(encounterId: string, emojis: string[])
 }
 
 /** Drop all label snapshots for a deleted encounter. */
-export function removeEncounterTagSnapshots(encounterId: string) {
+export async function removeEncounterTagSnapshots(encounterId: string): Promise<void> {
+  await encounterTagLabels.preload()
   for (const row of [...encounterTagLabels.values()]) {
     if (row.encounterId === encounterId) encounterTagLabels.delete(row.id)
   }
