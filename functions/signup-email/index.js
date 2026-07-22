@@ -261,7 +261,10 @@ async function handleDelete(req, res) {
     byProvider.docs.forEach((doc) => refs.set(doc.ref.path, doc.ref))
   }
   if (email) {
-    refs.set(`${SENT_COLLECTION}/${docIdForEmail(email)}`, firestore.collection(SENT_COLLECTION).doc(docIdForEmail(email)))
+    refs.set(
+      `${SENT_COLLECTION}/${docIdForEmail(email)}`,
+      firestore.collection(SENT_COLLECTION).doc(docIdForEmail(email)),
+    )
   }
 
   const batch = firestore.batch()

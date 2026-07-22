@@ -7,7 +7,12 @@ const TERMS_URL = 'https://www.tatumapp.com/terms.html'
 
 function LegalLink({ label, url }: { label: string; url: string }) {
   return (
-    <Pressable onPress={() => Linking.openURL(url).catch(() => {})} accessibilityRole="link" accessibilityLabel={label} hitSlop={8}>
+    <Pressable
+      onPress={() => Linking.openURL(url).catch(() => {})}
+      accessibilityRole="link"
+      accessibilityLabel={label}
+      hitSlop={8}
+    >
       <Text
         style={{
           fontFamily: font('dmSans', '300'),

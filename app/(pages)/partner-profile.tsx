@@ -21,9 +21,7 @@ export default function PartnerProfileRoute() {
   const { currentLabel } = useTagLabels()
 
   const partner = allPartners.find((p) => p.id === id)
-  const partnerEncounters = allEncounters
-    .filter((e) => e.partnerIds.includes(id))
-    .sort(compareEncountersNewestFirst)
+  const partnerEncounters = allEncounters.filter((e) => e.partnerIds.includes(id)).sort(compareEncountersNewestFirst)
 
   if (!partner) {
     return (

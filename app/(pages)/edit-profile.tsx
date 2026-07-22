@@ -59,10 +59,7 @@ export default function EditProfilePage() {
     () => allTags.filter((t) => t.isActive).sort((a, b) => a.sortOrder - b.sortOrder),
     [allTags],
   )
-  const reorderableTags = useMemo(
-    () => activeTags.filter((t) => t.id !== PERIOD_TAG_ID),
-    [activeTags],
-  )
+  const reorderableTags = useMemo(() => activeTags.filter((t) => t.id !== PERIOD_TAG_ID), [activeTags])
   const periodTag = useMemo(() => activeTags.find((t) => t.id === PERIOD_TAG_ID), [activeTags])
   const activePartners = useMemo(
     () => allPartners.filter((p) => p.isActive).sort((a, b) => a.displayName.localeCompare(b.displayName)),

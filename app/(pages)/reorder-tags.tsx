@@ -28,10 +28,7 @@ export default function ReorderTagsPage() {
   )
   // Period is protected — never reorderable — so keep it out of the sortable set
   // and pin it as a static footer.
-  const reorderableTags = useMemo(
-    () => activeTags.filter((t) => t.id !== PERIOD_TAG_ID),
-    [activeTags],
-  )
+  const reorderableTags = useMemo(() => activeTags.filter((t) => t.id !== PERIOD_TAG_ID), [activeTags])
   const periodTag = useMemo(() => activeTags.find((t) => t.id === PERIOD_TAG_ID), [activeTags])
 
   const [sortableTags, setSortableTags] = useState(reorderableTags)
@@ -49,8 +46,14 @@ export default function ReorderTagsPage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setSortableTags((currentTags) => {
       const activeById = new Map(reorderableTags.map((tag) => [tag.id, tag]))
-      const currentIds = currentTags.map((tag) => tag.id).sort().join('|')
-      const activeIds = reorderableTags.map((tag) => tag.id).sort().join('|')
+      const currentIds = currentTags
+        .map((tag) => tag.id)
+        .sort()
+        .join('|')
+      const activeIds = reorderableTags
+        .map((tag) => tag.id)
+        .sort()
+        .join('|')
 
       if (currentIds !== activeIds) return reorderableTags
 

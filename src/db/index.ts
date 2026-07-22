@@ -131,9 +131,7 @@ export async function initDatabase() {
     "SELECT hasOnboarded FROM user_settings WHERE id = 'singleton' LIMIT 1",
   )
   if (onboardedSettings[0]?.hasOnboarded === 1) {
-    await db.runAsync(
-      "UPDATE user_profile SET tier = 'premium', premiumExpiresAt = NULL WHERE tier != 'premium'",
-    )
+    await db.runAsync("UPDATE user_profile SET tier = 'premium', premiumExpiresAt = NULL WHERE tier != 'premium'")
   }
 
   // Backfill: every user with at least one active partner should have a main

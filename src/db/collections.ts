@@ -1,14 +1,6 @@
 import { createCollection } from '@tanstack/db'
 import type { SQLiteDatabase } from 'expo-sqlite'
-import type {
-  ActivityTag,
-  Encounter,
-  Partner,
-  DesireEntry,
-  WhisperMessage,
-  Affirmation,
-  UserProfile,
-} from './schema'
+import type { ActivityTag, Encounter, Partner, DesireEntry, WhisperMessage, Affirmation, UserProfile } from './schema'
 import { parseJsonColumn, serializeJsonColumn } from './sqlite'
 
 // ── SQLite sync factory ──
