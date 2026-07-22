@@ -35,4 +35,11 @@ module.exports = [
       'react-hooks/use-memo': 'warn',
     },
   },
+  {
+    files: ['tests/**'],
+    rules: {
+      // Date-sensitive tests must pin process.env.TZ before any import runs.
+      'import/first': 'off',
+    },
+  },
 ]
