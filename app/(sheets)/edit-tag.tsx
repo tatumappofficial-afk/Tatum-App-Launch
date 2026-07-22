@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 import { Alert } from 'react-native'
 import { useLocalSearchParams } from 'expo-router'
 import { useLiveQuery } from '@tanstack/react-db'
+import { generateId as uuid } from '@/src/utils/uuid'
 import { AddTagModal } from '@/lib/screens/AddTagModal'
 import { SuccessOverlay } from '@/lib/components/SuccessOverlay'
-import { activityTags, PERIOD_TAG_ID } from '@/src/db'
+import { activityTags, deactivateTag, PERIOD_TAG_ID } from '@/src/db'
 import { useSheetDismiss } from '@/app/(sheets)/_layout'
 
 const PERIOD_LOCKED_HINT =
@@ -59,6 +60,23 @@ export default function EditTagRoute() {
     const isDuplicate = otherTags.some((t) => t.label.toLowerCase() === label.toLowerCase())
     if (isDuplicate) return
 
+    // Swapping the emoji retires the old one — semantically a delete of that
+    // emoji's current name. Record it as an inactive row (invisible to every
+    // picker, which all filter isActive) so pre-snapshot legacy sessions and
+    // aggregates using the old emoji still resolve its last name instead of
+    // falling through to an older dead generation or the bare glyph.
+    if (selectedEmoji !== tag.emoji) {
+      activityTags.insert({
+        id: uuid(),
+        emoji: tag.emoji,
+        label: tag.label,
+        sortOrder: tag.sortOrder,
+        isDefault: false,
+        isActive: false,
+        deactivatedAt: new Date().toISOString(),
+      })
+    }
+
     activityTags.update(tag.id, (draft) => {
       draft.label = label
       draft.emoji = selectedEmoji
@@ -76,13 +94,11 @@ export default function EditTagRoute() {
         text: 'Delete',
         style: 'destructive',
         onPress: () => {
-          // Soft delete — encounters snapshot the emoji+label at log time, so
-          // we don't need to keep the row around for history, but flipping
-          // isActive instead of hard-deleting preserves recovery options if
-          // the user changes their mind.
-          activityTags.update(tag.id, (draft) => {
-            draft.isActive = false
-          })
+          // Soft delete. Sessions logged while this tag was current keep its
+          // name via their activityLabels snapshots; the row itself is kept
+          // (with deactivatedAt stamped) so sessions from before snapshotting
+          // existed can still resolve a name for this emoji.
+          deactivateTag(tag.id)
           setSuccessLabel(`${tag.emoji}  ${tag.label} removed`)
           setShowSuccess(true)
           dismissTimer.current = setTimeout(dismissSheet, 700)

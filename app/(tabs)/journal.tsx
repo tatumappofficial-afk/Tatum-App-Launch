@@ -2,6 +2,7 @@ import { useLiveQuery } from '@tanstack/react-db'
 import { useRouter } from 'expo-router'
 import { JournalScreen } from '@/lib/screens/JournalScreen'
 import { encounters, partners } from '@/src/db'
+import { compareEncountersNewestFirst } from '@/lib/stats'
 
 export default function JournalRoute() {
   const router = useRouter()
@@ -11,8 +12,10 @@ export default function JournalRoute() {
   const { data: allPartners = [] } = useLiveQuery((q) =>
     q.from({ partners }).select(({ partners }) => ({ ...partners })),
   )
+  // .slice() first — .sort() in place would mutate the live-query array.
   const entries = allEncounters
-    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice()
+    .sort(compareEncountersNewestFirst)
     .map((enc) => {
       const sessionPartners = enc.partnerIds
         .map((pid) => allPartners.find((p) => p.id === pid))

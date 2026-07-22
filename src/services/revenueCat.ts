@@ -122,7 +122,8 @@ export function getRevenueCatDiagnosticMessage(): string {
     return `The App Store purchase service could not be reached. Please check connection and try again.${suffix}`
   }
 
-  if (lastDiagnostic.kind === 'restore') return `Restore is unavailable right now. Please try again in a moment.${suffix}`
+  if (lastDiagnostic.kind === 'restore')
+    return `Restore is unavailable right now. Please try again in a moment.${suffix}`
   return `Please try again in a moment.${suffix}`
 }
 

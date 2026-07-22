@@ -9,6 +9,12 @@ export const ActivityTagSchema = z.object({
   sortOrder: z.number(),
   isDefault: z.boolean(),
   isActive: z.boolean(),
+  // When this tag stopped being the emoji's current name (soft delete). Null
+  // while active. Only used to pick a deterministic label for sessions that
+  // predate snapshotting when the emoji no longer has an active tag — see
+  // src/utils/tagLabels.ts. Nullable string (not required) because rows written
+  // by raw-SQL seeds may omit it.
+  deactivatedAt: z.string().nullable(),
 })
 
 export type ActivityTag = z.infer<typeof ActivityTagSchema>
@@ -55,6 +61,13 @@ export const EncounterSchema = z.object({
   id: z.string().uuid(),
   date: z.string(), // ISO date YYYY-MM-DD
   activities: z.array(z.string()).min(1), // emoji codes, at least one required
+  // Label each activity had when it was logged (or edited onto the session),
+  // keyed by emoji. This is what lets past sessions keep the name a tag had
+  // at log time while deleted/re-created or renamed tags only affect sessions
+  // logged afterwards. Lives on the row so it's written/deleted atomically
+  // with the session. Empty for sessions from before snapshotting existed —
+  // those fall back to the emoji's current label (src/utils/tagLabels.ts).
+  activityLabels: z.record(z.string(), z.string()),
   partnerIds: z.array(z.string().uuid()), // optional — sessions can be logged without a partner
   stars: z.number().min(0).max(10).nullable(),
   notes: z.string().max(3000).nullable(),

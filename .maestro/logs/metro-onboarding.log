@@ -1,0 +1,18 @@
+Starting project at /Users/victoria/Projects/Tatum-App-Launch
+Logs: /Users/victoria/Projects/Tatum-App-Launch/.expo/dev/logs/start.log
+Starting Metro Bundler
+
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+Waiting on http://localhost:8081
+Logs for your project will appear below.
+Android Bundled 3584ms node_modules/expo-router/entry.js (2521 modules)
+ LOG  [db] current user_version=0, target=5
+ LOG  [db] migrating from v0 → v5
+ LOG  [db] applying migration v1
+ LOG  [db] applying migration v2
+ LOG  [db] applying migration v3
+ LOG  [db] applying migration v4
+ LOG  [db] applying migration v5
+ LOG  [devSeed] seeding heavy dev dataset…
+ LOG  [devSeed] done — 45 sessions + period logs + 3 partners
+ WARN  InteractionManager has been deprecated and will be removed in a future release. Please refactor long tasks into smaller ones, and  use 'requestIdleCallback' instead.

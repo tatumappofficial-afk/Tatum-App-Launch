@@ -15,7 +15,9 @@ import { getDatabase, parseJsonColumn } from '@/src/db/sqlite'
  * feature verify the file came from a compatible Tatum.
  */
 
-const EXPORT_SCHEMA_VERSION = 1
+// v2: activity_tags gained deactivatedAt; encounters gained activityLabels
+// (per-session label snapshots).
+const EXPORT_SCHEMA_VERSION = 2
 
 interface ExportPayload {
   appName: 'Tatum'
@@ -63,6 +65,7 @@ export async function buildExportPayload(): Promise<ExportPayload> {
   const encounters = (await db.getAllAsync<Record<string, unknown>>('SELECT * FROM encounters')).map((r) =>
     decodeJson(r, [
       { field: 'activities', fallback: [] },
+      { field: 'activityLabels', fallback: {} },
       { field: 'partnerIds', fallback: [] },
     ]),
   )

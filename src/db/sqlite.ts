@@ -148,6 +148,27 @@ const MIGRATIONS: Migration[] = [
       ALTER TABLE user_settings ADD COLUMN backupEnabled INTEGER NOT NULL DEFAULT 1;
     `,
   },
+  {
+    // Tag-name history. Sessions store bare emoji strings; labels used to be
+    // resolved live against activity_tags, so deleting a tag and re-creating
+    // its emoji under a new name rewrote (nondeterministically) what old
+    // sessions displayed. encounters.activityLabels snapshots each activity's
+    // label at log time ({"🏁": "Quickie"}), written in the same row-write as
+    // the session so it can never drift or orphan; activity_tags.deactivatedAt
+    // makes the no-active-tag fallback deterministic ("most recently current"
+    // name). Pre-existing encounters keep the '{}' default on purpose: their
+    // log-time names were never recorded, so they fall back to the current
+    // label.
+    version: 5,
+    up: `
+      ALTER TABLE encounters ADD COLUMN activityLabels TEXT NOT NULL DEFAULT '{}';
+
+      ALTER TABLE activity_tags ADD COLUMN deactivatedAt TEXT;
+      UPDATE activity_tags
+        SET deactivatedAt = strftime('%Y-%m-%dT%H:%M:%fZ','now')
+        WHERE isActive = 0;
+    `,
+  },
 ]
 
 const TARGET_VERSION = MIGRATIONS[MIGRATIONS.length - 1].version

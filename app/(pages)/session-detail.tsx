@@ -3,7 +3,7 @@ import { useLiveQuery } from '@tanstack/react-db'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { SessionDetailScreen } from '@/lib/screens/SessionDetailScreen'
 import { encounters, partners } from '@/src/db'
-import { useActivityTagMap } from '@/src/hooks/useActivityTagMap'
+import { useTagLabels } from '@/src/hooks/useTagLabels'
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
@@ -16,7 +16,7 @@ export default function SessionDetailRoute() {
   const { data: allPartners = [] } = useLiveQuery((q) =>
     q.from({ partners }).select(({ partners }) => ({ ...partners })),
   )
-  const tagMap = useActivityTagMap()
+  const { sessionLabel } = useTagLabels()
 
   const encounter = allEncounters.find((e) => e.id === id)
 
@@ -62,7 +62,7 @@ export default function SessionDetailRoute() {
     })
 
   const activities = encounter.activities.map((emoji) => {
-    return { emoji, label: tagMap.get(emoji) || emoji }
+    return { emoji, label: sessionLabel(encounter, emoji) }
   })
 
   return (

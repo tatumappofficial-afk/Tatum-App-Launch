@@ -3,7 +3,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { PartnerProfileScreen } from '@/lib/screens/PartnerProfileScreen'
 import { partnerGradients } from '@/lib/theme'
 import { encounters, partners } from '@/src/db'
-import { useActivityTagMap } from '@/src/hooks/useActivityTagMap'
+import { useTagLabels } from '@/src/hooks/useTagLabels'
+import { compareEncountersNewestFirst } from '@/lib/stats'
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
@@ -17,12 +18,10 @@ export default function PartnerProfileRoute() {
     q.from({ encounters }).select(({ encounters }) => ({ ...encounters })),
   )
 
-  const tagMap = useActivityTagMap()
+  const { currentLabel } = useTagLabels()
 
   const partner = allPartners.find((p) => p.id === id)
-  const partnerEncounters = allEncounters
-    .filter((e) => e.partnerIds.includes(id))
-    .sort((a, b) => b.date.localeCompare(a.date))
+  const partnerEncounters = allEncounters.filter((e) => e.partnerIds.includes(id)).sort(compareEncountersNewestFirst)
 
   if (!partner) {
     return (
@@ -74,7 +73,7 @@ export default function PartnerProfileRoute() {
     .map(([emoji, count]) => {
       return {
         emoji,
-        label: tagMap.get(emoji) || emoji,
+        label: currentLabel(emoji),
         count,
         percent: Math.round((count / maxCount) * 100),
       }

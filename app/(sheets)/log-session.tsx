@@ -5,7 +5,7 @@ import { useLiveQuery } from '@tanstack/react-db'
 import { generateId as uuid } from '@/src/utils/uuid'
 import { LogSessionScreen } from '@/lib/screens/LogSessionScreen'
 import { DatePickerDropdown } from '@/lib/components/DatePickerDropdown'
-import { activityTags, encounters, partners } from '@/src/db'
+import { activityTags, buildActivityLabels, encounters, partners } from '@/src/db'
 import { useLoggedDaysForMonth } from '@/src/hooks/useLoggedDaysForMonth'
 import { useSheetDismiss } from '@/app/(sheets)/_layout'
 
@@ -151,9 +151,13 @@ export default function LogSessionRoute() {
 
     try {
       if (isEditing && existingEncounter) {
+        // Labels are diffed: activities kept on the session keep their
+        // log-time labels; only newly added ones snapshot today's name.
+        const labels = buildActivityLabels(selectedActivities, existingEncounter.activityLabels, allTags)
         encounters.update(id, (draft) => {
           draft.date = dateStr
           draft.activities = selectedActivities
+          draft.activityLabels = labels
           draft.partnerIds = selectedPartnerIds
           draft.stars = rating
           draft.notes = notes || null
@@ -164,6 +168,7 @@ export default function LogSessionRoute() {
           id: uuid(),
           date: dateStr,
           activities: selectedActivities,
+          activityLabels: buildActivityLabels(selectedActivities, {}, allTags),
           partnerIds: selectedPartnerIds,
           stars: rating,
           notes: notes || null,

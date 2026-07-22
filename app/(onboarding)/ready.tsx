@@ -19,11 +19,7 @@ import {
   purchaseRevenueCatPremium,
   restoreRevenueCatPurchases,
 } from '@/src/services/revenueCat'
-import {
-  clearOnboardingSession,
-  commitOnboardingSession,
-  getOnboardingSession,
-} from '@/src/services/onboardingSession'
+import { clearOnboardingSession, commitOnboardingSession, getOnboardingSession } from '@/src/services/onboardingSession'
 import { recordSignup } from '@/src/services/signupSync'
 
 const CalendarIcon: React.FC = () => (

@@ -54,6 +54,7 @@ export default function AddTagRoute() {
       sortOrder: minOrder - 1,
       isDefault: false,
       isActive: true,
+      deactivatedAt: null,
     })
 
     setSuccessLabel(`${selectedEmoji}  ${label} added`)

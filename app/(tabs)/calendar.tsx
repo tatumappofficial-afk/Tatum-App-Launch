@@ -5,8 +5,8 @@ import { useRouter } from 'expo-router'
 import { generateId as uuid } from '@/src/utils/uuid'
 import { CalendarScreen } from '@/lib/screens/CalendarScreen'
 import type { SuccessOverlayDetails } from '@/lib/components/SuccessOverlay'
-import { activityTags, encounters, partners, PERIOD_TAG_ID } from '@/src/db'
-import { useActivityTagMap } from '@/src/hooks/useActivityTagMap'
+import { activityTags, buildActivityLabels, encounters, partners, PERIOD_TAG_ID } from '@/src/db'
+import { useTagLabels } from '@/src/hooks/useTagLabels'
 import { useLoggedDaysForMonth } from '@/src/hooks/useLoggedDaysForMonth'
 import { formatDateString } from '@/lib/stats/windows'
 
@@ -43,7 +43,7 @@ export default function CalendarRoute() {
     q.from({ activityTags }).select(({ activityTags }) => ({ ...activityTags })),
   )
 
-  const tagMap = useActivityTagMap()
+  const { sessionLabel } = useTagLabels()
 
   // De-duplicate by emoji: two default tags can share an emoji (e.g. Manual and
   // Fingering both 👉), which collides the quick-log chip keys (key={emoji}) —
@@ -69,7 +69,9 @@ export default function CalendarRoute() {
   const dayOfWeek = DAY_NAMES[selectedDateObj.getDay()]
   const selectedDayLabel = `${dayOfWeek}, ${MONTH_NAMES[month - 1]} ${selectedDay}`
 
-  const dayEncounters = allEncounters.filter((e) => e.date === selectedDateStr)
+  const dayEncounters = allEncounters
+    .filter((e) => e.date === selectedDateStr)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
   const daySessions = dayEncounters.map((enc) => {
     const sessionPartners = enc.partnerIds
       .map((pid) => allPartners.find((p) => p.id === pid))
@@ -84,7 +86,7 @@ export default function CalendarRoute() {
       rating: enc.stars || 0,
       tags: enc.activities.map((emoji) => ({
         emoji,
-        label: tagMap.get(emoji) || emoji,
+        label: sessionLabel(enc, emoji),
       })),
       noteSnippet: enc.notes?.slice(0, 80),
     }
@@ -133,6 +135,7 @@ export default function CalendarRoute() {
       id: uuid(),
       date: dateStr,
       activities: [emoji],
+      activityLabels: buildActivityLabels([emoji], {}, allTags),
       partnerIds: target ? [target.id] : [],
       stars: null,
       notes: null,

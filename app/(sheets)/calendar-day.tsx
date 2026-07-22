@@ -42,8 +42,10 @@ export default function CalendarDayRoute() {
   const dayOfWeek = DAY_NAMES[dateObj.getDay()]
   const dayLabel = `${dayOfWeek}, ${MONTH_NAMES[monthNum]} ${dayNum}`
 
-  // Filter encounters for this specific day
-  const dayEncounters = allEncounters.filter((e) => e.date === dateStr)
+  // Filter encounters for this specific day, newest logged first
+  const dayEncounters = allEncounters
+    .filter((e) => e.date === dateStr)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
 
   // Build sessions list
   const sessions = dayEncounters.map((enc) => {

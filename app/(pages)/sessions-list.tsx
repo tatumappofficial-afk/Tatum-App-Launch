@@ -3,7 +3,14 @@ import { useLiveQuery } from '@tanstack/react-db'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { SessionsListScreen, type SessionsListEntry } from '@/lib/screens/SessionsListScreen'
 import { encounters, partners } from '@/src/db'
-import { filterByWindow, formatPeriodCaption, getWindow, parseDateString, type Period } from '@/lib/stats'
+import {
+  compareEncountersNewestFirst,
+  filterByWindow,
+  formatPeriodCaption,
+  getWindow,
+  parseDateString,
+  type Period,
+} from '@/lib/stats'
 
 const CALENDAR_START_DAY = 'sunday' as const
 
@@ -74,7 +81,7 @@ export default function SessionsListRoute() {
     const partnerById = new Map(allPartners.map((p) => [p.id, p]))
     return filteredEncounters
       .slice()
-      .sort((a, b) => b.date.localeCompare(a.date))
+      .sort(compareEncountersNewestFirst)
       .map((enc) => {
         const sessionPartners = enc.partnerIds
           .map((pid) => partnerById.get(pid))

@@ -24,6 +24,7 @@ export {
   userProfiles,
 } from './collections'
 export * from './schema'
+export * from './tagHistory'
 
 let initialized = false
 
@@ -78,10 +79,13 @@ export async function initDatabase() {
   // exist with the stable PERIOD_TAG_ID so downstream checks (lock state,
   // partner-optional logging) can find it. Two heal passes:
   // 1. Pre-stable-id installs seeded Period with a random UUID — rewrite that
-  //    row's id to PERIOD_TAG_ID. Encounters snapshot the emoji+label, not the
-  //    tag id, so updating activity_tags.id has no foreign-key consequences.
+  //    row's id to PERIOD_TAG_ID. Encounters reference activities by emoji
+  //    (with label snapshots in their activityLabels column), never by tag
+  //    id, so updating activity_tags.id has no foreign-key consequences.
   // 2. If Period was deleted (soft via isActive=0 or hard) in any prior build,
   //    re-insert/re-activate it. Period can never be missing for any user.
+  //    Re-activation also clears deactivatedAt — an active row must never
+  //    carry a deactivation stamp (see src/utils/tagLabels.ts).
   await db.runAsync(
     `UPDATE activity_tags SET id = ?
      WHERE emoji = '🩸' AND isDefault = 1 AND id != ?`,
@@ -101,7 +105,7 @@ export async function initDatabase() {
       [PERIOD_TAG_ID, '🩸', 'Period', maxOrder + 1],
     )
   } else if (periodRow[0].isActive === 0) {
-    await db.runAsync('UPDATE activity_tags SET isActive = 1 WHERE id = ?', [PERIOD_TAG_ID])
+    await db.runAsync('UPDATE activity_tags SET isActive = 1, deactivatedAt = NULL WHERE id = ?', [PERIOD_TAG_ID])
   }
 
   // Ensure at least one partner exists so the log-session picker is never
@@ -127,9 +131,7 @@ export async function initDatabase() {
     "SELECT hasOnboarded FROM user_settings WHERE id = 'singleton' LIMIT 1",
   )
   if (onboardedSettings[0]?.hasOnboarded === 1) {
-    await db.runAsync(
-      "UPDATE user_profile SET tier = 'premium', premiumExpiresAt = NULL WHERE tier != 'premium'",
-    )
+    await db.runAsync("UPDATE user_profile SET tier = 'premium', premiumExpiresAt = NULL WHERE tier != 'premium'")
   }
 
   // Backfill: every user with at least one active partner should have a main
@@ -188,11 +190,14 @@ export async function initDatabase() {
 
   // Migrate v1.0 activities format. The original build stored each logged
   // activity as a {emoji, label} snapshot object; every build since stores the
-  // bare emoji string and resolves the label live from activity_tags. Old rows
-  // crash rendering (an object fed to <Text>) the first time an upgraded
-  // install opens home. The LIKE filter only matches object-format JSON —
-  // plain emoji-string arrays contain no '{' — so this is a no-op for fresh
-  // installs and for rows already migrated.
+  // bare emoji string. Old rows crash rendering (an object fed to <Text>) the
+  // first time an upgraded install opens home. The LIKE filter only matches
+  // object-format JSON — plain emoji-string arrays contain no '{' — so this is
+  // a no-op for fresh installs and for rows already migrated.
+  //
+  // Those v1.0 objects carry the label each activity had at log time — the
+  // exact history activityLabels now records — so preserve them into the
+  // labels map instead of discarding them.
   const objectFormatRows = await db.getAllAsync<{ id: string; activities: string }>(
     "SELECT id, activities FROM encounters WHERE activities LIKE '%{%'",
   )
@@ -204,16 +209,23 @@ export async function initDatabase() {
       continue // unparseable — leave the row untouched rather than guess
     }
     if (!Array.isArray(parsed)) continue
-    const emojis = parsed
-      .map((a) =>
-        typeof a === 'string'
-          ? a
-          : a !== null && typeof a === 'object' && typeof (a as { emoji?: unknown }).emoji === 'string'
-            ? (a as { emoji: string }).emoji
-            : null,
-      )
-      .filter((e): e is string => e !== null)
-    await db.runAsync('UPDATE encounters SET activities = ? WHERE id = ?', [JSON.stringify(emojis), row.id])
+    const emojis: string[] = []
+    const labels: Record<string, string> = {}
+    for (const a of parsed) {
+      if (typeof a === 'string') {
+        emojis.push(a)
+      } else if (a !== null && typeof a === 'object' && typeof (a as { emoji?: unknown }).emoji === 'string') {
+        const emoji = (a as { emoji: string }).emoji
+        emojis.push(emoji)
+        const label = (a as { label?: unknown }).label
+        if (typeof label === 'string' && label.length > 0) labels[emoji] = label
+      }
+    }
+    await db.runAsync('UPDATE encounters SET activities = ?, activityLabels = ? WHERE id = ?', [
+      JSON.stringify(emojis),
+      JSON.stringify(labels),
+      row.id,
+    ])
   }
 
   // Dev-only data seed. Double-gated: __DEV__ is stripped from release builds,
@@ -343,6 +355,7 @@ export async function eraseAllUserData() {
       sortOrder: i,
       isDefault: true,
       isActive: true,
+      deactivatedAt: null,
     })
   }
 
