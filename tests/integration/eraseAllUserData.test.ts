@@ -49,8 +49,12 @@ describe('eraseAllUserData', () => {
     )
     expect(await countRows(db, 'encounters')).toBe(2)
 
+    // A non-default settings VALUE must survive the erase — row-count alone
+    // would stay 1 even if erase wrongly reset settings.
+    await db.runAsync("UPDATE user_settings SET calendarStartDay = 'monday' WHERE id = 'singleton'")
+
     await mod.eraseAllUserData()
-    await flush()
+    await flush(db)
 
     // Data tables empty (raw-written rows too).
     expect(await countRows(db, 'encounters')).toBe(0)
@@ -83,6 +87,10 @@ describe('eraseAllUserData', () => {
       premiumExpiresAt: null,
     })
     expect(await countRows(db, 'user_settings')).toBe(1)
+    const [settings] = await db.getAllAsync<{ calendarStartDay: string }>(
+      "SELECT calendarStartDay FROM user_settings WHERE id = 'singleton'",
+    )
+    expect(settings.calendarStartDay).toBe('monday')
   })
 
   it('leaves the in-memory collections consistent with SQLite after erase', async () => {
@@ -90,7 +98,7 @@ describe('eraseAllUserData', () => {
     await mod.encounters.insert(makeEncounter()).isPersisted.promise
 
     await mod.eraseAllUserData()
-    await flush()
+    await flush(db)
 
     await mod.activityTags.preload()
     await mod.partners.preload()

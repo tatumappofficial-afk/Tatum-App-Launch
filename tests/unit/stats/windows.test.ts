@@ -1,7 +1,5 @@
 // These window helpers use the machine's local calendar (getDay/getMonth/…),
 // so the suite is timezone-sensitive. Pin a fixed zone before anything runs.
-process.env.TZ = 'America/Los_Angeles'
-
 import {
   canStepForward,
   firstEncounterYear,

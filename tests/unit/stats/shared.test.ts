@@ -1,5 +1,3 @@
-process.env.TZ = 'America/Los_Angeles'
-
 import {
   averageRating,
   compareEncountersNewestFirst,

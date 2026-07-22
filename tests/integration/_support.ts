@@ -36,8 +36,36 @@ export async function dumpTable(
  * Let queued collection persistence (optimistic onInsert/onUpdate/onDelete
  * handlers) drain to SQLite. TanStack collection mutations that aren't returned
  * as a Transaction can't be awaited via `isPersisted.promise`, so we yield to
- * the macrotask queue. Uses real timers — never call under fake timers.
+ * the macrotask queue until the database row-state stops changing (two
+ * identical consecutive snapshots), bounded at ~1s so a genuine hang still
+ * fails the test instead of spinning. A fixed short sleep flakes on slow CI.
+ * Uses real timers — never call under fake timers.
  */
-export function flush(): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, 25))
+export async function flush(db?: SQLiteDatabase): Promise<void> {
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+  if (!db) {
+    await sleep(25)
+    return
+  }
+  const TABLES = [
+    'encounters',
+    'partners',
+    'activity_tags',
+    'desire_entries',
+    'whisper_messages',
+    'affirmations',
+    'user_profile',
+  ]
+  const snapshot = async () => {
+    const counts: number[] = []
+    for (const t of TABLES) counts.push(await countRows(db, t))
+    return counts.join(',')
+  }
+  let prev = await snapshot()
+  for (let i = 0; i < 40; i++) {
+    await sleep(25)
+    const next = await snapshot()
+    if (next === prev) return
+    prev = next
+  }
 }

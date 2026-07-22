@@ -1,0 +1,38 @@
+appId: com.tatumapp.tatum
+name: period-logging
+tags:
+  - android
+  - sweep
+# Period surfaces: the seed logs two period cycles, so 🩸 markers must show
+# on the calendar, and the Period tag must be locked against editing.
+# (The 🩸 quick-log chip sits at the end of the horizontally-scrolled chip
+# row, so the generic quick-log mechanics are exercised in flow 12 instead.)
+---
+- runFlow: ../subflows/launch-seeded.yaml
+- runFlow:
+    file: ../subflows/goto-tab.yaml
+    env:
+      TAB: CALENDAR
+- assertVisible: 'Calendar'
+# Seeded period days render 🩸 markers in the month grid.
+- assertVisible: '🩸'
+
+# Period tag is locked: no rename/emoji-swap/delete
+- runFlow:
+    file: ../subflows/goto-tab.yaml
+    env:
+      TAB: PROFILE
+- tapOn: 'Edit'
+- extendedWaitUntil:
+    visible: 'Display Name'
+    timeout: 10000
+- scrollUntilVisible:
+    element: 'Edit tag Period'
+    direction: DOWN
+- tapOn: 'Edit tag Period'
+- extendedWaitUntil:
+    visible: 'Period is part of .*'
+    timeout: 10000
+- assertNotVisible: 'Delete Tag'
+- tapOn: 'Close'
+- takeScreenshot: sweep_period

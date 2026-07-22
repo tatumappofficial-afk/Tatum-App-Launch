@@ -1,0 +1,28 @@
+appId: com.tatumapp.tatum
+name: quick-log-calendar
+tags:
+  - android
+  - sweep
+# Calendar quick-log: tap a chip to log today's session. The `below:` scope
+# pins the tap to the Quick Log chip row — day cells above the header show
+# the same emoji glyphs for logged days.
+---
+- runFlow: ../subflows/launch-seeded.yaml
+- runFlow:
+    file: ../subflows/goto-tab.yaml
+    env:
+      TAB: CALENDAR
+- assertVisible: 'Calendar'
+- assertVisible: 'Quick Log.*'
+- tapOn:
+    text: '🏁'
+    below: 'Quick Log.*'
+- waitForAnimationToEnd:
+    timeout: 4000
+# Quick-log logs to today WITH the main partner attached — the day section
+# gains a card whose accessibility label is the partner initials ('JR').
+# The seed's own today entry is a partnerless period row, so this fails if
+# quick-log insertion no-ops.
+- tapOn: 'Day .*, today.*'
+- assertVisible: 'JR'
+- takeScreenshot: sweep_quick_log

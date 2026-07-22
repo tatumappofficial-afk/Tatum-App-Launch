@@ -1,0 +1,38 @@
+appId: com.tatumapp.tatum
+name: stats-sanity
+tags:
+  - android
+  - sweep
+# Every Home stats period renders its sections over the seeded data.
+# Section labels are matched in source case (visual uppercase is style-only).
+---
+- runFlow: ../subflows/launch-seeded.yaml
+
+- tapOn: 'Week'
+- waitForAnimationToEnd:
+    timeout: 3000
+- scrollUntilVisible:
+    element: 'Top activities'
+    direction: DOWN
+
+- tapOn: 'Month'
+- waitForAnimationToEnd:
+    timeout: 3000
+- scrollUntilVisible:
+    element: 'Your weekly rhythm'
+    direction: DOWN
+
+- tapOn: 'Year'
+- waitForAnimationToEnd:
+    timeout: 3000
+- scrollUntilVisible:
+    element: 'Your year, by month'
+    direction: DOWN
+
+- tapOn: 'All Time'
+- waitForAnimationToEnd:
+    timeout: 3000
+- scrollUntilVisible:
+    element: 'Total sessions'
+    direction: DOWN
+- takeScreenshot: sweep_stats

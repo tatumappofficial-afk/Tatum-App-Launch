@@ -1,0 +1,77 @@
+appId: com.tatumapp.tatum
+name: partners-crud
+tags:
+  - android
+  - sweep
+# Partner add / rename / delete via Edit Profile.
+# NOT covered here: the "Set as main partner" switch — it is a label-less
+# custom toggle with no matchable text/testID (needs a testID in the app to
+# automate). Main-partner *behavior* is pinned by flow 11's TAT-7 preselect
+# assertion instead.
+---
+- runFlow: ../subflows/launch-seeded.yaml
+- runFlow:
+    file: ../subflows/goto-tab.yaml
+    env:
+      TAB: PROFILE
+- tapOn: 'Edit'
+- extendedWaitUntil:
+    visible: 'Your Partners'
+    timeout: 10000
+
+# Add
+- scrollUntilVisible:
+    element: 'Add a partner'
+    direction: DOWN
+- tapOn: 'Add a partner'
+- extendedWaitUntil:
+    visible: 'New Partner'
+    timeout: 10000
+- tapOn: 'Partner name'
+- inputText: 'Casey'
+- hideKeyboard
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn: 'Save Partner'
+# The page's text stays in the a11y tree behind the sheet — wait for the
+# sheet itself to close.
+- extendedWaitUntil:
+    notVisible: 'Save Partner'
+    timeout: 8000
+- assertVisible: 'Edit Casey'
+
+# Edit: rename Casey → Casey Lane
+- tapOn: 'Edit Casey'
+- extendedWaitUntil:
+    visible: 'Edit Partner'
+    timeout: 10000
+- waitForAnimationToEnd:
+    timeout: 3000
+# The wide name field's center sits past the short value, so eraseText
+# clears the whole value.
+- tapOn: 'Casey'
+- eraseText
+- inputText: 'Casey Lane'
+- assertVisible: 'Casey Lane'
+- hideKeyboard
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn: 'Save Changes'
+- extendedWaitUntil:
+    notVisible: 'Save Changes'
+    timeout: 8000
+- assertVisible: 'Edit Casey Lane'
+
+# Delete
+- tapOn: 'Edit Casey Lane'
+- extendedWaitUntil:
+    visible: 'Edit Partner'
+    timeout: 10000
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn: 'Delete Partner'
+- tapOn: 'Delete'
+- extendedWaitUntil:
+    notVisible: 'Edit Casey Lane'
+    timeout: 8000
+- takeScreenshot: sweep_partners_crud

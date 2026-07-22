@@ -1,0 +1,13 @@
+appId: com.tatumapp.tatum
+# Navigate to a bottom tab. Usage:
+#   - runFlow:
+#       file: ../subflows/goto-tab.yaml
+#       env:
+#         TAB: CALENDAR        # HOME | CALENDAR | SESSIONS | PROFILE
+# The tab bar exposes accessibility labels of the form ", SESSIONS" (leading
+# comma from the icon+label pair). Screen content often contains the same
+# bare word (e.g. Home's "SESSIONS" stat card), so match the comma form.
+---
+- tapOn: '.*, ${TAB}'
+- waitForAnimationToEnd:
+    timeout: 3000

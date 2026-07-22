@@ -3,8 +3,6 @@
  * backfills, and idempotency across repeated init + relaunch.
  */
 // Pin the timezone so the legacy UTC quick-log date heal is deterministic.
-process.env.TZ = 'America/Los_Angeles'
-
 import { loadFreshDb } from '../support/dbHarness'
 import { buildDbAtVersion } from '../support/legacyDb'
 import { DEFAULT_ACTIVITY_TAGS, PERIOD_TAG_ID } from '@/src/db/schema'

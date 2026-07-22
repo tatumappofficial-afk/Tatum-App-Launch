@@ -24,7 +24,7 @@ describe('signOutUser', () => {
     await mod.encounters.insert(makeEncounter()).isPersisted.promise
 
     await mod.signOutUser()
-    await flush()
+    await flush(db)
 
     const [profile] = await db.getAllAsync<Record<string, unknown>>("SELECT * FROM user_profile WHERE id = 'default'")
     // Cleared:

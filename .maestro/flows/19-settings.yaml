@@ -1,0 +1,58 @@
+appId: com.tatumapp.tatum
+name: settings
+tags:
+  - android
+  - sweep
+# Settings surface + a persistence check: edit the display name, relaunch
+# (without clearing state), verify it stuck.
+---
+- runFlow: ../subflows/launch-seeded.yaml
+- runFlow:
+    file: ../subflows/goto-tab.yaml
+    env:
+      TAB: PROFILE
+- tapOn: 'Settings'
+- extendedWaitUntil:
+    visible: 'Security'
+    timeout: 10000
+- assertVisible: 'Sign Out'
+- assertVisible: 'Export Data'
+- assertVisible: 'Delete Account & Data'
+- assertVisible: 'Privacy Policy'
+- tapOn: 'Go back'
+
+# Persistence: rename the profile, relaunch, verify
+- tapOn: 'Edit'
+- extendedWaitUntil:
+    visible: 'Display Name'
+    timeout: 10000
+# The dev seed pre-fills the display name; tap the value, not the hint.
+# The wide EditText's center sits past the short text, so eraseText clears
+# the whole value.
+- tapOn: 'Alex'
+- eraseText
+- inputText: 'Sweep Tester'
+- assertVisible: 'Sweep Tester'
+- hideKeyboard
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn: 'Save'
+# Relaunch WITHOUT clearing state: reconnect the dev client to Metro and
+# wait for Home ('All Time' — 'TATUM' would also match the launcher list).
+- launchApp:
+    stopApp: true
+# Let the dev launcher settle before the deep link — an intent that arrives
+# mid-init gets dropped.
+- extendedWaitUntil:
+    visible: 'Development Build'
+    timeout: 20000
+- openLink: tatum://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081
+- extendedWaitUntil:
+    visible: 'All Time'
+    timeout: 45000
+- runFlow:
+    file: ../subflows/goto-tab.yaml
+    env:
+      TAB: PROFILE
+- assertVisible: 'Sweep Tester'
+- takeScreenshot: sweep_settings

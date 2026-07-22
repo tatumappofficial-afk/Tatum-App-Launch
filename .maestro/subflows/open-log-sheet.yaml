@@ -1,0 +1,10 @@
+appId: com.tatumapp.tatum
+# Open the Log a Session sheet via the center FAB (icon-only, a11y-labelled).
+---
+- tapOn: 'Log a session'
+- extendedWaitUntil:
+    visible: 'Log a Session'
+    timeout: 10000
+# The sheet slides up — a tap fired mid-animation lands on stale coordinates.
+- waitForAnimationToEnd:
+    timeout: 3000

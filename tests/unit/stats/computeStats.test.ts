@@ -1,5 +1,3 @@
-process.env.TZ = 'America/Los_Angeles'
-
 import { PERIOD_TAG_ID } from '@/src/db/schema'
 import { computeAllTimeStats, computeMonthStats, computeWeekStats, computeYearStats } from '@/lib/stats'
 import { getAllTimeWindow, getMonthWindow, getWeekWindow, getYearWindow } from '@/lib/stats/windows'

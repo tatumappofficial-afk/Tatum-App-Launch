@@ -2,9 +2,6 @@
  * Dev seed: env gating, fresh-awareness, deterministic content, and the
  * onboarded/auth-identity spot checks that let automation skip sign-in.
  */
-// Pin TZ so localDate() in the seed is stable across machines.
-process.env.TZ = 'America/Los_Angeles'
-
 import { loadFreshDb } from '../support/dbHarness'
 import { countRows, dumpTable } from './_support'
 

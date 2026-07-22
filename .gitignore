@@ -31,3 +31,4 @@ TATUM_AUDIT.md
 
 # Maestro flows themselves are committed; screenshots are local artifacts.
 .maestro/screenshots/
+.maestro/logs/

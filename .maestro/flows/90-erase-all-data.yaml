@@ -1,0 +1,29 @@
+appId: com.tatumapp.tatum
+name: erase-all-data
+tags:
+  - android
+  - sweep
+  - destructive
+# Erase-all: Settings → Delete Account & Data. Runs LAST in the sweep.
+# After erase the app returns to the signed-out entry point.
+---
+- runFlow: ../subflows/launch-seeded.yaml
+- runFlow:
+    file: ../subflows/goto-tab.yaml
+    env:
+      TAB: PROFILE
+- tapOn: 'Settings'
+- extendedWaitUntil:
+    visible: 'Delete Account & Data'
+    timeout: 10000
+- tapOn: 'Delete Account & Data'
+- tapOn: 'Delete'
+# Data is gone: the app lands on the signed-out entry — the sign-in screen.
+# This doubles as the fresh-install OAuth-wall check (there is no dev bypass
+# for Apple/Google sign-in, so automation can never go past this screen).
+- extendedWaitUntil:
+    visible: 'Continue with Google'
+    timeout: 20000
+- assertVisible: 'Feel seen, validated,.*'
+- assertNotVisible: 'Sessions Journal'
+- takeScreenshot: sweep_erase_all
