@@ -27,7 +27,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          # Node 22+ required: the Jest suite's expo-sqlite shim uses node:sqlite.
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -38,6 +39,9 @@ jobs:
 
       - name: Lint
         run: npm run lint
+
+      - name: Unit & integration tests
+        run: npm test
 
       - name: Format check
         run: npm run format:check

@@ -1,0 +1,20 @@
+# Maestro workspace. Subflows live outside the glob so they only run via runFlow.
+flows:
+  - 'flows/*.yaml'
+
+executionOrder:
+  # One broken flow must not hide the rest of the sweep's results.
+  continueOnFailure: true
+  # Read-mostly flows first, destructive (data-wiping) flows last.
+  flowsOrder:
+    - home-smoke
+    - log-session-form
+    - quick-log-calendar
+    - edit-session
+    - tag-lifecycle-history
+    - partners-crud
+    - period-logging
+    - navigation
+    - stats-sanity
+    - settings
+    - erase-all-data

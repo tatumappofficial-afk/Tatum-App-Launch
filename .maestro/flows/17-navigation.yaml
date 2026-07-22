@@ -1,0 +1,59 @@
+appId: com.tatumapp.tatum
+name: navigation
+tags:
+  - android
+  - sweep
+# Round-trip every main surface: tabs, session detail, reorder-tags.
+---
+- runFlow: ../subflows/launch-seeded.yaml
+
+# Tabs
+- runFlow:
+    file: ../subflows/goto-tab.yaml
+    env:
+      TAB: CALENDAR
+- assertVisible: 'Calendar'
+- runFlow:
+    file: ../subflows/goto-tab.yaml
+    env:
+      TAB: SESSIONS
+- assertVisible: 'Sessions Journal'
+- runFlow:
+    file: ../subflows/goto-tab.yaml
+    env:
+      TAB: PROFILE
+- assertVisible: 'Settings'
+
+# Session detail from the journal (seed guarantees entries exist)
+- runFlow:
+    file: ../subflows/goto-tab.yaml
+    env:
+      TAB: SESSIONS
+- tapOn:
+    text: 'Session on .*'
+    index: 0
+- extendedWaitUntil:
+    visible: 'What Happened'
+    timeout: 10000
+- tapOn: 'Go back'
+- assertVisible: 'Sessions Journal'
+
+# Reorder-tags page
+- runFlow:
+    file: ../subflows/goto-tab.yaml
+    env:
+      TAB: PROFILE
+- tapOn: 'Edit'
+- extendedWaitUntil:
+    visible: 'Display Name'
+    timeout: 10000
+- scrollUntilVisible:
+    element: 'Reorder tags'
+    direction: DOWN
+- tapOn: 'Reorder tags'
+- extendedWaitUntil:
+    visible: 'Reorder Tags'
+    timeout: 10000
+- assertVisible: 'Press and hold a tag, then drag to reorder.'
+- tapOn: 'Done'
+- takeScreenshot: sweep_navigation

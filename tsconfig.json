@@ -5,6 +5,7 @@
     "jsx": "react-jsx",
     "esModuleInterop": true,
     "moduleResolution": "bundler",
+    "types": ["jest", "node"],
     "paths": {
       "@/*": ["./*"]
     }

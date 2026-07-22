@@ -1,0 +1,15 @@
+appId: com.tatumapp.tatum
+name: home-smoke
+tags:
+  - android
+  - smoke
+  - sweep
+# Seeded launch lands on Home with data: wordmark, period tabs, month stats.
+---
+- runFlow: ../subflows/launch-seeded.yaml
+- assertVisible: 'TATUM'
+- assertVisible: 'Week'
+- assertVisible: 'Month'
+- assertVisible: 'Year'
+- assertVisible: 'All Time'
+- takeScreenshot: sweep_home

@@ -1,0 +1,229 @@
+appId: com.tatumapp.tatum
+name: tag-lifecycle-history
+tags:
+  - android
+  - sweep
+  - regression
+# THE tag-name-history regression flow: sessions must keep the label a tag
+# had when they were logged, through rename, delete, and re-create of the
+# same emoji. Guards the fix/tag-name-history work (activityLabels snapshots
+# + deactivatedAt fallback).
+---
+- runFlow: ../subflows/launch-seeded.yaml
+
+# 1. Create custom tag ❤️ "Candlelight" (Profile → Edit → Add a tag)
+- runFlow:
+    file: ../subflows/goto-tab.yaml
+    env:
+      TAB: PROFILE
+- tapOn: 'Edit'
+- extendedWaitUntil:
+    visible: 'Display Name'
+    timeout: 10000
+# The tags section sits below the fold on the Edit Profile page.
+- scrollUntilVisible:
+    element: 'Add a tag'
+    direction: DOWN
+- tapOn: 'Add a tag'
+- extendedWaitUntil:
+    visible: 'Choose an emoji'
+    timeout: 10000
+# The picker preselects ❤️ — keep it, so both tag generations share the
+# same emoji (the exact precondition of the delete/re-create regression).
+- tapOn: 'e.g. Playful, Romantic.*'
+- inputText: 'Candlelight'
+- hideKeyboard
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn: 'Add Tag'
+# Creation is verified by the chip existing in the log sheet (step 2).
+- extendedWaitUntil:
+    notVisible: 'Tag name'
+    timeout: 8000
+- tapOn: 'Save'
+
+# 2. Log a session with the new tag. Open the sheet from the CALENDAR tab:
+# its content is emoji-only, so the chip's (emoji + label) pair is unique —
+# the Profile tab's tag pills behind the sheet would shadow the chip.
+- runFlow:
+    file: ../subflows/goto-tab.yaml
+    env:
+      TAB: CALENDAR
+- runFlow: ../subflows/open-log-sheet.yaml
+# Over the Calendar tab the label text exists only on the sheet's chip
+# (calendar content is emoji-only), so a plain label tap is unambiguous.
+- tapOn: 'Candlelight'
+- tapOn: 'Save Session'
+# The success overlay is transient and not reliably in the a11y tree —
+# wait for the sheet itself to close instead.
+- extendedWaitUntil:
+    notVisible: 'Save Session'
+    timeout: 8000
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# 3. Rename the tag to "Firelight"
+- runFlow:
+    file: ../subflows/goto-tab.yaml
+    env:
+      TAB: PROFILE
+- tapOn: 'Edit'
+- extendedWaitUntil:
+    visible: 'Display Name'
+    timeout: 10000
+- scrollUntilVisible:
+    element: 'Edit tag Candlelight'
+    direction: DOWN
+- tapOn: 'Edit tag Candlelight'
+- extendedWaitUntil:
+    visible: 'Edit tag'
+    timeout: 10000
+# The name input is pre-filled with 'Candlelight'. Scope with below: the
+# sheet's own 'Tag name' label so the wide EditText is matched (not the
+# page's tag-row text behind the sheet) — tapping the EditText's center
+# lands past the text end, so eraseText clears the whole value.
+- tapOn:
+    text: 'Candlelight'
+    below: 'Tag name'
+- eraseText
+- inputText: 'Firelight'
+# Fail fast if the erase left residue (e.g. 'Firelightght').
+- assertVisible: 'Firelight'
+- hideKeyboard
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn: 'Save Tag'
+- extendedWaitUntil:
+    notVisible: 'Save Tag'
+    timeout: 8000
+- tapOn: 'Save'
+
+# 4. HISTORIC LABEL: today's session must still show "Candlelight"
+- runFlow:
+    file: ../subflows/goto-tab.yaml
+    env:
+      TAB: SESSIONS
+- tapOn:
+    text: 'Session on .*'
+    index: 0
+- extendedWaitUntil:
+    visible: 'What Happened'
+    timeout: 10000
+- assertVisible: 'Candlelight'
+- assertNotVisible: 'Firelight'
+- takeScreenshot: sweep_tag_history_after_rename
+
+# 4b. EDIT-PATH: editing the session (note change) after the rename must NOT
+# re-label its activities — the edit branch must pass the existing snapshot
+# through unchanged (the second half of the shipped regression class).
+- tapOn: 'Edit'
+- extendedWaitUntil:
+    visible: 'Edit Session'
+    timeout: 10000
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn: '.*What made this moment special.*'
+- inputText: 'Edited after rename'
+- hideKeyboard
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn: 'Save Changes'
+- extendedWaitUntil:
+    notVisible: 'Save Changes'
+    timeout: 8000
+- waitForAnimationToEnd:
+    timeout: 3000
+- extendedWaitUntil:
+    visible: 'What Happened'
+    timeout: 10000
+- assertVisible: 'Candlelight'
+- assertNotVisible: 'Firelight'
+- tapOn: 'Go back'
+
+# 5. Delete the tag, re-create the same emoji under a new name
+- runFlow:
+    file: ../subflows/goto-tab.yaml
+    env:
+      TAB: PROFILE
+- tapOn: 'Edit'
+- extendedWaitUntil:
+    visible: 'Display Name'
+    timeout: 10000
+# Anchor the scroll on the row (large target); the icon-only delete button
+# is reliably visible alongside it.
+- scrollUntilVisible:
+    element: 'Edit tag Firelight'
+    direction: DOWN
+- tapOn: 'Delete tag Firelight'
+- tapOn: 'Delete'
+- extendedWaitUntil:
+    notVisible: 'Firelight'
+    timeout: 8000
+- scrollUntilVisible:
+    element: 'Add a tag'
+    direction: DOWN
+- tapOn: 'Add a tag'
+- extendedWaitUntil:
+    visible: 'Choose an emoji'
+    timeout: 10000
+# The picker preselects ❤️ — keep it, so both tag generations share the
+# same emoji (the exact precondition of the delete/re-create regression).
+- tapOn: 'e.g. Playful, Romantic.*'
+- inputText: 'Twilight'
+- hideKeyboard
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn: 'Add Tag'
+- extendedWaitUntil:
+    notVisible: 'Tag name'
+    timeout: 8000
+- tapOn: 'Save'
+
+# 6. Old session STILL shows "Candlelight" — the regression this flow pins
+- runFlow:
+    file: ../subflows/goto-tab.yaml
+    env:
+      TAB: SESSIONS
+- tapOn:
+    text: 'Session on .*'
+    index: 0
+- extendedWaitUntil:
+    visible: 'What Happened'
+    timeout: 10000
+- assertVisible: 'Candlelight'
+- assertNotVisible: 'Twilight'
+- tapOn: 'Go back'
+
+# 7. A NEW session with the re-created tag shows the new name. Tag it with
+# a unique note — same-day journal cards are visually identical (emoji-only,
+# same default rating), so the note is the only reliable way to open THIS
+# session rather than session A.
+- runFlow:
+    file: ../subflows/goto-tab.yaml
+    env:
+      TAB: CALENDAR
+- runFlow: ../subflows/open-log-sheet.yaml
+- tapOn: 'Twilight'
+- tapOn: '.*What made this moment special.*'
+- inputText: 'Twilight check'
+- hideKeyboard
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn: 'Save Session'
+# The success overlay is transient and not reliably in the a11y tree —
+# wait for the sheet itself to close instead.
+- extendedWaitUntil:
+    notVisible: 'Save Session'
+    timeout: 8000
+- waitForAnimationToEnd:
+    timeout: 3000
+# Verify via the calendar's selected-day section: its session cards expose
+# 'partner, note' accessibility labels (journal cards collapse to a bare
+# 'Session on {date}' label, so the note is unmatchable there).
+- tapOn: 'Day .*, today.*'
+- tapOn: '.*Twilight check.*'
+- extendedWaitUntil:
+    visible: 'What Happened'
+    timeout: 10000
+- assertVisible: 'Twilight'
+- takeScreenshot: sweep_tag_history_final

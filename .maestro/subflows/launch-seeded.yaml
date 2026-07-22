@@ -1,0 +1,40 @@
+appId: com.tatumapp.tatum
+# Fresh, deterministic starting state for every sweep flow: clear app data,
+# reconnect the dev client to Metro (which must be running with
+# EXPO_PUBLIC_DEV_SEED=1 — scripts/e2e-sweep.sh handles that), and wait for
+# the seeded Home screen. The dev seed marks the user onboarded/authed, so
+# the app lands directly on the tabs.
+---
+- launchApp:
+    clearState: true
+    stopApp: true
+# Let the dev launcher finish cold-starting before sending the deep link —
+# an intent that arrives mid-init gets dropped.
+- extendedWaitUntil:
+    visible: 'Development Build'
+    timeout: 20000
+- openLink: tatum://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081
+# After clearState the dev client always shows its first-launch developer
+# menu once the bundle is up; it is a modal that hides the app from the
+# accessibility tree, so dismiss it BEFORE waiting on app content.
+- extendedWaitUntil:
+    visible: 'This is the developer menu.*'
+    timeout: 60000
+- tapOn: 'Continue'
+# 'Continue' acknowledges the intro but can leave the expanded dev-menu
+# sheet (Reload / Go home / Tools) open. While it's up, switch OFF the
+# floating Tools bubble — it hovers over the app's top-right header actions
+# (e.g. the session-detail Edit button) and steals their taps — then close.
+- runFlow:
+    when:
+      visible: 'Runtime version.*'
+    commands:
+      - tapOn: 'Tools button'
+      - tapOn: 'Close'
+# 'All Time' is unique to the app's Home (Maestro text match is
+# case-insensitive, so 'TATUM' would also match the launcher's own list).
+- extendedWaitUntil:
+    visible: 'All Time'
+    timeout: 45000
+- waitForAnimationToEnd:
+    timeout: 5000

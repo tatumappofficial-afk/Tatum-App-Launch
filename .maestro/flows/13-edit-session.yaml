@@ -1,0 +1,61 @@
+appId: com.tatumapp.tatum
+name: edit-session
+tags:
+  - android
+  - sweep
+# Log a fresh session, open it from the journal, edit it, verify the update.
+---
+- runFlow: ../subflows/launch-seeded.yaml
+- runFlow: ../subflows/open-log-sheet.yaml
+- tapOn:
+    containsDescendants:
+      - text: '🏁'
+      - text: 'Quickie'
+- tapOn: 'Save Session'
+# The success overlay is transient and not reliably in the a11y tree —
+# wait for the sheet itself to close instead.
+- extendedWaitUntil:
+    notVisible: 'Save Session'
+    timeout: 8000
+- waitForAnimationToEnd:
+    timeout: 3000
+- runFlow:
+    file: ../subflows/goto-tab.yaml
+    env:
+      TAB: SESSIONS
+- assertVisible: 'Sessions Journal'
+# Newest entry is first — today's session we just logged.
+- tapOn:
+    text: 'Session on .*'
+    index: 0
+- extendedWaitUntil:
+    visible: 'What Happened'
+    timeout: 10000
+# Edit: change the note, save, verify.
+- tapOn: 'Edit'
+- extendedWaitUntil:
+    visible: 'Edit Session'
+    timeout: 10000
+- tapOn: '.*What made this moment special.*'
+- inputText: 'Edited by sweep'
+- hideKeyboard
+- tapOn: 'Save Changes'
+- extendedWaitUntil:
+    notVisible: 'Save Changes'
+    timeout: 8000
+- waitForAnimationToEnd:
+    timeout: 3000
+# Back out of the session-detail page first — it has no tab bar.
+- tapOn: 'Go back'
+- extendedWaitUntil:
+    visible: 'Sessions Journal'
+    timeout: 8000
+# Verify the edit persisted via the calendar day-card '{initials}, {note}'
+# accessibility label.
+- runFlow:
+    file: ../subflows/goto-tab.yaml
+    env:
+      TAB: CALENDAR
+- tapOn: 'Day .*, today.*'
+- assertVisible: 'JR, Edited by sweep'
+- takeScreenshot: sweep_edit_session

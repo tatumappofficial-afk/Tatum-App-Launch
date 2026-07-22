@@ -1,0 +1,51 @@
+appId: com.tatumapp.tatum
+name: log-session-form
+tags:
+  - android
+  - sweep
+  - regression
+# Full Log a Session form, WITHOUT touching the partner row (TAT-7: the main
+# partner must be pre-selected), then verify the entry lands in the journal.
+---
+- runFlow: ../subflows/launch-seeded.yaml
+- runFlow: ../subflows/open-log-sheet.yaml
+- assertVisible: 'With'
+- assertVisible: 'What happened'
+# Pick an activity (safe default label) and a rating, add a note.
+# containsDescendants pins the tap to the real chip (emoji + label): the Home
+# screen behind the transparent sheet stays in the accessibility tree, and
+# its explored-grid tile carries the same label (but only the emoji child).
+- tapOn:
+    containsDescendants:
+      - text: '🏁'
+      - text: 'Quickie'
+- tapOn: '8'
+# NB: selector avoids the literal '?' in the placeholder — Maestro text
+# matching is regex, where '?' is a quantifier.
+- tapOn: '.*What made this moment special.*'
+- inputText: 'Sweep test note'
+- hideKeyboard
+- tapOn: 'Save Session'
+# The success overlay is transient and not reliably in the a11y tree —
+# wait for the sheet itself to close instead.
+- extendedWaitUntil:
+    notVisible: 'Save Session'
+    timeout: 8000
+- waitForAnimationToEnd:
+    timeout: 3000
+# Verify in the Sessions Journal
+- runFlow:
+    file: ../subflows/goto-tab.yaml
+    env:
+      TAB: SESSIONS
+- assertVisible: 'Sessions Journal'
+- assertVisible: 'Sweep test note'
+# TAT-7 proper: the calendar day-card exposes '{initials}, {note}' — 'JR'
+# proves the untouched partner row still attached the main partner.
+- runFlow:
+    file: ../subflows/goto-tab.yaml
+    env:
+      TAB: CALENDAR
+- tapOn: 'Day .*, today.*'
+- assertVisible: 'JR, Sweep test note'
+- takeScreenshot: sweep_log_session

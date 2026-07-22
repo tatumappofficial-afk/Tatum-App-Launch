@@ -25,12 +25,14 @@ const DB_NAME = 'tatum.db'
  * "drop-and-recreate" history. Future schema changes append migration 2,
  * migration 3, etc.
  */
-interface Migration {
+export interface Migration {
   version: number
   up: string
 }
 
-const MIGRATIONS: Migration[] = [
+// Exported for tests only: tests/support/legacyDb.ts replays shipped
+// migrations to build genuine version-N databases for upgrade tests.
+export const MIGRATIONS: Migration[] = [
   {
     version: 1,
     up: `
