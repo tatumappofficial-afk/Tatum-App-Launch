@@ -1,5 +1,7 @@
 import * as SQLite from 'expo-sqlite'
 
+import { getOrCreateDbKey, openEncryptedDatabase } from '@/src/db/encryption'
+
 const DB_NAME = 'tatum.db'
 
 /**
@@ -175,11 +177,32 @@ export const MIGRATIONS: Migration[] = [
 
 const TARGET_VERSION = MIGRATIONS[MIGRATIONS.length - 1].version
 
-let db: SQLite.SQLiteDatabase | null = null
+// Memoized as a promise, not a handle: concurrent first callers (several
+// TanStack collections initialize at startup) must share one open. Racing
+// opens was always wasteful, but with encryption it becomes destructive: two
+// racers could each mint a cipher key, and whichever keychain write lands
+// last would not match the database the other one opened or migrated.
+let dbPromise: Promise<SQLite.SQLiteDatabase> | null = null
 
-export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
-  if (db) return db
-  db = await SQLite.openDatabaseAsync(DB_NAME)
+export function getDatabase(): Promise<SQLite.SQLiteDatabase> {
+  if (!dbPromise) {
+    dbPromise = openDatabase().catch((err) => {
+      // A failed open must not stick: clear the memo so the next call retries
+      // instead of rejecting forever.
+      dbPromise = null
+      throw err
+    })
+  }
+  return dbPromise
+}
+
+async function openDatabase(): Promise<SQLite.SQLiteDatabase> {
+  // SQLCipher at-rest encryption, keyed from the platform keychain. The key
+  // is null only under jest, where the shim opts out (the node:sqlite
+  // stand-in has no SQLCipher); on-device it is always present. See
+  // encryption.ts for the design and the plaintext-migration path.
+  const cipherKeyHex = await getOrCreateDbKey()
+  const db = cipherKeyHex ? await openEncryptedDatabase(DB_NAME, cipherKeyHex) : await SQLite.openDatabaseAsync(DB_NAME)
 
   // Connection-level PRAGMAs. journal_mode persists in the file; foreign_keys
   // is per-connection and must be set on every open. secure_delete makes
