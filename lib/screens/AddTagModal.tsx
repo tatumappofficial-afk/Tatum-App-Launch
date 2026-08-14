@@ -10,7 +10,7 @@ import { colors, fontFamily, gradientPoints, typography } from '../theme'
 import { TagPill } from '../components/TagPill'
 import { EmojiChip } from '../components/EmojiChip'
 import { GradientButton } from '../components/GradientButton'
-import { TAG_EMOJIS } from '../data/tagEmojis'
+import { TAG_EMOJIS, TAG_EMOJI_SUGGESTIONS } from '../data/tagEmojis'
 import { useSheetPanGesture } from '@/app/(sheets)/_layout'
 
 /* ── Types ── */
@@ -96,6 +96,10 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
   const isDuplicate =
     trimmedName.length > 0 && existingTags.some((t) => t.name.toLowerCase() === trimmedName.toLowerCase())
   const addTagDisabled = trimmedName.length === 0 || isDuplicate
+  // What this emoji is commonly used for, offered as a placeholder only. The
+  // user still types her own name — the suggestion is a prompt, not a default,
+  // so every emoji in the picker stays a tag she defines herself.
+  const suggestedName = TAG_EMOJI_SUGGESTIONS[selectedEmoji]
   // Lock view shows the hint persistently as a banner; tapping the emoji re-
   // surfaces it briefly as a tooltip below the row, so the gesture has visible
   // feedback even when the banner has scrolled offscreen.
@@ -305,7 +309,7 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
             <TextInput
               value={tagName}
               onChangeText={(text) => onTagNameChange?.(text)}
-              placeholder="e.g. Playful, Romantic..."
+              placeholder={suggestedName ? `e.g. ${suggestedName}` : 'e.g. Playful, Romantic...'}
               placeholderTextColor={colors.muted}
               maxLength={20}
               autoCapitalize="words"
