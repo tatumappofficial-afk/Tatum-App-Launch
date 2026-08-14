@@ -210,10 +210,10 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
         ))}
       </View>
 
-      {/* Notes */}
+      {/* Journal */}
       {noteText && (
         <>
-          <SectionLabel label="Notes" />
+          <SectionLabel label="Journal" />
           <View
             style={{
               marginHorizontal: 20,
@@ -254,7 +254,7 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
               >
                 {noteText}
               </Text>
-              {/* Edit note row */}
+              {/* Edit journal row */}
               <View
                 style={{
                   position: 'relative',
@@ -297,7 +297,7 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
                       color: colors.terra,
                     }}
                   >
-                    Edit note
+                    Edit entry
                   </Text>
                 </Pressable>
               </View>
