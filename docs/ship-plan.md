@@ -307,6 +307,14 @@ The very last feature before public launch. Out of scope for the initial beta; t
 - **Welcome screen "No traces left behind" copy** — needs softening once server-side email exists. Suggested wording: "Uninstalling Tatum removes all of your activity. You can also delete your account in Settings to remove your name and email." (Update this when Phase 4 lands.)
 - **Account deletion in Settings** — App Store requires apps that create server-side accounts to offer in-app account deletion. Need to wire a "Delete my account" entry that hits a Vercel endpoint to remove the user's row from the Sheet. Track this with the Phase 4 work.
 
+## Post-launch backlog (engineering)
+
+- [ ] **Bump Play Age Signals to `0.0.4` — deadline Oct 31, 2026.** Google is deprecating `com.google.android.play:age-signals:0.0.3` and below after that date. We're on `0.0.3`, pinned inside `node_modules/expo-age-range/android/build.gradle`; Expo has not bumped it on any SDK line as of `expo-age-range@57.0.2` (checked 2026-07-24), while `0.0.4` has been on Google Maven since 2026-07-20.
+  - **Blast radius if it lapses:** low but real. `checkAgeSignal()` (`src/services/ageSignal.ts`) already treats a failed lookup as `unavailable` and never blocks, so a dead client degrades to "no platform age signal" rather than breaking onboarding. The in-app 18+ attestation stays the hard gate either way.
+  - **Fix:** don't wait on Expo. `android/` is gitignored (prebuild flow), so pin it ourselves via a `patch-package` patch on `expo-age-range` (postinstall already runs patch-package) or a config plugin adding a Gradle `resolutionStrategy.force`. ~5 lines; the actual cost is an Android build + device run to confirm `0.0.4` didn't change the Kotlin signatures the module calls.
+  - **Not required for us:** the two new `0.0.4` features are Brazil-only in-app age prompts and extra age-source metadata. Neither applies to our launch markets.
+  - Alanna forwarded the Google notice 2026-07-22; answered that we're aware and it's parked until after launch.
+
 ## Handoff to Alanna (post-launch)
 
 Small things only Alanna can do herself because the dashboards filter by logged-in user. Walk her through each one over a call or via Loom.
