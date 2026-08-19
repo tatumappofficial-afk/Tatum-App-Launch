@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { StyleSheet, View, Text, Pressable } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Polyline, Path, Rect, Circle } from 'react-native-svg'
@@ -10,7 +10,12 @@ import { GradientButton } from '@/lib/components/GradientButton'
 import { StepDots } from '@/lib/components/StepDots'
 import { DecorativeGlow } from '@/lib/screens/shared/DecorativeGlow'
 import { StatusBarSpacer } from '@/lib/screens/shared/StatusBarSpacer'
-import { authenticate, getBiometricCapabilities, type BiometricCapabilities } from '@/src/utils/biometrics'
+import {
+  authenticateWithResult,
+  describeAuthFailure,
+  getBiometricCapabilities,
+  type BiometricCapabilities,
+} from '@/src/utils/biometrics'
 import { updateOnboardingSession } from '@/src/services/onboardingSession'
 
 const LockIcon: React.FC = () => (
@@ -53,34 +58,72 @@ export default function ProtectScreen() {
   const [caps, setCaps] = useState<BiometricCapabilities | null>(null)
   const [busy, setBusy] = useState(false)
   const [enableLock, setEnableLock] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // Mirrors `busy` synchronously. State only reaches a handler's closure on the
+  // next render, so two taps landing in the same frame — the button and the skip
+  // link, say — would both read busy: false and both act. That could commit
+  // biometricLock twice with conflicting values.
+  const busyRef = useRef(false)
+
+  function beginAction() {
+    if (busyRef.current) return false
+    busyRef.current = true
+    setBusy(true)
+    return true
+  }
+
+  function endAction() {
+    busyRef.current = false
+    setBusy(false)
+  }
+
+  // A phone with no screen lock at all can never satisfy the prompt, so the
+  // card is switched off and made inert rather than offering a button that
+  // would fail every time it was pressed.
+  const lockUnavailable = caps !== null && !caps.canLock
 
   useEffect(() => {
     getBiometricCapabilities()
-      .then(setCaps)
+      .then((next) => {
+        setCaps(next)
+        if (!next.canLock) setEnableLock(false)
+      })
       .catch((err) => {
         console.error('Failed to load biometric capabilities:', err)
-        setCaps({ hasHardware: false, isEnrolled: false, label: 'Use device passcode' })
+        // Assume the lock is usable on error: authenticate() surfaces a real
+        // reason if it isn't, which beats hiding the option over a probe that
+        // happened to fail.
+        setCaps({ hasHardware: false, isEnrolled: false, canLock: true, label: 'Use device passcode' })
       })
   }, [])
+
+  function skip() {
+    updateOnboardingSession({ biometricLock: false })
+    router.push('/(onboarding)/safe')
+  }
 
   // Stays busy through router.push so a second tap can't re-trigger the
   // biometric prompt while the next screen is animating in.
   async function handlePrimary() {
-    if (busy) return
-    setBusy(true)
+    if (!beginAction()) return
+    setError(null)
     if (!enableLock) {
-      updateOnboardingSession({ biometricLock: false })
-      router.push('/(onboarding)/safe')
+      skip()
       return
     }
-    let ok = false
+    let outcome
     try {
-      ok = await authenticate('Unlock Tatum')
+      outcome = await authenticateWithResult('Unlock Tatum')
     } catch (err) {
       console.error('Biometric auth failed:', err)
+      outcome = { success: false, error: undefined } as const
     }
-    if (!ok) {
-      setBusy(false)
+    if (!outcome.success) {
+      // Never fail silently — this screen blocks the hardware back button, so an
+      // unexplained no-op reads as the app having frozen.
+      setError(describeAuthFailure(outcome.error))
+      endAction()
       return
     }
     updateOnboardingSession({ biometricLock: true })
@@ -125,9 +168,15 @@ export default function ProtectScreen() {
 
         {/* Lock card — tap to toggle whether the user wants to enable biometrics. */}
         <Pressable
-          onPress={() => setEnableLock((prev) => !prev)}
+          onPress={() => {
+            // Also inert while an action is in flight: flipping this mid-prompt
+            // would leave the card contradicting the choice about to be saved.
+            if (lockUnavailable || busyRef.current) return
+            setError(null)
+            setEnableLock((prev) => !prev)
+          }}
           accessibilityRole="checkbox"
-          accessibilityState={{ checked: enableLock }}
+          accessibilityState={{ checked: enableLock, disabled: lockUnavailable }}
           accessibilityLabel="Enable biometric lock"
           style={({ pressed }) => ({
             backgroundColor: colors.surface,
@@ -177,11 +226,27 @@ export default function ProtectScreen() {
                 lineHeight: 17.5,
               }}
             >
-              You'll be prompted each time you open Tatum.
+              {lockUnavailable
+                ? 'Add a passcode or fingerprint in your phone settings to use this.'
+                : "You'll be prompted each time you open Tatum."}
             </Text>
           </View>
           {enableLock && <CheckCircle />}
         </Pressable>
+        {error && (
+          <Text
+            style={{
+              fontFamily: font('dmSans', '300'),
+              fontSize: 13,
+              color: colors.terra,
+              textAlign: 'center',
+              lineHeight: 18,
+              marginTop: 14,
+            }}
+          >
+            {error}
+          </Text>
+        )}
         <Text
           style={{
             fontFamily: font('dmSans', '300'),
@@ -206,6 +271,23 @@ export default function ProtectScreen() {
             disabled={!caps || busy}
           />
         </View>
+        {/* Standing escape hatch. The card doubles as a toggle, but nothing on
+            screen advertises that, so without this a failed prompt leaves the
+            user with no visible way forward and no hardware back button. */}
+        {enableLock && (
+          <Pressable
+            onPress={() => {
+              if (!beginAction()) return
+              skip()
+            }}
+            accessibilityRole="button"
+            style={{ alignItems: 'center', paddingVertical: 8, marginBottom: 8 }}
+          >
+            <Text style={{ fontFamily: font('dmSans', '300'), fontSize: 14, color: colors.muted }}>
+              Skip for now
+            </Text>
+          </Pressable>
+        )}
         <StepDots current={3} total={7} />
       </View>
     </View>
