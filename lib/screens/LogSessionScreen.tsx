@@ -79,6 +79,18 @@ const ACTIVITY_ROWS = 4
 const ACTIVITY_ROW_HEIGHT = 33
 const ACTIVITY_GAP = 6
 
+/* ── Journal field sizing ──
+   The field opens tall enough to feel like a page rather than a one-liner, then
+   grows with content to a cap and scrolls internally past it. Both bounds are
+   expressed in lines so the two platforms stay in step: iOS enforces the cap
+   with maxHeight, Android with numberOfLines (it has no maxHeight equivalent). */
+const JOURNAL_LINE_HEIGHT = 21
+const JOURNAL_VERTICAL_PADDING = 12
+const JOURNAL_MIN_LINES = 6
+const JOURNAL_MAX_LINES = 12
+const journalHeightForLines = (lines: number) =>
+  lines * JOURNAL_LINE_HEIGHT + JOURNAL_VERTICAL_PADDING * 2
+
 /* ── Component ── */
 
 export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
@@ -242,8 +254,8 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
           <RatingSlider value={rating} onChange={onRatingChange} />
         </View>
 
-        {/* ── NOTES ── */}
-        <FormLabel>Notes</FormLabel>
+        {/* ── JOURNAL ── */}
+        <FormLabel>Journal</FormLabel>
         <TextInput
           value={notes}
           onChangeText={(text) => onNotesChange?.(text)}
@@ -252,9 +264,9 @@ export const LogSessionScreen: React.FC<LogSessionScreenProps> = ({
           multiline
           // On Fabric, numberOfLines hard-caps the iOS field height (and iOS
           // internal scroll must stay enabled so the caret/loupe can reach
-          // overflowing text). Android keeps its native 3-line + caret-follow
-          // behavior via numberOfLines; scrollEnabled is an iOS-only prop.
-          numberOfLines={Platform.OS === 'android' ? 3 : undefined}
+          // overflowing text). Android has no maxHeight equivalent, so it caps
+          // via numberOfLines at the same line count; scrollEnabled is iOS-only.
+          numberOfLines={Platform.OS === 'android' ? JOURNAL_MAX_LINES : undefined}
           maxLength={3000}
           autoCapitalize="sentences"
           autoCorrect
@@ -424,17 +436,18 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: colors.border,
     borderRadius: 14,
-    paddingVertical: 12,
+    paddingVertical: JOURNAL_VERTICAL_PADDING,
     paddingHorizontal: 14,
     fontFamily: fontFamily.playfair,
     fontSize: 14,
     fontStyle: 'italic',
     color: '#5A3E36',
-    lineHeight: 21,
+    lineHeight: JOURNAL_LINE_HEIGHT,
     marginBottom: 4,
-    minHeight: 70,
-    // iOS only: grow with content up to ~8 lines, then scroll internally.
-    ...(Platform.OS === 'ios' ? { maxHeight: 192 } : null),
+    // Opens at 6 lines so there is room to actually journal, not just jot.
+    minHeight: journalHeightForLines(JOURNAL_MIN_LINES),
+    // iOS only: grow with content up to the cap, then scroll internally.
+    ...(Platform.OS === 'ios' ? { maxHeight: journalHeightForLines(JOURNAL_MAX_LINES) } : null),
     textAlignVertical: 'top',
   },
   charCount: {

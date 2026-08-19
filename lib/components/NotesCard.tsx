@@ -117,10 +117,10 @@ export const NotesCard: React.FC<NotesCardProps> = ({ note, onEditNote, showStac
             lineHeight: 27,
           }}
         >
-          No notes yet...
+          Nothing journaled yet...
         </Text>
       )}
-      {/* Edit note row */}
+      {/* Edit journal row */}
       <View
         style={{
           flexDirection: 'row',
@@ -136,7 +136,7 @@ export const NotesCard: React.FC<NotesCardProps> = ({ note, onEditNote, showStac
         <Pressable
           onPress={onEditNote}
           accessibilityRole="button"
-          accessibilityLabel={note ? 'Edit note' : 'Add note'}
+          accessibilityLabel={note ? 'Edit journal entry' : 'Add journal entry'}
           style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
         >
           <PencilIcon />
@@ -148,7 +148,7 @@ export const NotesCard: React.FC<NotesCardProps> = ({ note, onEditNote, showStac
               color: colors.terra,
             }}
           >
-            {note ? 'Edit note' : 'Add note'}
+            {note ? 'Edit entry' : 'Add entry'}
           </Text>
         </Pressable>
       </View>

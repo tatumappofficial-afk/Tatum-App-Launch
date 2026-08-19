@@ -255,10 +255,10 @@ const NotesCard: React.FC<{
             lineHeight: 27,
           }}
         >
-          No notes yet...
+          Nothing journaled yet...
         </Text>
       )}
-      {/* Edit note row */}
+      {/* Edit journal row */}
       <View
         style={{
           position: 'relative',
@@ -297,7 +297,7 @@ const NotesCard: React.FC<{
               color: colors.terra,
             }}
           >
-            {note ? 'Edit note' : 'Add note'}
+            {note ? 'Edit entry' : 'Add entry'}
           </Text>
         </Pressable>
       </View>
@@ -422,7 +422,7 @@ export const SessionDetailScreen: React.FC<SessionDetailScreenProps> = ({
       <SectionLabel label="What Happened" />
       <ActivityTags activities={activities} />
 
-      <SectionLabel label="Notes" />
+      <SectionLabel label="Journal" />
       <NotesCard note={note} onEditNote={onEditNote} />
 
       {partners.length > 0 && (
