@@ -85,6 +85,11 @@ export function describeAuthFailure(error: LocalAuthentication.LocalAuthenticati
       return 'Your phone does not have a screen lock set up yet. Add a passcode or fingerprint in your phone settings, then turn this on in Tatum settings.'
     case 'not_available':
       return "This phone can't use a lock. You can skip this step — everything else works the same."
+    // The likeliest failure for someone who does have biometrics set up: the
+    // scan simply did not match. Retrying is the right advice, so this must not
+    // fall through to the generic "set it up later" copy.
+    case 'authentication_failed':
+      return "Your phone didn't recognise you. Try again, or skip for now."
     case 'lockout':
       return 'Too many attempts. Unlock your phone the usual way first, then try again — or skip for now.'
     default:

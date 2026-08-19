@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { StyleSheet, View, Text, Pressable } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Polyline, Path, Rect, Circle } from 'react-native-svg'
@@ -60,6 +60,24 @@ export default function ProtectScreen() {
   const [enableLock, setEnableLock] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Mirrors `busy` synchronously. State only reaches a handler's closure on the
+  // next render, so two taps landing in the same frame — the button and the skip
+  // link, say — would both read busy: false and both act. That could commit
+  // biometricLock twice with conflicting values.
+  const busyRef = useRef(false)
+
+  function beginAction() {
+    if (busyRef.current) return false
+    busyRef.current = true
+    setBusy(true)
+    return true
+  }
+
+  function endAction() {
+    busyRef.current = false
+    setBusy(false)
+  }
+
   // A phone with no screen lock at all can never satisfy the prompt, so the
   // card is switched off and made inert rather than offering a button that
   // would fail every time it was pressed.
@@ -88,8 +106,7 @@ export default function ProtectScreen() {
   // Stays busy through router.push so a second tap can't re-trigger the
   // biometric prompt while the next screen is animating in.
   async function handlePrimary() {
-    if (busy) return
-    setBusy(true)
+    if (!beginAction()) return
     setError(null)
     if (!enableLock) {
       skip()
@@ -106,7 +123,7 @@ export default function ProtectScreen() {
       // Never fail silently — this screen blocks the hardware back button, so an
       // unexplained no-op reads as the app having frozen.
       setError(describeAuthFailure(outcome.error))
-      setBusy(false)
+      endAction()
       return
     }
     updateOnboardingSession({ biometricLock: true })
@@ -152,7 +169,9 @@ export default function ProtectScreen() {
         {/* Lock card — tap to toggle whether the user wants to enable biometrics. */}
         <Pressable
           onPress={() => {
-            if (lockUnavailable) return
+            // Also inert while an action is in flight: flipping this mid-prompt
+            // would leave the card contradicting the choice about to be saved.
+            if (lockUnavailable || busyRef.current) return
             setError(null)
             setEnableLock((prev) => !prev)
           }}
@@ -258,8 +277,7 @@ export default function ProtectScreen() {
         {enableLock && (
           <Pressable
             onPress={() => {
-              if (busy) return
-              setBusy(true)
+              if (!beginAction()) return
               skip()
             }}
             accessibilityRole="button"
